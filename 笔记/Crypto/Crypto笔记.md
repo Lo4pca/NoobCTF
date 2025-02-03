@@ -747,6 +747,8 @@ $$
     - 结果还是看不懂官方wp……四元数可以写成复数域下的矩阵，而复数元素又可以写成实数域下的矩阵。用单射同态便能构造出整数域下的矩阵，从而正常地使用LLL（大部分数学软件只支持整数域的矩阵LLL）。看了一眼wp的脚本，似乎是把一个大的四元数矩阵“切”成了四块，一个一个解（又学一种构建思路，这个构建方法不知道为什么就能直接LLL出来结果，不需要CVP）
     - Mathematica 和 [fpllh](https://www-fourier.univ-grenoble-alpes.fr/~pev/fplllh/)支持高斯整数下的LLL
     - 其他解法： https://gist.github.com/C0nstellati0n/cf6ae2c5e0e9fe1ecb532d257a56e101#knutsacque 。果然有人跟我类似思路，不过我没想到竟然有现成脚本： https://github.com/TheBlupper/linineq
+- [zk-Openings](https://github.com/srdnlen/srdnlenctf-2025_public/blob/main/crypto_zk-openings)
+    - Zero-knowledge+Lattice。太难了，难到全场零解。只知道这和[Plonkup](https://eprint.iacr.org/2022/086.pdf)有关
 
 ## Elliptic Curves(ECC,椭圆曲线)
 
@@ -803,6 +805,9 @@ $$
     - 获取EC-LCG的7个输出后恢复曲线的参数p，a和b。主要是 https://arxiv.org/pdf/1609.03305 第5页的算法的简单实现
     - 光滑阶数曲线（smooth order curve）求离散对数
     - 另一位佬不看论文的做法，使用polynomial resultants： https://gist.github.com/C0nstellati0n/cf6ae2c5e0e9fe1ecb532d257a56e101#private-curve
+- [Future Desk Market](https://github.com/srdnlen/srdnlenctf-2025_public/blob/main/cryptopwn_FDM)
+    - ECC partial nonce leak。也是早有耳闻，只是没想到第一次见这个考点居然是在一个pwn题里……
+    - 看到了一个不错的调试工具：[libdebug](https://github.com/libdebug/libdebug)
 
 ## AES/DES
 
