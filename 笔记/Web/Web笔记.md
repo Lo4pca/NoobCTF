@@ -4192,3 +4192,12 @@ fopen("$protocol://127.0.0.1:3000/$name", 'r', false, $context)
 519. [Average HTTP/3 Enjoyer](https://github.com/srdnlen/srdnlenctf-2025_public/blob/main/web_averageHTTP3enjoyer)
 - 什么http都有3了？明明2都没怎么用过（
 - 题目的Haproxy和ACL规则禁止访问`/flag`。然而http 3有伪头部字段（pseudo-header，2也有），如`:path`，可以直接传要访问的路径。单独传一个flag也能正常访问`/flag`路径。唯一的问题是大部分工具都会在路径前自动加个`/`。能通过改工具源码避免这点： https://github.com/aiortc/aioquic/blob/main/examples/http3_client.py#L227
+520. [Baby Injection](https://seall.dev/posts/knightctf2025)
+- PyYAML（python yaml处理库）反序列化漏洞。常见payload： https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Insecure%20Deserialization/Python.md#pyyaml
+521. [Luana](https://seall.dev/posts/knightctf2025)
+- redis LUA Sandbox Escape： https://book.hacktricks.wiki/en/network-services-pentesting/6379-pentesting-redis.html
+522. [submission](https://blog.whale-tw.com/2025/01/27/x3ctf-2025)
+- wildcard injection。拿`*`举例，这个符号会扩展成当前目录下的任意文件名（除了`.`开头的文件）。假如执行`find *`而且有个文件名为`--arg`，实际效果等于执行了`find --arg`
+- chmod有个`--reference=file`选项，可以把文件改成和file一样的权限
+- 在命令后加个`--`即可避免这个问题，比如`chmod -- 0 *`
+- 这个行为似乎在macOS上无法复现。拿到和题目一样的环境真的太重要了……

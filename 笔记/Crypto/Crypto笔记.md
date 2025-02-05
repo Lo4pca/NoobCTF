@@ -557,6 +557,8 @@ for i in range(1,e):
     - 假如用rsa加密一个数字k，攻击者可以尝试找满足ij=k的i和j，然后利用rsa的同态特性进行meet in the middle攻击
 - [small eqs](https://gist.github.com/C0nstellati0n/cf6ae2c5e0e9fe1ecb532d257a56e101#small-eqs)
     - [Williams's p + 1 algorithm](https://en.wikipedia.org/wiki/Williams%27s_p_%2B_1_algorithm)分解n。概率算法，不是百分之百成功。而且这题的p的构造有漏洞，构成p的多项式中包含一个很小的质数
+- [fastcrypto](https://blog.whale-tw.com/2025/01/27/x3ctf-2025)
+    - NTT算法+CRT加速RSA计算。NTT其实不负责整数乘法，而是模某个数下的多项式乘法。因此题目需要将整数转为多项式，拿到NTT结果后再从多项式转回整数。问题在于题目选择模的“某个数”太小了，而题目编写的多项式转换公式都基于系数不超过模数的前提。NTT返回的结果完全有可能超过这个限制，故出现计算错误。计算错误又会导致RSA中的fault attack，导致攻击者可以用gcd恢复p和q中的一个
 
 ## Sagemath
 
