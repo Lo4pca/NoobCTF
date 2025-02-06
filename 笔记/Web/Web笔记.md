@@ -348,6 +348,18 @@
 - [Cascade Chaos](https://seall.dev/posts/backdoorctf2024)
     - 比赛时找到了这题的dom clobbering，并且成功注入了xss payload。但是题目由两个机器组成，flag不在出现xss的机器上。试了很久发现无论如何都没法访问到另一个机器。以为是自己没搞懂docker间机器的通信问题（如何通信见 https://stackoverflow.com/questions/47648792/communicating-between-different-docker-services-in-docker-compose ），原来是被CORS挡住了
     - 这篇wp是非预期解。flag所在的机器在style处有个注入，闭合style标签后就能注入js payload了。预期解见 https://gist.github.com/C0nstellati0n/248ed49dea0accfef1527788494e2fa5#cascade-chaos 。利用`nth-child`和xs leak技巧逐个字符爆破flag
+- [blogdog](https://jorianwoltjer.com/blog/p/ctf/x3ctf-blogdog-new-css-injection-xs-leak)
+    - css injection（xs leak）+csp bypass。题目的csp设置了`img-src 'none'`，参考[官方wp](https://github.com/x3ctf/challenges-2025/blob/main/web/blogdog),只需要加载非图片的外部资源即可绕过。比如`@font-face`
+    - 一个chromium bug： https://issues.chromium.org/issues/382086298 ，用chrome加载这段css代码会导致加载代码的tab连带着与tab同源（same origin）的所有instance全部崩溃，即使在iframe里也一样。这是因为[Full Site Isolation](https://chromium.googlesource.com/chromium/src/+/main/docs/process_model_and_site_isolation.md#Full-Site-Isolation-site_per_process)机制，同源的所有页面在chrome里都是一个进程
+    - 再次验证一个规则：不要手动修改dompurify返回的结果。这题的dompurify设置很严格，dompurify本身也没漏洞。但程序用replace拿掉了purify结果的引号。结果因为replace没加`/g`导致只会拿掉一个引号，剩下的一个引号成功逃逸到css中，导致css injection
+    - 一个浏览器的奇怪行为：属性（attribute）`is`没法用Element.removeAttribute移除： https://github.com/jsdom/jsdom/issues/3265 。配合dompurify可以凭空“捏造”出引号：`<p is>`的purify结果（设置为`no attributes allowed`）是`<p is=""></p>`
+    - iframe的onload event可以跨源触发。所以只要目标页面可以被iframe，就能测量那个页面加载所需的时间
+    - 存储分区（Storage Partitioning）： https://developers.google.com/privacy-sandbox/cookies/storage-partitioning#what_is_storage_partitioning 。当某个网站处于第三方环境，比如iframe，其所有的存储api都会和main origin分离。等于在iframe的网页里用js的localstorage是取不到和主源一样的内容的
+    - 感觉wp的构造很有意思，复述一下。构造这样的payload：注入猜测的flag作为css selector，后面加上前面提到的崩溃chrome的css片段。当猜测的flag匹配时会触发那段css，导致这个网站下的所有网页全部崩溃，包括iframe。创建两个iframe（这里第一个iframe一定能加载成功，但第二个iframe有可能在加载时崩溃。佬计算出的完美时间间隔），并操控bot打开上述构造的payload。如果猜测的flag正确，那个加载中的iframe2便会停止加载，无法触发onload event；反之则无事发生。只需观察iframe2是否触发onload即可判断猜测的flag是否正确
+    - 其他相关链接：
+        - https://gist.github.com/JorianWoltjer/76fdd101a6e89b06b3b047d35fb9bcc0 ：题目用到的泄漏技巧的更普遍poc
+        - 常见css injection技巧： https://aszx87410.github.io/beyond-xss/en/ch3/css-injection
+        - html浏览器响应测试工具： https://r.jtw.sh
 
 ## SSTI
 

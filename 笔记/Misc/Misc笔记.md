@@ -2507,3 +2507,6 @@ $ cd a/b
     - 第三种：zip文件的末尾有个end-of central directory (EOCD)块，指向第一个中央目录（central directory）。multi-disk ZIP是一种将太大的zip文件拆分成较小的部分跨磁盘存储的技术。7zip支持但libzip不支持，表现在会忽略当前EOCD块，转而寻找下一个。通常情况下zip文件只有一个EOCD块，于是报错。然而可以在末尾手动加上另一个EOCD块，使libzip不报错的同时7zip也解压成功。这个做法包含较复杂的手动zip构造
 379. [Malvent](https://g4rud4kun.github.io/2025/01/21/Srdnlen-CTF-2025)
 - 使用[Event Viewer](https://learn.microsoft.com/en-us/shows/inside/event-viewer)分析`.evtx` windows日志文件
+380. [redacted](https://github.com/x3ctf/challenges-2025/blob/main/misc/redacted)
+- 之前见过类似思路的题目，`Secret Message 2`。不过这题隐藏文字的手段不是像素化，而是ShareX软件的红笔。预期解是用脚本+discord字体模拟所有可能的字符，通过比对字符被红笔划过的痕迹爆破flag
+- 也有人去discord截图后拿诸如photopea之类的图像软件diff两张图来找到flag
