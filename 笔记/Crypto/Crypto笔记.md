@@ -529,7 +529,7 @@ for i in range(1,e):
     - 已知phi，e和c，获取m
 - [easy-rsa](https://github.com/C0d3-Bre4k3rs/PingCTF2023-writeups/tree/main/easy-rsa)
     - 获知`q&p`和`q&(p<<1)`后分解n。或者说，在得知p和q的随机个bit后尝试恢复p和q：[Random known bits of p and q](https://eprint.iacr.org/2020/1506.pdf#page=23)。这题Z3可解
-    - 又遇到了类似考点的题：[Shibs](https://kanzya.github.io/posts/MAPNACTF/)。这题wp作者用了多线程（python multiprocessing）配合z3。个人做这道题时倒是用了easy-rsa里的方法: https://gist.github.com/C0nstellati0n/cf6ae2c5e0e9fe1ecb532d257a56e101#shibs 。我发现这种类型的题只需要找到题目里p和q的bit之间的关系,结合backtrack的思想即可解出。p和q之间的关系用于backtrack设置bit及检查是否返回的条件。注意backtrack设置完bit并递归完后一定要取消刚才设置的bit
+    - 又遇到了类似考点的题：[Shibs](https://kanzya.github.io/posts/MAPNACTF/)。这题wp作者用了多线程（python multiprocessing）配合z3。个人做这道题时倒是用了easy-rsa里的方法: **Shibs** 。我发现这种类型的题只需要找到题目里p和q的bit之间的关系,结合backtrack的思想即可解出。p和q之间的关系用于backtrack设置bit及检查是否返回的条件。注意backtrack设置完bit并递归完后一定要取消刚才设置的bit
 - [L4ugh](https://berliangabriel.github.io/post/0xl4ugh-ctf-2024/)
     - 利用LLL实现[Common Private Exponent](https://www.ijcsi.org/papers/IJCSI-9-2-1-311-314.pdf)攻击。特征为多组公钥共享一个私钥。这种攻击比较简短的解释： https://connor-mccartney.github.io/cryptography/rsa/L4ugh-0xl4ughCTF-2024
     - AES翻转bit攻击（控制iv）
@@ -543,9 +543,9 @@ for i in range(1,e):
     - 和这题与上一题相关的论文:[Some Applications of Lattice Based Root Finding Techniques](https://eprint.iacr.org/2010/146),[New Results for Partial Key Exposure on RSA with Exponent Blinding](https://www.scitepress.org/papers/2015/55717/55717.pdf)
 - [rsa_oracle](https://github.com/PetePriority/picoctf-2024/tree/main/cryptography/rsa_oracle)
     - chosen plaintext/ciphertext attack。这题是个rsa oracle，允许加密和解密除flag外的明文/密文。wp作者参考了 https://crypto.stackexchange.com/questions/2323/how-does-a-chosen-plaintext-attack-on-rsa-work/2331#2331 ，个人写的时候参考了 https://ctf-wiki.mahaloz.re/crypto/asymmetric/rsa/rsa_chosen_plain_cipher/
-    - 脚本： https://gist.github.com/C0nstellati0n/cf6ae2c5e0e9fe1ecb532d257a56e101#rsa_oracle
+    - 脚本：**rsa_oracle**
 - [ComplexProblem](https://github.com/acmucsd/sdctf-2024/tree/main/crypto/complex-problem)
-    - 复数上的RSA。比赛时搜了好久"RSA over complex numbers"或者各种RSA+complex numbers的组合，但搜不出来。换个说法"rsa with gaussian primes"就出来了。 https://digitalcommons.njit.edu/cgi/viewcontent.cgi?article=1332&context=dissertations 135页（论文118页）。部分简单的复数可以在sagemath里分解。个人解法和官方解法稍微有点不一样，故记录一下（虽然本质是一样的）: https://gist.github.com/C0nstellati0n/cf6ae2c5e0e9fe1ecb532d257a56e101#complexproblem
+    - 复数上的RSA。比赛时搜了好久"RSA over complex numbers"或者各种RSA+complex numbers的组合，但搜不出来。换个说法"rsa with gaussian primes"就出来了。 https://digitalcommons.njit.edu/cgi/viewcontent.cgi?article=1332&context=dissertations 135页（论文118页）。部分简单的复数可以在sagemath里分解。个人解法和官方解法稍微有点不一样，故记录一下（虽然本质是一样的）: **complexproblem**
 - [RSAn’t](https://github.com/L3AK-TEAM/L3akCTF-2024-public/tree/main/crypto/RSAn%E2%80%99t)
     - 当同一个公钥加密两条明文时，可通过两组明文和密文求出n
     - 已知p或q高位的coppersmith。以后遇见题目里奇怪的生成质数方式时一定要用代数乘出来看看结果，不然根本看不出来一些特殊的关系
@@ -614,7 +614,7 @@ sympy也放这了
     - 这题最快的解法可能是flintlib的[nmod_poly_interpolate_nmod_vec_fast](https://flintlib.org/doc/nmod_poly.html#c.nmod_poly_interpolate_nmod_vec_fast)。sagemath实现见 https://github.com/PetePriority/picoctf-2024/blob/main/cryptography/flag_printer/solve_fast.ipynb （Fast interpolation algorithm）
     - 这个[wp](https://github.com/SuperBeetleGamer/Crypto-Writeups/blob/main/picoCTF%202024/Flag_printer/writeup.md)使用了[优化版的Lagrange Interpolation](https://codeforces.com/blog/entry/82953)。仅供参考，wp里再优化一遍后再加上112核的机器也要20小时才能跑完……
     - 这题的矩阵其实是范德蒙德矩阵（[Vandermonde matrix](https://en.wikipedia.org/wiki/Vandermonde_matrix)），可以跟着这篇[wp](https://hackmd.io/@touchgrass/HyZ2poy1C#flag-printer)和 https://codeforces.com/blog/entry/94143 实现更优化版的Lagrange interpolation
-    - 其他解法及更多参考链接： https://gist.github.com/C0nstellati0n/cf6ae2c5e0e9fe1ecb532d257a56e101#flag_printer ， https://cp-algorithms.com/algebra/polynomial.html#interpolation
+    - 其他解法及更多参考链接：**flag_printer** ， https://cp-algorithms.com/algebra/polynomial.html#interpolation
 - [cryptordle](https://github.com/aditya-adiraju/capture-the-flag/tree/main/utctf-2024/cryptordle)
     - [多项式环、理想](https://zhuanlan.zhihu.com/p/31441459)和[variety of an ideal](https://math.stackexchange.com/questions/1173939/variety-of-an-ideal)在sagemath里的使用。这么看来多项式环似乎只是全体多项式的集合，且可以有多个变量（多个变量是Multivariate Polynomial Ring）或在有限域里。对应到sagemath里的语法就是`R.<a,b,c,d,e> = PolynomialRing(GF(p))`。理想（ideal）跟着定义来就好，个人在sagemath里试了一下，怎么感觉随便写个多项式都能构造出理想，明明理想的定义挺严格的啊？有了理想后可以取variety，感觉就是理想内所有多项式共同的根
 - [QCG](https://github.com/tamuctf/tamuctf-2024/tree/master/crypto/qcg),[wp](https://cryptography-journey.gitbook.io/mindflayer02-ctf-writeups/tamu-ctf-24/qcg-groebner-basis)
@@ -635,7 +635,7 @@ sympy也放这了
     - 一些sagemath api
         - `function('y')(x)`:定义一个名为y的函数，其自变量为x
         - `desolve(2*ypp - 6*yp + 3*y == 0, y, ics=[0,v0,v1], ivar=x)`:第一个参数为方程，第二个参数为因变量，第三个参数为初始条件。这里表示`x=0,y(0)=v0,y'(0)=v1`。`ivar=x`表示自变量为x
-    - python sympy（无sagemath）解法： https://gist.github.com/C0nstellati0n/cf6ae2c5e0e9fe1ecb532d257a56e101#my-calculus-lab
+    - python sympy（无sagemath）解法：**my calculus lab**
 - [Determined](https://octo-kumo.me/c/ctf/2024-uiuctf/crypto/determined)
     - 比赛时看出来了它在算5阶方阵的行列式，也想到了用sagemath或者z3算方程拿p和q，但是模拟方程太复杂了，懒得写。结果这个wp告诉我sympy里直接做个矩阵自动求行列式放到方程里就能解？
 - [Raul Rosas](https://tsumiiiiiiii.github.io/deadsec24)
@@ -724,11 +724,11 @@ $$
 - [R Stands Alone](https://lov2.netlify.app/nitectf-2024-tuan-dui-writeup)
     - 用格求解形如 $ax^n + by^n$ 的质数的x和y值。类似题目： https://connor-mccartney.github.io/cryptography/other/TCP51Prime-TCP1PCTF2024International
     - 比赛时借着moectf学到的知识弄出了非预期解。加密的明文长度必须超过n的最大素数因子的位数，否则就能直接拿最大素数因子-1当作phi进行解密（得到的是m模那个质数，然而m比那个质数小，于是就直接出来了）
-    - 另一个未曾设想的道路： https://gist.github.com/C0nstellati0n/cf6ae2c5e0e9fe1ecb532d257a56e101#r-stands-alone ，竟然能直接解啊？
+    - 另一个未曾设想的道路：**R Stands Alone** ，竟然能直接解啊？
 - [Hashing Frenzy](https://hackmd.io/@r4sti/BkCBDWuryl)
     - 有进步！看出格的可能性了！但是又退步到没看出来怎么找模数p……题目自定义的hash算法多项式如下： $A = s_6 = \sum_{i = 0}^5{s_ih_i(m)} \pmod p$ ,但p未知， $h_i$ 是已知的哈希算法。不过可以连续hash两条明文，自行计算 $\sum_{i = 0}^5{s_ih_i(m)}$ 后与服务器得到的结果相减得到 $k_1p$ 和 $k_2p$ ，gcd两者有很大可能得到p
     - 格的构造（svp做法）wp讲的很详细，不过这里记录一下个人的疑惑和见到的补充内容
-        - 这个做法提到需要加个scaling factor LLL才能找到正确的结果。但最后又发现其实不加scaling factor，只要多加一个列即可。可能是因为最开始不加列所构造的格基矩阵不是一个方矩阵？当然更有可能是这样构造出来的格的最短向量比目标更短，毕竟[这个做法](https://github.com/kh4rg0sh/ctf_writeups/tree/main/backdoorctf-2024/crypto/Hashing-Frenzy)使用的格基矩阵也不是方矩阵，但LLL成功了。不过那个做法怎么是8个9维行向量组成的格？这也行吗？还是其实是9个8维列向量？后面发现去掉从右往左数第二个列也是可以的,见 https://gist.github.com/C0nstellati0n/cf6ae2c5e0e9fe1ecb532d257a56e101#hashing-frenzy
+        - 这个做法提到需要加个scaling factor LLL才能找到正确的结果。但最后又发现其实不加scaling factor，只要多加一个列即可。可能是因为最开始不加列所构造的格基矩阵不是一个方矩阵？当然更有可能是这样构造出来的格的最短向量比目标更短，毕竟[这个做法](https://github.com/kh4rg0sh/ctf_writeups/tree/main/backdoorctf-2024/crypto/Hashing-Frenzy)使用的格基矩阵也不是方矩阵，但LLL成功了。不过那个做法怎么是8个9维行向量组成的格？这也行吗？还是其实是9个8维列向量？后面发现去掉从右往左数第二个列也是可以的,见 **Hashing Frenzy**
         - 加了scaling factor后的线性关系是不是写错了？见`the target vector is derived as`部分，个人觉得应该是:
 
         $$\begin{pmatrix}h_0&h_1&h_2&h_3&h_4&h_5&1&-k\end{pmatrix}$$

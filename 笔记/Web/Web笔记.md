@@ -78,7 +78,7 @@
     - 很少见这么完整的sqlite注入过程了。注入点出现在insert语句的values中，可以用[subquery](https://www.w3resource.com/sqlite/sqlite-subqueries.php)带出数据（即再包一层select语句）。当然经典union select在这里也能用： https://twc1rcle.com/ctf/team/ctf_writeups/nahamcon_2024/web/TheHackerWebstore
     - python flask(Werkzeug) password encryption破解。这类hash以`pbkdf2:sha256:600000`开头。有现成的破解工具:[Werkzeug-Cracker](https://github.com/AnataarXVI/Werkzeug-Cracker)
 - [bbsqli](https://kashmir54.github.io/ctfs/L3akCTF2024)
-    - 一个挺有意思的sql注入挑战。注入出现在username，要求注入sql语句将flag从email字段带出，且语句查询出的用户名等于username。有点唬人的成分在，只需要提前将构造好的sql语句作为用户名注册即可。wp作者使用了`INNER JOIN...on...`和LIKE语句。不过官方解法更简单，直接内嵌一个sql语句即可（subquery？）: https://gist.github.com/C0nstellati0n/248ed49dea0accfef1527788494e2fa5#bbsqli
+    - 一个挺有意思的sql注入挑战。注入出现在username，要求注入sql语句将flag从email字段带出，且语句查询出的用户名等于username。有点唬人的成分在，只需要提前将构造好的sql语句作为用户名注册即可。wp作者使用了`INNER JOIN...on...`和LIKE语句。不过官方解法更简单，直接内嵌一个sql语句即可（subquery？）: **bbsqli**
 - [User #1](https://j4ck4l-24.github.io/2024/06/12/BCACTF_5.0_Writeup/)
     - sqlite在update语句处的注入。包含：获取表名，字段名，表结构，修改字段等。修改时要注意`INTEGER PRIMARY KEY`，这类key必须是独特的，不能和其他的重复。但没有规定必须是递增的
     - `FOREIGN KEY(id) REFERENCES users(id) ON UPDATE CASCADE`表示修改users表的id也会修改当前表的id
@@ -4213,3 +4213,6 @@ fopen("$protocol://127.0.0.1:3000/$name", 'r', false, $context)
 - chmod有个`--reference=file`选项，可以把文件改成和file一样的权限
 - 在命令后加个`--`即可避免这个问题，比如`chmod -- 0 *`
 - 这个行为似乎在macOS上无法复现。拿到和题目一样的环境真的太重要了……
+523. [kittyconvert](https://github.com/x3ctf/challenges-2025/blob/main/web/kittyconvert)
+- 在png文件里编写php木马。难点在于上传的png文件会被转成`.ico`再存储，所以需要找到在这个转换过程中不变的字节
+- 在png转ico的过程中，png的RGBA顺序对应着ico的BGRA。唯一的问题是ico的alpha值的lsb会被丢弃，所以必须满足`ord(c) % 2 == 0`

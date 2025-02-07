@@ -58,7 +58,7 @@ kernel pwn题合集。用于纪念我连堆都没搞明白就敢看内核的勇�
   - kernel-land空间+指定[cr3寄存器](https://blog.csdn.net/SweeNeil/article/details/106171361)任意地址读（AAR）。cr3寄存器简单来说可以用wp里的一句话概括：“CR3 register holds the physical address of Page Map Level (PML) 4 Table address”。PML4 Table指的是这篇[文章](https://zhuanlan.zhihu.com/p/108425561)里介绍的四个有关将虚拟地址转换为物理地址的表（我一直以为PML4 table是一个表，搜了好久都没搜到是个啥玩意，原来是4个表的合称）。这个寄存器通常由系统控制，进程切换时会修改cr3寄存器里的值为要切换进程的物理基地址。如果攻击者可以修改这个寄存器，就可以跨进程读内存。可通过kernel内部的task_struct（从init_task开始，一个个往下找想要进程的结构体）泄漏PML 4 table的虚拟地址，然后参考 https://www.kernel.org/doc/gorman/pdf/understand.pdf 59页的内容将其转换为物理地址
   - Interrupt Descriptor Table (IDT)不被KASLR影响，可用来泄漏kernel基地址
   - 将kernel exp发送到服务器上的工具： https://github.com/pr0cf5/kernel-exploit-sendscript
-  - 非预期解： https://gist.github.com/C0nstellati0n/c5657f0c8e6d2ef75c342369ee27a6b5#mov-cr3 。虽然是两个不同的进程，但所在的物理内存都是一样的。所以利用AAR扫描物理内存即可。我顺便记录了在服务器上看到的一段有助于理解的对话
+  - 非预期解：**mov cr3**。虽然是两个不同的进程，但所在的物理内存都是一样的。所以利用AAR扫描物理内存即可。我顺便记录了在服务器上看到的一段有助于理解的对话
 - [dead-pwners-society](https://kaligulaarmblessed.github.io/post/dead-pwners-society)
 	- UAF+double free。kernel保护全开，还加了一堆配置保护项：
 		- `CONFIG_CFI_CLANG=y`:Control flow integrity，kROP和控制RIP的手段无法使用
@@ -188,13 +188,13 @@ ret
 - [Janky](https://github.com/tamuctf/tamuctf-2024/tree/master/pwn/janky)
   - 要求shellcode反编译后的每个指令都以j开头。能用的指令只有jmp，可以利用jmp的目标立即数实现RCE。这块得看wp才好理解，具体是，jmp指令后面的立即数最多4个字节，那么可以将shellcode分成多个部分，每个部分长4个字节，写成立即数跟在jmp后面。然后利用错位jmp，跳过开头的jmp指令，直接跳到立即数部分，就能执行这些立即数代表的shellcode了
   - 大佬写的自动化脚本： https://github.com/9x14S/jmp-encoder
-- [baby-sandbox](https://unvariant.pages.dev/writeups/amateursctf-2024/pwn-baby-sandbox/)
+- [baby-sandbox](https://unvariant.pages.dev/writeups/amateursctf-2024/pwn-baby-sandbox)
   - 可以使用sysenter来调用syscall。只是使用sysenter前，rbp和其他参数要指向可读地址；且这个指令只能在64位的intel处理器上用
   - wp里提到了vector registers（以后写shellcode可以注意下，说不定直接就非预期简单解了）和侧信道解法
   - 更详细wp： https://hyggehalcyon.gitbook.io/page/ctfs/2024/amateursctf#baby-sandbox
 - [randomness](https://github.com/cr3mov/cr3ctf-2024/tree/main/challenges/pwn/randomness)
   - 每8个字节的shellcode的最后一个字节会被随机数字异或。预期解是将rdi设为0，然后只用7个字节跳转到调用srand的地方。这样就能知道接下来的随机数了
-  - 但我记这道题主要还是因为这个非预期解: https://gist.github.com/C0nstellati0n/c5657f0c8e6d2ef75c342369ee27a6b5#randomness 。我们可以执行任意多个长度为5字节的shellcode，只需要在最后拼接上长为2字节的相对jmp，就能跳过接下来被随机化的字节，到下一个5字节指令
+  - 但我记这道题主要还是因为这个非预期解: **randomness** 。我们可以执行任意多个长度为5字节的shellcode，只需要在最后拼接上长为2字节的相对jmp，就能跳过接下来被随机化的字节，到下一个5字节指令
 - [Bad Trip](https://github.com/AkaSec-1337-CyberSecurity-Club/Akasec-CTF-2024/tree/main/pwn/bad_trip_and_the_absolute_horror_of_the_trip)
   - MMU cache side-channel attack to bypass ASLR
 - [syscalls](https://flex0geek.blogspot.com/2024/07/pwn-writeup-syscalls-and-backup-power.html)
@@ -206,6 +206,9 @@ ret
   - 使用io_uring raw syscall读取文件（一种很复杂的open+read，绕seccomp可用）
 - [VisibleInput](../../CTF/moectf/2024/Pwn/VisibleInput.md)
   - alphanumeric shellcode encoder [ae64](https://github.com/veritas501/ae64)使用
+- [secure-sandbox](https://github.com/x3ctf/challenges-2025/blob/main/pwn/secure-sandbox)
+  - 沙盒开放open和write和lseek，但是没有read。可以open `/proc/[pid]/mem`，lseek到任意地址，write写shellcode。特殊的地方在于，如果是通过mem文件访问内存，可以无视代码段的权限，直接往权限只有`rx`的函数代码段写shellcode。类似这道题： https://ctftime.org/writeup/23144
+  - 个人解法：**secure-sandbox**
 
 1. 程序关闭标准输出会导致getshell后无法得到cat flag的输出。这时可以用命令`exec 1>&0`将标准输出重定向到标准输入，再执行cat flag就能看见了。因为默认打开一个终端后，0，1，2（标准输入，标准输出，标准错误）都指向同一个位置也就是当前终端。详情见这篇[文章](https://blog.csdn.net/xirenwang/article/details/104139866)。例题：[wustctf2020_closed](https://buuoj.cn/challenges#wustctf2020_closed)
 2. 做菜单类堆题时，添加堆块的函数一般是最重要的，需要通过分析函数来构建出程序对堆块的安排。比如有些笔记管理题会把笔记名称放一个堆中，笔记内容放另一个堆中，再用一个列表记录指针。了解程序是怎么安排堆后才能根据漏洞制定利用计划。如果分析不出来，用gdb调试对着看会好很多。例题：[babyfengshui](https://github.com/C0nstellati0n/NoobCTF/blob/main/CTF/%E6%94%BB%E9%98%B2%E4%B8%96%E7%95%8C/6%E7%BA%A7/Pwn/babyfengshui.md)

@@ -39,7 +39,7 @@
     - 自动morse code解码器
 - [DΔς](https://yun.ng/c/ctf/2025-iris-ctf/misc/dac)
     - delta-sigma modulation,输出结果由1和-1组成。这题数据混在图片里了，看起来像密集的条形码。不知道是不是特征
-    - 其他做法： https://gist.github.com/C0nstellati0n/78f5887b5bee235583a026840354ae54#d%CE%B4%CF%82
+    - 其他做法：**DΔς**
 - [sinefm](https://yun.ng/c/ctf/2025-iris-ctf/radio/sinefm)
     - 如何使用GNU Radio的FM demodulation block。虽然不知道为啥要用这个，因为题目名说了吗（
 - [nethog](https://yun.ng/c/ctf/2025-iris-ctf/forensics/nethog)
@@ -161,7 +161,7 @@
 - [Breath of the wild](https://twc1rcle.com/ctf/team/ctf_writeups/nahamcon_2024/forensics/Breathofthewild)
     - Microsoft Disk Image eXtended文件(virtual hard disk，`.VHDX`)分析。访问disk文件最简单的方法是在windows里挂载（mount）
     - Autopsy可以获取图片在网络上的url（即下载时的url，如果有的话）
-    - 也可以用qemu-nbd & dislocker处理disk后，在linux里mount或者用TestDisk读取ADS (Alternate Data stream)数据： https://gist.github.com/C0nstellati0n/78f5887b5bee235583a026840354ae54#breath-of-the-wild 。如何在linux里mount vhdx文件： https://gist.github.com/allenyllee/0a4c02952bf695470860b27369bbb60d 。相关wp： https://ctftime.org/writeup/25953
+    - 也可以用qemu-nbd & dislocker处理disk后，在linux里mount或者用TestDisk读取ADS (Alternate Data stream)数据：**Breath of the wild** 。如何在linux里mount vhdx文件： https://gist.github.com/allenyllee/0a4c02952bf695470860b27369bbb60d 。相关wp： https://ctftime.org/writeup/25953
 - [Taking Up Residence](https://github.com/LazyTitan33/CTF-Writeups/blob/main/Nahamcon-2024/Forensics/Taking_Up_Residence.md)
     - [MFT](https://learn.microsoft.com/en-us/windows/win32/fileio/master-file-table)文件相关forensic。可用[MFTExplorer](https://ericzimmerman.github.io)工具查看
 - [The Spy](https://0xmr8anem.medium.com/l3akctf-2024-forensics-writeups-3b5575f07cba)
@@ -184,7 +184,7 @@
         - https://www.cnblogs.com/LAMENTXU/articles/18288730 ：mimikatz的lsadump也可以
 - [mkductfiso](https://ouuan.moe/post/2024/07/ductf-2024)
 	- 提取ISO文件时如果发现提取出来的内容少了`initramfs-linux.img`或`{amd,intel}-ucode.img`或什么其他文件，导致iso文件无法正常挂载，可以自行下载需要的文件，之后用xorriso命令打包成新的iso文件
-	- [官方wp](https://github.com/DownUnderCTF/Challenges_2024_Public/blob/main/misc/mkductfiso)和这篇差不多， https://gist.github.com/C0nstellati0n/78f5887b5bee235583a026840354ae54#mkductfiso 是另一种更详细的方式
+	- [官方wp](https://github.com/DownUnderCTF/Challenges_2024_Public/blob/main/misc/mkductfiso)和这篇差不多，**mkductfiso** 是另一种更详细的方式
 - [Lost in Memory](https://warlocksmurf.github.io/posts/ductf2024/)
 	- 使用volatility2和volatility3分析memory dump文件
 	- [reflective DLL injection](https://www.hackthebox.com/blog/reflection-ca-ctf-2022-forensics-writeup)的特征：出现powershell module `Invoke-ReflectivePEInjection`
@@ -2437,7 +2437,7 @@ a=A()
 - 使用[salae logic analyzer](https://www.saleae.com)分析硬件[Sniffing attack](https://en.wikipedia.org/wiki/Sniffing_attack)的结果。关于Saleae Logic Analyzer怎么用： https://www.youtube.com/watch?v=XGxE4FJH5kI 。这硬件的东西我啥也不会，记录一下相关链接
 - 使用键盘的相关ascii code：[cardkb](https://github.com/ian-antking/cardkb),使用[I2C](https://youtu.be/CAvawEcxoPU)协议通信，见 https://docs.m5stack.com/en/unit/cardkb_1.1#protocol
 - Inky pHAT [pin layout](https://pinout.xyz/pinout/inky_phat)以及相关库[Inky](https://github.com/pimoroni/inky)
-- 一篇比较简短的wp： https://gist.github.com/C0nstellati0n/78f5887b5bee235583a026840354ae54#sniff 。官方解法： https://github.com/Thehackerscrew/CrewCTF-2024-Public/tree/main/challenges/misc/sniff
+- 一篇比较简短的wp：**sniff** 。官方解法： https://github.com/Thehackerscrew/CrewCTF-2024-Public/tree/main/challenges/misc/sniff
 359. [DEBUGjail](https://defcon225.org/blog/2024/crew-ctf.html)
 - 使用[DEBUG.EXE](https://en.wikipedia.org/wiki/Debug_(command))获取内存中的某段数据。DEBUG.EXE本身可以执行汇编或者查看内存，这题的关键其实是软件是由[DOSBox](https://zh.wikipedia.org/wiki/DOSBox)模拟运行的，但我们无法获取其GUI输出。因此这题从DOSBox入手，通过故意报错使其从报错信息中泄露内容
 - 官方解法： https://github.com/Thehackerscrew/CrewCTF-2024-Public/blob/main/challenges/misc/debugjail
@@ -2465,13 +2465,13 @@ $ cd a/b
 - [age](https://github.com/FiloSottile/age)加密系统的使用。该系统给出的公钥以`age1`开头。生成公私钥可用 https://age-wasm.ey.r.appspot.com
 366. [Rogue Robloxians](https://github.com/PuruSinghvi/CTF-Writeups/tree/main/SunshineCTF%202024/Forensics/Rogue%20Robloxians)
 - 如何获取roblox游戏的旧版本
-- 其他wp： https://gist.github.com/C0nstellati0n/78f5887b5bee235583a026840354ae54#rogue-robloxians
+- 其他wp：**rogue robloxians**
 367. [Dropped ELF](https://github.com/PuruSinghvi/CTF-Writeups/tree/main/SunshineCTF%202024/Reversing/Dropped%20ELF)
 - 恢复被打乱的elf文件块
 368. [Schrödinger Compiler](https://github.com/plvie/writeup/blob/main/glacierctf2024/schrodinger_compiler)
 - 利用编译过程泄漏指定文件里的内容。可以用`#include`在编译时读文件，然后用时间oracle爆破flag
 - 其他做法：
-    - 多线程脚本： https://gist.github.com/C0nstellati0n/78f5887b5bee235583a026840354ae54#schr%C3%B6dinger-compiler
+    - 多线程脚本：**Schrödinger**
     - https://github.com/nononovak/glacierctf-2024-writeups/blob/main/Schrodinger%20Compiler%20(writeup).md
 369. [Satan Himself](https://www.youtube.com/watch?v=G6cYc_7I_Sc)
 - esoteric language Malbolge。一些可用的编译器：
@@ -2510,3 +2510,6 @@ $ cd a/b
 380. [redacted](https://github.com/x3ctf/challenges-2025/blob/main/misc/redacted)
 - 之前见过类似思路的题目，`Secret Message 2`。不过这题隐藏文字的手段不是像素化，而是ShareX软件的红笔。预期解是用脚本+discord字体模拟所有可能的字符，通过比对字符被红笔划过的痕迹爆破flag
 - 也有人去discord截图后拿诸如photopea之类的图像软件diff两张图来找到flag
+381. [hydraulic-press](https://github.com/x3ctf/challenges-2025/tree/main/misc/hydraulic-press)
+- 解压zlib，但是zlib里含有大量null字节，直接解压会使电脑崩溃。参考下方的解法，只需要把zlib流中的重复字节拿掉，解压时就不会得到那些null字节了
+- 解法：**hydraulic-press**
