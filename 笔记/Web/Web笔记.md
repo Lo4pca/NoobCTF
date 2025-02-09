@@ -2297,7 +2297,7 @@ cast send 0x[Selfdestruct] "kill(address)" 0x[target address] --rpc-url $RPC_URL
     - 此题的一些unintended solutions：
 ```
 /{{config.update(u=config.update)}}
-/{{config.u(g="__globals__)}}
+/{{config.u(g="__globals__")}}
 /{{config.u(l=lipsum[config.g])}}
 /{{config.u(o=config.l['os'])}}
 /{{config.u(p=o.popen)}}
@@ -3400,7 +3400,7 @@ res=web3.eth.wait_for_transaction_receipt(hstrx)
 311. [reCAPTCHA v39](https://github.com/sahuang/my-ctf-challenges/tree/main/vsctf-2023/misc_recaptcha-v39)
 - python建立websocket连接+计算图片阴影部分面积。websocket连接的网页用requests是连不上的
 - 不知道为啥，在做[kaboot](https://github.com/TJCSec/tjctf-2024-challenges/tree/main/web/kaboot)时websocket库出问题了，没法send（奇了怪了，明明官方也是用这个库的）。于是这里是nodejs做法： https://gist.github.com/C0nstellati0n/248ed49dea0accfef1527788494e2fa5#kaboot
-- 好好好，今天又遇见一道websocket题，python和nodejs都不行，疯狂断连。但为啥别人的nodejs就行啊？[Spinner](https://vaktibabat.github.io/posts/vsCTF_Writeups/),以及个人的无脑console解法（用js代码触发题目自带的event从而发送socket信息）和其他python解法： https://gist.github.com/C0nstellati0n/248ed49dea0accfef1527788494e2fa5#spinner
+- 好好好，今天又遇见一道websocket题，python和nodejs都不行，疯狂断连。但为啥别人的nodejs就行啊？[Spinner](https://vaktibabat.github.io/posts/vsCTF_Writeups/),以及个人的无脑console解法（用js代码触发题目自带的event从而发送socket信息）和其他python解法： **spinner**
 312. [ZKPLite](https://github.com/sahuang/my-ctf-challenges/tree/main/vsctf-2023/misc_zkplite)
 - blockchain如何计算/预测合约地址（msg.sender）： https://docs.soliditylang.org/en/latest/control-structures.html#salted-contract-creations-create2
 313. [Optimized Admin Bot](https://www.youtube.com/watch?v=BRnMRdQJVeo)
@@ -3636,7 +3636,7 @@ next();
 ```
 当JSON.parse报错时，会进入catch分支，然后直接next，从而绕过if的检查admin权限逻辑
 - 视频wp： https://www.youtube.com/watch?v=JetPydd3ud4
-369. [GlacierCoin](https://themj0ln1r.github.io/posts/glacierctf23)
+369. [GlacierCoin](https://themj0ln1r.github.io/writeups/glacierctf23)
 - solidity blockchain Reentrancy attack
 - `(msg.sender).call`会调用msg.sender的fallback()函数。用receive()也行： https://github.com/Brivan-26/GlacierCTF2k23-SmartContracts-writeups
 - forge script使用
