@@ -18,6 +18,9 @@
   - 另一个snes调试器：[bsnes-plus](https://github.com/devinacker/bsnes-plus)
 - [diaphora](http://diaphora.re)
   - IDA插件；program diffing tool
+- [net-msg](https://scuffed.online/x3ctf-2025)
+  - 逆向golang。题目的binary没有被去除符号（not stripped），然而gdb在这种情况下会找不到引用的源码文件，导致设置断点时可能出现segault。可以尝试用go原生调试器[Delve](https://github.com/go-delve/delve)。不过这个调试器有个缺点，就是没法自由地修改寄存器的值（见 https://github.com/go-delve/delve/blob/master/Documentation/cli/expr.md ）。这时只能去除binary的调试符号并换回gdb
+  - ghidra插件[GolangAnalyzer](https://github.com/mooncat-greenpy/Ghidra_GolangAnalyzerExtension)
 
 ## Game
 
@@ -1368,3 +1371,6 @@ mov     r8, qword [r13]
 - [Reverse Engineering Mixed Mode Assemblies (IDA, DnSpyEx)](https://www.youtube.com/watch?v=H8gr3NxWteM)
 203. [Sentir](https://gist.github.com/C0nstellati0n/a066c450ed5d4c8ffbb0c1328283fe14#sentir)
 - 逆向`.NET` AOT程序： https://harfanglab.io/insidethelab/reverse-engineering-ida-pro-aot-net
+204. [oh-my-gadt](https://scuffed.online/x3ctf-2025)
+- 逆向混淆过的Haskell代码。看来大家都用AI辅助啊
+- 比赛时尝试动调，差点给我连蒙带猜逆出来了。还是wp的做法聪明些，把函数定义拿出来调用看一下做了什么

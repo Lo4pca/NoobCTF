@@ -349,7 +349,7 @@
     - 比赛时找到了这题的dom clobbering，并且成功注入了xss payload。但是题目由两个机器组成，flag不在出现xss的机器上。试了很久发现无论如何都没法访问到另一个机器。以为是自己没搞懂docker间机器的通信问题（如何通信见 https://stackoverflow.com/questions/47648792/communicating-between-different-docker-services-in-docker-compose ），原来是被CORS挡住了
     - 这篇wp是非预期解。flag所在的机器在style处有个注入，闭合style标签后就能注入js payload了。预期解见 https://gist.github.com/C0nstellati0n/248ed49dea0accfef1527788494e2fa5#cascade-chaos 。利用`nth-child`和xs leak技巧逐个字符爆破flag
 - [blogdog](https://jorianwoltjer.com/blog/p/ctf/x3ctf-blogdog-new-css-injection-xs-leak)
-    - css injection（xs leak）+csp bypass。题目的csp设置了`img-src 'none'`，参考[官方wp](https://github.com/x3ctf/challenges-2025/blob/main/web/blogdog),只需要加载非图片的外部资源即可绕过。比如`@font-face`
+    - css injection（xs leak）+csp bypass。题目的csp为`script-src 'self'; object-src 'none'; img-src 'none'`，参考[官方wp](https://github.com/x3ctf/challenges-2025/blob/main/web/blogdog),只需要用css exfiltration并加载非图片的外部资源即可绕过。比如`@font-face`
     - 一个chromium bug： https://issues.chromium.org/issues/382086298 ，用chrome加载这段css代码会导致加载代码的tab连带着与tab同源（same origin）的所有instance全部崩溃，即使在iframe里也一样。这是因为[Full Site Isolation](https://chromium.googlesource.com/chromium/src/+/main/docs/process_model_and_site_isolation.md#Full-Site-Isolation-site_per_process)机制，同源的所有页面在chrome里都是一个进程
     - 再次验证一个规则：不要手动修改dompurify返回的结果。这题的dompurify设置很严格，dompurify本身也没漏洞。但程序用replace拿掉了purify结果的引号。结果因为replace没加`/g`导致只会拿掉一个引号，剩下的一个引号成功逃逸到css中，导致css injection
     - 一个浏览器的奇怪行为：属性（attribute）`is`没法用Element.removeAttribute移除： https://github.com/jsdom/jsdom/issues/3265 。配合dompurify可以凭空“捏造”出引号：`<p is>`的purify结果（设置为`no attributes allowed`）是`<p is=""></p>`
@@ -3804,9 +3804,9 @@ window.recaptcha=true;
 - minio CVE-2023-28434漏洞利用，可在minio服务器上执行任意代码
 - 其他做法： https://gist.github.com/C0nstellati0n/248ed49dea0accfef1527788494e2fa5#minioday
 407. [another-csp](https://blog.huli.tw/2024/02/12/dicectf-2024-writeup/)
-- 在iframe的sandbox全开（无法使用script标签），csp `defeault-src 'none'`（禁止引入任何外部资源），不能执行任何JavaScript，也无法透过meta重新导向的情况下leak同网页下的token。因css开了unsafe-inline，加上可以得知bot正在访问的网页是否关闭，故利用html+css使Chromium崩溃（相关[issue](https://issues.chromium.org/issues/41490764)）或使网页载入变慢，进而加快/拖慢bot的执行时间
+- 在iframe的sandbox全开（无法使用script标签），csp `default-src 'none'`（禁止引入任何外部资源），不能执行任何JavaScript，也无法透过meta重新导向的情况下leak同网页下的token。因css开了unsafe-inline，加上可以得知bot正在访问的网页是否关闭，故利用html+css使Chromium崩溃（相关[issue](https://issues.chromium.org/issues/41490764)）或使网页载入变慢，进而加快/拖慢bot的执行时间
 - 利用dns-prefetch绕过CSP的详细介绍/相关链接： https://www.cse.chalmers.se/research/group/security/pdf/data-exfiltration-in-the-face-of-csp.pdf ， https://github.com/w3c/webappsec-csp/issues/542
-- 其他做法： https://gist.github.com/C0nstellati0n/248ed49dea0accfef1527788494e2fa5#another-csp
+- 其他做法：**another-csp**
 408. [safestlist](https://blog.huli.tw/2024/02/12/dicectf-2024-writeup/#webx2fsafestlist-2-solves)
 - 浏览器对网址长度有限制，可以利用一些特殊格式构造长的url：`http://${'a'.repeat(1000000)}}:pwd@localhost:3000`，其中那些a为用户名，pwd为密码，尝试对localhost:3000执行验证。过长的重定向后会触发错误，新打开的界面为`about:blank`
 409. [burnbin](https://blog.huli.tw/2024/02/12/dicectf-2024-writeup/#webx2fburnbin-1-solve)
@@ -4216,3 +4216,4 @@ fopen("$protocol://127.0.0.1:3000/$name", 'r', false, $context)
 523. [kittyconvert](https://github.com/x3ctf/challenges-2025/blob/main/web/kittyconvert)
 - 在png文件里编写php木马。难点在于上传的png文件会被转成`.ico`再存储，所以需要找到在这个转换过程中不变的字节
 - 在png转ico的过程中，png的RGBA顺序对应着ico的BGRA。唯一的问题是ico的alpha值的lsb会被丢弃，所以必须满足`ord(c) % 2 == 0`
+- 补充个有互动的wp： https://exe2py.neocities.org/writeups/2025_x3ctf/kittyconvert
