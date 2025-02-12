@@ -2232,3 +2232,8 @@ fn get_ptr<'a, 'b, T: ?Sized>(x: &'a mut T) -> &'b mut T {
 - fsop解法： https://vulnx.github.io/blog/posts/UofTCTF2025
   - pwntools可以直接用`FileStructure().write`生成可以泄漏任意地址的stdout结构体
   - 可以通过覆盖stdin来修改输入字节的存储地址（任意地址写）
+230. [pwny-heap](https://github.com/x3ctf/challenges-2025/tree/main/pwn/pwny-heap)
+- libc 2.35，预期解是house of botcake，不过好像tcache poisoning（还有个fsop的模板）也能用： https://github.com/im-razvan/writeups/blob/main/x3CTF-2025/pwny-heap
+- 偷一下大家的做法：**pwny-heap** 。包含：
+  - exit functions
+  - fsop（file_lock好像有symbol了，`libc.sym._IO_stdfile_1_lock`）

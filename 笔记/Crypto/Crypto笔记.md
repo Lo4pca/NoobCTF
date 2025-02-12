@@ -810,6 +810,12 @@ $$
 - [Future Desk Market](https://github.com/srdnlen/srdnlenctf-2025_public/blob/main/cryptopwn_FDM)
     - ECC partial nonce leak。也是早有耳闻，只是没想到第一次见这个考点居然是在一个pwn题里……
     - 看到了一个不错的调试工具：[libdebug](https://github.com/libdebug/libdebug)
+- [much-vulnerable-machine-1](https://github.com/x3ctf/challenges-2025/tree/main/crypto/much-vulnerable-machine-1)
+    - ecdsa nonce leak攻击
+    - 补充文章： https://blog.trailofbits.com/2020/06/11/ecdsa-handle-with-care
+        - reused nonce
+        - leaked and biased nonce
+        - bad nonce（nonce bit数过小）
 
 ## AES/DES
 

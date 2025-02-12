@@ -4217,3 +4217,6 @@ fopen("$protocol://127.0.0.1:3000/$name", 'r', false, $context)
 - 在png文件里编写php木马。难点在于上传的png文件会被转成`.ico`再存储，所以需要找到在这个转换过程中不变的字节
 - 在png转ico的过程中，png的RGBA顺序对应着ico的BGRA。唯一的问题是ico的alpha值的lsb会被丢弃，所以必须满足`ord(c) % 2 == 0`
 - 补充个有互动的wp： https://exe2py.neocities.org/writeups/2025_x3ctf/kittyconvert
+524. [MVMCheckers Inc](https://oshawk.uk/Writeups/MVMCheckers+Inc)
+- 文件polyglot，使file命令返回的结果里包含`image`，同时是个json文件。前者可以用`xbm image`（其他的也可以，不过这个类型的文件头规定没那么严格）绕过，但file命令判断文件为json的优先级更高。预期解里程序在调用file后会把`\`替换为空，所以可以用`\`破坏json结构也不影响使用。更普遍的做法是多加几层`[]`，超过500层后file就不会将其看作是json了
+- 各种mime类型见 https://github.com/waviq/PHP/blob/master/Laravel-Orang1/public/filemanager/connectors/php/plugins/rsc/share/magic.mime

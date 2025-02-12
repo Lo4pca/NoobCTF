@@ -1374,3 +1374,4 @@ mov     r8, qword [r13]
 204. [oh-my-gadt](https://scuffed.online/x3ctf-2025)
 - 逆向混淆过的Haskell代码。看来大家都用AI辅助啊
 - 比赛时尝试动调，差点给我连蒙带猜逆出来了。还是wp的做法聪明些，把函数定义拿出来调用看一下做了什么
+- 静态分析做法及haskell gadt介绍： https://pingotux.si/blog/oh-my-gadt
