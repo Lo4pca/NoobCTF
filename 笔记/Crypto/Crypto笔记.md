@@ -559,6 +559,9 @@ for i in range(1,e):
     - [Williams's p + 1 algorithm](https://en.wikipedia.org/wiki/Williams%27s_p_%2B_1_algorithm)分解n。概率算法，不是百分之百成功。而且这题的p的构造有漏洞，构成p的多项式中包含一个很小的质数
 - [fastcrypto](https://blog.whale-tw.com/2025/01/27/x3ctf-2025)
     - NTT算法+CRT加速RSA计算。NTT其实不负责整数乘法，而是模某个数下的多项式乘法。因此题目需要将整数转为多项式，拿到NTT结果后再从多项式转回整数。问题在于题目选择模的“某个数”太小了，而题目编写的多项式转换公式都基于系数不超过模数的前提。NTT返回的结果完全有可能超过这个限制，故出现计算错误。计算错误又会导致RSA中的fault attack，导致攻击者可以用gcd恢复p和q中的一个
+    - [官方wp](https://github.com/x3ctf/challenges-2025/blob/main/crypto/fastcrypto)也不错
+- [much-vulnerable-machine-3](https://github.com/x3ctf/challenges-2025/tree/main/crypto/much-vulnerable-machine-3)
+    - bleichenbacher may攻击，参考论文[New Attacks on RSA with Small Secret CRT-Exponents](https://www.iacr.org/archive/pkc2006/39580001/39580001.pdf)，适用于dp/dq过小的情况
 
 ## Sagemath
 
@@ -816,6 +819,7 @@ $$
         - reused nonce
         - leaked and biased nonce
         - bad nonce（nonce bit数过小）
+        - https://cryptopals.com/sets/8/challenges/62.txt 也不错
 
 ## AES/DES
 
@@ -2833,3 +2837,6 @@ assert crc32(a)^crc32(b)==crc32(c)^crc32(d)
 - Feistel network类型密码攻击。给定明文对应的密文，要求恢复密钥。这题是7轮的Feistel结构，轮函数`_f`在 $F_{2^{64}}$ 下完全线性，为 $F(x):\frac{1}{x}+c$ ，c为常数。故可以用 $F_{2^{64}}$ 中整数（环？）与多项式环的同构，用sagemath实现一个多项式GF下的Feistel，再用PolynomialRing多项式代表未知的key，跑一遍Feistel，即可构成有关密钥的多项式方程组
 - wp利用XL算法（eXtended Linearization algorithm）求方程组的根。和groebner_basis()与ideal()目标差不多，不过XL适合稀疏方程组，在这题的表现下更快。sagemath的gb的基础设置在这题可能会超时，参考 https://github.com/DagurB/informalWriteups/tree/master/srdnlen/basedsbox ，用`singular:slimgb`可以提高速度。或者直接用“更好”的gb实现： https://www.singular.uni-kl.de/Manual/4-0-3/sing_396.htm 。属于密码学中的代数攻击（Algebraic attack）
 - 整数转多项式：首先把数字转成二进制，比如0x1b的二进制是`00011011`。然后从右往左看，每个1就代表一个 $x^n$ 项的系数。比如0x1b的多项式表示为 $x^4+x^3+x+1$ 。在这个同构下，异或`^`和加法`+`之间可以相互转换
+169. [babyrng](https://github.com/x3ctf/challenges-2025/tree/main/crypto/babyrng)
+- 破解splitmix rng。其实论文里已经讲了： https://gee.cs.oswego.edu/dl/papers/oopsla14.pdf 的第13页右下角。然而这题是用haskell，我找到了[源码](https://github.com/haskellari/splitmix/blob/master/src/System/Random/SplitMix.hs)，但是死也看不懂它怎么生成的数字，于是硬生生把源码改了。后面看大家的wp才发现效果等同于模个数而已……
+- 其他做法：**babyrng**

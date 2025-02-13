@@ -4220,3 +4220,7 @@ fopen("$protocol://127.0.0.1:3000/$name", 'r', false, $context)
 524. [MVMCheckers Inc](https://oshawk.uk/Writeups/MVMCheckers+Inc)
 - 文件polyglot，使file命令返回的结果里包含`image`，同时是个json文件。前者可以用`xbm image`（其他的也可以，不过这个类型的文件头规定没那么严格）绕过，但file命令判断文件为json的优先级更高。预期解里程序在调用file后会把`\`替换为空，所以可以用`\`破坏json结构也不影响使用。更普遍的做法是多加几层`[]`，超过500层后file就不会将其看作是json了
 - 各种mime类型见 https://github.com/waviq/PHP/blob/master/Laravel-Orang1/public/filemanager/connectors/php/plugins/rsc/share/magic.mime
+525. [Story Creator](https://github.com/x3ctf/challenges-2025/blob/main/web/StoryCreator/challenge-solution)
+- 后端Go+gqlgen，前端Vite, React和Apollo GraphQL，并用Automated Persistent Queries（APQ）缩减GraphQL请求的大小。APQ机制我粗略看了一下，核心思想是把查询语句存储在服务器端，这样客户端只需要发送一个hash，由服务器端用判断该hash对应哪个查询语句。若hash不存在，则让客户端需重新发送完整的查询语句，存储后再执行
+- gqlgen在遇见hash和查询语句被同时发送的情况下会直接设置cache key，无论发送过来的hash cache key是否已经被设置过
+- 这题的漏洞为Automated Persistent Queries cache poisoning。题目有个headless browser bot固定查询一个hash值为h的语句，但flag不在任何一个已存在的查询语句内。题目使cache查询语句的hash容易出现碰撞，于是攻击者尝试构造包含flag的查询语句，同时其hash值等于h。配合上一条gqlgen的特性，能够把h对应的语句换成带有flag的语句。于是等bot查询的时候就能得到flag了

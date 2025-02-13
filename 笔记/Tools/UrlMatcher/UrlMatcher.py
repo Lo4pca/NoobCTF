@@ -49,12 +49,8 @@ def main():
         "pbs.twimg.com", "github.com/bata24/gef", "pwnable.kr", "pwnable.tw", "letmegooglethat.com",
         "ibb.co", ".tar.gz", "webhook.site", ".gif"
     ]
-    bookmark_template = """<DL><p>
-        <DT><H3>Writeups</H3>
-        <DL><p>
-        {}
-        </DL><p>
-    </DL><p>"""
+    bookmark_template = """<DT><H3>Writeups</H3>
+        {}"""
     processor = BookmarkProcessor(exclude_urls, bookmark_template)
     mode = input("请输入文件格式(json/csv): ").strip().lower()
     if mode not in ("json", "csv"):
@@ -68,10 +64,9 @@ def main():
         print("路径无效，请检查输入路径")
         return
     output_path = Path(input("请输入结果文件的路径: ").strip())
-    bookmarks_path = output_path.parent / f"bookmarks_{output_path.name}"
     for file in input_path.glob(glob_pattern):
         process_func(file)
-    processor.write_bookmarks(f"{bookmarks_path}.html")
-    print(f"书签已保存至: {bookmarks_path}.html")
+    processor.write_bookmarks(f"{output_path}")
+    print(f"书签已保存至: {output_path}")
 if __name__ == "__main__":
     main()

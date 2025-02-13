@@ -1311,6 +1311,7 @@ mov     r8, qword [r13]
 - 其他wp： https://gist.github.com/C0nstellati0n/78f5887b5bee235583a026840354ae54#push-and-pickle 。又认识了几个工具：
   - [astor](https://github.com/berkerpeksag/astor):将AST转换为代码
   - [Fickling](https://github.com/trailofbits/fickling):将pickle转为AST
+    - 补充一个使用fickling的题目：[pickle-season](https://github.com/x3ctf/challenges-2025/blob/main/rev/pickle-season)。也可以用python自带的pickletools模块，不过要用python 3.14的pickletools，旧版本的有些bug
   - [pker](https://github.com/EddieIvan01/pker):更方便创建pickle opcodes
 183. [tooooo fancy](https://hackmd.io/@fsharp/ryuOxo1DC)
 - [tcl](https://en.wikipedia.org/wiki/Tcl)语言汇编逆向。如果题目提供了程序的机器码，可以用[tbcload](https://github.com/corbamico/tbcload)将其转换为assembly code。指令集参考 https://core.tcl-lang.org/tclquadcode/wiki?name=Standard+Tcl+Bytecodes
@@ -1375,3 +1376,5 @@ mov     r8, qword [r13]
 - 逆向混淆过的Haskell代码。看来大家都用AI辅助啊
 - 比赛时尝试动调，差点给我连蒙带猜逆出来了。还是wp的做法聪明些，把函数定义拿出来调用看一下做了什么
 - 静态分析做法及haskell gadt介绍： https://pingotux.si/blog/oh-my-gadt
+205. [secure-snek](https://github.com/x3ctf/challenges-2025/tree/main/misc/secure-snek)
+- 逆向混淆后的python代码。这题的混淆方式类似虚拟机vm，可以参考 https://forum.tuts4you.com/topic/44240-python-obfuscated-keygenme 的方式添加trace代码查看调用的函数
