@@ -611,7 +611,7 @@ sympy也放这了
     - [constant_coefficient](https://ask.sagemath.org/question/52938/constant-coefficient-of-symbolic-expression/)使用
     - 其他解法: [Discrete logarithm modulo powers of a small prime](https://math.stackexchange.com/questions/1863037/discrete-logarithm-modulo-powers-of-a-small-prime), Using p-adic Ring in sage to compute discrete logarithm
 - [Too Many Leaks](https://connor-mccartney.github.io/cryptography/diffie-hellman/Too-Many-Leaks-GCC-CTF-2024)
-    - bivariate coppersmith求解方程。其实不仅能用于RSA，只要是在有限域下，两个变量的方程都能解（但估计和单变量coppersmith一样，有要求解的变量的大小的限制）。不过这题应用coppersmith的情况还是那种经典的leak n个bits的题，应该还有其他情况能用吧？只要找到线性关系就行
+    - bivariate coppersmith求解方程。其实不仅能用于RSA，只要是在有限域下，两个变量的方程都能解（但估计和单变量coppersmith一样，有要求解的变量的大小的限制）。不过这题应用coppersmith的情况还是那种经典的leak n个bits的题，应该还有其他情况能用吧？只要找到线性关系就行（好像确实是，见 https://l0mb4rd.gitbook.io/crypto/cool-ctf-challenges/kleinvieh_2 ）
 - [flag_printer](https://github.com/PetePriority/picoctf-2024/tree/main/cryptography/flag_printer)
     - 寻找一个多项式 $p(x)=a_0+a_1x+...+a_nx^n$ ，使得 $p(x_i)=y_i$ 。 $x_i$ 和 $y_i$ 都已知，相当于找多项式的系数 $a_i$ 。写成矩阵就是找Ap=y的p。这种线性方程组可以用polynomial interpolation相关算法（比如Lagrange）加速，但更快的做法参考 https://mathoverflow.net/questions/408666/fastest-implementation-of-polynomial-interpolation/458091#458091 ，思路是FFT+divide and conquer
     - 这题最快的解法可能是flintlib的[nmod_poly_interpolate_nmod_vec_fast](https://flintlib.org/doc/nmod_poly.html#c.nmod_poly_interpolate_nmod_vec_fast)。sagemath实现见 https://github.com/PetePriority/picoctf-2024/blob/main/cryptography/flag_printer/solve_fast.ipynb （Fast interpolation algorithm）
@@ -907,6 +907,8 @@ AES是很能出题的。DES则是放在这凑数的
 	3. a=0的情况下，容易看出 $b=\sqrt{k}$ ，以r代替。此时替换新a''=b， $b'=a'=-(r-2kr)-a=-(1-2k)r-a$ 。新出现的(a'',b')也是满足条件的一组(a,b)值。继续这么推下去就能拿到无数组想要的值
 	4. 百科里用这个方法递减可能的解，直到最小。为啥我们这越来越大？因为百科里默认0 < $x^2$ < b < a，这里我们初始b > a，懒得证明（菜）但是感觉这样替换结果越来越大
 	5. 为啥可以把a''换成b，b'换成a'？这里看原始式子就简单得多， $\frac{a^2 + ab + b^2}{2ab + 1}=k$ 里明显a和b的值交换不影响k
+- [Kleinvieh 2](https://mindcrafters.xyz/writeups/nullconctf-2025-crypto)
+    - 好的其他部分我都明白，唯独卡在不知道怎么用数学表示同一条message重复n次。答案是，将长度为S的message重复一次等同于将message乘上 $10^S+1$
 
 ## 其他
 

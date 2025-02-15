@@ -4224,3 +4224,6 @@ fopen("$protocol://127.0.0.1:3000/$name", 'r', false, $context)
 - 后端Go+gqlgen，前端Vite, React和Apollo GraphQL，并用Automated Persistent Queries（APQ）缩减GraphQL请求的大小。APQ机制我粗略看了一下，核心思想是把查询语句存储在服务器端，这样客户端只需要发送一个hash，由服务器端用判断该hash对应哪个查询语句。若hash不存在，则让客户端需重新发送完整的查询语句，存储后再执行
 - gqlgen在遇见hash和查询语句被同时发送的情况下会直接设置cache key，无论发送过来的hash cache key是否已经被设置过
 - 这题的漏洞为Automated Persistent Queries cache poisoning。题目有个headless browser bot固定查询一个hash值为h的语句，但flag不在任何一个已存在的查询语句内。题目使cache查询语句的hash容易出现碰撞，于是攻击者尝试构造包含flag的查询语句，同时其hash值等于h。配合上一条gqlgen的特性，能够把h对应的语句换成带有flag的语句。于是等bot查询的时候就能得到flag了
+526. [ZONEy.eno](https://blog.n0va.in/posts/nullcon-writeup)
+- dns & dig相关挑战
+- NSEC-walking。对某个已知的域名请求NSEC记录会返回下一个有效域名，于是攻击者可以重复这一步骤进而暴露DNS区域中的所有域名信息，包括内部系统或未公开的服务

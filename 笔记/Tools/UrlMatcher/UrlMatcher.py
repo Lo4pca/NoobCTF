@@ -50,7 +50,7 @@ def main():
         "ibb.co", ".tar.gz", "webhook.site", ".gif"
     ]
     bookmark_template = """<DT><H3>Writeups</H3>
-        {}"""
+{}"""
     processor = BookmarkProcessor(exclude_urls, bookmark_template)
     mode = input("请输入文件格式(json/csv): ").strip().lower()
     if mode not in ("json", "csv"):

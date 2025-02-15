@@ -48,6 +48,8 @@
     - IQ数据转wav文件
 - [Spicy Messaging Sinusoids](https://github.com/TFNS/writeups/tree/master/2025-01-05-IrisCTF/spicy_messaging_sinusoids)
     - [Universal Radio Hacker](https://github.com/jopohl/urh)处理digital FSK modulation。这工具还可以直接加载iq文件
+- [oscilloscope](https://nikzu.dev/writeups/oscilloscope)
+    - 从I2C信号中提取数据
 
 ## Linux相关
 

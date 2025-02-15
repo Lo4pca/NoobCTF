@@ -2237,3 +2237,5 @@ fn get_ptr<'a, 'b, T: ?Sized>(x: &'a mut T) -> &'b mut T {
 - 偷一下大家的做法：**pwny-heap** 。包含：
   - exit functions
   - fsop（file_lock好像有symbol了，`libc.sym._IO_stdfile_1_lock`）
+231. [wasmup](https://ctftime.org/task/29973)
+- 这题其实非常简单，输入`debug`后，程序会用call_indirect从函数表中调用指定的函数。但call_indirect根据索引决定调用的函数，程序也准备了一个flag函数。于是用格式化字符串漏洞覆盖call_indirect的参数，从而调用flag。不过wasm的逆向挺痛苦的，比赛时我用[wasmtime](https://docs.wasmtime.dev/examples-debugging-native-debugger.html)动态调试，却始终找不到代码段。还是用搜索输入字符串的方式加上猜才勉强做出来的
