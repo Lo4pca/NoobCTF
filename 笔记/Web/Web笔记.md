@@ -424,6 +424,8 @@ for i in range(300,1000):
 - [My Second App](https://hubert.hackin.ca/posts/uoftctf25-my-second-app)
     - python flask ssti绕过滤的究极题目。关键是用filter语法`|`（jinjia独有，普通pyjail不能用）
     - 这题还有个hash extension attack
+- [Deathday Card](https://nullbrunk.github.io/posts/pragyan-deathdaycard)
+    - 利用`config.update`绕过payload size限制。见 https://niebardzo.github.io/2020-11-23-exploiting-jinja-ssti 。之前在`Drink from my Flask`见过
 - [Frog-WAF](https://fireshellsecurity.team/sekaictf-frog-waf-and-chunky/)
     - java ssti模板注入（[EL - Expression Language](https://book.hacktricks.xyz/pentesting-web/ssti-server-side-template-injection/el-expression-language)）。此题的难点在于waf，限制了所有数字和一些特殊符号与java的类名
     - 其他payload：

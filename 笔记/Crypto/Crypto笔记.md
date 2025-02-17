@@ -656,6 +656,11 @@ sympy也放这了
     - 计算矩阵是否是二次剩余（legendre symbol）。不过看题目的矩阵生成代码，只有可对角化并可逆的矩阵才有可能使用legendre symbol，有和整数类似的性质。看[官方wp](https://github.com/Cryptonite-MIT/niteCTF-2024/tree/main/crypto/quadrillion_matrices)的解法会更清楚。比赛中由于生成矩阵的代码被隐藏了，直接没想到这点。看来以后遇到矩阵幂的情况要看看矩阵的对角化和jordan form形式
     - 计算矩阵的的dlp。需要神奇的CADO-NFS，而且耗时较长
     - 原来这题很久以前就有人研究过了，结合 https://cstheory.stackexchange.com/questions/12655/discrete-log-in-gl2-p 和 https://crypto.stackexchange.com/questions/22830/finding-xs-parity-in-the-discrete-log-problem 即可
+- [Matrixfun](https://ctftime.org/task/29968)
+    - diffie hellman，但是矩阵。需要计算矩阵的dlp，但是sagemath默认不支持这么做。以下是几篇wp的思路：
+        - 看矩阵的特征多项式，发现多项式分解后的因子有个2次的。于是将矩阵拓展到 $GF(p^2)$ 。然后求jordan_form，利用jordan_form将矩阵对角化。若G可以对角化，则 $G^a=PD^aP^{-1}$ 。此时计算 $G^a$ 的dlp的问题就转为计算 $D^a$ 的dlp的问题。而 $D^a$ 是对角矩阵，其对角线上的元素是D的特征值的a次幂。意味着将矩阵的dlp转换为了对角元素（ $GF(p^2)$ 中的元素）的dlp。拓展GF这步很重要，如果只在GF(p)下是找不到特征值（特征多项式的解）的，进而找不到正确的jordan_form
+        - 或者不考虑什么转换，直接自己实现一个矩阵的bsgs即可
+        - 再或者修改sagemath的discrete_log实现，使其支持矩阵
 - 记录个工具： https://github.com/Aeren1564/CTF ，里面的CTF_Library看起来很香
 
 ## Lattice(格)
@@ -2842,3 +2847,9 @@ assert crc32(a)^crc32(b)==crc32(c)^crc32(d)
 169. [babyrng](https://github.com/x3ctf/challenges-2025/tree/main/crypto/babyrng)
 - 破解splitmix rng。其实论文里已经讲了： https://gee.cs.oswego.edu/dl/papers/oopsla14.pdf 的第13页右下角。然而这题是用haskell，我找到了[源码](https://github.com/haskellari/splitmix/blob/master/src/System/Random/SplitMix.hs)，但是死也看不懂它怎么生成的数字，于是硬生生把源码改了。后面看大家的wp才发现效果等同于模个数而已……
 - 其他做法：**babyrng**
+170. [FAKE AZURE](https://github.com/delta/PCTF25-Writeups/blob/main/crypto/FakeGM)
+- python randcrack+coppersmith+[Goldwasser–Micali cryptosystem](https://en.wikipedia.org/wiki/Goldwasser%E2%80%93Micali_cryptosystem)
+171. [TINYBUNNIE](https://github.com/delta/PCTF25-Writeups/blob/main/crypto/TinyBunnie)
+- Equivalent Keys in TEA Encryption。每个key可以产生其他三个key，这四个key加密同一个明文得到的都是同一个密文。见 https://www.schneier.com/wp-content/uploads/2016/02/paper-key-schedule.pdf
+172. [TooMuchCrypto](https://github.com/delta/PCTF25-Writeups/blob/main/crypto/TooMuchCrypto)
+- BLAKE Preimage Attack。通过部分明文和state values恢复出完整的明文

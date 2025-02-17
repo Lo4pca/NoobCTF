@@ -2423,7 +2423,7 @@ a=A()
 - 如何破解一个世界的seed。需要安装mod [SeedcrackerX](https://github.com/19MisterX98/SeedcrackerX)。按照wp的方法安装mod后满世界找一些特殊遗迹即可恢复seed
 353. [playful-puppy](https://centinels.gitbook.io/home/writeups/imaginaryctf/forensics-playful-puppy)
 - 使用NBTExplorer分析Minecraft世界数据。这题的目标是找一个生物的名字
-- 命令解法： https://yun.ng/c/ctf/2024-ictf/forensics/playful-puppy
+- 游戏内命令解法： https://yun.ng/c/ctf/2024-ictf/forensics/playful-puppy
 354. [zable](https://yun.ng/c/ctf/2024-ictf/misc/zable)
 - bazel `--action_env`注入。如果可以控制`--action_env`的内容，则能够执行任意命令。`--action_env`本质是运行这么一条命令：`EXPORT NAME="content"`
 355. [gdbjail1](https://github.com/rerrorctf/writeups/tree/main/2024_07_19_Imaginary24/misc/gdbjail1)/[gdbjail2](https://github.com/rerrorctf/writeups/blob/main/2024_07_19_Imaginary24/misc/gdbjail2)
@@ -2515,3 +2515,13 @@ $ cd a/b
 381. [hydraulic-press](https://github.com/x3ctf/challenges-2025/tree/main/misc/hydraulic-press)
 - 解压zlib，但是zlib里含有大量null字节，直接解压会使电脑崩溃。参考下方的解法，只需要把zlib流中的重复字节拿掉，解压时就不会得到那些null字节了
 - 解法：**hydraulic-press**
+382. [semaphore](https://ctftime.org/task/29961)
+- 识别[Flag semaphore](https://en.wikipedia.org/wiki/Flag_semaphore) （旗语）
+383. [abroad study notes](https://ctftime.org/task/29960)
+- 修复jpeg。一般`0xff`后的字节需要是`0x00`
+- 其他资源：
+    - [JPEGVisualRepairTool](https://github.com/albmac/JPEGVisualRepairTool)
+    - https://www.disktuna.com/list-of-jpeg-markers
+    - http://mcatutorials.com/mca-tutorials-jpeg-file-layout-format-2-c-practical.php
+384. [Ancient paper](https://ctftime.org/task/29955)
+- 解码IBM punchcard
