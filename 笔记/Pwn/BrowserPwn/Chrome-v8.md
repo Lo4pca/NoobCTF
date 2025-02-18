@@ -51,3 +51,111 @@ v8中比较重要的部分：
     - `runtime/runtime.cc`定义了很多有助于调试v8的运行时函数，实现也在同一目录下
 - wasm
     - 与Liftoff有关
+
+## [Part 4](https://www.madstacks.dev/posts/V8-Exploitation-Series-Part-4)
+
+Turbofan使用稍微修改后的[Sea of Nodes](https://darksi.de/d.sea-of-nodes)结构。编译器对Ignition生成的Abstract Syntax Tree (AST)进行一系列优化，从而缩小graph并将其转化为机器码。优化阶段里，node之间可以合并，拆分，或是更改名字。每个阶段都使用[Visitor pattern](https://en.wikipedia.org/wiki/Visitor_pattern)
+
+优化相关事项其实是在Turbofan以外的地方决定的。所以关于js源码和最终JIT代码之间的Intermediate Representation (IR)，先看去优化（Deoptimization，简称deopt）。deopt在Turbofan生成的JIT代码中调用。V8中有两种deopt，急切（eager）和懒惰（lazy）
+
+- eager：当前执行的代码需要进行去优化（The code currently being executed needs to be deoptimized）
+- lazy：当前执行的代码使其他代码无效（The code currently being executed invalidates some other code）
+
+eager deopt例子如下：
+```js
+function f(x) { 
+    return x + 1; 
+}
+//对整数参数进行优化
+for (i = 0; i < 1000000; i++) { 
+    f(i);
+}
+//当使用字符串作为参数时，执行去优化
+f("1");
+```
+字符串参数使之前认为参数是整数的假设无效。v8在JIT代码间放置检查来验证假设。如果检查失败，则会立即跳回解释器（interpreter）
+
+当优化后的代码影响了其他优化后的代码，需要去优化那个被影响的代码，因为我们可能会破坏它的假设。v8用调用去优化的代码来替换掉被影响的函数的代码。可以看出去优化只会在这个函数被运行时调用，所以是”lazy“（我不确定我是不是看错了，这怎么跑去deopt其他函数了？它自己会不会被deopt啊？放段原文）
+
+...if our optimized code affects some other optimized code, we need to deoptimize that other code because we may have broken some of its assumptions. It now replaces the code of other functions with calls to deoptimize. Since the deoptimization will happen later, whenever that other code is run, this is called lazy
+
+如果函数出现问题，可以查看解释器。去优化的全部原因见`src/deoptimize-reason.h`。使用d8的`--trace-deopt`标志可以查看哪些函数被deopt了
+
+将js代码放入树后（Once we get all of our JavaScript put into a tree。这个tree应该是IR tree，不知道是否和前文的sea of nodes结构有关系？）就可以添加各个node的信息了，帮助我们折叠（collapse）node（可能是把信息类似的node折叠成一个之类的？）。信息可能包含副作用（side-effect），控制流相关信息（control flow relevance），以及node的类型和可能值的范围。typing过程就是字面意思，决定node的类型和可能值。参考这个例子：
+```js
+var x = 5;
+if (y == 10) {
+    x = 10;
+}
+if (x < 5) {
+    //无法到达的语句。x的可能值范围为5-10，总之绝对不可能小于5。if可以被移除
+}
+```
+并不是所有代码都可以被优化，比如下面这个例子：
+```js
+function example(x, y) {
+    if (y == 10) {
+        x = 10;
+    }
+    if (x < 5) {
+        //编译器不知道是否能到达此处，因为优化过程仅发生在这个函数范围内
+    }
+}
+//优化
+for (i = 0; i < 1000000; i++) { 
+    example(i, 0);
+}
+//这种情况下if语句是多余的
+var z1 = 5;
+var z2 = 10;
+example(z1, z2);
+```
+`types.h`包含所有存在的类型以及注释。注意NaN和负零（MinusZero）都有自己的值，以及各种数字的表示
+
+数组（array）有多种类型，方便给不同类型的数组应用不同的优化。比如：
+```js
+let arr1 = [0, 1, 2];
+let arr2 = new Array(1000);
+arr2[0] = 0;
+arr2[999] = 999;
+```
+arr1用3块连续的内存存储；然而arr2只存储两个值以及对应的索引。这就是packed和holey数组的差别
+
+折叠nodes过程中代码里出现的术语
+- union：合并两个输入（input，指代折叠的两个node？）的全部可能值
+- intersect：仅合并两个输入的匹配值（matching values）
+- phi：编译器需要在不同的执行路径追踪变量，因此需要给同一个变量指定不同的中间标识符（intermediate identifiers）。当执行路径合并时，合并不同路径中同一变量的可能值
+- is（`node.Is(arg)`）：若node是给定的参数arg的子集，则它“是”参数arg
+- maybe(`node.Maybe(arg)`)：若参数arg是node的所有类型的子集，则node“可能”是参数arg（不确定是不是反了，maybe和is检查的方向不一样？）
+
+d8中有助于调试的标志：
+- `--trace-turbo`：以json格式输出脚本中被优化函数的IR
+- `--trace-turbo-filter`：指定trace的函数
+- `--print-opt-code --print-code-verbose --code-comments`：获取Turbofan输出的机器码的更多信息
+- `--trace-opt`：查看函数何时被优化以及原因
+- `--print-bytecode`：打印原始的Ignition bytecode
+
+以下是三种触发函数优化的方式（假设test函数中包含需要被优化的代码）。三种方法不会以完全相同的方式触发漏洞
+1. 调用函数足够多次
+```js
+for (var i=0; i < 1000000; i++) {
+    test();
+}
+```
+2. 使用`--allow-natives-syntax`标志并直接调用v8内置函数
+```js
+%OptimizeFunctionOnNextCall(test);
+test();
+```
+3. 比上一个方法多调用一个函数
+```js
+%PrepareFunctionForOptimization(test);
+test();
+%OptimizeFunctionOnNextCall(test);
+test();
+```
+`--trace-turbo`输出的json文件可以用[Turbolizer](https://v8.github.io/tools/head/turbolizer/index.html)查看。可用于检查编译器是否正确优化了代码
+
+`node.h`包含很多注释，详细介绍了`Node`结构，对理解优化非常重要。结构中包含ID，类型信息，相邻node以及构成IR node的其他信息。此结构的成员名称不直观，因此需要了解在哪里查找结构成员
+
+`operator.h`包含`Operator`结构的定义

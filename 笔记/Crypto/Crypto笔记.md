@@ -562,6 +562,8 @@ for i in range(1,e):
     - [官方wp](https://github.com/x3ctf/challenges-2025/blob/main/crypto/fastcrypto)也不错
 - [much-vulnerable-machine-3](https://github.com/x3ctf/challenges-2025/tree/main/crypto/much-vulnerable-machine-3)
     - bleichenbacher may攻击，参考论文[New Attacks on RSA with Small Secret CRT-Exponents](https://www.iacr.org/archive/pkc2006/39580001/39580001.pdf)，适用于dp/dq过小的情况
+- [The Laughing Cipher](https://github.com/delta/PCTF25-Writeups/blob/main/misc/The_Laughing_Cipher)
+    - Bleichenbacher’s RSA Padding Oracle Attack。如果有一个oracle能够分辨某个密文是否有正确的PKCS#1 v1.5 padding，则可以获取明文
 
 ## Sagemath
 
