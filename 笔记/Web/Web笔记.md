@@ -360,6 +360,8 @@
         - https://gist.github.com/JorianWoltjer/76fdd101a6e89b06b3b047d35fb9bcc0 ：题目用到的泄漏技巧的更普遍poc
         - 常见css injection技巧： https://aszx87410.github.io/beyond-xss/en/ch3/css-injection
         - html浏览器响应测试工具： https://r.jtw.sh
+- [SUPER-SECRET-NOTES](https://github.com/delta/PCTF25-Writeups/blob/main/web/Admin-super-secret-notes)
+    - CSP注入；服务器允许插入自定义csp。服务器有设置innerHTML的操作，于是可以用`require-trusted-types-for 'script'; report-uri webhook`。设置innerHTML自然需要使用script，而根据csp，任何违反Trusted Types policy的内容（此处是script里的flag）会被报告到webhook上
 
 ## SSTI
 
@@ -426,7 +428,8 @@ for i in range(300,1000):
     - 这题还有个hash extension attack
 - [Deathday Card](https://nullbrunk.github.io/posts/pragyan-deathdaycard)
     - 利用`config.update`绕过payload size限制。见 https://niebardzo.github.io/2020-11-23-exploiting-jinja-ssti 。之前在`Drink from my Flask`见过
-- [Frog-WAF](https://fireshellsecurity.team/sekaictf-frog-waf-and-chunky/)
+    - [预期解](https://github.com/delta/PCTF25-Writeups/blob/main/web/birthday-card)则是利用了有多处注入点的设置用`%set`设置变量。殊途同归
+- [Frog-WAF](https://fireshellsecurity.team/sekaictf-frog-waf-and-chunky)
     - java ssti模板注入（[EL - Expression Language](https://book.hacktricks.xyz/pentesting-web/ssti-server-side-template-injection/el-expression-language)）。此题的难点在于waf，限制了所有数字和一些特殊符号与java的类名
     - 其他payload：
         - https://github.com/AlbertoFDR/CTF/tree/main/2023/ProjectSekai/web/Frog-WAF
@@ -4229,3 +4232,5 @@ fopen("$protocol://127.0.0.1:3000/$name", 'r', false, $context)
 526. [ZONEy.eno](https://blog.n0va.in/posts/nullcon-writeup)
 - dns & dig相关挑战
 - NSEC-walking。对某个已知的域名请求NSEC记录会返回下一个有效域名，于是攻击者可以重复这一步骤进而暴露DNS区域中的所有域名信息，包括内部系统或未公开的服务
+527. [SpELling it out](https://github.com/delta/PCTF25-Writeups/blob/main/web/SpELling-it-out)
+- java Spring expression language injection。代码使用了`?#{?0}`，即会把第一个参数当作SpEL表达式执行；加上程序没有任何过滤，故出现rce
