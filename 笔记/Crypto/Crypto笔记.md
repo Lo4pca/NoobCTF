@@ -564,6 +564,8 @@ for i in range(1,e):
     - bleichenbacher may攻击，参考论文[New Attacks on RSA with Small Secret CRT-Exponents](https://www.iacr.org/archive/pkc2006/39580001/39580001.pdf)，适用于dp/dq过小的情况
 - [The Laughing Cipher](https://github.com/delta/PCTF25-Writeups/blob/main/misc/The_Laughing_Cipher)
     - Bleichenbacher’s RSA Padding Oracle Attack。如果有一个oracle能够分辨某个密文是否有正确的PKCS#1 v1.5 padding，则可以获取明文
+- [RSA Bummer](https://github.com/IC3lemon/CTF-reports/tree/main/BITSCTF-2025/crypto/RSA%20Bummer)
+    - 将rsa解密过程转换到模p的环上。其实就是之前见过的flag小于p的情况，直接在p上求逆元即可。不过这题还加了一步，e和phi(p)不互质。p上开根很简单，sagemath的nth_root就能解决。见[Algorithm for finding the nth root of modulo p](https://vixra.org/pdf/2205.0155v1.pdf)
 
 ## Sagemath
 
@@ -887,6 +889,8 @@ AES是很能出题的。DES则是放在这凑数的
     - aes有10轮，每轮都会调用subBytesInv，而且每轮的expandKey都不一样，所以都会有影响。不过wp说correlation function会将这些内容看作噪音忽略掉
     - AES/DES轮密钥逆向工具： https://github.com/SideChannelMarvels/Stark
     - 官方wp： https://github.com/UofTCTF/uoftctf-2025-chals-public/blob/master/timed-aes 。原理一样不过脚本要复杂些
+- [Alice n Bob in Wonderland](https://github.com/rerrorctf/writeups/blob/main/2025_02_07_BITSCTF25/crypto/alice_n_bob_in_wonderland)
+    - AES CBC,在提供解密oracle和加密oracle（或是获取到至少三块密文）且不提供iv的情况下恢复iv
 
 ## Z3使用
 

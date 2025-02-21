@@ -50,6 +50,8 @@
     - [Universal Radio Hacker](https://github.com/jopohl/urh)处理digital FSK modulation。这工具还可以直接加载iq文件
 - [oscilloscope](https://nikzu.dev/writeups/oscilloscope)
     - 从I2C信号中提取数据
+- [Old Skool](https://mindcrafters.xyz/writeups/hardware-bitskrieg)
+    - 解码`.iq`数据。之前的脚本好像用不了，在我搞清楚之前只能不断积累脚本了……
 
 ## Linux相关
 

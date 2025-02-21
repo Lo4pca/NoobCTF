@@ -85,6 +85,10 @@
 20. idc脚本基础使用（解密简单自加密函数）。例题:[[GWCTF 2019]re3](../../CTF/BUUCTF/Reverse/[GWCTF%202019]re3.md)
 21. 菜单栏Search->Search immediate可搜寻汇编里的立即操作数，例如`add ptr 3`里面的3。勾选Find All Occurences可一次性列出全部出现位置。有时候利用这一点可以走捷径。例如一个贪吃蛇游戏，每次吃到东西后速度都会+3。这时就能直接搜寻这个3，patch成0就能让游戏变得很简单。
 22. [Flare CAPA](https://github.com/mandiant/capa/tree/master/capa/ida/plugin)插件可以帮助分析程序，例如找到程序里的混淆字符串
+23. [Mishap](https://blog.diefunction.io/ctf/bitsctf-reverse-mishap)
+  - 如何在ida中提取和应用函数签名
+  - 一个rust程序逆向技巧。程序字符串中能看到编译器的版本和使用的第三方库。自己写一个`Cargo.toml`文件并用相同的编译器和第三方库就能编译出带符号的程序。从中提取出签名后即可用于题目文件
+  - wp里提到的Flare capa information应该是这个： https://github.com/mandiant/capa
 
 ## Jadx使用
 

@@ -362,6 +362,13 @@
         - html浏览器响应测试工具： https://r.jtw.sh
 - [SUPER-SECRET-NOTES](https://github.com/delta/PCTF25-Writeups/blob/main/web/Admin-super-secret-notes)
     - CSP注入；服务器允许插入自定义csp。服务器有设置innerHTML的操作，于是可以用`require-trusted-types-for 'script'; report-uri webhook`。设置innerHTML自然需要使用script，而根据csp，任何违反Trusted Types policy的内容（此处是script里的flag）会被报告到webhook上
+- [Get Into My Cute Small Planner](https://adamzvara.github.io/writeups/writeups/2025/BITSCTF/Get-Into-My-Cute-Small-Planner.html)
+    - 编码绕过dompurify：题目sanitize代码后用base64编码存储结果，用的时候再解码为ascii。这就导致了可以用unicode overflow夹杂一些特殊的字符。见 https://portswigger.net/research/splitting-the-email-atom#unicode-overflows 。比赛的时候我找了一个被解码成ascii后会产生引号的unicode来逃逸出xss payload，现在发现没有wp的做法好。我的方法没法嵌套太多引号
+    - 绕过csp `script-src 'self' 'nonce-' 'unsafe-eval' https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js; base-uri 'none'; object-src 'none'`。要求题目中存在一个被csp允许的重定向端点，且重定向的目标也被csp允许（域名相同即可）。比如上面这个csp，虽然允许的其实是`https://cdnjs.cloudflare.com/xxx`，但重定向时会放过所有`https://cdnjs.cloudflare.com`下的资源。利用这点就能导入各种ajax库来执行xss了，比如`angular.js`，再比如`htmx.js`
+    - 其他资源
+        - https://joaxcar.com/blog/2024/05/16/sandbox-iframe-xss-challenge-solution ：和这题思路很像，多了一个可以用`document.baseURI`访问父iframe的知识点
+        - https://portswigger.net/research/xss-without-html-client-side-template-injection-with-angularjs ：利用AngularJS获取xss
+        - https://www.blackhat.com/docs/us-17/thursday/us-17-Lekies-Dont-Trust-The-DOM-Bypassing-XSS-Mitigations-Via-Script-Gadgets.pdf ：何为Script Gadgets
 
 ## SSTI
 
