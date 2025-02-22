@@ -393,6 +393,8 @@ extradata:0         .. file: Zip archive data, at least v2.0 to extract, compres
     - TCP/IP header隐写手段（序列号、ID 或时间戳等）。甚至有篇论文： https://people.cs.georgetown.edu/~clay/classes/spring2009/555/papers/Embedding_Covert_Channels_into_TCPIP.pdf
 - [The A-Files](https://github.com/pawel-kaczmarek/The-A-Files)
     - 一个音频隐写工具集合
+- [Steganography Toolkit](https://github.com/DominicBreuker/stego-toolkit)
+    - 隐写工具整合包
 
 1.   当遇见单独加密的压缩包时，首先确认是不是[伪加密](https://github.com/C0nstellati0n/NoobCTF/blob/main/CTF/%E6%94%BB%E9%98%B2%E4%B8%96%E7%95%8C/1%E7%BA%A7/Misc/fakezip.md)。不同版本的zip加密位不一样,例如有些zip需要将第7个字节的09改成00。如果不是，考虑到没有其它提示的因素，可以尝试直接ARCHPR爆破，常见的爆破掩码为4位数字。
 2.   010Editor自带很多文件类型模板，把常用的例如png装上，鼠标悬浮在数据上就能得到那些数据代表的内容。修改单个字节可以鼠标选中要修改的字节，然后菜单栏->编辑->插入/覆盖->插入字节
