@@ -159,3 +159,62 @@ test();
 `node.h`包含很多注释，详细介绍了`Node`结构，对理解优化非常重要。结构中包含ID，类型信息，相邻node以及构成IR node的其他信息。此结构的成员名称不直观，因此需要了解在哪里查找结构成员
 
 `operator.h`包含`Operator`结构的定义
+
+## [Part 5](https://www.madstacks.dev/posts/V8-Exploitation-Series-Part-5)
+
+v8使用指针压缩（pointer compression）缩减内存使用。通过存储指针相对于基地址的偏移，原本64bit的指针现在只需要32bit
+
+js里的变量一般存储为指向对象的指针（c++对象，不是js对象）。不过整数的操作很多，而且通常都是简单的操作，所以可以直接在存指针的地方存储数值。比如这样：
+```
+            |----- 32 bits -----|----- 32 bits -----|
+Pointer:    |________________address______________w1|
+Smi:        |____int32_value____|0000000000000000000|
+(small integer)
+```
+指针都是字对齐的（word-aligned），所以可以将lsb标记为1来区分开指针和整数（称为TaggedPtr）。压缩后也可以这么做。问题是压缩后32bit的整数有可能lsb为1。解决办法是只用31bit表示整数，这样lsb就永远为0了（我的疑惑是万一这个整数有完整的32bit信息呢？这不就损失数据了吗？可能v8设计得不会有这种情况？）
+```
+                        |----- 32 bits -----|
+Pointer:                |_____address_____w1|
+Smi:                    |___int31_value____0|
+```
+`objects/objects.h`中列出了全部的object类型。js里几乎所有东西都是`Object`，v8里几乎所有东西都是`HeapObject`。除了`SMI`和`TaggedIndex`
+
+对象包含属性（方法也算）；每个属性都有三个标志，指示当前属性是否可写，可枚举（enumerable）和可配置（configurable）
+
+js里的属性更像字典，属性名为键。为了节省内存，相似的对象只会存储一个字典，值则在其他地方，键值之间用“map”和偏移值联系起来：
+```
+// Naive case structure in memory
+obj_1 = {"x": {"value": 5, ...}, "y": {"value": 6, ...}}
+obj_2 = {"x": {"value": 7, ...}, "y": {"value": 8, ...}}
+
+// Efficient case structure in memory
+obj_case1_dict = {"x": {"offset": 0, ...}, "y": {"offset": 1, ...}}
+obj1 = [5, 6, &obj_case1_dict] // not an accurate layout, but we'll fix this soon
+obj2 = [7, 8, &obj_case1_dict] // not an accurate layout, but we'll fix this soon
+// "..." here represents the enumerable, writable, and configurable flags
+```
+- 无论shapes, hidden classes, types, structure, 还是maps指的都是对象属性的布局。名称可以互换，因为不同js引擎使用不同的名称。v8使用术语“map”
+
+在更高效的结构中，多个对象之间使用同一个字典，键是属性名，值是内存中属性值存储位置相对于对象位置的偏移
+
+注意上文中`not an accurate layout`的部分。说对象中包含一个指向map的指针其实不准确，指针实际上指向的是transition tree的末尾（条目链中的map条目，map entry in a chain of entries）。某种意义上还是个字典，只不过属性之间由指针相连，而大部分字典中的属性存储在一块连续的内存中。对象添加属性时会创建新的条目（entry），包含指向树的末尾的指针。说map是字典，其实更像链表（linked lists）。至于transition tree为啥叫树，因为多个对象间可以共享一些属性，但添加不同属性时可能会产生分支。访问属性时，会向后遍历整个链条（chain is walked backwards），直到找到目标属性
+
+![transition tree](https://i.imgur.com/nw5XMkc.png)
+
+map指代的是上述结构，内部还包含对象的很多信息。见`objects/map.h`
+
+数组（arrays）是特殊类型的object，可以想象成数组类是object的子类。数组使用数字索引来映射值，意味着大量属性只是连续的数字而已。因此，v8除了用map存储诸如length的属性外，还有个后备存储（backing store）。直接指向数组里的元素
+
+数组和object的内存结构是一样的。假如一个object有数字键属性，对应的值也有后备存储
+
+v8根据“元素类型（elements kinds,数组根据元素的类型和间距存储元素的不同方式）”描述数组。`objects/elements-kind.h`列出了数组的全部类型。数组的类型与其在内存中的布局和可执行的优化有关
+
+v8通过将查询结果存储到指令处来减少查询属性的用时。当生成查找属性相关的bytecode指令时，编译器使binary中有空间存储属性值（When object property lookup bytecode instructions are generated, they have room in the binary for data to be stored。不太确定这里的they指的是编译器还是binary还是bytecode instruction？）。这些空间在运行时将填以map中定义的偏移和属性的实际值。inline caches的相关代码位于`src/ic`
+
+在d8中使用`--allow-natives-syntax`标志然后调用`%DebugPrint()`函数即可查看v8内存中变量的结构。不过这样看不到内存布局，此时可以用gdb
+
+将`tools/gdbinit`文件以`.gdbinit`文件名存储于家目录下；或者把里面的内容添加到已经存在的`.gdbinit`中；再或者调用`source <path to v8>/tools/gdbinit`即可进行调试。文件中的`define`处定义了新添加的命令
+
+注意pwndbg中的一些命令会与v8冲突，只能通过更换其他调试器解决。以下是一些调试相关的资源
+- [v8-debugging-tools](https://github.com/JeremyFetiveau/debugging-tools)
+- [Tips and Tricks for Node.js Core Development and Debugging](https://joyeecheung.github.io/blog/2018/12/31/tips-and-tricks-node-core)
