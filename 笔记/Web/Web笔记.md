@@ -369,6 +369,10 @@
         - https://joaxcar.com/blog/2024/05/16/sandbox-iframe-xss-challenge-solution ：和这题思路很像，多了一个可以用`document.baseURI`访问父iframe的知识点
         - https://portswigger.net/research/xss-without-html-client-side-template-injection-with-angularjs ：利用AngularJS获取xss
         - https://www.blackhat.com/docs/us-17/thursday/us-17-Lekies-Dont-Trust-The-DOM-Bypassing-XSS-Mitigations-Via-Script-Gadgets.pdf ：何为Script Gadgets
+- [Purell](https://jp0x1.github.io/blog/lactf)
+    - 一些xss绕过滤技巧
+        - 大写属性名
+        - `<svg/onload>`内部用html codes也能正常执行。似乎大部分tag都可以？因为`<img>`也有这个特性： https://mh4ck3r0n3.github.io/posts/2025/02/08/purell
 
 ## SSTI
 
@@ -4241,3 +4245,5 @@ fopen("$protocol://127.0.0.1:3000/$name", 'r', false, $context)
 - NSEC-walking。对某个已知的域名请求NSEC记录会返回下一个有效域名，于是攻击者可以重复这一步骤进而暴露DNS区域中的所有域名信息，包括内部系统或未公开的服务
 527. [SpELling it out](https://github.com/delta/PCTF25-Writeups/blob/main/web/SpELling-it-out)
 - java Spring expression language injection。代码使用了`?#{?0}`，即会把第一个参数当作SpEL表达式执行；加上程序没有任何过滤，故出现rce
+528. [Whack a Mole](https://sylvie.fyi/posts/lactf-2025)
+- python flask内部处理session的dump_payload会用`zlib.compress`压缩原本的session。如果flag出现在session里，可能可以利用这点进行测信道
