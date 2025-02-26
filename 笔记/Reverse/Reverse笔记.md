@@ -1382,3 +1382,5 @@ mov     r8, qword [r13]
 - 静态分析做法及haskell gadt介绍： https://pingotux.si/blog/oh-my-gadt
 205. [secure-snek](https://github.com/x3ctf/challenges-2025/tree/main/misc/secure-snek)
 - 逆向混淆后的python代码。这题的混淆方式类似虚拟机vm，可以参考 https://forum.tuts4you.com/topic/44240-python-obfuscated-keygenme 的方式添加trace代码查看调用的函数
+206. [elfisyou](https://gist.github.com/tillvit/441d9fec637f1d9c1f17f00fcca7dfe3)
+- （minimal）elf格式解析

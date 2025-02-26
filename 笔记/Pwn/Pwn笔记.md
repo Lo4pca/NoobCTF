@@ -117,6 +117,16 @@ kernel pwn题合集。用于纪念我连堆都没搞明白就敢看内核的勇�
     - 利用cpu_entry_area（其地址固定，不被kaslr影响）泄漏kernel base
     - 利用modprobe_path提权
   - 内核堆似乎没法像用户态pwn一样，泄漏一个堆地址就能计算出其他chunk的地址。这题的源码用了两次kzalloc分配chunk A和B。攻击时可以泄漏B的地址，但A的地址仍不确定（wp里是相对于B地址随便减了个偏移当作A的地址，成功率也挺高的）
+- [messenger](https://terawhiz.github.io/2025/2/oob-write-to-page-uaf-lactf-2025)
+  - 开启`SMAP, SMEP, KPTI`。题目patch了load_msg函数里的`copy_from_user`，使`msg_msg`结构的data buffer出现三个字节的溢出。可以通过`msgsnd`系统调用触发。注意这个系统调用属于IPC syscalls，所以需要开启`CONFIG_SYSVIPC`
+  - `msg_msg`结构分配时带`GFP_KERNEL_ACCOUNT`标志，free后会被放到`kmalloc-cg-*` slab caches中。`pipe_buffer`也有类似性质
+  - 喷射`cred`结构的技巧。`fork`系统调用可以分配`cred`结构，但同时也会分配其他杂七杂八的东西，可能影响exp的稳定性。`cred`结构和其他对象不一样，不是存储在`kmalloc` slab中，而是在`cred_jar` slab中。技巧是用`setuid`或其他`set*`的syscall清空`cred_jar` slab，等内核分配新的一页给`cred_jar` slab后再用fork申请cred，会更稳定
+  - 完整exp见 https://github.com/terawhiz/kpwn/blob/main/challenges/messenger/exploit.c （不知道为什么内核题就喜欢复述exp）
+    - spray大量pipe_buffer，并给每个pipe_buffer一个独特的标识符。标识符是为了后续分辨出哪个pipe是溢出的目标
+    - free几个pipe_buffer从而在连续的pipe_buffer中创造几个空隙，然后分配一个msg_msg。利用msg_msg里的溢出漏洞修改紧接着msg_msg后的pipe_buffer的`page`字段的lsb，从而使两个pipe_buffer指向同一个page
+    - 释放其中一个pipe，制造page level UAF
+    - 调用多次setuid从而清空`cred_jar` slab，期望kernel将出现uaf的page分配做新的`cred_jar` slab
+    - 调用fork分配cred结构，同时用null字节覆盖出现uaf的page。运气好的话有一个fork的cred的uid会为0
 
 ## Shellcode题合集
 
@@ -1916,3 +1926,21 @@ fn get_ptr<'a, 'b, T: ?Sized>(x: &'a mut T) -> &'b mut T {
 - 这题其实非常简单，输入`debug`后，程序会用call_indirect从函数表中调用指定的函数。但call_indirect根据索引决定调用的函数，程序也准备了一个flag函数。于是用格式化字符串漏洞覆盖call_indirect的参数，从而调用flag。不过wasm的逆向挺痛苦的，比赛时我用[wasmtime](https://docs.wasmtime.dev/examples-debugging-native-debugger.html)动态调试，却始终找不到代码段。还是用搜索输入字符串的方式加上猜才勉强做出来的
 232. [Heap of the Brave](https://github.com/delta/PCTF25-Writeups/blob/main/pwn/The%20Heap%20of%20the%20Brave)
 - libc 2.23 House of Einherjar。和之前见过的`baby-talk`用的技巧相同，不过可以溢出8个字节，比off by null的用法简单些。效果是把chunk中伪造的fake chunk链入bins中，操控得稍微再精细些还能做到任意地址分配
+233. [MMAPRO](https://jopraveen.github.io/pwn-mmapro)
+- libc 2.37，题目提供libc leak，并允许控制调用mmap函数时的全部参数
+- mmap在匿名映射时会将映射区域填充为null字节，而null字节在x64汇编里会被解析为`add BYTE PTR [rax],al`
+- 将mmap的参数设置为以下：
+```py
+#the_mmap64_plus_23_itself是__GI___mmap64+23，但是减去了末尾0xf37来保证页对齐
+addr   = the_mmap64_plus_23_itself
+length = 0x57000
+prot   = 0x7
+flags  = ret_gadget
+fd     = libc_base + libc.sym['gets']
+offset = the_mmap64_plus_23_itself
+```
+`__GI___mmap64+23`的上一条指令执行mmap syscall，于是从`the_mmap64_plus_23_itself`开始长度0x57000的字节全为null。假如mmap syscall执行成功的话，rax将指向有效指针，此时便能fuzz看看多少个`add BYTE PTR [rax],al`会触发segmentation fault。发现length为`0x57000`时rip等同于flags的值（原因在`ptsname_r+106`）。flags值必须由合法的flag组合而成，这里找了个可以由有效flag组成的`ret_gadget`。ret会return到fd的值，即调用gets。此时正好rdi就是mmap的addr，还是rwx段。于是往里面传shellcode后再返回到mmap的addr处即可执行shellcode
+234. [unsafe](https://sky-lance.github.io/2025/02/11/LACTF25-unsafe)
+- OCaml语言下的pwn。感觉不同语言写的binary内部的pwn思想都是一样的，只是不同语言有不同的“特性”
+- 这题给了libc和stack leak，还有一个相对于array的越界写。OCaml中array之前（array -32索引处）存储着array的地址，把这个值改了后就能通过往array里写值得到任意地址写
+- OCaml的int或char类型值存储时会左移1位，且lsb固定为0
