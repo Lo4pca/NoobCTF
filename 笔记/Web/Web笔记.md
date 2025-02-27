@@ -373,6 +373,31 @@
     - 一些xss绕过滤技巧
         - 大写属性名
         - `<svg/onload>`内部用html codes也能正常执行。似乎大部分tag都可以？因为`<img>`也有这个特性： https://mh4ck3r0n3.github.io/posts/2025/02/08/purell
+- [antisocial-media](https://ensy.zip/posts/2025-lactf-antisocial-media)
+    - js `.replace`函数replacement字符串注入。`.replace`函数包含一些special replacement pattern，导致replace不一定只替换参数指定的字符串。例子：
+        ```js
+        const html = `    
+        <script nonce="{{nonce}}">
+            const note = {{...notes}};
+        `;
+        //$`会被替换成被匹配项前面的内容，即 {{...notes}} 前面的所有内容
+        const payload = '$`</script>$`""; custom script with nonce! //';
+        console.log(html.replace(
+                "{{...notes}}",
+                `['${payload}']`))
+        ```
+        输出结果为
+        ```html
+        <script nonce="{{nonce}}">
+            const note = [' 
+        <script nonce="{{nonce}}">
+            const note = </script> 
+        <script nonce="{{nonce}}">
+            const note = ""; custom script with nonce! //'];
+        ```
+        成功得到了有nonce的自定义xss payload。可以用来绕规定script nonce的csp
+    - 题目本身算是个self xss。xss payload存储在session里，只能看到自己session里的note。利用同CTF下的其他xss挑战修改bot的cookie即可。wp修改bot的cookie的方法应该是之前也见过的Cookie Path Precedence，指定了特定path的cookie优先级要比没有指定的普遍cookie高
+    - 构造极小xss payload。允许多段payload拼在一起，但每段payload都不能超过15字符。关键是利用多行注释`/**/`和`window.name`来存储太长的webhook url
 
 ## SSTI
 
@@ -4247,3 +4272,5 @@ fopen("$protocol://127.0.0.1:3000/$name", 'r', false, $context)
 - java Spring expression language injection。代码使用了`?#{?0}`，即会把第一个参数当作SpEL表达式执行；加上程序没有任何过滤，故出现rce
 528. [Whack a Mole](https://sylvie.fyi/posts/lactf-2025)
 - python flask内部处理session的dump_payload会用`zlib.compress`压缩原本的session。如果flag出现在session里，可能可以利用这点进行测信道
+529. [Old Site](https://sylvie.fyi/posts/lactf-2025)
+- 当nextjs以开发模式启动时（`next dev`），网站将自动包含默认路由`/__nextjs_source-map`。这个路由接收一个`?filename`参数，作用是指定source map文件。如果source map文件包含一句`//# sourceMappingURL=filepath`且filepath指向的文件是合法json，则会展示该文件的内容

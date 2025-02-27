@@ -2367,7 +2367,7 @@ for i in "${!data[@]}"; do modbus host:port $((i+19))=${data[$i]}; done
 - MITM（中间人攻击）。攻击者作为两个互相交流的服务器之间的代理，将两者沟通时使用的RSA公钥换为自己的，即可窃听所有内容
 - 一个比较常见的做法是，两个服务器互相交换公钥，然后用公钥加密某个对称密码（如AES）的密钥，之后用AES的密钥进行沟通。实现MITM攻击时需要留意这点
 213. [Silly Registry](https://meashiri.github.io/ctf-writeups/posts/202312-tuctf/#silly-registry)
-- [Abusing exposed Docker Registry APIs](https://dreamlab.net/en/blog/post/abusing-exposed-docker-registry-apis/)。当开放docker的api且没加任何过滤时，攻击者可通过GET api获取docker内部的文件。有时候单纯GET报错可以加上`Authorization`
+- [Abusing exposed Docker Registry APIs](https://dreamlab.net/en/blog/post/abusing-exposed-docker-registry-apis)。当开放docker的api且没加任何过滤时，攻击者可通过GET api获取docker内部的文件。有时候单纯GET报错可以加上`Authorization`
 - 更多wp/参考链接
     - https://book.hacktricks.xyz/network-services-pentesting/5000-pentesting-docker-registry
     - https://github.com/4n86rakam1/writeup/tree/main/TUCTF_2023/Misc/Silly_Registry
@@ -2865,3 +2865,6 @@ $ cd a/b
 - 解码IBM punchcard
 385. [Mikumikubeam](https://hackmd.io/@r2dev2/S1P0RYHYke)
 - 破解imagemagick的`-stegano`选项
+386. [broken ships](https://hackmd.io/@lamchcl/S1mHGpDY1l)
+- 若某个网站的response的headers里有`docker-distribution-api-version`，则这个网站可能有[Docker Registry HTTP API](https://github.com/openshift/docker-distribution/blob/main/docs/spec/api.md)。可以做一些信息收集
+- 类似213 `Silly Registry`

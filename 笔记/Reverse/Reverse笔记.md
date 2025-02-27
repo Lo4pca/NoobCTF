@@ -922,6 +922,7 @@ print(ops_list)
 - scratch(`.sb3`)文件逆向。可以去 https://leopardjs.com/ 把sb3文件转为js后本地部署然后再逆向
   - 或者 https://scratch.mit.edu/ ，可以直接打开sb3文件并编辑
   - https://turbowarp.org/ 打开文件然后点击“转到源代码”也行
+- 补充另一道scratch逆向题：[Prologue](https://sylvie.fyi/posts/lactf-2025)。`.sb3`其实就是zip，解压后打开`project.json`文件就能修改一些配置，比如变量名，代码块是否可见等（`shadow: true`）。参考 https://en.scratch-wiki.info/wiki/Scratch_File_Format
 103. [CSCE221](https://github.com/les-amateurs/AmateursCTF-Public/tree/main/2023/rev/csce221)
 - 若一个程序没有开启PIE，那么其coredump包含的函数和数据也和程序在同一地址
   - dump文件（core file）需要额外用反编译器反编译。注意有时候低版本的ghidra load core file会报错
