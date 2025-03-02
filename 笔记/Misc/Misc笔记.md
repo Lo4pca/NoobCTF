@@ -2868,3 +2868,5 @@ $ cd a/b
 386. [broken ships](https://hackmd.io/@lamchcl/S1mHGpDY1l)
 - 若某个网站的response的headers里有`docker-distribution-api-version`，则这个网站可能有[Docker Registry HTTP API](https://github.com/openshift/docker-distribution/blob/main/docs/spec/api.md)。可以做一些信息收集
 - 类似213 `Silly Registry`
+387. [1000xREV](https://hackmd.io/@lamchcl/S1mHGpDY1l)
+- DNS zone transfer query(AXFR)可以获取在nameserver中存储的所有记录

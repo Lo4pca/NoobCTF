@@ -37,7 +37,7 @@ public:
     }
 };
 ```
-遇见某些特殊test case时会得到错误答案。仔细一想可能是贪方便，处理testcase时直接用了max，导致i=0和i=1时引用到同一个位置了。以下是错误的testcase案例：
+遇见某些特殊test case时会得到错误答案。仔细一想可能是贪方便，处理edgecase时直接用了max，导致i=0和i=1时引用到同一个位置了。以下是错误的testcase案例：
 ```
 "aa"
 "aaa"

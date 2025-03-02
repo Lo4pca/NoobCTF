@@ -665,6 +665,8 @@ sympy也放这了
         - 看矩阵的特征多项式，发现多项式分解后的因子有个2次的。于是将矩阵拓展到 $GF(p^2)$ 。然后求jordan_form，利用jordan_form将矩阵对角化。若G可以对角化，则 $G^a=PD^aP^{-1}$ 。此时计算 $G^a$ 的dlp的问题就转为计算 $D^a$ 的dlp的问题。而 $D^a$ 是对角矩阵，其对角线上的元素是D的特征值的a次幂。意味着将矩阵的dlp转换为了对角元素（ $GF(p^2)$ 中的元素）的dlp。拓展GF这步很重要，如果只在GF(p)下是找不到特征值（特征多项式的解）的，进而找不到正确的jordan_form
         - 或者不考虑什么转换，直接自己实现一个矩阵的bsgs即可
         - 再或者修改sagemath的discrete_log实现，使其支持矩阵
+- [quickprime](https://hackmd.io/@lamchcl/S1mHGpDY1l)
+    - 使用已知参数的lcg生成rsa的质数。比赛时队友搜到[类似的题](https://project-euphoria.dev/problems/2)了，方程（一元二次方程）也出来了。但那道题的lcg的模数是质数，这道的模数是2的512次幂，导致方程不好解。唯一的问题是一元二次方程的求根公式包含除以2的操作，除以2等同于乘上2的模逆元，显然这个逆元在m下是没有的。不过这不代表就没法除2了。如果分子是2的倍数直接除以2就行： $x=\frac{2k}{2}\mod m,2x=2k\mod m,x=k\mod \frac{m}{2}$ 。模运算中，当分子和分母有公因数d时，方程解的范围缩小为模 $\frac{m}{d}$ 。求出x后需要额外检查 $x+\frac{m}{2}$ ，因为这个数在模 $\frac{m}{2}$ 下等价，但在原方程的模m中不一样
 - 记录个工具： https://github.com/Aeren1564/CTF ，里面的CTF_Library看起来很香
 
 ## Lattice(格)
