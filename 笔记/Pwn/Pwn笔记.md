@@ -1944,3 +1944,10 @@ offset = the_mmap64_plus_23_itself
 - OCaml语言下的pwn。感觉不同语言写的binary内部的pwn思想都是一样的，只是不同语言有不同的“特性”
 - 这题给了libc和stack leak，还有一个相对于array的越界写。OCaml中array之前（array -32索引处）存储着array的地址，把这个值改了后就能通过往array里写值得到任意地址写
 - OCaml的int或char类型值存储时会左移1位，且lsb固定为0
+235. [lamp](../../CTF/LA%20CTF/lamp-2025.md)
+- libc 2.39无文件流（无fsop）+可无限malloc大小在`0-0xff`之间的chunk但每个chunk只有一次直接写入机会+无限overflow
+- 使用了smallbin相关攻击使tcache里出现栈上的指针（结合partial overwrite+`__libc_argv`），并覆盖tcache_entry(tcache_perthread_struct)从而得到任意地址分配+复制tcache里存在的地址
+- 这题也给盲打栈提供了一个思路
+236. [minceraft](https://github.com/uclaacm/lactf-archive/blob/main/2025/pwn/minceraft)
+- 官方wp的解法是栈迁移，再凑一点程序里的gadget
+- 非预期解更有意思： https://sashactf.gitbook.io/pwn-notes/pwn/rop-2.34+/ret2gets 。gets在某种意义上可以充当`pop rdi`，进而在泄漏地址，调用system时都有帮助
