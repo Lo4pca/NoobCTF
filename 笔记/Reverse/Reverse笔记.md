@@ -1385,3 +1385,6 @@ mov     r8, qword [r13]
 - 逆向混淆后的python代码。这题的混淆方式类似虚拟机vm，可以参考 https://forum.tuts4you.com/topic/44240-python-obfuscated-keygenme 的方式添加trace代码查看调用的函数
 206. [elfisyou](https://gist.github.com/tillvit/441d9fec637f1d9c1f17f00fcca7dfe3)
 - （minimal）elf格式解析
+207. [mcflagchecker](https://github.com/carl-vbn/cucyber-ctf-writeups/tree/main/lactf-2025/rev/mcflagchecker)
+- 逆向minecraft [Data pack](https://minecraft.wiki/w/Data_pack)中的`.mcfunction`“代码”逻辑。不完全是代码是因为里面的命令缺少大部分语言里的功能，比如if和变量之类的。很多人用工具将普通代码（cbscript）转换为`.mcfunction`（见 https://github.com/uclaacm/lactf-archive/tree/main/2025/rev/mcflagchecker ），因此自己根据规律写一个反编译器是可能的
+- 其他wp： https://github.com/EllE961/LA-CTF-McFlagChecker

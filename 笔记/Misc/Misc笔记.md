@@ -334,7 +334,13 @@ print(base64.b64encode(temp.encode()))
   - eval+无builtins+过滤`e`
   - 技巧是用`:=`从而在eval里实现赋值；`().__class__.__mro__[1]`可以拿到object;`object.__dict__["getattr"]`。有了getattr就能从object身上拿到builtins了
   - 其他解法： **Farquaad**
-- pyjail cheatsheet： https://shirajuki.js.org/blog/pyjail-cheatsheet
+- [sneckos-lair](https://github.com/uclaacm/lactf-archive/blob/main/2025/misc/sneckos-lair)
+    - exec pyjail，禁`@:{}[]|&,ifb`且`__`数量不超过6，括号`(`,`)`不超过1
+    - payload原理大概是将函数的字节码(co_code)替换成getshell内容，然而开头的`type os=os+path+system`我完全没法运行，也搜不到类似的语法。看dockerfile是python 3.14，可能是新加的？
+    - 缩减官方payload后的结果： **sneckos-lair** 。可以用`sh`代替`/bin/sh`，`pwn.red/jail`并不会清理这个默认路径值。`./*`也是一个不错的技巧
+- pyjail cheatsheet
+    - https://shirajuki.js.org/blog/pyjail-cheatsheet
+    - https://book.hacktricks.wiki/en/generic-methodologies-and-resources/python/bypass-python-sandboxes/index.html
 
 ## Tools
 
@@ -2870,3 +2876,9 @@ $ cd a/b
 - 类似213 `Silly Registry`
 387. [1000xREV](https://hackmd.io/@lamchcl/S1mHGpDY1l)
 - DNS zone transfer query(AXFR)可以获取在nameserver中存储的所有记录
+388. [i-am-github](https://github.com/uclaacm/lactf-archive/blob/main/2025/misc/i-am-github)
+- 在github web interface下进行的squash merge提交由创建PR的用户发起，但签名的却是github的web signing key（when doing a squash merge in the github web interface, the commit that is made to squash is made under the user who created the pull request, but signed by github's web signing key，啥意思啊？）
+- 例子见 https://github.com/lactf/lactf-website/pull/97 。点击`burturt merged commit 8d0d602 into main...`中的hash [8d0d602](https://github.com/lactf/lactf-website/commit/8d0d60260c64d282ff4ddfa4960575f05e43c59b)，能发现作者是`Aplet123`，而不是merge该commit的`burturt`。我比对过其他pull request合并后的信息，正常merge后作者应该是merge PR的人。可能这就是这道题的意思？
+389. [insecure-submission](https://github.com/uclaacm/lactf-archive/tree/main/2025/misc/insecure-submission)
+- [KQL](https://learn.microsoft.com/en-us/kusto/query)入门
+- 日志分析工具： https://dataexplorer.azure.com/freecluster

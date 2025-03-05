@@ -667,6 +667,7 @@ sympy也放这了
         - 再或者修改sagemath的discrete_log实现，使其支持矩阵
 - [quickprime](https://hackmd.io/@lamchcl/S1mHGpDY1l)
     - 使用已知参数的lcg生成rsa的质数。比赛时队友搜到[类似的题](https://project-euphoria.dev/problems/2)了，方程（一元二次方程）也出来了。但那道题的lcg的模数是质数，这道的模数是2的512次幂，导致方程不好解。唯一的问题是一元二次方程的求根公式包含除以2的操作，除以2等同于乘上2的模逆元，显然这个逆元在m下是没有的。不过这不代表就没法除2了。如果分子是2的倍数直接除以2就行： $x=\frac{2k}{2}\mod m,2x=2k\mod m,x=k\mod \frac{m}{2}$ 。模运算中，当分子和分母有公因数d时，方程解的范围缩小为模 $\frac{m}{d}$ 。求出x后需要额外检查 $x+\frac{m}{2}$ ，因为这个数在模 $\frac{m}{2}$ 下等价，但在原方程的模m中不一样
+    - 另一种解法： https://github.com/uclaacm/lactf-archive/blob/main/2025/crypto/quickprime
 - 记录个工具： https://github.com/Aeren1564/CTF ，里面的CTF_Library看起来很香
 
 ## Lattice(格)
@@ -893,6 +894,11 @@ AES是很能出题的。DES则是放在这凑数的
     - 官方wp： https://github.com/UofTCTF/uoftctf-2025-chals-public/blob/master/timed-aes 。原理一样不过脚本要复杂些
 - [Alice n Bob in Wonderland](https://github.com/rerrorctf/writeups/blob/main/2025_02_07_BITSCTF25/crypto/alice_n_bob_in_wonderland)
     - AES CBC,在提供解密oracle和加密oracle（或是获取到至少三块密文）且不提供iv的情况下恢复iv
+- [goodhash](https://github.com/aparker314159/ctf-writeups/blob/main/LACTF2025/goodhash.md)
+    - AES GCM nonce reuse密钥恢复攻击。可以控制`leftextend + secret + rightextend`中的`leftextend`和`rightextend`，secret未知。加密这段内容后获取mac值。重复三次后要求输入secret的值
+    - AES GCM的mac值计算公式其实是一个 $GF(2^{128})$ 下的多项式。具体怎么算的见wp，总之nonce在这个过程中起到“mask”隐藏掉原多项式的功能，所有mac多项式在最后都会加上nonce末尾补上0的加密结果。如果nonce重复，这个值就固定了，两个多项式相减即可消掉它。消掉后事情就简单了，尽量构造线性关系解方程就完事
+    - 补充一点可能困惑的地方。 $GF(2^{128})$ 下加和减都是一个操作，即异或。所以在wp的`Formulating the MAC`部分可以混着说，说是`+`，理解成`-`会更容易些
+    - 官方wp没有使用sagemath，直接自己实现 $GF(2^{128})$ 下的运算： https://github.com/uclaacm/lactf-archive/blob/main/2025/crypto/good-hash
 
 ## Z3使用
 

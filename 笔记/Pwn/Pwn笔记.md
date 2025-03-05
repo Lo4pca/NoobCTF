@@ -1951,4 +1951,4 @@ offset = the_mmap64_plus_23_itself
 - 这题也给盲打栈提供了一个思路
 236. [minceraft](https://github.com/uclaacm/lactf-archive/blob/main/2025/pwn/minceraft)
 - 官方wp的解法是栈迁移，再凑一点程序里的gadget
-- 非预期解更有意思： https://sashactf.gitbook.io/pwn-notes/pwn/rop-2.34+/ret2gets 。gets在某种意义上可以充当`pop rdi`，进而在泄漏地址，调用system时都有帮助
+- 非预期解更有意思： https://sashactf.gitbook.io/pwn-notes/pwn/rop-2.34+/ret2gets 。gets在某种意义上可以充当`pop rdi`，进而在泄漏地址，调用system时都有帮助。见 https://gabri3l.net/lactf-2024-writeups
