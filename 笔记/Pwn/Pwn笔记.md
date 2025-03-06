@@ -121,6 +121,7 @@ kernel pwn题合集。用于纪念我连堆都没搞明白就敢看内核的勇�
   - 开启`SMAP, SMEP, KPTI`。题目patch了load_msg函数里的`copy_from_user`，使`msg_msg`结构的data buffer出现三个字节的溢出。可以通过`msgsnd`系统调用触发。注意这个系统调用属于IPC syscalls，所以需要开启`CONFIG_SYSVIPC`
   - `msg_msg`结构分配时带`GFP_KERNEL_ACCOUNT`标志，free后会被放到`kmalloc-cg-*` slab caches中。`pipe_buffer`也有类似性质
   - 喷射`cred`结构的技巧。`fork`系统调用可以分配`cred`结构，但同时也会分配其他杂七杂八的东西，可能影响exp的稳定性。`cred`结构和其他对象不一样，不是存储在`kmalloc` slab中，而是在`cred_jar` slab中。技巧是用`setuid`或其他`set*`的syscall清空`cred_jar` slab，等内核分配新的一页给`cred_jar` slab后再用fork申请cred，会更稳定
+  - pipe_buffer任意地址读写技巧： https://www.interruptlabs.co.uk/articles/pipe-buffer
   - 完整exp见 https://github.com/terawhiz/kpwn/blob/main/challenges/messenger/exploit.c （不知道为什么内核题就喜欢复述exp）
     - spray大量pipe_buffer，并给每个pipe_buffer一个独特的标识符。标识符是为了后续分辨出哪个pipe是溢出的目标
     - free几个pipe_buffer从而在连续的pipe_buffer中创造几个空隙，然后分配一个msg_msg。利用msg_msg里的溢出漏洞修改紧接着msg_msg后的pipe_buffer的`page`字段的lsb，从而使两个pipe_buffer指向同一个page

@@ -398,6 +398,18 @@
         成功得到了有nonce的自定义xss payload。可以用来绕规定script nonce的csp
     - 题目本身算是个self xss。xss payload存储在session里，只能看到自己session里的note。利用同CTF下的其他xss挑战修改bot的cookie即可。wp修改bot的cookie的方法应该是之前也见过的Cookie Path Precedence，指定了特定path的cookie优先级要比没有指定的普遍cookie高
     - 构造极小xss payload。允许多段payload拼在一起，但每段payload都不能超过15字符。关键是利用多行注释`/**/`和`window.name`来存储太长的webhook url
+- [Gigachessbased](https://siunam321.github.io/ctf/LA-CTF-2025/web/gigachessbased)
+    - 网站使用了[Svelte](https://svelte.dev)框架和[svelte-spa-router](https://www.npmjs.com/package/svelte-spa-router)模块，故路由是[hash-based routing](https://www.npmjs.com/package/svelte-spa-router#hash-based-routing)。hash-based routing的特点是可以通过改变url `#`号后的内容触发某些功能。比如`w.location.replace('<gigachessbased>#/search?q=something')`能在不重加载整个页面的前提下触发搜索`something`的功能
+    - 仅能操作url的xs leak。题目在搜索成功时会实施重定向，而失败时则不会。则成功时需要两次requests，失败时只需要一次。故leak方式是[connection pool](https://xsleaks.dev/docs/attacks/timing-attacks/connection-pool)
+    - 感觉记录一点失败的思路也不错
+        - [Scroll to Text Fragment (STTF)](https://developer.mozilla.org/en-US/docs/Web/URI/Reference/Fragment/Text_fragments)：可以用STTF检测浏览器何时进入viewport（浏览器窗口中当前可见的网页部分）。要求攻击目标可以被嵌入iframe中，且内部存在html注入。对于这道题，没有一个条件满足
+        - [Navigations](https://xsleaks.dev/docs/attacks/navigations):通过读`history.length`的值区分成功与失败的查询。首先把bot引向攻击者的网站，使其访问目标网站后执行查询。理论上查询成功的重定向会使`history.length`的值会比查询失败时多出1。最后将bot导会攻击者网站来访问`history.length`的值（只有同源才能读取这个值）。结果实测发现fetch向`/search`发的post请求没有被记入到`history.length`中
+        - [Max redirects](https://xsleaks.dev/docs/attacks/navigations/#max-redirects):浏览器限制3XX重定向链的最大次数为20。所以可以在攻击者的网站上重定向20-n次，n为目标网站搜索失败时重定向的次数，n+1为成功时的次数。于是搜索成功会实施21次重定向，触发network error。重点在于“重定向链”。实测里访问目标网站得到的是http code 200而不是3XX，链子断了就没用了。而且题目作者还检查了referer
+        - [CSS :visited selector](https://xsleaks.dev/docs/attacks/css-tricks/):根据 https://jorianwoltjer.com/blog/p/hacking/xs-leaking-flags-with-css-a-ctfd-0day 和 https://varun.ch/posts/history ，可以用css的`:visited` selector来泄漏访问过的网站url。失败的原因和之前一样，fetch发起的post请求不在history里
+        - [Cross-window Timing Attacks](https://xsleaks.dev/docs/attacks/timing-attacks/network-timing/#cross-window-timing-attacks):攻击者可以测量某个页面打开的时间。问题是这题要测量的是重定向的时间而不是页面打开的时间
+    - 官方wp和payload
+        - https://hackmd.io/@r2dev2/S1P0RYHYke
+        - https://github.com/uclaacm/lactf-archive/blob/main/2025/web/gigachessbased
 
 ## SSTI
 
@@ -4274,3 +4286,8 @@ fopen("$protocol://127.0.0.1:3000/$name", 'r', false, $context)
 - python flask内部处理session的dump_payload会用`zlib.compress`压缩原本的session。如果flag出现在session里，可能可以利用这点进行测信道
 529. [Old Site](https://sylvie.fyi/posts/lactf-2025)
 - 当nextjs以开发模式启动时（`next dev`），网站将自动包含默认路由`/__nextjs_source-map`。这个路由接收一个`?filename`参数，作用是指定source map文件。如果source map文件包含一句`//# sourceMappingURL=filepath`且filepath指向的文件是合法json，则会展示该文件的内容
+530. [whats-my-number](https://github.com/uclaacm/lactf-archive/blob/main/2025/web/whats-my-number)
+- 破解js math.random。相关资源：
+    - https://github.com/Arc-blroth/ece117-unpredictables
+    - https://www.youtube.com/watch?v=_Iv6fBrcbAM
+    - https://github.com/XMPPwocky/nodebeefcl

@@ -76,7 +76,9 @@ Cross-Cache attack个人其实没找到明确定义，只在标题的文章中�
 ### [pipe-primitive](https://github.com/veritas501/pipe-primitive)
 利用pipe_buffer结构体实现任意文件写。参考 https://kaligulaarmblessed.github.io/post/palindromatic-biosctf2024/ 的DirtyPipe章节。说是pipe_buffer结构体里有个PIPE_BUF_FLAG_CAN_MERGE标志。当某些文件内容被写入pipe_buffer且长度不足以填满一个page时，其内容会被添加到已经存在的page（ring中上一个pipe_buffer的page。至于ring是什么，这里截一段原文：`The actual pipe_buffer object that is allocated is actually a ring of pipe_buffer structs. Initially the object is empty, when its written to for the first time, a pipe_buffer is added to the ring.`）而不是新分配一个，前提是这些pipe_buffer设置了PIPE_BUF_FLAG_CAN_MERGE标志。从pipe读取数据不会取消设置标志
 
-内核里还有个splice函数，可以从两个文件描述符中转移数据。所以我们可以splice一个文件，如`/etc/passwd`，这时会在ring里新增一个pipe_buffer。然后用诸如UAF的方法尝试泄漏这个新增的pipe_buffer，紧接着构造一个假的pipe_buffer，同时设置PIPE_BUF_FLAG_CAN_MERGE标志。然后往这个pipe_buffer里写东西，就会被添加到ring中上一个pipe_buffer的page，即刚才打开的/etc/passwd。这段参考了 https://blog.bi0s.in/2024/02/26/Pwn/bi0sCTF24-palindromatic/
+内核里还有个splice函数，可以从两个文件描述符中转移数据。所以我们可以splice一个文件，如`/etc/passwd`，这时会在ring里新增一个pipe_buffer。然后用诸如UAF的方法尝试泄漏这个新增的pipe_buffer，紧接着构造一个假的pipe_buffer，同时设置PIPE_BUF_FLAG_CAN_MERGE标志。然后往这个pipe_buffer里写东西，就会被添加到ring中上一个pipe_buffer的page，即刚才打开的/etc/passwd。这段参考了 https://blog.bi0s.in/2024/02/26/Pwn/bi0sCTF24-palindromatic
+
+好像读写都可以： https://www.interruptlabs.co.uk/articles/pipe-buffer
 
 ### [userfaultfd + setxattr universal heap spray](https://duasynt.com/blog/linux-kernel-heap-spray)
 
