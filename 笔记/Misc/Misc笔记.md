@@ -392,6 +392,9 @@ print(base64.b64encode(temp.encode()))
     - 从I2C信号中提取数据
 - [Old Skool](https://mindcrafters.xyz/writeups/hardware-bitskrieg)
     - 解码`.iq`数据。之前的脚本好像用不了，在我搞清楚之前只能不断积累脚本了……
+- [EHAX Radio](https://github.com/E-HAX/EHAX-CTF-2025/tree/master/forensics/ehax_radio)
+    - 继续`.iq`转wav。看来采样率和频率（sample rate and frequency）是必备的
+    - [iqToSharp](https://github.com/Marcin648/iqToSharp):RTL-SDR iq to SDRSharp WAV
 
 ## Linux相关
 
@@ -427,6 +430,10 @@ print(base64.b64encode(temp.encode()))
 - [Racing 2](https://github.com/avid-eclipse/CTF-Writeups/blob/main/UofTCTF%202025%20Tau%20Writeup.md)
     - 一个很明显的条件竞争，然而我只做过读文件的，一时竟不知道写文件的该怎么搞……我是AI的概率还真不是零。特此记录，明明有个`/etc/passwd`可以写
     - `ld.so.preload`，ctrl+z解法（题目的设置有问题，允许攻击者用ctrl+z将竞争窗口无限延长）和ssh session re-use（只是将ctrl+z换成了两个ssh连接，见 https://www.cyberciti.biz/faq/linux-unix-reuse-openssh-connection ）：**Racing 2**
+- [Docker Not Found](https://github.com/E-HAX/EHAX-CTF-2025/tree/master/misc/Docker%20Not%20Allowed)
+    - `lxd`组下成员的privilege escalation。这个组允许成员运行容器，exp见 https://github.com/saghul/lxd-alpine-builder
+    - 不过题目给的是Vmware machine文件，用特殊手段以root身份挂载即可： https://github.com/thmai11/writeups/blob/main/2025/ehax/docker_not_allowed
+
 ## Digital Forensics and Incident Response(DFIR)
 
 开个新的分类，用于存储这个困扰我很久的题目类型:(。顺便把disk，mem类型的forensic题也放这
@@ -2882,3 +2889,5 @@ $ cd a/b
 389. [insecure-submission](https://github.com/uclaacm/lactf-archive/tree/main/2025/misc/insecure-submission)
 - [KQL](https://learn.microsoft.com/en-us/kusto/query)入门
 - 日志分析工具： https://dataexplorer.azure.com/freecluster
+390. [Mined Solving This](https://nacatech.es/writeups/bronco_ctf_25/mined_solving_this)
+- [Amulet Map Editor](https://www.amuletmc.com)使用
