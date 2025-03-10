@@ -1390,3 +1390,8 @@ mov     r8, qword [r13]
 - 其他wp： https://github.com/EllE961/LA-CTF-McFlagChecker
 208. [Pika-Pika](https://github.com/E-HAX/EHAX-CTF-2025/tree/master/rev/PIKA-PIKA)
 - Pokemon GBA games逆向工具：[Hex Maniac Advance](https://github.com/haven1433/HexManiacAdvance)
+209. [World's Hardester Flag](https://blog.mard.kr/ctf/2025/02/26/BroncoCTF-Writeup.html)
+- 使用[Dex Explorer](https://www.reddit.com/r/ROBLOXExploiting/comments/14y4xqr/noobie_guidedocument_to_using_dex_explorer)查看roblox游戏内的object与脚本
+210. [buckys-impossible-obby](https://github.com/ZTzTopia/ctf/tree/main/writeups/2025/broncoctf/forensics/buckys-impossible-obby)
+- roblox studio使用
+- 其他wp（这题好像允许攻击者执行任意lua代码？）： https://github.com/ZTzTopia/ctf/tree/main/writeups/2025/broncoctf/misc/worlds-hardester-flag

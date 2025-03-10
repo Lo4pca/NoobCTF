@@ -763,7 +763,7 @@ $$
     - 求解四元数（quaternion algebra）的线性方程。我不懂四元数，但搜了一下发现四元数乘法有个明确的公式（Hamilton product），于是整个四元数线性方程其实是四个线性方程组成的方程组。拿正常思路解即可。LLL不知道为啥出不来，不过babai_cvp侥幸拿下
     - 结果还是看不懂官方wp……四元数可以写成复数域下的矩阵，而复数元素又可以写成实数域下的矩阵。用单射同态便能构造出整数域下的矩阵，从而正常地使用LLL（大部分数学软件只支持整数域的矩阵LLL）。看了一眼wp的脚本，似乎是把一个大的四元数矩阵“切”成了四块，一个一个解（又学一种构建思路，这个构建方法不知道为什么就能直接LLL出来结果，不需要CVP）
     - Mathematica 和 [fpllh](https://www-fourier.univ-grenoble-alpes.fr/~pev/fplllh/)支持高斯整数下的LLL
-    - 其他解法： https://gist.github.com/C0nstellati0n/cf6ae2c5e0e9fe1ecb532d257a56e101#knutsacque 。果然有人跟我类似思路，不过我没想到竟然有现成脚本： https://github.com/TheBlupper/linineq
+    - 其他解法： **knutsacque** 。果然有人跟我类似思路，不过我没想到竟然有现成脚本： https://github.com/TheBlupper/linineq
 - [zk-Openings](https://github.com/srdnlen/srdnlenctf-2025_public/blob/main/crypto_zk-openings)
     - Zero-knowledge+Lattice。太难了，难到全场零解。只知道这和[Plonkup](https://eprint.iacr.org/2022/086.pdf)有关
 

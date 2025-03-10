@@ -333,7 +333,7 @@
 - [SAAS](https://game0v3r.vercel.app/blog/wwctf-saas-challenge-writeup)
     - mutation xss。wp提到了这题的黑名单过滤忽略了一些MathML元素（svg和math），这些元素与其他标准html元素的处理方式不同（属于不同的命名空间）。佬的mutation xss实验室： https://kabilan1290.github.io/sniper
     - 此题的payload：`<math><mtext><table><mglyph><style><img/src=x onerror="alert()">`。正常情况下后面的img payload会被看作是style标签里的内容。但是放到dom tree里渲染后，由于`<mglyph>`和`<style>`不允许作为table标签的子标签，两者连带后面img都被移到了table的前面。接着过滤器过滤掉table标签，剩下的img标签突然就“逃逸”出来（似乎和命名空间解析的不同有关，见 https://research.securitum.com/mutation-xss-via-mathml-mutation-dompurify-2-0-17-bypass ），独自作为payload
-    - 最后是个利用url+eval缩短payload的技巧，之前见过。补充其他人的payload： https://gist.github.com/C0nstellati0n/248ed49dea0accfef1527788494e2fa5#saas
+    - 最后是个利用url+eval缩短payload的技巧，之前见过。补充其他人的payload： **SAAS**
     - js的`new URL`特性。经过url编码的url也可以正常解析，甚至于往url里塞几个奇怪字符也不影响
     - mxss cheatsheet： https://sonarsource.github.io/mxss-cheatsheet/examples
     - 官方wp： https://abdulhaq.me/blog/saas-mxss-challenge-writeup-from-wwctf-2024
