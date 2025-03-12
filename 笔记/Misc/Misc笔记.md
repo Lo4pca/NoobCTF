@@ -564,6 +564,9 @@ print(base64.b64encode(temp.encode()))
     - 使用adb获取存储在`mmssms.db`里的sms短信
     - 用[gesture-crack](https://github.com/Webblitchy/AndroidGestureCrack)可以从`gesture.key`文件中破解pattern lock code
     - 其他wp（也许算个wp……）： https://gist.github.com/C0nstellati0n/78f5887b5bee235583a026840354ae54#patterned-secrets
+    - android Mobile Forensic相关资源
+        - https://hackers-arise.net/2023/11/30/digital-forensics-part-10-mobile-forensics-android
+        - [Android Logs Events And Protobuf Parser](https://github.com/abrignoni/ALEAPP)
 - [Batman: The dark knight](https://github.com/thmai11/writeups/blob/main/2024/0xl4ugh/batman_the_dark_knight)
     - 这题的目标是恢复一个被删除的文件，提示给的是Alternate Data Stream manipulation（具体联系在下方的官方wp里有）
     - autopsy+FTK Imager分析DOS/MBR boot sector。foremost有时也能派上用场

@@ -426,3 +426,68 @@ console.log(victim.length);
 另一个提高exp的稳定性的原则是“恢复被覆盖的旧值”，防止各种随机的崩溃
 
 最后，很多exp都会标记特殊的值从而标记并确保堆布局正确。可以考虑在exp里添加某些浮点数并在触发漏洞后确认这些值在期望的正确位置
+
+## [Part 7](https://www.madstacks.dev/posts/V8-Exploitation-Series-Part-7)
+
+最后一篇！
+
+除了读codebase，实践也是很好的学习方式，比如学习N-Days漏洞。旧bug可以帮助发现新bug，且一个bug被发现后，有很大的概率类似的bug同样存在
+
+### Bug Trackers
+
+- v8的bug list： https://issues.chromium.org/issues?q=componentid:1456824%2B%20is:open
+- Chromium tracking list： https://bugs.chromium.org/p/chromium/issues/list?q=Type%3D%22Bug-Security%22%20component%3DBlink%3EJavaScript%3ECompiler&can=1
+    - 使用`Type="Bug-Security" component=Blink>JavaScript>Compiler`过滤器过滤有用的信息（不过我没搜出来任何东西
+    - 重要的bug在被关闭后的14周后才能看见
+    - Bug report包含poc，code base解析，和bug是如何被触发和修复的。以及最重要的，新的exploitation技巧
+
+### Chrome Releases
+
+假如没时间看Bug Trackers的话……
+
+- chrome release： https://chromereleases.googleblog.com
+    - 包含了过去六周被修复的重大漏洞
+    - 附带简短的漏洞列表和介绍
+    - 仅在漏洞被修复后才会发布，时间间隔较长
+
+### Git Changelog
+
+查看最近的patch：
+
+- V8 log： https://chromium.googlesource.com/v8/v8.git/+log
+- github v8 mirror： https://github.com/v8/v8/commits/master
+
+在命令行运行`git log origin/master`可以查看master分支的日志。虽然大部分改动都与安全无关，但是commit message里通常带有bug id。拿着这个id就能在bug tracker和changelog里查看这个bug是否是安全问题
+
+chrome有自己的更新周期。神奇的地方在于，漏洞在更新之前就被披露和“修补”，但此时用户是无法拿到patch的，因为还没到更新时间。见 https://blog.exodusintel.com/2019/04/03/a-window-of-opportunity
+
+### Posts
+
+v8团队有[推特账号](https://twitter.com/v8js)和[博客](https://v8.dev/blog)，两者均会发布有关v8改动的内容。博客通常以开发者的视角编写，因此添加了很多对于代码的解析
+
+- Google Project Zero Blog: https://googleprojectzero.blogspot.com
+    - 虽然不专注于v8，但经常研究浏览器漏洞。以下是一些关于chrome和v8的文章：
+        - https://googleprojectzero.blogspot.com/2019/05/trashing-flow-of-data.html
+        - https://googleprojectzero.blogspot.com/2019/04/virtually-unlimited-memory-escaping.html
+        - https://googleprojectzero.blogspot.com/2020/02/escaping-chrome-sandbox-with-ridl.html
+
+### Fuzzing
+
+对于大型软件，fuzzing可以帮助测试大量的案例，便于查看哪个案例能使系统崩溃
+
+- ClusterFuzz: https://blog.chromium.org/2012/04/fuzzing-for-security.html
+    - chrome主要的fuzzer，包含不同的组件来测试某个特定的功能，比如[javascript](https://github.com/v8/v8/tree/master/tools/clusterfuzz/js_fuzzer)
+    - 手动代码审查发现的漏洞也能输入到ClusterFuzz中，用于查看受影响的chrome版本范围并帮助修复
+    - 已经集成到v8中，比如address sanitization（google的[sanitizers](https://github.com/google/sanitizers)中的一个）
+- FuzzIL： https://saelo.github.io/papers/thesis.pdf
+    - 不是专门fuzz v8的fuzzer，但是也发现了一些漏洞，比如 https://sensepost.com/blog/2020/the-hunt-for-chromium-issue-1072171
+- DIE： https://github.com/sslab-gatech/DIE
+- 使用Dharma/Domato fuzz liftoff： https://fuzzinglabs.com/fuzzing-javascript-wasm-dharma-chrome-v8
+- Getting started with fuzzing in Chromium： https://chromium.googlesource.com/chromium/src/+/master/testing/libfuzzer/getting_started.md
+- How to make a libFuzzer fuzzer in V8： https://chromium.googlesource.com/v8/v8/+/refs/heads/master/test/fuzzer/README.md
+
+### Checks
+
+v8代码中包含大量CHECK和DCHECK宏定义。CHECK检查的条件都是必须满足的，若不满足会使浏览器崩溃，否则会有安全问题。DCHECK仅在debug build中存在，用于检查应该永远为真的前置条件和后置条件
+
+这些语句帮助fuzzers定位错误
