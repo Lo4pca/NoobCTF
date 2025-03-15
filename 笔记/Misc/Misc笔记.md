@@ -743,6 +743,8 @@ extradata:0         .. file: Zip archive data, at least v2.0 to extract, compres
     - TCP/IP header隐写手段（序列号、ID 或时间戳等）。甚至有篇论文： https://people.cs.georgetown.edu/~clay/classes/spring2009/555/papers/Embedding_Covert_Channels_into_TCPIP.pdf
 - [The A-Files](https://github.com/pawel-kaczmarek/The-A-Files)
     - 一个音频隐写工具集合
+- [stegsnow](https://www.kali.org/tools/stegsnow)
+    - [SNOWy Evening](https://abuctf.github.io/posts/KashiCTF)
 - [Steganography Toolkit](https://github.com/DominicBreuker/stego-toolkit)
     - 隐写工具整合包
 
@@ -2894,3 +2896,8 @@ $ cd a/b
 - 日志分析工具： https://dataexplorer.azure.com/freecluster
 390. [Mined Solving This](https://nacatech.es/writeups/bronco_ctf_25/mined_solving_this)
 - [Amulet Map Editor](https://www.amuletmc.com)使用
+391. [Do Not Redeem #4](https://abuctf.github.io/posts/KashiCTF)
+- minecraft相关工具合集
+    - [BlueStacks](https://www.bluestacks.com):安卓模拟器
+    - [TLauncher](https://tlauncher.org):启动器
+    - [Chunker](https://www.chunker.app)/[je2be](https://je2be.app):基岩版和java版之间的转换器

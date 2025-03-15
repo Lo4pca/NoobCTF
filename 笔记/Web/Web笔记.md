@@ -98,7 +98,7 @@
 
 ## XSS
 
-觉得是时候给xss建个分类了。最近见到的xss题目越来越多了(个人觉得仅利用CSS的也算广义上的“xss”)
+觉得是时候给xss建个分类了。最近见到的xss题目越来越多了(个人觉得XS leak和仅利用CSS的也算广义上的“xss”)
 - [quickstyle](https://sheeptester.github.io/longer-tweets/lactf/#webquickstyle)
     - 利用form实现dom clobbering覆盖原本document里的函数（如`document.querySelectorAll`）。覆盖函数后程序内部无法调用该函数
     - CSP较为严格的情况下可以考虑利用CSS泄漏页面指定信息。这种技巧一般只需要一个字符一个字符地泄漏，即创建多个css泄露固定的一个信息；但这题要求一个css一次泄露完整的信息。如果覆盖所有可能性的话会导致payload过长，可以考虑3个字符3个字符地泄漏。构造payload时需要借助CSS变量，防止多种规则同时生效时被覆盖。一些CSP和CSS利用的分析和总结也可以参考wp：
@@ -410,6 +410,21 @@
     - 官方wp和payload
         - https://hackmd.io/@r2dev2/S1P0RYHYke
         - https://github.com/uclaacm/lactf-archive/blob/main/2025/web/gigachessbased
+- [Keeper](https://sectt.github.io/writeups/TRXCTF2025/Keeper/README)
+    - css injection+xs leak。需要简述一下题目的设置，因为设计比较“奇妙”
+        - `/`（GET），若session绑定了一个secret，则展示secret（此处存在html injection）；否则展示一个输入code和username的form，用于提交secret
+        - `/get-secret`（GET）:输入username和code后返回secret。每5秒只能访问一次
+        - `/set-secret`（POST）：`/`的form的action，用于设置secret。每个session只能设置一次secret
+        - `/visit`:(GET/POST):提交访问的url，每分钟只能访问一次。bot会先在主站提交一个随机的code和username，secret为flag，然后访问攻击者提交的任意http/s开头的url
+        - session设置为`same-site strict`
+        - 针对js的csp非常严格，但css几乎没有限制
+    - 题目中的难点
+        - “每个session只能设置一次secret”。bot设置完flag后就有了自己的session，而攻击者的payload在绑定自己的session，也没办法在客户端删掉bot的cookie。突破点在于`same-site strict`，跨站请求不会发送cookie。只要post请求来自跨站的form，访问`/set-secret`时就不会有cookie，从而创建一个与payload关联的session并覆盖掉bot原本的cookie
+        - 这么做后bot确实可以触发payload，但是原先输入的code又不见了。需要利用bot先提交secret再访问攻击者的url这点，用`history.goto`连续返回两次，回到`/`。此时页面仍然保留着bot输入的code值，同时会展示secret，即攻击者的payload。个人感觉和`srcdoc-memos`的`history.back()`的不统一性有关
+        - 用户输入/js api插入的值与通过html标签的属性设置值不同，前者无法诸如`input[value^="0"]`的CSS selector选中。可以用`font-face`与`unicode-range:`（检测到页面中包含某些字符后向定义的url发送请求）解决这点
+        - csp过于严格，`font-face`的请求无法跨源到达攻击者的服务器。利用`/get-secret`的rate limit解决。定义`font-face`的资源url为`/get-secret`，随后用`link rel=prefetch`（假如请求的资源返回>=400的状态码，触发error event。比如`429 Too Many Requests`）的xs leak技巧检测`font-face`是否发送了请求
+        - 上述方法一次只能检测一个字符。解决办法是定义多个`font-family`，并用CSS animation一个一个触发（同时触发的话`/get-secret`处的oracle就没用了）
+        - 上述方法只能得到组成code的字符，得不到顺序。佬选择让bot访问多次并选择只由数字组成的code，然后爆破code字符顺序。官方wp看起来能解决这个问题： https://github.com/TheRomanXpl0it/TRX-CTF-2025/blob/main/web/keeper
 
 ## SSTI
 

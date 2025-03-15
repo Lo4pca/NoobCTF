@@ -21,6 +21,8 @@
 - [net-msg](https://scuffed.online/x3ctf-2025)
   - 逆向golang。题目的binary没有被去除符号（not stripped），然而gdb在这种情况下会找不到引用的源码文件，导致设置断点时可能出现segault。可以尝试用go原生调试器[Delve](https://github.com/go-delve/delve)。不过这个调试器有个缺点，就是没法自由地修改寄存器的值（见 https://github.com/go-delve/delve/blob/master/Documentation/cli/expr.md ）。这时只能去除binary的调试符号并换回gdb
   - ghidra插件[GolangAnalyzer](https://github.com/mooncat-greenpy/Ghidra_GolangAnalyzerExtension)
+- [AssetRipper](https://github.com/AssetRipper/AssetRipper)
+  - 提取unity游戏的资源
 
 ## Game
 

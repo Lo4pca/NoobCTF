@@ -770,6 +770,9 @@ $$
 ## Elliptic Curves(ECC,椭圆曲线)
 
 是的我需要一个椭圆曲线题分类。我对这玩意的了解比格还少，只是记录下来方便未来的我复习(相信后人的智慧)
+
+找到个不错的动图演示： https://curves.xargs.org
+
 - [Isogenies](https://hackmd.io/_D7hNf_wQ7qq0PArYPWjSQ)
     - 3-torsion point
     - isogeny
