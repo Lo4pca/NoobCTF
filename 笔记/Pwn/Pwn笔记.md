@@ -152,7 +152,7 @@ xchg edi, ebx
 syscall
 ret
 ```
-- [Inj](https://github.com/qLuma/TFC-CTF-2023/tree/main/Inj),[wp](https://xa21.netlify.app/blog/tfcctf-2023/inj/)
+- [Inj](https://github.com/qLuma/TFC-CTF-2023/tree/main/Inj),[wp](https://xa21.netlify.app/blog/tfcctf-2023/inj)
   - 可以在64位程序里使用`int 0x80`调用32位的系统调用（遵守32位系统调用的调用号和参数传递，有些seccomp会禁掉，只允许64位）。利用`BPF_JUMP`和`BPF_STMT`设置沙盒时也可以分32位和64位系统调用分别设置
   - 只有open和read无write调用时可以通过测信道的方式读取flag。读取flag后，一位一位地遍历flag。若为0，让程序崩溃；若为1，让程序延时（执行另一个read或者执行一个很长的loop）
 - [the great escape](https://gerrardtai.com/coding/ductf#the-great-escape)
@@ -202,7 +202,7 @@ ret
 - [baby-sandbox](https://unvariant.pages.dev/writeups/amateursctf-2024/pwn-baby-sandbox)
   - 可以使用sysenter来调用syscall。只是使用sysenter前，rbp和其他参数要指向可读地址；且这个指令只能在64位的intel处理器上用
   - wp里提到了vector registers（以后写shellcode可以注意下，说不定直接就非预期简单解了）和侧信道解法
-  - 更详细wp： https://hyggehalcyon.gitbook.io/page/ctfs/2024/amateursctf#baby-sandbox
+  - 更详细wp： https://hyggehalcyon.gitbook.io/page/ctfs/2024/amateursctf
 - [randomness](https://github.com/cr3mov/cr3ctf-2024/tree/main/challenges/pwn/randomness)
   - 每8个字节的shellcode的最后一个字节会被随机数字异或。预期解是将rdi设为0，然后只用7个字节跳转到调用srand的地方。这样就能知道接下来的随机数了
   - 但我记这道题主要还是因为这个非预期解: **randomness** 。我们可以执行任意多个长度为5字节的shellcode，只需要在最后拼接上长为2字节的相对jmp，就能跳过接下来被随机化的字节，到下一个5字节指令
@@ -220,13 +220,31 @@ ret
 - [secure-sandbox](https://github.com/x3ctf/challenges-2025/blob/main/pwn/secure-sandbox)
   - 沙盒开放open和write和lseek，但是没有read。可以open `/proc/[pid]/mem`，lseek到任意地址，write写shellcode。特殊的地方在于，如果是通过mem文件访问内存，可以无视代码段的权限，直接往权限只有`rx`的函数代码段写shellcode。类似这道题： https://ctftime.org/writeup/23144
   - 个人解法：**secure-sandbox**
+- [canon event](https://necessary-psychology-c86.notion.site/canon-event-1a336e79f11a802ab45ed0446a13d7b4)
+  - 利用fork，ptrace和wait4 syscall绕过seccomp。不过可能不是通用方法，这题的seccomp反编译后有如下部分：
+  ```
+  A = instruction_pointer >> 32
+  if (A >= 0x8000) goto ALLOW
+  ```
+  即只要当前地址不在指定范围内就能调用任意系统调用。其他时候见的syscall都没有这个条件
+  - Linux 4.8后，seccomp仅在ptrace调用后实施；Linux 3.5 到 Linux 4.7则是在ptrace之前（等于新版本更不安全了）
+  - 看了半天终于理解了exp的逻辑：
+    - 首先调用fork，fork出一个子进程。子进程内部允许父进程跟踪自己，并编写打开并输出flag文件的shellcode
+    - 父进程使用`PTRACE_SYSCALL`，使子进程在执行syscall前停止
+    - 父进程使用`PTRACE_GETREGS`获取子进程寄存器，修改rip为不在seccomp管辖范围内的任意地址后用`PTRACE_SETREGS`设置子进程的寄存器
+    - 由于子进程在被父进程修改rip寄存器前已经从原本的rip fetch了syscall指令，所以可以正常执行syscall。而且执行syscall时rip已经被父进程修改了，故绕过seccomp关于`instruction_pointer`检查（即执行syscall时instruction_pointer是一个假地址）
+    - syscall后子进程会返回SIGSEV，因为假地址不合法。父进程可以用`wait4`和`PTRACE_SETREGS`来恢复子进程原本的rip，使子进程继续往下执行
+    - 重复以上步骤直到执行完所有获取flag要用到的syscall
+    - 注意不能调用execve，因为execve会把当前进程替换为新进程，而新进程继承原本的seccomp
+  - 注意和ptrace相关的exp不能用常规的gdb调试方法调试。作者推荐的调试方式是“使shellcode在系统调用失败后进入无限循环，然后gdb连接程序检查寄存器是否有错误“
+  - 题目作者的概念poc： **canon event**
 
 1. 程序关闭标准输出会导致getshell后无法得到cat flag的输出。这时可以用命令`exec 1>&0`将标准输出重定向到标准输入，再执行cat flag就能看见了。因为默认打开一个终端后，0，1，2（标准输入，标准输出，标准错误）都指向同一个位置也就是当前终端。详情见这篇[文章](https://blog.csdn.net/xirenwang/article/details/104139866)。例题：[wustctf2020_closed](https://buuoj.cn/challenges#wustctf2020_closed)
 2. 做菜单类堆题时，添加堆块的函数一般是最重要的，需要通过分析函数来构建出程序对堆块的安排。比如有些笔记管理题会把笔记名称放一个堆中，笔记内容放另一个堆中，再用一个列表记录指针。了解程序是怎么安排堆后才能根据漏洞制定利用计划。如果分析不出来，用gdb调试对着看会好很多。例题：[babyfengshui](https://github.com/C0nstellati0n/NoobCTF/blob/main/CTF/%E6%94%BB%E9%98%B2%E4%B8%96%E7%95%8C/6%E7%BA%A7/Pwn/babyfengshui.md)
 3. 32位利用A和%p计算格式化字符串偏移+$hn按字节改got表。例题：[axb_2019_fmt32](https://github.com/C0nstellati0n/NoobCTF/blob/main/CTF/BUUCTF/Pwn/axb_2019_fmt32.md)
 4. pwntools生成shellcode
 
-适用于linux。不过我到现在还没见过windows的pwn，可能是windows考的不多吧。
+适用于linux。不过我到现在还没见过windows的pwn，可能是windows考的不多吧
 
 ```python
 from pwn import *
@@ -1953,3 +1971,6 @@ offset = the_mmap64_plus_23_itself
 236. [minceraft](https://github.com/uclaacm/lactf-archive/blob/main/2025/pwn/minceraft)
 - 官方wp的解法是栈迁移，再凑一点程序里的gadget
 - 非预期解更有意思： https://sashactf.gitbook.io/pwn-notes/pwn/rop-2.34+/ret2gets 。gets在某种意义上可以充当`pop rdi`，进而在泄漏地址，调用system时都有帮助。见 https://gabri3l.net/lactf-2024-writeups
+237. [Virtual Insanity](https://github.com/im-razvan/writeups/tree/main/TRXCTF-2025/Virtual%20Insanity)
+- 没有canary但有pie的rop，在无法泄漏地址的情况下实现ret2win。`rsp + 0x10`的地方存有main的地址，如果能返回到`rsp + 0x10`，就能利用partial overwrite实现ret2win。关键在于远程机器开启了vsyscall，其地址固定，而且包含ret gadget
+- 在[1000levevls](../../CTF/攻防世界/5级/Pwn/1000levevls.md)里见过vsyscall，但是完全忘了……

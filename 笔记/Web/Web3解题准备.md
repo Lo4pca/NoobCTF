@@ -2,6 +2,8 @@
 
 记录如何配置解题脚本并运行
 
+## Metamask
+
 今天终于做出来了人生第一道blockchain入门题。漏洞实在太明显了，我这种没有啥经验的都能一眼看出来，所以不记录题目内容。卡了我很久的反而是“怎么deploy我的攻击合约啊“？翻看我的笔记，大佬们都用foundry/cast，但是我怎么样都配置不好……最后从笔记里翻出了这篇[wp](https://github.com/skabdulhaq/CTF-learnings/blob/main/CTF-writeups/BytesbanditCTF/blockchain-GuessTheName.md)，使用remix+metamask的配置。简单好上手，个人认为是最适合入门的
 
 首先安装metamask的chrome插件： https://chromewebstore.google.com/detail/metamask/nkbihfbeogaeaoehlefnkodbefgpgknn ，按照步骤创建新账号即可。接着点击右上角三个点，选择“设置”->“网络”->"添加网络"，把blockchain题目给的rpc url填进去。链ID通常是1，不确定的话可以用python的web3模块查看：
@@ -15,6 +17,8 @@ print(web3.eth.chain_id)
 然后就可以去[Remix](https://remix.ethereum.org)了。点击倒数第二个图标（Deploy & run transactioins），最上方的ENVIRONMENT选择Inject Provider - MetaMask。绑定账号时一定要选那个有钱的账号，原因之前提过了。如果不小心绑定了没钱的账号，个人当时（本经验不来自于网络）直接重装了metamask，后面想想应该清除cookie就行了。另外提醒一点，metamask里导入的账户可以随时删除，但是自己创建的不能，要想删除的话只能重装插件（我在官网看到这句话时人都傻了）
 
 这样应该就可以了，后面正常写攻击合约正常deploy并调用函数即可，用大白话说就是“Remix该怎么用咱们就怎么用”。顺便再说一句，开头提到的那篇wp确实是最适合初学者入门的，包括里面攻击合约的编写也是最基础的
+
+## Foundry
 
 最近发现metamask连不到rpc url了，依靠metamask的remix自然也用不了。再记录一个foundry的用法
 
@@ -44,6 +48,18 @@ Project/
     - `PRIVATE_KEY`:默认的私钥
 
 设置了这些变量后，调用命令时就无需指定`--rpc-url`或`--private-key`了
+
+另外`--broadcast`是必须的，不带的话就是在本地测试网络下运行，不影响外部内容
+
+## Sepolia testnet
+
+今天遇见一道sepolia testnet上的题。下列资源比较有用
+
+- https://sepolia.etherscan.io ：用题目提供的地址可以搜索对应的合约，可用来查看合约内容是否匹配，或者确认自己在正确的testnet上
+- https://rpc.info/ethereum-sepolia ：查找sepolia testnet的rpc url
+- https://cloud.google.com/application/web3/faucet/ethereum/sepolia ：google的Faucet，用于获取sepolia testnet上的ETH（没ETH就没法释放合约，付gas之类的）
+
+## Others
 
 这里是一个blockchain（solidity）的javascript web3开发教程： https://www.youtube.com/watch?v=gyMwXuJrbJQ ,不过也有blockchain（solidity）的基础/深度知识讲解
 

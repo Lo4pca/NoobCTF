@@ -1397,3 +1397,5 @@ mov     r8, qword [r13]
 210. [buckys-impossible-obby](https://github.com/ZTzTopia/ctf/tree/main/writeups/2025/broncoctf/forensics/buckys-impossible-obby)
 - roblox studio使用
 - 其他wp（这题好像允许攻击者执行任意lua代码？）： https://github.com/ZTzTopia/ctf/tree/main/writeups/2025/broncoctf/misc/worlds-hardester-flag
+211. [LLL](https://unoarroefy.github.io/blog/trx2025)
+- 逆向[Service Modeling Language](https://en.wikipedia.org/wiki/Service_Modeling_Language)（`.sml`）
