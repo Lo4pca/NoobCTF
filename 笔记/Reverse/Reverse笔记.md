@@ -1338,6 +1338,9 @@ mov     r8, qword [r13]
 - 使用[debugger](https://bxt.gitlab.io/brainfuck-debugger/)调试brainfuck代码。不过这题主要利用的工具还是这个可以运行brainfuck并限制步数上限的js库：[braincrunch](https://github.com/Macil/braincrunch)
 189. [The Moon](https://gist.github.com/TrixterTheTux/6ed0999479443823538fe2d1b8739458)
 - 逆向lua脚本。好新颖的一道题，调试方法也挺神奇。因为脚本内部加了一堆反调试的代码，所以直接从lua的内部实现下手，让代码里使用的关键函数有方便调试的输出，就能弄明白题目的逻辑了
+- 遇见一道“类似”的题，也是逆向混淆后的lua脚本：[Lost](https://github.com/uniquadev/ctf-writeups/blob/main/trx-ctf-2025/lost)
+  - 混淆后的脚本可以用诸如[lua-beautifier](https://goonlinetools.com/lua-beautifier)的工具美化。若美化后的脚本输出与原本脚本的输出不一样，可能是脚本内有integrity check
+  - 可以hook lua内的库函数从而得知脚本调用了什么函数以及在何处调用。比直接修改lua的函数便捷
 190. [html](https://github.com/Thehackerscrew/CrewCTF-2024-Public/tree/main/challenges/rev/html)
 - [html语言](https://html-lang.org)逆向。不是网站的那个html，确确实实是一种编程语言，只是故意设计的像html。有位大佬写了个转换器，可将这种语言转为python代码： https://github.com/harrier-lcc/html-python-transpile
 191. [Secure Computing](https://github.com/Pusty/writeups/tree/master/SekaiCTF2024)
@@ -1399,3 +1402,5 @@ mov     r8, qword [r13]
 - 其他wp（这题好像允许攻击者执行任意lua代码？）： https://github.com/ZTzTopia/ctf/tree/main/writeups/2025/broncoctf/misc/worlds-hardester-flag
 211. [LLL](https://unoarroefy.github.io/blog/trx2025)
 - 逆向[Service Modeling Language](https://en.wikipedia.org/wiki/Service_Modeling_Language)（`.sml`）
+212. [Molly](https://ctftime.org/writeup/40045)
+- 分析dll+exe。dll文件的entry point函数全部执行完后才到当前进程（exe文件）

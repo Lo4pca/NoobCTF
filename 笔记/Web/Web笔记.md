@@ -420,11 +420,29 @@
         - 针对js的csp非常严格，但css几乎没有限制
     - 题目中的难点
         - “每个session只能设置一次secret”。bot设置完flag后就有了自己的session，而攻击者的payload在绑定自己的session，也没办法在客户端删掉bot的cookie。突破点在于`same-site strict`，跨站请求不会发送cookie。只要post请求来自跨站的form，访问`/set-secret`时就不会有cookie，从而创建一个与payload关联的session并覆盖掉bot原本的cookie
-        - 这么做后bot确实可以触发payload，但是原先输入的code又不见了。需要利用bot先提交secret再访问攻击者的url这点，用`history.goto`连续返回两次，回到`/`。此时页面仍然保留着bot输入的code值，同时会展示secret，即攻击者的payload。个人感觉和`srcdoc-memos`的`history.back()`的不统一性有关
+        - 这么做后bot确实可以触发payload，但是原先输入的code又不见了。需要利用bot先提交secret再访问攻击者的url这点，用`history.goto`连续返回两次，回到`/`。此时页面仍然保留着bot输入的code值，同时会展示secret，即攻击者的payload。个人感觉和`srcdoc-memos`的`history.back()`（bfcache）的不统一性有关
         - 用户输入/js api插入的值与通过html标签的属性设置值不同，前者无法诸如`input[value^="0"]`的CSS selector选中。可以用`font-face`与`unicode-range:`（检测到页面中包含某些字符后向定义的url发送请求）解决这点
         - csp过于严格，`font-face`的请求无法跨源到达攻击者的服务器。利用`/get-secret`的rate limit解决。定义`font-face`的资源url为`/get-secret`，随后用`link rel=prefetch`（假如请求的资源返回>=400的状态码，触发error event。比如`429 Too Many Requests`）的xs leak技巧检测`font-face`是否发送了请求
         - 上述方法一次只能检测一个字符。解决办法是定义多个`font-family`，并用CSS animation一个一个触发（同时触发的话`/get-secret`处的oracle就没用了）
-        - 上述方法只能得到组成code的字符，得不到顺序。佬选择让bot访问多次并选择只由数字组成的code，然后爆破code字符顺序。官方wp看起来能解决这个问题： https://github.com/TheRomanXpl0it/TRX-CTF-2025/blob/main/web/keeper
+        - 上述方法只能得到组成code的字符，得不到顺序。佬选择让bot访问多次并选择只由数字组成的code，然后爆破code字符顺序
+    - 以为这个解法已经很聪明了，没想到[官方wp](https://salvatore-abello.github.io/posts/css-exfiltration-under-default-src-self)更天才。前面的部分和上述解法一样，直到`font-face`的部分。由于csp `default-src ‘self’`无法向外部发送请求，佬想了个巨天才的方法：利用connection pool。exp执行的步骤如下（这里省略具体的设置，总结起来太复杂了，直接看作者提供的代码更简单）：
+        1. 阻塞255个socket，即向255个不同的origin发送请求，且每个请求耗时极长
+        2. 用AbortController阻塞最后一个空闲socket。AbortController的特点在于可以随时终止连接
+        3. 请求`zzzzzz.com`。关键在于域名开头的字符位于的字母顺序要尽量低。注意这个请求会被阻塞，因为最多同时用256个socket
+        4. 等待`font-face`的资源请求（sleep合适的时间即可）
+        5. 操控AbortController终止第二步的连接
+        6. 依次向`aaaaaa.com`（保证域名开头的字符的顺序高于第三步的域名即可）发送请求，保证第i号请求加载完成后再发送第i+1号请求
+        
+        以上步骤的结果：
+        - 第5步释放了一个socket，于是chrome会从所有被阻塞的请求中选择优先级最高的连接。此时优先级最高的是`font-face`的资源请求（css的资源请求优先级很高，见 https://web.dev/articles/fetch-priority?hl=en#resource-priority ），因此这个空闲的socket就给了`font-face`
+        - `font-face`的请求完成后被堵塞的请求还有两个，第3步的`zzzzzz.com`和第6步的`aaaaaa.com`。a比z小，所以先请求`aaaaaa.com`
+        - `aaaaaa.com`的请求完成后又到了`font-face`的请求。重复以上步骤，直到`font-face`中不再有未请求的资源url
+        - 因为`font-face`不再发送请求，所以`aaaaaa.com`的请求完成后终于到了第3步的`zzzzzz.com`请求。从最开始到完成`zzzzzz.com`请求的这段时间里，`aaaaaa.com`请求的数量等同于`font-face`的请求数量
+        - 最后根据`font-face`的请求数量查找对应的字符即可
+
+        补充一些知识点：
+        - 除资源优先级等其他决定优先级的方法外，chrome最底层决定请求的优先级顺序为`port, scheme, host`。即端口80要比端口8080优先级高；host名a比host名z优先级高（字母顺序更高）
+        - `font-face`可以指定多个`src:`资源url，浏览器会按顺序请求，直到遇见一个不返回404错误的url或是请求完全部的url。这题利用了这个特点，让css匹配到A时请求3次，B时请求4次……依次类推，然后测量请求的次数，反推对应的字符。因为这个方法依赖的是请求的次数，所以具体请求什么不重要，能连上就行。比如这题请求的就是localhost
 
 ## SSTI
 
@@ -436,7 +454,7 @@ ssti（模板注入）。这张简单但是经典的表说明当出现ssti时如
 
 - [twig](https://xz.aliyun.com/t/10056#toc-13)(php)
 - [smarty](https://www.anquanke.com/post/id/272393)(php)
-- [flask](https://github.com/C0nstellati0n/NoobCTF/blob/main/CTF/%E6%94%BB%E9%98%B2%E4%B8%96%E7%95%8C/3%E7%BA%A7/Web/shrine.md)(python)。例题1:[[GYCTF2020]FlaskApp](https://github.com/C0nstellati0n/NoobCTF/blob/main/CTF/BUUCTF/Web/%5BGYCTF2020%5DFlaskApp.md)。例题2（利用[subprocess.Popen](https://blog.csdn.net/whatday/article/details/109315876)执行命令）:[[CSCCTF 2019 Qual]FlaskLight](https://blog.csdn.net/mochu7777777/article/details/107589811)。命令：`{{''.__class__.__mro__[1].__subclasses__()[395]('ls',shell=True,stdout=-1).communicate()[0].strip()}}`。索引需要爆破：
+- [flask](../../CTF/攻防世界/3级/Web/shrine.md)(python)。例题1:[[GYCTF2020]FlaskApp](../../CTF/BUUCTF/Web/[GYCTF2020]FlaskApp.md)。例题2（利用[subprocess.Popen](https://blog.csdn.net/whatday/article/details/109315876)执行命令）:[[CSCCTF 2019 Qual]FlaskLight](https://blog.csdn.net/mochu7777777/article/details/107589811)。命令：`{{''.__class__.__mro__[1].__subclasses__()[395]('ls',shell=True,stdout=-1).communicate()[0].strip()}}`。索引需要爆破：
 
 ```python
 import requests
