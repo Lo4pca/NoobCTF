@@ -4326,3 +4326,4 @@ fopen("$protocol://127.0.0.1:3000/$name", 'r', false, $context)
     - https://github.com/XMPPwocky/nodebeefcl
 531. [zStego](https://learn-cyber.net/writeup/zStego)
 - doc文件（zip）解压与symlink。这题补了我一个盲点，symlink还可以link到目录。比如让media为链接到根目录的symlink，php改变目录到`word/media`目录实际上是改变到了根目录。可以用来绕`ini_set('open_basedir', '.')`（万物皆是文件的魅力时刻）
+    - 补充一点，这个做法只有php > 8.3才能使用。旧版本没有这么智能，认为路径就应该在`.`下（即使`.`就是root），因此读不到`/flag`

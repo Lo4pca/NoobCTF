@@ -1974,3 +1974,6 @@ offset = the_mmap64_plus_23_itself
 237. [Virtual Insanity](https://github.com/im-razvan/writeups/tree/main/TRXCTF-2025/Virtual%20Insanity)
 - 没有canary但有pie的rop，在无法泄漏地址的情况下实现ret2win。`rsp + 0x10`的地方存有main的地址，如果能返回到`rsp + 0x10`，就能利用partial overwrite实现ret2win。关键在于远程机器开启了vsyscall，其地址固定，而且包含ret gadget
 - 在[1000levevls](../../CTF/攻防世界/5级/Pwn/1000levevls.md)里见过vsyscall，但是完全忘了……
+238. [Free the monsters](https://github.com/tesuji/ctf-writeups/tree/master/2025/trx/pwn/free)
+- libc 2.41，从double free+堆地址泄漏得到chunk overlapping+tcache poisoning。[详细步骤](./Heap/堆技巧学习.md#利用double-free获取chunk-overlapping和tcache-poisoning)
+- 这篇wp利用environ泄漏栈地址并写rop链。覆盖std_err的fsop解法见 https://github.com/TheRomanXpl0it/TRX-CTF-2025/blob/main/pwn/free_the_monsters 。由于题目允许的chunk大小太小，需要分段写入。但分段写入会导致文件结构内部分内容被堆块的header数据损坏。从`0x10`偏移处写入即可避免重要内容被损坏
