@@ -443,6 +443,10 @@
         补充一些知识点：
         - 除资源优先级等其他决定优先级的方法外，chrome最底层决定请求的优先级顺序为`port, scheme, host`。即端口80要比端口8080优先级高；host名a比host名z优先级高（字母顺序更高）
         - `font-face`可以指定多个`src:`资源url，浏览器会按顺序请求，直到遇见一个不返回404错误的url或是请求完全部的url。这题利用了这个特点，让css匹配到A时请求3次，B时请求4次……依次类推，然后测量请求的次数，反推对应的字符。因为这个方法依赖的是请求的次数，所以具体请求什么不重要，能连上就行。比如这题请求的就是localhost
+- [baby-sandbox](https://github.com/TheRomanXpl0it/TRX-CTF-2025/blob/main/web/baby-sandbox)
+    - 非常明显的html注入，目标是泄漏shadow dom里的flag。直接用js是无法访问shadow dom里的内容的，但是可以用`document.execCommand`执行`findstring`来逐字符爆破flag
+    - 绕过csp `"default-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'`带出flag的方法为WebRTC
+    - 还可以用`window.find`匹配到shadow dom里的内容；题目的csp还可以用meta绕过。见 **Baby Sandbox**
 
 ## SSTI
 

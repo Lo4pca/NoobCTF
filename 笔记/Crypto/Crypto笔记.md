@@ -566,6 +566,8 @@ for i in range(1,e):
     - Bleichenbacher’s RSA Padding Oracle Attack。如果有一个oracle能够分辨某个密文是否有正确的PKCS#1 v1.5 padding，则可以获取明文
 - [RSA Bummer](https://github.com/IC3lemon/CTF-reports/tree/main/BITSCTF-2025/crypto/RSA%20Bummer)
     - 将rsa解密过程转换到模p的环上。其实就是之前见过的flag小于p的情况，直接在p上求逆元即可。不过这题还加了一步，e和phi(p)不互质。p上开根很简单，sagemath的nth_root就能解决。见[Algorithm for finding the nth root of modulo p](https://vixra.org/pdf/2205.0155v1.pdf)
+- [factor.com](https://magicfrank00.github.io/writeups/writeups/trxctf/trxctf-crypto)
+    - 好的我是傻子，同样的考点换个问法我就不会了。题目见 https://github.com/TheRomanXpl0it/TRX-CTF-2025/blob/main/crypto/factor.com 。最少2048位的N由随机的n个质数组成，质数的位数在`random.randint(1,512)`之间。明显只靠碰运气等N的质因子全是小质数不太可能，但是有一两个质因子是小质数还是很有可能的。关键在于只需要提取出一个质因子就能恢复flag mod p了，原理和上一条一样。然后题目又是oracle，多拿几份 $flag\mod p_i$ 再用CRT就能恢复完整flag了
 
 ## Sagemath
 
@@ -752,7 +754,7 @@ $$
     - 在上方的gists处我还记了一位佬对这篇wp的补充说明+讨论。包括：
         - sagemath的block_matrix的用法
         - 利用PolynomialRing更快构造格的方法(用了一下，不知道为啥报错……考虑下面knutsacque的其他解法中`alex_hcsc`的类似构造方法)
-        - LLL解题过程中权重（weight）的思考——什么时候该加权重，加了意味着什么？详情见 https://magicfrank00.github.io/writeups/posts/lll-to-solve-linear-equations ，我见过的有关LLL解线性方程组的最好解释
+        - LLL解题过程中权重（weight）的思考——什么时候该加权重，加了意味着什么？详情见 https://magicfrank00.github.io/writeups/posts/lll-to-solve-linear-equations ，我见过的有关LLL解线性方程组的最好解释。另外，教程里有关利用`coefficients_monomials`构造格的方法似乎不是所有sagemath版本都能用
 - [Secure Nonsense](https://hackmd.io/@Solderet/rk2g-kwr1g)
     - hidden number problem(hnp)。包装好直接用的hnp见 https://github.com/josephsurin/lattice-based-cryptanalysis/blob/main/lbc_toolkit/problems/hidden_number_problem.sage 。主要是这样一个式子: $\beta_i - t_i \alpha + a_i \equiv 0 \pmod p$ ,输入各个 $t_i$ 和 $a_i$ 的值并给出 $\beta_i$ 的上限，返回 $\alpha$
 - [A-Complex-Shamir](https://github.com/kh4rg0sh/ctf_writeups/blob/main/backdoorctf-2024/crypto/A-Complex-Shamir)
@@ -791,11 +793,11 @@ $$
     - 通过曲线上的两个点恢复参数a和b
     - 带有elliptic cusp（a和b均为0）的椭圆曲线上的离散对数比较好求，参考 https://crypto.stackexchange.com/questions/61302/how-to-solve-this-ecdlp
     - 利用离散对数将曲线上点的加法转换为线性方程（wp里说是背包问题，我菜到看不出来）。假设有一些已知的点，各个点的系数未知，整体加起来为曲线上的另一个点S。可以取已知的点中任意一个点作“生成点G”，那么剩下的点一定是G的倍数（具体多少倍求离散对数可得）。求G对于S的离散对数（不确定这样表达有没有问题，求S是G的多少倍），那么之前求的G相对于已知点集里各个点的离散对数结果与G对S的离散对数构成模曲线质数p的方程（各个离散对数结果记为 $d_i$ ,G对S的离散对数记为D那么 $d_ix+d_{i+1}y+...=D\mod p$ 。解这种模某个数的线性方程的脚本参考wp）
-- [Predictable](https://blog.bi0s.in/2024/03/28/Crypto/Predictable-bi0sCTF2024/)
+- [Predictable](https://blog.bi0s.in/2024/03/28/Crypto/Predictable-bi0sCTF2024)
     - 椭圆曲线上两个点相加的double-and-add算法的时间测信道攻击
     - 利用backdoor预测Dual_EC_DRBG输出
-    - 其他wp： https://tanglee.top/2024/02/27/bi0sCTF-2024-Crypto-Writeups/
-- [challengename](https://tanglee.top/2024/02/27/bi0sCTF-2024-Crypto-Writeups/)
+    - 其他wp： https://tanglee.top/2024/02/27/bi0sCTF-2024-Crypto-Writeups
+- [challengename](https://tanglee.top/2024/02/27/bi0sCTF-2024-Crypto-Writeups)
     - 若ECDSA算法定义在256-bit的曲线上而nonce只有128 bit，可以使用short nonce attack。只需两个签名就可恢复私钥
     - nonce reuse解法： https://berliangabriel.github.io/post/bi0s-ctf-2024/ ， https://gist.github.com/Hisokap3/f446034f6d6ca9bcfeee05c1dad0aaa4
 - [Elliptic](https://connor-mccartney.github.io/cryptography/ecc/Elliptic-GCC-CTF-2024)
@@ -824,7 +826,7 @@ $$
 - [Private Curve](https://connor-mccartney.github.io/cryptography/ecc/PrivateCurve-0xl4ughCTF2024)
     - 获取EC-LCG的7个输出后恢复曲线的参数p，a和b。主要是 https://arxiv.org/pdf/1609.03305 第5页的算法的简单实现
     - 光滑阶数曲线（smooth order curve）求离散对数
-    - 另一位佬不看论文的做法，使用polynomial resultants： https://gist.github.com/C0nstellati0n/cf6ae2c5e0e9fe1ecb532d257a56e101#private-curve
+    - 另一位佬不看论文的做法，使用polynomial resultants：**Private Curve**
 - [Future Desk Market](https://github.com/srdnlen/srdnlenctf-2025_public/blob/main/cryptopwn_FDM)
     - ECC partial nonce leak。也是早有耳闻，只是没想到第一次见这个考点居然是在一个pwn题里……
     - 看到了一个不错的调试工具：[libdebug](https://github.com/libdebug/libdebug)
@@ -835,6 +837,10 @@ $$
         - leaked and biased nonce
         - bad nonce（nonce bit数过小）
         - https://cryptopals.com/sets/8/challenges/62.txt 也不错
+- [babyDLP](https://magicfrank00.github.io/writeups/writeups/trxctf/trxctf-crypto)
+    - biased-nonce attack。这玩意似乎不是ecdsa的专利，往大了说得归入“solve system of linear equations with small unknowns”。即只要有多个线性方程且每个方程里的未知数较小，就能用LLL（或者BKZ，这个方法的表现似乎比LLL好）
+    - 获取flag%p的和p的值后求解原本的flag。类似之前见过的[onelinecrypto](https://web.archive.org/web/20240412075022/https://demo.hedgedoc.org/s/DnzmwnCd7),但我更推荐之前见过的[这篇wp](https://nush.app/blog/2023/06/21/see-tf-2023)。第一篇wp的思路非常神奇，还用了linear programming，完全不知道是啥玩意。babyDLP的思路和后者比较像，加了一步“根据flag的格式并爆破flag的一个字符”来缩减题目的复杂度，更好理解而且有效
+        - 思路最像的应该是这个： https://blog.maple3142.net/2023/06/12/seetf-2023-writeups 。里面介绍了一种用fplll做lattice enumeration的方法，适合找维度较小的格中的最小向量而且非常精确。缺点是时间复杂度非常高，建议先拿BKZ把格规约一遍后再枚举
 
 ## AES/DES
 
