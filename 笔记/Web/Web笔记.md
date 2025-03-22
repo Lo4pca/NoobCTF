@@ -38,7 +38,7 @@
     - 题目由solidity assembly（基于EVM的栈语言）编写，目标是改动storage中位于slot 1处的issolved变量。整个assembly只有一个opcode可以修改storage里的内容：sstore
     - 如何查看文件a里b合约的storage布局：`forge inspect a.sol:b storageLayout`
     - Pausable合约：当`_pause`标志为true时，执行带有whenNotPaused修饰符的函数会被revert
-    - [EVM memory layout](https://docs.soliditylang.org/en/latest/internals/layout_in_memory.html)和[EVM opcodes](https://www.evm.codes/)。注意分型memory和storage的区别。memory是暂时存储空间，存那些无需跨函数调用的数据，比如局部变量，参数和返回值等；storage则是永久存储，存全局变量等。memory按0x20字节（一个slot的大小）对齐，前4 slot `0x00~0x80`被保留。重点是`0x40~0x60`:指向空闲内存。文档里说是“当前已分配内存空间”，等同于说“指向空闲内存的指针”。注意这里只有一个指针，引用时取0x40。`0x40~0x60`准确地说是这个slot的大小。这个指针很重要，汇编里经常引用
+    - [EVM memory layout](https://docs.soliditylang.org/en/latest/internals/layout_in_memory.html)和[EVM opcodes](https://www.evm.codes/)。注意区分memory和storage。memory是暂时存储空间，存那些无需跨函数调用的数据，比如局部变量，参数和返回值等；storage则是永久存储，存全局变量等。memory按0x20字节（一个slot的大小）对齐，前4 slot `0x00~0x80`被保留。重点是`0x40~0x60`:指向空闲内存。文档里说是“当前已分配内存空间”，等同于说“指向空闲内存的指针”。注意这里只有一个指针，引用时取0x40。`0x40~0x60`准确地说是这个slot的大小。这个指针很重要，汇编里经常引用
     - 可用`forge inspect a.sol:b deployedBytecode`查看文件a里b合约的字节码。 https://bytegraph.xyz 可以查看汇编的控制流图表，可以在 https://www.evm.codes/playground 调试汇编
     - 这题的其中一个漏洞是攻击者可以修改函数指针。题目有一个数组，数组里装着一个函数指针a，a指向被whenNotPaused修饰的函数b。假如我们可以修改函数指针，就能将a修改为修饰符逻辑下面的函数b逻辑内容，进而绕过修饰符检查，从而正常执行函数b（相当于修改got表时因为某种原因改成backdoor函数的开头不行，于是就把got修改为backdoor函数的重要部分）。注意solidity里jump的目的地必须是某个jumpdest字节码。剩下的漏洞是内存溢出（有点像堆溢出）和out of bounce read（指程序读取了预期之外的内容）
     - [预期解](https://blog.solidity.kr/posts/(ctf)-2024-SekaiCTF)里提到了[foundry debugger](https://book.getfoundry.sh/forge/debugger)。感觉和radare2一样都是基于命令行的图形ui调试器
