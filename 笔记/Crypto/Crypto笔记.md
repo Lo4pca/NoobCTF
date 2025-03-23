@@ -1,11 +1,11 @@
 # Crypto笔记
 
-此篇笔记对应的gist： https://gist.github.com/C0nstellati0n/cf6ae2c5e0e9fe1ecb532d257a56e101 。题目对应的关键词将加粗
+此篇笔记对应的gist： https://gist.github.com/Lo4pca/cf6ae2c5e0e9fe1ecb532d257a56e101 。题目对应的关键词将加粗
 
 ## RSA
-- 得到d和c，p和q为相邻质数。例题：[[NCTF2019]babyRSA](https://github.com/C0nstellati0n/NoobCTF/blob/main/CTF/BUUCTF/Crypto/%5BNCTF2019%5DbabyRSA.md)
-- 光滑数分解+威尔逊定理使用。例题1：[smooth](../../CTF/moectf/2022/Crypto/smooth.md)，例题2:[[RoarCTF2019]babyRSA](https://github.com/C0nstellati0n/NoobCTF/blob/main/CTF/BUUCTF/Crypto/%5BRoarCTF2019%5DbabyRSA.md)
-- 共模攻击。适用于相同明文用同样的n却用不同的e加密时。注意两个不同的e需要互质。[例题1](https://github.com/C0nstellati0n/NoobCTF/blob/main/CTF/%E6%94%BB%E9%98%B2%E4%B8%96%E7%95%8C/3%E7%BA%A7/Crypto/best_rsa.md)搭配使用Crypto库读取公钥，[例题2](https://blog.csdn.net/weixin_44017838/article/details/104886290)搭配解密结果是ascii的情况。
+- 得到d和c，p和q为相邻质数。例题：[[NCTF2019]babyRSA](../../CTF/BUUCTF/Crypto/[NCTF2019]babyRSA.md)
+- 光滑数分解+威尔逊定理使用。例题1：[smooth](../../CTF/moectf/2022/Crypto/smooth.md)，例题2:[[RoarCTF2019]babyRSA](../../CTF/BUUCTF/Crypto/[RoarCTF2019]babyRSA.md)
+- 共模攻击。适用于相同明文用同样的n却用不同的e加密时。注意两个不同的e需要互质。[例题1](../../CTF/攻防世界/3级/Crypto/best_rsa.md)搭配使用Crypto库读取公钥，[例题2](https://blog.csdn.net/weixin_44017838/article/details/104886290)搭配解密结果是ascii的情况。
 
 ```python
 from Crypto.Util.number import *
@@ -32,9 +32,9 @@ c2=0
 print(decrypt(1697,599,n,c1,c2).decode())
 ```
 
-- lcm问题+e与phi不互质（gcd较小）。例题：[[NPUCTF2020]EzRSA](https://github.com/C0nstellati0n/NoobCTF/blob/main/CTF/BUUCTF/Crypto/%5BNPUCTF2020%5DEzRSA.md)
-- dp泄露。例题：[0rsa0](https://github.com/C0nstellati0n/NoobCTF/blob/main/CTF/moectf/Crypto/0rsa0.md)
-- sagemath解二元方程组+e，d泄露后分解n。例题:[[MRCTF2020]Easy_RSA](https://github.com/C0nstellati0n/NoobCTF/blob/main/CTF/BUUCTF/Crypto/%5BMRCTF2020%5DEasy_RSA.md)
+- lcm问题+e与phi不互质（gcd较小）。例题：[[NPUCTF2020]EzRSA](../../CTF/BUUCTF/Crypto/[NPUCTF2020]EzRSA.md)
+- dp泄露。例题：[0rsa0](../../CTF/moectf/2022/Crypto/0rsa0.md)
+- sagemath解二元方程组+e，d泄露后分解n。例题:[[MRCTF2020]Easy_RSA](../../CTF/BUUCTF/Crypto/[MRCTF2020]Easy_RSA.md)
 ```py
 P_n = 
 P_F_n =
@@ -43,7 +43,7 @@ eq1=P_n==p*q
 eq2=P_F_n==(p-1)*(q-1)
 solve([eq1,eq2],p,q)
 ```
-- rsa衍生算法：[Rabin](https://co5mos.github.io/2018/09/14/rsa-rabin/)。[原理](https://zhuanlan.zhihu.com/p/533927542)及脚本：
+- rsa衍生算法：[Rabin](https://co5mos.github.io/2018/09/14/rsa-rabin)。[原理](https://zhuanlan.zhihu.com/p/533927542)及脚本：
 
 ```python
 import libnum

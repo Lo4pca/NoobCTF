@@ -1,6 +1,6 @@
 # Pwn笔记
 
-此篇笔记对应的gist： https://gist.github.com/C0nstellati0n/c5657f0c8e6d2ef75c342369ee27a6b5 。题目对应的关键词将加粗
+此篇笔记对应的gist： https://gist.github.com/Lo4pca/c5657f0c8e6d2ef75c342369ee27a6b5 。题目对应的关键词将加粗
 
 ## Chrome V8
 
@@ -211,7 +211,7 @@ ret
 - [syscalls](https://flex0geek.blogspot.com/2024/07/pwn-writeup-syscalls-and-backup-power.html)
   - 使用openat，preadv2和pwritev2读取文件内容
   - 其他做法：
-    - https://gist.github.com/C0nstellati0n/c5657f0c8e6d2ef75c342369ee27a6b5#syscalls ：使用openat+mmap+pwritev2读取文件内容，并用pwntools编写shellcode。之前没注意，今天发现mmap有个参数fd，用open或openat等函数得到文件fd后，用mmap就能得到文件的内容，不是非得read系函数
+    - **syscalls** ：使用openat+mmap+pwritev2读取文件内容，并用pwntools编写shellcode。之前没注意，今天发现mmap有个参数fd，用open或openat等函数得到文件fd后，用mmap就能得到文件的内容，不是非得read系函数
     - https://github.com/rerrorctf/writeups/tree/main/2024_06_29_UIUCTFCTF24/pwn/syscalls ：seccomp rule规定只要writev的fd大于0x3e9就能使用writev。于是用openat+preadv2读文件后用dup2复制文件fd再用writev写（所以为什么不用第一个wp的pwritev2）
 - [syscalls-2](https://gist.github.com/C0nstellati0n/c5657f0c8e6d2ef75c342369ee27a6b5#syscalls-2)
   - 使用io_uring raw syscall读取文件（一种很复杂的open+read，绕seccomp可用）
@@ -1140,6 +1140,7 @@ sc = jmpsc + b"\x00" * (0x50 - len(jmpsc)) + realsc
 86. [all patched up](https://github.com/M0ngi/CTF-Writeups/tree/main/2023/Nahamcon/pwn/all%20patched%20up)
 - [ret2csu](https://ctf-wiki.org/pwn/linux/user-mode/stackoverflow/x86/medium-rop/#ret2csu)(万能gadget)实战。其实wp里用的不是ret2csu，是我用了后发现和ctf wiki里有一点不一样，参数的顺序不一致。仍然可以套ctf wiki里的模板，但是要自己根据libc的版本更换参数位置。此题是libc-2.31,顺序为：
 ```py
+#注意调用的函数必须是一个指针。即不能直接填写函数A的地址，要填写指向A的指针B（B的内容是A）
 def csu(rbx, rbp, r12, r13, r14, r15, last):
     # pop rbx,rbp,r12,r13,r14,r15
     # rbx should be 0,
@@ -1154,15 +1155,15 @@ def csu(rbx, rbp, r12, r13, r14, r15, last):
     payload += p64(last)
     return payload
 ```
-- 此题的[另一种解法](https://hackmd.io/@KentangRenyah/BJ5Fiy2Dh#All-Patched-Up)使用了ld.so文件里的gadget。rop不一定要ret2libc，若实在无法泄露libc的地址，ld.so也是可以的。
-87. [Limitations](https://hackmd.io/@KentangRenyah/BJ5Fiy2Dh#Limitations)
+- 此题的[另一种解法](https://hackmd.io/@KentangRenyah/BJ5Fiy2Dh)使用了ld.so文件里的gadget。rop不一定要ret2libc，若实在无法泄露libc的地址，ld.so也是可以的。
+87. [Limitations](https://hackmd.io/@KentangRenyah/BJ5Fiy2Dh)
 - 汇编调用ptrace函数+ptrace函数基础知识。ptrace函数可以让一个进程与另一个进程（如fork产生的子进程）沟通，前提是获取另一个进程的process ID。ptrace的PTRACE_POKEDATA选项可以让进程修改另一个进程的代码
   - ptrace(PTRACE_ATTACH,child_id,0,0)
   - ptrace(PTRACE_POKEDATA,chid_id, addr, data)
   - ptrace(PTRACE_DETACH,child_id,0,0)
 - 一个进程的seccomp不会影响到另一个进程，fork出来的进程也一样（seccomp的调用在fork之后）
-88. [Web Application Firewall](https://hackmd.io/@KentangRenyah/BJ5Fiy2Dh#Web-Application-Firewall)
-- [tcache_perthread_struct](https://zafirr31.github.io/posts/imaginary-ctf-2022-zookeeper-writeup/)利用
+88. [Web Application Firewall](https://hackmd.io/@KentangRenyah/BJ5Fiy2Dh)
+- [tcache_perthread_struct](https://zafirr31.github.io/posts/imaginary-ctf-2022-zookeeper-writeup)利用
   - In short, tcache_perthread_struct contains a counter for the number of available (already freed) tcachebin chunks and stores the address entries for each tcachebin size. The address of the tcache_perthread_struct is kept at the second word of a freed tcache chunk. 其中address entries控制着tcache chunk从哪里取。如果我们能覆盖这个地址为free_hook，下次malloc就能直接获取到对应地址处的内存。
 89. [storygen](https://github.com/google/google-ctf/tree/master/2023/pwn-storygen)
 - linux shebang利用。shebang在bash脚本的第一行，由`#!`开头，用于选择脚本的解释器。也可以用来注入执行任意命令，类似`#!/usr/bin/python3 -c print(123)`。或者利用env的-S参数，将剩下的部分全部拆分成shell命令（默认最多只能拆分一个参数）:`#!/usr/bin/env -S bash -c ls -fl`

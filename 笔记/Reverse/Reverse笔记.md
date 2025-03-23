@@ -1,5 +1,7 @@
 # Reverse笔记
 
+此篇笔记对应的gist： https://gist.github.com/Lo4pca/a066c450ed5d4c8ffbb0c1328283fe14 。题目对应的关键词将加粗
+
 ## Tools
 
 平时见到的乱七八糟的工具

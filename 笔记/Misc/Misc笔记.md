@@ -1,6 +1,6 @@
 # Misc笔记
 
-此篇笔记对应的gist： https://gist.github.com/C0nstellati0n/78f5887b5bee235583a026840354ae54 。题目对应的关键词将加粗
+此篇笔记对应的gist： https://gist.github.com/Lo4pca/78f5887b5bee235583a026840354ae54 。题目对应的关键词将加粗
 
 ## Pyjail
 

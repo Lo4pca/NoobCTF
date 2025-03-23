@@ -2,7 +2,7 @@
 
 越来越认识到什么是“好记性不如烂笔头”
 
-此篇笔记对应的gist: https://gist.github.com/C0nstellati0n/248ed49dea0accfef1527788494e2fa5 。题目对应的关键词将加粗
+此篇笔记对应的gist: https://gist.github.com/Lo4pca/248ed49dea0accfef1527788494e2fa5 。题目对应的关键词将加粗
 
 ## Web3
 
