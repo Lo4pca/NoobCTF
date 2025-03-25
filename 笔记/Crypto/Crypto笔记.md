@@ -568,10 +568,15 @@ for i in range(1,e):
     - 将rsa解密过程转换到模p的环上。其实就是之前见过的flag小于p的情况，直接在p上求逆元即可。不过这题还加了一步，e和phi(p)不互质。p上开根很简单，sagemath的nth_root就能解决。见[Algorithm for finding the nth root of modulo p](https://vixra.org/pdf/2205.0155v1.pdf)
 - [factor.com](https://magicfrank00.github.io/writeups/writeups/trxctf/trxctf-crypto)
     - 好的我是傻子，同样的考点换个问法我就不会了。题目见 https://github.com/TheRomanXpl0it/TRX-CTF-2025/blob/main/crypto/factor.com 。最少2048位的N由随机的n个质数组成，质数的位数在`random.randint(1,512)`之间。明显只靠碰运气等N的质因子全是小质数不太可能，但是有一两个质因子是小质数还是很有可能的。关键在于只需要提取出一个质因子就能恢复flag mod p了，原理和上一条一样。然后题目又是oracle，多拿几份 $flag\mod p_i$ 再用CRT就能恢复完整flag了
+- [vectorial-rsa](https://github.com/TheRomanXpl0it/TRX-CTF-2025/blob/main/crypto/vectorial-rsa)
+    - Franklin-Reiter（多项式gcd）。一时间忘了我见过这个考点了……题目用rsa加密了两个多项式，其中多项式c1满足 $f(kA)-cA\equiv 0\mod n$ ，多项式c2则满足 $f(kA+B)-cB\equiv 0\mod n$ ,其中B是一个随机的最大16位的数字。爆破B的值后构造多项式，使用Franklin-Reiter即可解出kA
+    - **vectorial-rsa** 的脚本更好理解一点
 
 ## Sagemath
 
 感觉了解sagemath的api很重要啊，那今天就专门开个部分用于记录例题和使用的函数
+
+ubuntu上怎么安装sagemath： https://sagemanifolds.obspm.fr/install_ubuntu.html
 
 sympy也放这了
 
@@ -841,6 +846,37 @@ $$
     - biased-nonce attack。这玩意似乎不是ecdsa的专利，往大了说得归入“solve system of linear equations with small unknowns”。即只要有多个线性方程且每个方程里的未知数较小，就能用LLL（或者BKZ，这个方法的表现似乎比LLL好）
     - 获取flag%p的和p的值后求解原本的flag。类似之前见过的[onelinecrypto](https://web.archive.org/web/20240412075022/https://demo.hedgedoc.org/s/DnzmwnCd7),但我更推荐之前见过的[这篇wp](https://nush.app/blog/2023/06/21/see-tf-2023)。第一篇wp的思路非常神奇，还用了linear programming，完全不知道是啥玩意。babyDLP的思路和后者比较像，加了一步“根据flag的格式并爆破flag的一个字符”来缩减题目的复杂度，更好理解而且有效
         - 思路最像的应该是这个： https://blog.maple3142.net/2023/06/12/seetf-2023-writeups 。里面介绍了一种用fplll做lattice enumeration的方法，适合找维度较小的格中的最小向量而且非常精确。缺点是时间复杂度非常高，建议先拿BKZ把格规约一遍后再枚举
+- [lepton2](https://github.com/TheRomanXpl0it/TRX-CTF-2025/blob/main/crypto/lepton2)
+    - ecc isogeny。思路基本等于[seashells](https://magicfrank00.github.io/writeups/writeups/n1ctf2024/seashells)，感觉还简单了点，用`First idea`里的做法即可
+    - 题目大概如下：
+        - 曲线的阶由多个小质数（ells列表）相乘得到，为光滑数
+        - walk_isogeny函数根据私钥的二进制表示决定是否应用阶为 $ell_i$ 的点P为核的同源映射（类似seashells的wave函数，可能后者还好理解一点）。最后返回所有同源映射的结合
+        - 用户可以输入E上任意点，题目会计算该点经过上述同源映射后的结果，并取出`.xy()`，用其sha256值作为aes的密钥加密flag
+        - 很重要的两点是：
+            - 对于任意同源映射 $\phi_i$ ，有 $\phi_i(0)=0$
+            - 无法在0点上应用`.xy()`，会报错。正好题目有个try-except块区分是否报错
+    - 解法如下：
+        - ells的第一个质数为3，假设生成了一个阶为3的点P，以点P为核的同源映射为 $\phi_3$ 。假如私钥的第一个bit为1，这个映射会被应用；反之不会
+        - 同一个曲线的`random_point`输出相同。题目已经给出了曲线E的参数，意味着我们也可以生成与服务器上相同的 $\phi_3$ 核点P
+        - 直接向服务器发送点P。若服务器的同源映射中包含 $\phi_3$ ，则结果为0。因为 $\phi_3(P)=0$ 且任何 $\phi_i(0)=0$
+        - 假如结果为0，调用`.xy()`时会出错，走except代码块；否则正常运行。利用这点可以泄漏出私钥的第一个bit
+        - 重复以上步骤来泄漏剩下的bit
+- [magic_curves](https://github.com/TheRomanXpl0it/TRX-CTF-2025/blob/main/crypto/magic_curves)
+    - 输入椭圆曲线的a，b和p参数，并计算`EllipticCurve(Zp, [a, b])`和`EllipticCurve(Zp, [b, a])`上的离散对数
+    - 预期解在固定j不变量的情况下爆破p，使曲线为一个异常曲线（anomalous curve，`E.cardinality() == p`），方便应用smart攻击；同时保证交换a和b参数后曲线的阶为光滑数，保证可以用pohlig_hellman求出离散对数
+    - 其他解法： https://github.com/Sarkoxed/ctf-writeups/blob/master/trx-2025/magic_curves ，利用了坐标变换。deepseek的讲解如下：
+        - 假设存在一个同构映射，将曲线E₁: y² = x³ + a x + b 转换为 E₂: y² = x³ + b x + a。引入坐标变换： $x=\lambda x'，y=\mu y'$
+        - 将变换代入E₁的方程,得到 $(\mu y')^2=(\lambda x')^3+a(\lambda x')+b$
+            - 展开得到 $\mu^2y'^2=\lambda^3x'^3+a\lambda x'+b$
+        - 将上式转换为E₂的形式。即： $y'^2=\frac{\lambda^3}{\mu^2}x'^3+\frac{a\lambda}{\mu^2}x'+\frac{b}{\mu^2}$
+        - 对比E₂的系数，得到方程组：
+            1. $\frac{\lambda^3}{\mu^2}=1$
+            2. $\frac{a\lambda}{\mu^2}=b$
+            3. $\frac{b}{\mu^2}=a$
+        - 由1式得到 $\lambda^3=\mu^2$ 。将该结果带入2式，得到 $\frac{a\lambda}{\lambda^3}=b$ ，即 $b=\frac{a}{\lambda^2}$ 。再代入3式，得到 $\frac{\frac{a}{\lambda^2}}{\mu^2}=a$ , $\frac{\frac{a}{\lambda^2}}{\lambda^3}=a$ , $\frac{a}{\lambda^5}=a$ , $\lambda^5=1$
+        - 因此 $\lambda$ 必须是5次单位根。GF(p)中存在五次单位根的条件是 $p\equiv 1\mod 5$ ，即脚本内为什么要检查`(p - 1) % 5 == 0`
+        - 找到合适的p后用`G(1).nth_root(5)`求出单位根。随机生成a后用单位根 $\lambda$ 求出b，并保证曲线的阶数为光滑数
+        - 因为坐标变换 $x=\lambda x'，y=\mu y'$ 的点是一一对应的，故构成了同构映射，保持阶数不变。因此两个曲线的阶数均为光滑数，都可以用bsgs+pohlig_hellman算法求解
 
 ## AES/DES
 
