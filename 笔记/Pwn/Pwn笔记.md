@@ -128,6 +128,22 @@ kernel pwn题合集。用于纪念我连堆都没搞明白就敢看内核的勇�
     - 释放其中一个pipe，制造page level UAF
     - 调用多次setuid从而清空`cred_jar` slab，期望kernel将出现uaf的page分配做新的`cred_jar` slab
     - 调用fork分配cred结构，同时用null字节覆盖出现uaf的page。运气好的话有一个fork的cred的uid会为0
+- [/dev/mem](https://necessary-psychology-c86.notion.site/dev-mem-1a336e79f11a808d9f8be9da75e480a1)
+  - 允许用户与`/dev/mem`交互，一次可往指定地址写八个字节。由于关闭了`CONFIG_STRICT_DEVMEM`,这个primitive可以直接与物理内存交互
+  - 这题直接看步骤比较清晰：
+    - 从高地址开始，依次往`CONFIG_PHYSICAL_START * CONFIG_PHYSICAL_ALIGN * counter + (modprobe_path offset)`写特定值。如果猜测的地址正确的话，读取`/proc/sys/kernel/modprobe`时就能得到特定值,进而计算物理基地址
+    - 有了基地址后可以去覆盖`kptr_restrict`变量的值为0，之后就能直接读`/proc/kallsyms`获取内核的虚拟基地址了
+    - 通过覆盖`n_tty_ops` vtable的`ioctl`字段可以控制rip（此函数在`/dev/ptmx`的fd上调用ioctl时会调用）。配合一些gadget可以实现任意地址读写
+    - 从init_task结构体开始找到当前进程的结构体，覆盖cred结构体后提权成root
+  - 一些知识点
+    - `CONFIG_STATIC_USERMODEHELPER`配置项启用后modprobe路径仍然可写,只是不会使用这个路径而已
+    - 关于为何要从高地址向地址爆破：因为从低地址到高地址的区域排序如下：
+      - .text
+      - .rodata
+      - .data
+
+      假如从低地址开始爆破的话，覆盖`.text`区域会导致程序崩溃
+    - exp里的`0x300c6c20`没有什么特殊的意义，只是一个符合modprobe偏移的物理地址，用于寻找基地址
 
 ## Shellcode题合集
 

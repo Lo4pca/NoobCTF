@@ -338,6 +338,8 @@ print(base64.b64encode(temp.encode()))
     - exec pyjail，禁`@:{}[]|&,ifb`且`__`数量不超过6，括号`(`,`)`不超过1
     - payload原理大概是将函数的字节码(co_code)替换成getshell内容，然而开头的`type os=os+path+system`我完全没法运行，也搜不到类似的语法。看dockerfile是python 3.14，可能是新加的？
     - 缩减官方payload后的结果： **sneckos-lair** 。可以用`sh`代替`/bin/sh`，`pwn.red/jail`并不会清理这个默认路径值。`./*`也是一个不错的技巧
+- [Golf](https://github.com/TheRomanXpl0it/TRX-CTF-2025/blob/main/misc/golf)
+    - 只能使用```?.,|^/`;=&~$%```和字母，但环境里存在builtins。感觉思路和上面的warden差不多，都是引入一个模块并覆盖一个不需要参数且可以用特殊方式调用的函数
 - pyjail cheatsheet
     - https://shirajuki.js.org/blog/pyjail-cheatsheet
     - https://book.hacktricks.wiki/en/generic-methodologies-and-resources/python/bypass-python-sandboxes/index.html

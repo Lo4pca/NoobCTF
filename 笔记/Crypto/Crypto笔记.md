@@ -877,6 +877,17 @@ $$
         - 因此 $\lambda$ 必须是5次单位根。GF(p)中存在五次单位根的条件是 $p\equiv 1\mod 5$ ，即脚本内为什么要检查`(p - 1) % 5 == 0`
         - 找到合适的p后用`G(1).nth_root(5)`求出单位根。随机生成a后用单位根 $\lambda$ 求出b，并保证曲线的阶数为光滑数
         - 因为坐标变换 $x=\lambda x'，y=\mu y'$ 的点是一一对应的，故构成了同构映射，保持阶数不变。因此两个曲线的阶数均为光滑数，都可以用bsgs+pohlig_hellman算法求解
+- [what_the_hecc](https://github.com/TheRomanXpl0it/TRX-CTF-2025/blob/main/crypto/what_the_hecc)
+    - hecc（HyperellipticCurve cryptography）。记一点二级结论，因为一级结论记不住（“我能在患有痴呆症的情况下通关抽象代数吗？”）
+    - 这题的设置如下：定义了一个超椭圆曲线（形如 $y^2+h(x)y=f(x)$ ），并在超椭圆曲线上构造Jacobian群。这个群中的所有元素都是约化除子，由Mumford表示法表示。Mumford表示法用两个多项式u(x)和v(x)来表示约化除子。作者邪恶的地方在于没有直接用sagemath里自带的HyperellipticCurve和`jacobian()`函数，而是自己实现了群运算，导致如果没见过这玩意也无法从脚本中猜出点什么
+        - 题目给出`P+Q+R`和`P+Q+S`的u多项式，要求求出原始的P,Q,R和S点
+    - 超椭圆曲线的Jacobian群元素的Mumford表示法介绍：
+        - u(x)是二次多项式，其根为曲线上的x坐标
+        - v(x)是线性多项式，用来确定具体的y坐标
+        - 约化除子与曲线上的点并不是一对一的关系。一个约化除子对应多个点的组合。在这题里为两个点，因为曲线的属为2
+        - 当n个约化除子根据群运算相加后，结果仍然是2个点的组合，或者说g个点，g表示曲线的属
+        - 分解运算结果的u多项式可以得到原本相加的两个约化除子的信息。比如分解P+(Q+R)可以得到P和Q+R（这个群是交换群）
+    - 有了这些二级结论看求解脚本就没那么费力了。extractPoints用于分解u多项式，获取原本相加的两个约化除子的信息。不过每个x坐标对应两个y，不确定具体是哪个。所以要用product爆破所有的可能性。后续`extractPoints(Jnm[0])`也是同理。`extractPoints(*Jpq1)`这段则不需要爆破。因为已经有v多项式了，所以可以直接确定y
 
 ## AES/DES
 
