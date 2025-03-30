@@ -1465,16 +1465,34 @@ while (sz-- > 0)
   ((fini_t) array[sz]) ();
 ```
 `map->l_addr`通常为程序的基地址，`fini_array->d_un.d_ptr`也是一个固定的偏移（0x3d88）。所以如果修改`map->l_addr`为`map->l_addr+[one_gadget]-0x3d88`（[one_gadget]为存有one_gadget地址的指针），就能让程序执行one_gadget。这题利用格式化字符串直接在栈上找到`map->l_addr`并修改。找法很简单，gdb跟进到printf函数内部，然后vmmap找到程序基地址，使用`search --hex addr`(注意这里的addr为程序基地址的小端形式，要倒过来写。或者直接`search -p addr`，不用倒过来)就能找到几个存有基地址的指针。其中一个指针会在栈上（134条破案了，它们就是记录程序基地址的玩意）
-- pwndbg调试PIE程序。今天终于找到解决办法了，利用pwndbg自带的brva即可
+- pwndbg调试PIE程序。今天终于找到解决办法了，利用pwndbg自带的brva即可。模板如下：
 ```py
+from pwn import *
+import os
+context.arch='amd64'
+os.chdir("./challenge")
 context.terminal = ["tmux", "splitw", "-h"]
 gdbscript='''
     si
-    brva offset_of_instruction
+    brva
     c
 '''
-p = gdb.debug("./pwn",gdbscript=gdbscript)
+exe_path = ''
+exe=ELF(exe_path)
+libc=ELF("")
+host=""
+port=
+def conn(argv=[]):
+    if args.REMOTE:
+        r = remote(host, int(port))
+    elif args.GDB:
+        r = gdb.debug(argv or [exe_path], exe=exe_path, gdbscript=gdbscript)
+    else:
+        r = process(argv or [exe_path])
+    return r
+p=conn()
 ```
+
 138. [Digital Circuit](https://chovid99.github.io/posts/tcp1p-ctf-2023/#digital-circuit)
 - 个人觉得非常巧妙的栈迁移题，思路也值得学习。把栈迁移到bss段算常规操作，但是可输入的字节仍然不够构造完整的rop怎么办？wp利用这段代码：
 ```

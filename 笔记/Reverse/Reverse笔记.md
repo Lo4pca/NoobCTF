@@ -1406,3 +1406,6 @@ mov     r8, qword [r13]
 - 逆向[Service Modeling Language](https://en.wikipedia.org/wiki/Service_Modeling_Language)（`.sml`）
 212. [Molly](https://ctftime.org/writeup/40045)
 - 分析dll+exe。dll文件的entry point函数全部执行完后才到当前进程（exe文件）
+213. [rulemaster](https://github.com/TheRomanXpl0it/TRX-CTF-2025/blob/main/rev/rulemaster)
+- 逆向`.cbc`文件（文件头`ClamBC`，ClamAV signature bytecode）
+- 另一道类似的题： https://vince-qu.com/posts/24_07_13_hitcon_antivirus.html
