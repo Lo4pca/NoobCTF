@@ -583,6 +583,8 @@ print(base64.b64encode(temp.encode()))
 
 记那种分析pcapng的流量题
 
+任何和network相关的也放这
+
 - [Sussy](https://auteqia.garden/posts/write-ups/akasec2024/sussy/)
     - 在docker里使用[zeek](https://zeek.org)分析流量包
     - john爆破7z和pdf文件密码
@@ -625,6 +627,12 @@ print(base64.b64encode(temp.encode()))
     - 纯命令行做法： https://gist.github.com/C0nstellati0n/78f5887b5bee235583a026840354ae54#no-shark
 - [Cheese with Friends](https://github.com/srdnlen/srdnlenctf-2025_public/blob/main/foren_Cheese_with_Friends)
     - usb keyboard pcap，但是包含vscode快捷键。最好的办法是用pynput库模拟出全部的击键
+- [Broken Tooth](https://github.com/thmai11/writeups/blob/main/2025/apoorvctf/broken_tooth)
+    - 分析蓝牙设备pcap并提取音频资源
+    - 也和RTP相关，所以wireshark内部就能提取出音频： https://www.youtube.com/watch?v=hvrYrY0bLMs
+- [Nobita’s Network Nightmare](https://abuctf.github.io/posts/ApoorvCTF)
+    - [Cisco Packet Tracer](https://www.netacad.com/resources/lab-downloads)网络配置
+    - 更详细的wp： https://blog.grace.sh/posts/apoorvctf2025_nnn
 
 1. 将tcp流解码为tpkt+openssl检查ASN.1。例题：[arrdeepee](../../CTF/攻防世界/6级/Misc/arrdeepee.md)
 2. mca后缀名文件为游戏Minecraft使用的世界格式。例题:[Russian-zips](https://blog.csdn.net/weixin_44604541/article/details/113741829)

@@ -569,6 +569,7 @@ for i in range(300,1000):
 	- 具体payload见[官方wp](https://github.com/idekctf/idekctf-2024/tree/main/web/untitled-smarty-challenge)。其他解法： https://gist.github.com/C0nstellati0n/248ed49dea0accfef1527788494e2fa5#untitled-smarty-challenge
 - [Cat Club](https://crypto-cat.gitbook.io/ctf-writeups/2024/intigriti/web/cat_club)
     - jwt [algorithm confusion](https://portswigger.net/web-security/jwt/algorithm-confusion)。常出现于“明明有现成的jwt库但是却自己写了个验证函数“的情况
+        - 补个exp更简单的题目的wp: https://dyn20.gitbook.io/writeup-ctf/root-me/json-web-token-jwt-public-key
     - js pug库ssti。注意`pug.render`(compile函数也会触发ssti)的参数有没有未过滤的用户输入。补点常用payload： https://book.hacktricks.xyz/pentesting-web/ssti-server-side-template-injection#pugjs-nodejs
 - [更多模板注入payload](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Server%20Side%20Template%20Injection/Python.md)
     - `{% for x in ().__class__.__base__.__subclasses__() %}{% if "warning" in x.__name__ %}{{x()._module.__builtins__['__import__']('os').popen("cmd").read()}}{%endif%}{% endfor %}`
