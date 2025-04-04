@@ -57,6 +57,8 @@
     }
     ```
     我对这里的`msg.value`的理解是“调用者调用某个函数时附带的eth数“。假如攻击者正常调用两次deposit，就需要付两次eth。但利用上面的for循环+delegatecall，可调用任意次deposit，且只用付一次eth。withdraw的时候就能凭空提取不属于自己的eth
+- [Mafia2](https://github.com/DK27ss/PWNME-CTF-Mafia2-WriteUp)
+    - solidity里的private字段可以通过`cast storage`获得……并非private
 
 ## SQL注入
 
@@ -447,6 +449,20 @@
     - 非常明显的html注入，目标是泄漏shadow dom里的flag。直接用js是无法访问shadow dom里的内容的，但是可以用`document.execCommand`执行`findstring`来逐字符爆破flag
     - 绕过csp `"default-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'`带出flag的方法为WebRTC
     - 还可以用`window.find`匹配到shadow dom里的内容；题目的csp还可以用meta绕过。见 **Baby Sandbox**
+- [An 18 years old bug](https://mizu.re/post/an-18-years-old-bug)
+    - firefox的离谱bug，与iframe和页面cache有关。在一个设置了`Cache-Control`的页面下执行以下操作即可触发bug：
+
+        0. `/`路径具有cache，可以通过get参数设置iframe 1的src；iframe 1下还有一个iframe 2，但无法控制其src
+        1. 访问`/`并设置iframe的src属性，假设为A
+        2. cache当前iframe src为A的页面（访问`/`并随便加一个get参数，不设置src）
+        3. 访问`/`并修改iframe的src属性，假设为B
+        4. 回到之前cache的网页，`[CTRL] + [R]`或者js调用`location.reload`
+        5. 此时网页的dom内显示iframe的src为B，但iframe实际展示的却是A的内容
+    - iframe与cache还有个更离谱的bug，会导致页面上的iframe出现“src偏移”：
+        - 前两步和上述一致
+        - 访问`/`并修改iframe的src属性为任意无效值。比如`about:x`
+        - 上述第四步后，iframe 1的src为之前设置的无效值，同时iframe 2展示A的内容（但dom中无法观察到iframe 2的src改为A，而是原本的值）
+    - 结合以上两个bug，假如用户可以控制有sandbox的iframe 1的src，且iframe 1下方有一个无法控制src的iframe 2，就能劫持iframe 2渲染的内容。如果iframe 2恰好没有sandbox，等于顺便绕过了sandbox的限制
 
 ## SSTI
 

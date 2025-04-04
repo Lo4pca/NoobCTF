@@ -1409,3 +1409,5 @@ mov     r8, qword [r13]
 213. [rulemaster](https://github.com/TheRomanXpl0it/TRX-CTF-2025/blob/main/rev/rulemaster)
 - 逆向`.cbc`文件（文件头`ClamBC`，ClamAV signature bytecode）
 - 另一道类似的题： https://vince-qu.com/posts/24_07_13_hitcon_antivirus.html
+214. [Flattened Vyper](https://md.updownup.de/s/IswdBTUYe)
+- 逆向solidity evm code。可以用[evm-run](https://github.com/zemse/evm-run)运行代码
