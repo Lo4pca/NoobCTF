@@ -23,6 +23,13 @@
     - kHeapObjectTag是v8里用于区分某个值是指针还是值的玩意。如果某个值是指针，其lsb就会是1，否则是0
     - byteCodeTag是v8里用于标注某个东西和bytecode有关的东西。伪造bytecode时，装有假bytecode的buf地址得有这个玩意v8才会承认这个地址装的是bytecode。看起来tag的值是固定的，至少对于单个v8 build来说
   - 另一种做法： https://github.com/mwlik/v8-ctf-challenges/tree/main/infoseciitr2024/pwn/V8box ，需要爆破一个字节（`cpt_page+0x10ae0n`处）。getshell则用了 https://ju256.de/posts/kitctfctf22-date 里介绍的技巧。v8里每个函数对象的code对象都有一个`code_entry_point`原始指针（raw pointer，区别于sandbox里其他“其实是相对heap base或external pointer table的索引”的指针）字段，覆盖这项后便能控制程序的rip。然而这个覆盖相当于覆盖malloc_hook这类的东西，只能执行一个gadget。v8里只执行一个gadget还不足以getshell（再次感慨为什么libc里会存在one_gadget这种逆天东西）。所以这里可以结合jop（jump orientated programming，应该是指末尾是jmp指令的gadget）和rop做个栈迁移。另外这个技巧其实是 https://anvbis.au/posts/code-execution-in-chromiums-v8-heap-sandbox 的延伸。如果sandbox开了JIT，有更简单的方式直接使v8运行shellcode
+- [holy cow](https://tourpran.github.io/writeups/1740990144225-holy-cow---pwnme25)
+  - 此题的primitive是“攻击者可以获取`TheHole`值”。`TheHole`值在v8里的作用有：
+    - 表示一个位置曾经有值但现在没有
+    - 不同于`undefined`，是V8内部使用的更低级别的概念
+    - 用于标记数组或对象中已删除或未初始化的元素
+  - 利用`TheHole`值可以破坏map的size值，比如将size降为-1。原理是v8内部用`TheHole`标记被删除的键值对，即用`TheHole`值补位被删除的键。明显这样的删除方法无法应对被删除的键值对就是`TheHole`的情况，导致可以“无限”删除（实际情况下还需要保证元素数量大于bucket数量除以2），将size削减为负数
+  - 利用size为负数的特点配合turbofan的错误代码优化可以实现数组oob。turbofan会将map.size误判为>=0（似乎是直接判为了0？如果是整数的话根据wp提供的exp还是有直接的oob风险的。或者编译器跟我想的不一样？），导致更进一步的优化时移除了数组的范围检查
 
 ## Kernel
 

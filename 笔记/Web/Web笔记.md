@@ -463,6 +463,11 @@
         - 访问`/`并修改iframe的src属性为任意无效值。比如`about:x`
         - 上述第四步后，iframe 1的src为之前设置的无效值，同时iframe 2展示A的内容（但dom中无法观察到iframe 2的src改为A，而是原本的值）
     - 结合以上两个bug，假如用户可以控制有sandbox的iframe 1的src，且iframe 1下方有一个无法控制src的iframe 2，就能劫持iframe 2渲染的内容。如果iframe 2恰好没有sandbox，等于顺便绕过了sandbox的限制
+- [sayMyName](https://fayred.fr/en/writeups/pwnme-ctf-2025-saymyname)
+    - 又是一道关于字符集与ISO-2022-JP的题目。虽然说我见了很多次但还是不熟，看到flask的`return Response(render_template(a.html), content_type='text/html')`和`a.html`里没有设定meta都没反应过来
+    - a标签的`onfocus`可以利用`#`触发。比如一个a标签的id是b，那么访问`http://c.com/d#b`即可触发
+    - 这题的xss注入点在`onfocus`中，且固定含有`document.location="http://a.com"`部分。这个重定向会导致无法执行一些复杂的payload，比如fetch。可以构造`document.location="http://a.com"[0]="#"`来阻止重定向（最后document.location是当前页面加上`#`。没想到这种语法也行）
+    - python格式化字符串注入漏洞。如果环境含有复杂的模块，比如flask，就能借助这些模块(以更短的payload)拿到os，进而执行命令
 
 ## SSTI
 
@@ -3506,7 +3511,7 @@ res=web3.eth.wait_for_transaction_receipt(hstrx)
 - websocket下的sqlite注入。漏洞点和利用方法都一样，只不过连接方式不同。sqlmap默认不支持websocket，需要借助于工具： https://github.com/BKreisel/sqlmap-websocket-proxy
 311. [reCAPTCHA v39](https://github.com/sahuang/my-ctf-challenges/tree/main/vsctf-2023/misc_recaptcha-v39)
 - python建立websocket连接+计算图片阴影部分面积。websocket连接的网页用requests是连不上的
-- 不知道为啥，在做[kaboot](https://github.com/TJCSec/tjctf-2024-challenges/tree/main/web/kaboot)时websocket库出问题了，没法send（奇了怪了，明明官方也是用这个库的）。于是这里是nodejs做法： https://gist.github.com/C0nstellati0n/248ed49dea0accfef1527788494e2fa5#kaboot
+- 不知道为啥，在做[kaboot](https://github.com/TJCSec/tjctf-2024-challenges/tree/main/web/kaboot)时websocket库出问题了，没法send（奇了怪了，明明官方也是用这个库的）。于是这里是nodejs做法：**kaboot**
 - 好好好，今天又遇见一道websocket题，python和nodejs都不行，疯狂断连。但为啥别人的nodejs就行啊？[Spinner](https://vaktibabat.github.io/posts/vsCTF_Writeups/),以及个人的无脑console解法（用js代码触发题目自带的event从而发送socket信息）和其他python解法： **spinner**
 312. [ZKPLite](https://github.com/sahuang/my-ctf-challenges/tree/main/vsctf-2023/misc_zkplite)
 - blockchain如何计算/预测合约地址（msg.sender）： https://docs.soliditylang.org/en/latest/control-structures.html#salted-contract-creations-create2
