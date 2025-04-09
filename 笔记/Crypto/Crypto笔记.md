@@ -760,6 +760,7 @@ $$
         - sagemath的block_matrix的用法
         - 利用PolynomialRing更快构造格的方法(用了一下，不知道为啥报错……考虑下面knutsacque的其他解法中`alex_hcsc`的类似构造方法)
         - LLL解题过程中权重（weight）的思考——什么时候该加权重，加了意味着什么？详情见 https://magicfrank00.github.io/writeups/posts/lll-to-solve-linear-equations ，我见过的有关LLL解线性方程组的最好解释。另外，教程里有关利用`coefficients_monomials`构造格的方法似乎不是所有sagemath版本都能用
+        - 在另外一个地方发现了 https://valter.wiki/blog/lattices ，也不错
 - [Secure Nonsense](https://hackmd.io/@Solderet/rk2g-kwr1g)
     - hidden number problem(hnp)。包装好直接用的hnp见 https://github.com/josephsurin/lattice-based-cryptanalysis/blob/main/lbc_toolkit/problems/hidden_number_problem.sage 。主要是这样一个式子: $\beta_i - t_i \alpha + a_i \equiv 0 \pmod p$ ,输入各个 $t_i$ 和 $a_i$ 的值并给出 $\beta_i$ 的上限，返回 $\alpha$
 - [A-Complex-Shamir](https://github.com/kh4rg0sh/ctf_writeups/blob/main/backdoorctf-2024/crypto/A-Complex-Shamir)
@@ -888,6 +889,13 @@ $$
         - 当n个约化除子根据群运算相加后，结果仍然是2个点的组合，或者说g个点，g表示曲线的属
         - 分解运算结果的u多项式可以得到原本相加的两个约化除子的信息。比如分解P+(Q+R)可以得到P和Q+R（这个群是交换群）
     - 有了这些二级结论看求解脚本就没那么费力了。extractPoints用于分解u多项式，获取原本相加的两个约化除子的信息。不过每个x坐标对应两个y，不确定具体是哪个。所以要用product爆破所有的可能性。后续`extractPoints(Jnm[0])`也是同理。`extractPoints(*Jpq1)`这段则不需要爆破。因为已经有v多项式了，所以可以直接确定y
+- [Vending Machine](https://github.com/Ectario/articles-and-wu/tree/master/WriteUps/VendingMachine)
+    - ECDSA，但是存在不安全的nonce生成过程（Biased Nonce，二进制表示的nonce之间共享相同但是未知的前缀）。见[论文](https://eprint.iacr.org/2019/023.pdf) 4.3
+    - 对于任意合法的ECDSA签名`(m,r,s)`，`(m,r,n-s)`也是一组m的合法签名（n为模数）
+    - python内置`hash`函数的特性：如果输入的内容小于python内部的模数[PyHASH_MODULUS](https://github.com/python/cpython/blob/main/Include/cpython/pyhash.h#L18)，则会直接返回输入内容，作为其hash。比较特殊的一点是，`hash(-1)`和`hash(-2)`的hash都是-2，因为-1在python内部有特殊意义
+    - 一些破解ecdsa不安全nonce的工具
+        - https://github.com/daedalus/BreakingECDSAwithLLL
+        - https://github.com/josephsurin/lattice-based-cryptanalysis/blob/main/lbc_toolkit/attacks/ecdsa_biased_nonce.sage#L25
 
 ## AES/DES
 
