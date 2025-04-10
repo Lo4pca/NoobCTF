@@ -2912,3 +2912,13 @@ $ cd a/b
     - [BlueStacks](https://www.bluestacks.com):安卓模拟器
     - [TLauncher](https://tlauncher.org):启动器
     - [Chunker](https://www.chunker.app)/[je2be](https://je2be.app):基岩版和java版之间的转换器
+392. [Just A Private Key](https://github.com/Phreaks-2600/PwnMeCTF-2025-quals/blob/main/Misc/Just_a_private_key)
+- 由github SSH私钥泄漏引发的惨案……
+    - 使用被泄漏的ssh私钥登录github可以获取对应的用户名
+    - 利用`git ls-remote`命令可以枚举用户的所有repo，包括私有仓库
+    - 仓库里存在由Terraform部署的AWS环境的相关内容，包括S3 Buckets和IAM Roles与Policies
+    - 通过不安全的public s3 bucket可以泄漏AWS账号id。工具：[S3 Account Search](https://github.com/WeAreCloudar/s3-account-search)
+    - 仓库还泄漏了AWS IAM OIDC provider的信息。provider允许GitHub Actions使用OIDC tokens进行AWS的身份验证
+    - 存在一个允许被OIDC provider代入（assume）的role，且该role可以访问含有flag的私有s3 bucket。该role的名称含有3位随机数字后缀，需要爆破
+    - 使用[pacu](https://github.com/RhinoSecurityLabs/pacu)（AWS exploitation framework）枚举所有IAM roles并找到上一条提到的role
+    - 伪造GitHub Actions workflow并代入上述role，拿到flag

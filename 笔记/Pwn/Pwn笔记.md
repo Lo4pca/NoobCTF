@@ -48,11 +48,13 @@ kernel pwn题合集。用于纪念我连堆都没搞明白就敢看内核的勇�
 
 ### Linux
 
+在一场比赛中看见有人用[Accessing physical memory from userspace on Linux](https://codentium.com/accessing-physical-memory-from-userspace-on-linux)里的内容直接速通了一道题（[Hidden Key Recovery](https://github.com/Phreaks-2600/PwnMeCTF-2025-quals/tree/main/Pwn/HiddenKeyRecovery)）。但是他没写是咋干的，记一下就当我学会了（
+
 - [Virtio-note](https://github.com/nobodyisnobody/write-ups/tree/main/bi0sCTF.2024/pwn/virtio-note)
   - 细分下来应该算qemu逃逸（qemu escape），不过这题pwn的是qemu内置的VirtIO drivers(VirtIO驱动，VirtIO drivers offer a more efficient and direct method of accessing host hardware resources compared to emulated drivers, leading to better performance and lower overhead in virtualized environments)中的作者自定义部分。需要自行写一个在qemu vm里运行的kernel模块，其与virtio backend交互，最终执行shellcode，将flag发回攻击者监听的端口
   - 题目里的bug是OOB读写，bug还是该怎么利用怎么利用，不过除了泄漏heap地址以外，还要泄漏和qemu binary有关的地址（如`qobject_input_type_null`），来计算qemu binary映射基地址。qemu bss段的`tcg_qemu_tb_exec`变量指向qemu内部用来生成jit代码的RWX段，用来写shellcode很方便
-  - 看了[官方wp](https://blog.bi0s.in/2024/02/28/Pwn/bi0sCTF24-virtio-note/)，对VirtIO PCI device和内部机制VirtQueues了解得更清楚了些。解法用的是栈迁移加ropchain
-- [palindromatic](https://kaligulaarmblessed.github.io/post/palindromatic-biosctf2024/),[官方wp](https://blog.bi0s.in/2024/02/26/Pwn/bi0sCTF24-palindromatic/)
+  - 看了[官方wp](https://blog.bi0s.in/2024/02/28/Pwn/bi0sCTF24-virtio-note)，对VirtIO PCI device和内部机制VirtQueues了解得更清楚了些。解法用的是栈迁移加ropchain
+- [palindromatic](https://kaligulaarmblessed.github.io/post/palindromatic-biosctf2024),[官方wp](https://blog.bi0s.in/2024/02/26/Pwn/bi0sCTF24-palindromatic)
     - UAF+double free。kernel保护（SMEP, SMAP, KPTI 和 KASLR）全开，额外还有CONFIG_STATIC_USERMODEHELPER和[CONFIG_RANDOM_KMALLOC_CACHES](https://sam4k.com/exploring-linux-random-kmalloc-caches/#introducing-random-kmalloc-caches)。前者让攻击者无法通过覆盖modprobe_path提权，后者会复杂一点，简述就是，每个大小的slab中有多个slab caches。当使用kmalloc分配一个object时，它会随机去到一个slab。虽然降低了相似大小的object去往同一个slab cache的可能性，但是不会影响cross-cache攻击。堆喷时多喷几个object即可
     - 尝试复述一下漏洞利用过程的关键部分（还是看[exp](https://gist.github.com/k1R4/bf302fffc2bd5e313a0f7ad789fbd363)会比较好理解）
       - 首先利用程序里的漏洞获取UAF，使得我们仍然可以用程序内的操作控制某个已被free的object（这块已使用cross cache使得下一步能让pipe_buffer覆盖到题目object所在的内存页）
