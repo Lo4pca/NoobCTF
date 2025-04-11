@@ -468,6 +468,11 @@
     - a标签的`onfocus`可以利用`#`触发。比如一个a标签的id是b，那么访问`http://c.com/d#b`即可触发
     - 这题的xss注入点在`onfocus`中，且固定含有`document.location="http://a.com"`部分。这个重定向会导致无法执行一些复杂的payload，比如fetch。可以构造`document.location="http://a.com"[0]="#"`来阻止重定向（最后document.location是当前页面加上`#`。没想到这种语法也行）
     - python格式化字符串注入漏洞。如果环境含有复杂的模块，比如flask，就能借助这些模块(以更短的payload)拿到os，进而执行命令
+- [Hack The Bot 1](https://github.com/Phreaks-2600/PwnMeCTF-2025-quals/blob/main/Web/Hack_The_Bot_1)
+    - 使用iframe的srcdoc属性绕过xss过滤并提取cookie。srcdoc里的html Entity可以使用`&#num`的形式，`&#xnum`不是必须的
+    - 其他解法与非预期解： **Hack The Bot 1**
+        - 使用input标签和`oncontentvisibilityautostatechange`属性
+        - 非预期解中题目由于nginx配置错误出现了路径穿越漏洞，可以直接走到chrome的文件夹下下载加密的cookie文件。这里记录一下解密的脚本，比赛时搜了好久都没搜到
 
 ## SSTI
 
@@ -4353,3 +4358,6 @@ fopen("$protocol://127.0.0.1:3000/$name", 'r', false, $context)
 531. [zStego](https://learn-cyber.net/writeup/zStego)
 - doc文件（zip）解压与symlink。这题补了我一个盲点，symlink还可以link到目录。比如让media为链接到根目录的symlink，php改变目录到`word/media`目录实际上是改变到了根目录。可以用来绕`ini_set('open_basedir', '.')`（万物皆是文件的魅力时刻）
     - 补充一点，这个做法只有php > 8.3才能使用。旧版本没有这么智能，认为路径就应该在`.`下（即使`.`就是root），因此读不到`/flag`
+532. [PwnShop](https://github.com/Phreaks-2600/PwnMeCTF-2025-quals/blob/main/Web/Pwnshop)
+- 无回显的xxe，即无法获取xxe请求的返回内容。可以用Out Of Band (OOB)请求绕过（看起来只是使服务器下载了公网上布置的恶意dtd文件而已）
+- [Less.php](https://github.com/wikimedia/less.php) 0 day rce漏洞
