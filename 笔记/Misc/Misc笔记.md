@@ -633,6 +633,9 @@ print(base64.b64encode(temp.encode()))
 - [Nobita’s Network Nightmare](https://abuctf.github.io/posts/ApoorvCTF)
     - [Cisco Packet Tracer](https://www.netacad.com/resources/lab-downloads)网络配置
     - 更详细的wp： https://blog.grace.sh/posts/apoorvctf2025_nnn
+- [Dura Lesc, Sed Lesc](https://github.com/Phreaks-2600/PwnMeCTF-2025-quals/blob/main/Misc/Dura_Lesc_Sed_Lesc)
+    - 使用[crackle](https://github.com/mikeryan/crackle)破解BLE Encryption (Bluetooth Smart)
+    - 没有wp，只有来自出题人的脚本：**Dura Lesc**
 
 1. 将tcp流解码为tpkt+openssl检查ASN.1。例题：[arrdeepee](../../CTF/攻防世界/6级/Misc/arrdeepee.md)
 2. mca后缀名文件为游戏Minecraft使用的世界格式。例题:[Russian-zips](https://blog.csdn.net/weixin_44604541/article/details/113741829)

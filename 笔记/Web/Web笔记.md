@@ -467,12 +467,27 @@
     - 又是一道关于字符集与ISO-2022-JP的题目。虽然说我见了很多次但还是不熟，看到flask的`return Response(render_template(a.html), content_type='text/html')`和`a.html`里没有设定meta都没反应过来
     - a标签的`onfocus`可以利用`#`触发。比如一个a标签的id是b，那么访问`http://c.com/d#b`即可触发
     - 这题的xss注入点在`onfocus`中，且固定含有`document.location="http://a.com"`部分。这个重定向会导致无法执行一些复杂的payload，比如fetch。可以构造`document.location="http://a.com"[0]="#"`来阻止重定向（最后document.location是当前页面加上`#`。没想到这种语法也行）
+        - 另一种方法是修改`document.readyState`，见 **sayMyName** 。题目使用`document.readyState`判断是否应该关闭WebDriver。修改后便有了足够的时间
     - python格式化字符串注入漏洞。如果环境含有复杂的模块，比如flask，就能借助这些模块(以更短的payload)拿到os，进而执行命令
+        - 有人提到了另一道题目的[wp](https://github.com/jailctf/challenges-2024/tree/master/MMM)，利用格式化字符串漏洞构建无回显的侧信道做法。不过无法应用于这题，服务器无法承受强度这么高的爆破
 - [Hack The Bot 1](https://github.com/Phreaks-2600/PwnMeCTF-2025-quals/blob/main/Web/Hack_The_Bot_1)
     - 使用iframe的srcdoc属性绕过xss过滤并提取cookie。srcdoc里的html Entity可以使用`&#num`的形式，`&#xnum`不是必须的
     - 其他解法与非预期解： **Hack The Bot 1**
         - 使用input标签和`oncontentvisibilityautostatechange`属性
         - 非预期解中题目由于nginx配置错误出现了路径穿越漏洞，可以直接走到chrome的文件夹下下载加密的cookie文件。这里记录一下解密的脚本，比赛时搜了好久都没搜到
+        - 由于bot在访问url同时（其实是异步）设置cookie，因此还可以用`cookieStore.addEventListener`检测cookie的设置并直接获取其值
+- [Hack The Bot 2](https://github.com/Phreaks-2600/PwnMeCTF-2025-quals/blob/main/Web/Hack_The_Bot_2)
+    - WebDrivers(xss挑战里常见的bot，如pupeteer)使用Chrome DevTools Protocole（CDP）的api与浏览器进行交互
+        - CDP的载体为http，与pupeteer同时在localhost上启动。具体的端口可由`remote-debugging-port`指定，或者由chrome随机指定
+        - [devtools API](https://chromedevtools.github.io/devtools-protocol)有很多，这题使用的是`/json/list`，返回有效websocket的列表。可通过返回内容中的`webSocketDebuggerUrl`记录的ws url与调试工具交互。通常情况下这个url有严格的同源策略（SOP），只允许webdriver自身与其交互；但若开启webdriver时指定`--remote-allow-origins=*`，则所有人都可以在得知具体url（url末尾含有不可爆破的随机id）的情况下与其交互
+        - 利用devtools可以访问本机文件系统里的文件。用`Page.navigate`配合`file://` url即可
+    - 这题同样存在nginx配置错误，允许攻击者访问chrome cache。cache会记录当前用户（webdriver）访问的所有资源（包括devtools api的url），文件名是由特定规则生成的hash
+    - 复述一下题目exp
+        - 通过nginx配置漏洞访问cache下的`DevToolsActivePort`文件，获取DevTools启动的http端口
+        - 通过http访问`/json/list`。由于同源策略问题，我们无法直接获取其内容。但cache这个page后就能利用nginx配置漏洞查看内容了
+        - 计算`/json/list`文件名对应的hash后获取其内容，进而得到websocket url
+        - 通过websocket访问文件系统中的flag文件
+        - 由于完整payload较长，因此可以用另外一个服务器serve完整payload，提交给bot的内容为fetch上述payload并eval执行
 
 ## SSTI
 
