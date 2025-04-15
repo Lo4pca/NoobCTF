@@ -488,6 +488,9 @@
         - 计算`/json/list`文件名对应的hash后获取其内容，进而得到websocket url
         - 通过websocket访问文件系统中的flag文件
         - 由于完整payload较长，因此可以用另外一个服务器serve完整payload，提交给bot的内容为fetch上述payload并eval执行
+- [DNXSS-over-HTTPS](https://mariosk1574.com/posts/kalmar-ctf-2025-dnxss-over-https)
+    - 使`dns.google`返回合法的xss payload。用`/resolve`可以解决很多我做题时（用`/dns-query`）遇到的问题
+    - 个人解法：**DNXSS-over-HTTPS** 。使用`dns.message`构造raw dns query
 
 ## SSTI
 
@@ -612,6 +615,12 @@ for i in range(300,1000):
     - jwt [algorithm confusion](https://portswigger.net/web-security/jwt/algorithm-confusion)。常出现于“明明有现成的jwt库但是却自己写了个验证函数“的情况
         - 补个exp更简单的题目的wp: https://dyn20.gitbook.io/writeup-ctf/root-me/json-web-token-jwt-public-key
     - js pug库ssti。注意`pug.render`(compile函数也会触发ssti)的参数有没有未过滤的用户输入。补点常用payload： https://book.hacktricks.xyz/pentesting-web/ssti-server-side-template-injection#pugjs-nodejs
+- [Ez ⛳ v3](https://mariosk1574.com/posts/kalmar-ctf-2025-ez-v3)
+    - caddyfile模板注入。比赛时真正卡住我的地方竟然是如何连接服务器……文件内存在`strict_sni_host insecure_off`，可以用openssl以一种特定的方式连接；但是用浏览器的话会显示没有指定的mtls证书
+    - 指定`Host` header也能绕过mtls连接：**Ez ⛳ v3**
+- [KalmarNotes](https://jonason0592.substack.com/p/kalmar-ctf-writeup-web-challenges)
+    - 比赛时找到了xss注入点，但是拥有session的用户只能查看自己的note，故正常情况下只能是个self xss
+    - 题目在`default.vcl`文件中定义了缓存规则，用于缓存所有静态资源，如`.png`结尾的资源。漏洞在于应用没有仔细核对查看note的url（`/note/<id>/<type>`）。即使type不在预期范围内也会呈现note的内容。于是可以构造`/note/id/a.png`，在自己的session下使应用缓存页面后再让admin访问。由于缓存的优先级高于应用的逻辑，admin看到的是先前缓存的payload，而不是身份验证失败的authentication failed提示
 - [更多模板注入payload](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Server%20Side%20Template%20Injection/Python.md)
     - `{% for x in ().__class__.__base__.__subclasses__() %}{% if "warning" in x.__name__ %}{{x()._module.__builtins__['__import__']('os').popen("cmd").read()}}{%endif%}{% endfor %}`
     - https://sanlokii.eu/writeups/downunderctf/parrot-the-emu
@@ -4161,7 +4170,7 @@ Content-Type: text/plain
     - https://octo-kumo.me/c/ctf/2024-ductf/web/prisoner-processor ：不同的crush方式和rce payload
     - https://jamvie.net/posts/2024/07/ductf-2024-prisoner-processor/ ：一个思路差不多但是实现方式完全不一样的wp。这位大佬选择用原型链污染覆盖tsconfig.json。这个文件可以控制typescript导入模块时具体导入的文件。可以将其指向一个别的可控制内容的js文件，然后使程序崩溃，重新加载这个文件后index.ts导入模块时就能执行代码了。崩溃方式选择的是往/proc/self/mem写入内容。另外还有个冷知识，tsconfig.json其实不是json文件，它能支持`/**/`多行注释，在一个合法的json结构后加上一堆非法json也不会崩溃
 473. [hah_got_em](https://octo-kumo.me/c/ctf/2024-ductf/web/hah_got_em)
-- gotenbergv8.0.3文件读取漏洞。基本上看见题目莫名其妙用一个特定版本的软件时就说明这个版本大概率有问题。不过exp不一定搜得到，需要自己查看patch找
+- gotenberg v8.0.3 文件读取漏洞。基本上看见题目莫名其妙用一个特定版本的软件时就说明这个版本大概率有问题。不过exp不一定搜得到，需要自己查看patch找
 - 其他wp：
     - https://github.com/DownUnderCTF/Challenges_2024_Public/blob/main/web/hah-got-em
     - https://chuajianshen.github.io/2024/07/06/DownUnderCTF2024/
@@ -4376,3 +4385,16 @@ fopen("$protocol://127.0.0.1:3000/$name", 'r', false, $context)
 532. [PwnShop](https://github.com/Phreaks-2600/PwnMeCTF-2025-quals/blob/main/Web/Pwnshop)
 - 无回显的xxe，即无法获取xxe请求的返回内容。可以用Out Of Band (OOB)请求绕过（看起来只是使服务器下载了公网上布置的恶意dtd文件而已）
 - [Less.php](https://github.com/wikimedia/less.php) 0 day rce漏洞
+533. [G0tchaberg](https://mariosk1574.com/posts/kalmar-ctf-2025-g0tchaberg)
+- 此题的设置是脚本每五秒就会访问gotenberg `/forms/chromium/convert/html`来渲染flag；但文件在远程机器上，攻击者无法直接访问
+- [Gotenberg](https://github.com/gotenberg/gotenberg)是一个将html，markdown等其他格式的文件转为pdf的api工具
+    - 允许列出`/tmp`目录下的文件名以及文件读取，可以用html的iframe标签加`file://` url实现
+    - 采用队列的形式处理请求。在`/tmp`下的一个随机uuid名称的目录里，gotenberg会为每个请求创建随机的uuid目录，并将等待转换的原始文件存入其中。pdf转换完成后会删除目录以及内部的文件。同时只会处理一个请求，但请求时设置`waitDelay`可以实现异步的操作
+- 复述一下exp过程
+    1. 首先使用iframe列出`/tmp`下的目录，确认随机的uuid名称（称为uuid1）
+    2. 用第二个请求列出`/tmp/uuid1`下的内容，注意设置`waitDelay`
+    3. 紧接着发送第三个请求，内容是fetch远程服务器的exp.js并执行。同样需要设置`waitDelay`
+    4. 理想情况下，接下来正好是题目自动发送的渲染flag的请求
+    5. 第四步的请求使`/tmp/uuid1`下出现了含有flag的目录。`waitDelay`后第二步的请求将能列出flag所在的目录，称为`uuid2`
+    6. 拿到uuid2后迅速往第三步提到的远程服务器上传`exp.js`，内容为读取`/tmp/uuid1/uuid2/`下的已知名称的flag
+    7. 第三个请求的`waitDelay`结束后执行`exp.js`，成功读取到flag

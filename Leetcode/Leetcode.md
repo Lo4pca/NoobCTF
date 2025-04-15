@@ -374,6 +374,7 @@
 - [Valid Arrangement of Pairs](./Hard/Valid%20Arrangement%20of%20Pairs.md). Hierholzer's Algorithm：在Eulerian Graph/Semi-Eulerian Graph中寻找Eulerian path
 - [Find Minimum Diameter After Merging Two Trees](./Hard/Find%20Minimum%20Diameter%20After%20Merging%20Two%20Trees.md). 寻找树（tree）的直径（diameter）
 - [Recover a Tree From Preorder Traversal](./Hard/Recover%20a%20Tree%20From%20Preorder%20Traversal.md). binary tree
+- [Count Good Triplets in an Array](./Hard/Count%20Good%20Triplets%20in%20an%20Array.md). binary indexed tree（Fenwick Tree）
 
 ## Others
 
