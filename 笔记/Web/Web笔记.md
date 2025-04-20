@@ -489,8 +489,12 @@
         - 通过websocket访问文件系统中的flag文件
         - 由于完整payload较长，因此可以用另外一个服务器serve完整payload，提交给bot的内容为fetch上述payload并eval执行
 - [DNXSS-over-HTTPS](https://mariosk1574.com/posts/kalmar-ctf-2025-dnxss-over-https)
-    - 使`dns.google`返回合法的xss payload。用`/resolve`可以解决很多我做题时（用`/dns-query`）遇到的问题
+    - 使`dns.google`返回合法的xss payload。用`/resolve`（如果get参数传`ct`可以使google不过滤返回内容）可以解决很多我做题时（用`/dns-query`）遇到的问题
     - 个人解法：**DNXSS-over-HTTPS** 。使用`dns.message`构造raw dns query
+        - 这篇[wp](https://mqcybersec.org/writeups/25-kalmar-dnsxssoverhttp)用的也是`/dns-query`，不知道为啥比我顺利很多？
+- [KalmarNotes](https://mqcybersec.org/writeups/25-kalmar-kalmarnotes)
+    - 比赛时找到了xss注入点，但是拥有session的用户只能查看自己的note，故正常情况下只能是个self xss
+    - 题目在`default.vcl`（[Varnish Configuration Language](https://varnish-cache.org/docs/trunk/users-guide/vcl.html)，[Varnish HTTP Cache](https://varnish-cache.org)）文件中定义了缓存规则，用于缓存所有静态资源，如`.png`结尾的资源。漏洞在于应用没有仔细核对查看note的url（`/note/<id>/<type>`）。即使type不在预期范围内也会呈现note的内容。于是可以构造`/note/id/a.png`，在自己的session下使应用缓存页面后再让admin访问。由于缓存的优先级高于应用的逻辑，admin看到的是先前缓存的payload，而不是身份验证失败的authentication failed提示
 
 ## SSTI
 
@@ -616,11 +620,8 @@ for i in range(300,1000):
         - 补个exp更简单的题目的wp: https://dyn20.gitbook.io/writeup-ctf/root-me/json-web-token-jwt-public-key
     - js pug库ssti。注意`pug.render`(compile函数也会触发ssti)的参数有没有未过滤的用户输入。补点常用payload： https://book.hacktricks.xyz/pentesting-web/ssti-server-side-template-injection#pugjs-nodejs
 - [Ez ⛳ v3](https://mariosk1574.com/posts/kalmar-ctf-2025-ez-v3)
-    - caddyfile模板注入。比赛时真正卡住我的地方竟然是如何连接服务器……文件内存在`strict_sni_host insecure_off`，可以用openssl以一种特定的方式连接；但是用浏览器的话会显示没有指定的mtls证书
-    - 指定`Host` header也能绕过mtls连接：**Ez ⛳ v3**
-- [KalmarNotes](https://jonason0592.substack.com/p/kalmar-ctf-writeup-web-challenges)
-    - 比赛时找到了xss注入点，但是拥有session的用户只能查看自己的note，故正常情况下只能是个self xss
-    - 题目在`default.vcl`文件中定义了缓存规则，用于缓存所有静态资源，如`.png`结尾的资源。漏洞在于应用没有仔细核对查看note的url（`/note/<id>/<type>`）。即使type不在预期范围内也会呈现note的内容。于是可以构造`/note/id/a.png`，在自己的session下使应用缓存页面后再让admin访问。由于缓存的优先级高于应用的逻辑，admin看到的是先前缓存的payload，而不是身份验证失败的authentication failed提示
+    - caddyfile `httpInclude`模板注入。比赛时真正卡住我的地方竟然是如何连接服务器……文件内存在`strict_sni_host insecure_off`，可以用openssl以一种特定的方式连接；但是用浏览器的话会显示没有指定的mtls证书
+    - 指定`Host` header也能绕过mtls连接：**Ez ⛳ v3** 和 https://mqcybersec.org/writeups/25-kalmar-ezv3
 - [更多模板注入payload](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Server%20Side%20Template%20Injection/Python.md)
     - `{% for x in ().__class__.__base__.__subclasses__() %}{% if "warning" in x.__name__ %}{{x()._module.__builtins__['__import__']('os').popen("cmd").read()}}{%endif%}{% endfor %}`
     - https://sanlokii.eu/writeups/downunderctf/parrot-the-emu
@@ -4398,3 +4399,6 @@ fopen("$protocol://127.0.0.1:3000/$name", 'r', false, $context)
     5. 第四步的请求使`/tmp/uuid1`下出现了含有flag的目录。`waitDelay`后第二步的请求将能列出flag所在的目录，称为`uuid2`
     6. 拿到uuid2后迅速往第三步提到的远程服务器上传`exp.js`，内容为读取`/tmp/uuid1/uuid2/`下的已知名称的flag
     7. 第三个请求的`waitDelay`结束后执行`exp.js`，成功读取到flag
+- 另一个不错的wp： https://siunam321.github.io/ctf/KalmarCTF-2025/web/G0tchaberg
+534. [KalmarDSL](https://siunam321.github.io/ctf/KalmarCTF-2025/web/KalmarDSL)
+- [Structurizr](https://structurizr.com) 3.1.0 RCE漏洞

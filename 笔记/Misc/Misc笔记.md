@@ -436,6 +436,9 @@ print(base64.b64encode(temp.encode()))
 - [Docker Not Found](https://github.com/E-HAX/EHAX-CTF-2025/tree/master/misc/Docker%20Not%20Allowed)
     - `lxd`组下成员的privilege escalation。这个组允许成员运行容器，exp见 https://github.com/saghul/lxd-alpine-builder
     - 不过题目给的是Vmware machine文件，用特殊手段以root身份挂载即可： https://github.com/thmai11/writeups/blob/main/2025/ehax/docker_not_allowed
+- [RWX](https://emma.rs/kalmarctf2025)
+    - 这个系列的题提供了读写文件与执行命令的功能，但能执行的命令的长度有限。目标是执行`/would`文件，且需要有指定的参数
+    - bash中可以用`.`来运行shell脚本。即`. ~/x`可以执行家目录下名为x的shell脚本
 
 ## Digital Forensics and Incident Response(DFIR)
 
@@ -2640,19 +2643,19 @@ a=A()
 - 更详细的做法参考 https://anugrahn1.github.io/pico2024#blast-from-the-past-300-pts
 287. [SansAlpha](https://github.com/PetePriority/picoctf-2024/tree/main/general_skills/SansAlpha)
 - bash无字母jail。思路是利用redirect或者特殊变量保存bash的报错信息，就能从报错信息里提取字母，组成要执行的命令
-- 其他做法： https://gist.github.com/C0nstellati0n/78f5887b5bee235583a026840354ae54#sansalpha
+- 其他做法：**sansalpha**
 288. [dont-you-love-banners](https://medium.com/@0xSphinx/picoctf-2024-dont-you-love-banners-writeup-43828d04f1d9)
 - python的open函数可以打开symlink。这也意味着具有root权限的python文件不能打开任何用户可控制的文件，因为这样攻击者就能用symlink链接到任意想要读取的文件
 289. [Commitment Issues](https://anugrahn1.github.io/pico2024#commitment-issues-50-pts)
 - git相关命令使用
-290. [Study Music](https://gerlachsnezka.github.io/writeups/utctf/2024/forensics/study-music/)
+290. [Study Music](https://gerlachsnezka.github.io/writeups/utctf/2024/forensics/study-music)
 - Audacity使用。可以利用`Analyze > Plot Spectrum`功能集中显示某个频段的声音，并用`Effect > EQ and Filters > Filter Curve EQ`功能增强某个频率的声音并削弱其他频率的声音。这两个操作下来，某个频率声音的对应波形图的频谱图会清晰很多
 - 利用相位抵消的做法： https://slefforge.github.io/writeups/StudyMusic/writeup.html
-291. [CCV](https://gerlachsnezka.github.io/writeups/utctf/2024/misc/ccv/)
+291. [CCV](https://gerlachsnezka.github.io/writeups/utctf/2024/misc/ccv)
 - 利用[Luhn algorithm](https://en.wikipedia.org/wiki/Luhn_algorithm)检查[PAN](https://en.wikipedia.org/wiki/Payment_card_number)
-- 计算CVV，参考 https://www.linkedin.com/pulse/card-verification-code-cvc-value-cvv-nayoon-cooray/
+- 计算CVV，参考 https://www.linkedin.com/pulse/card-verification-code-cvc-value-cvv-nayoon-cooray
 292. [Gibberish](https://slefforge.github.io/writeups/Gibberish/writeup.html)
-- 键盘pcap流量分析。不过这题的按键不是一个一个按的，而是同时按下多个键并同时松手。这种特征指向输入的方式可能为速记（[Stenotype](https://en.wikipedia.org/wiki/Stenotype)）。一个可用于qwerty键盘的速记引擎为[Plover](https://www.openstenoproject.org/plover/)。如何从pcap里提取组合键并转为正常文本参考wp
+- 键盘pcap流量分析。不过这题的按键不是一个一个按的，而是同时按下多个键并同时松手。这种特征指向输入的方式可能为速记（[Stenotype](https://en.wikipedia.org/wiki/Stenotype)）。一个可用于qwerty键盘的速记引擎为[Plover](https://www.openstenoproject.org/plover)。如何从pcap里提取组合键并转为正常文本参考wp
 - 更详细的wp： https://meashiri.github.io/ctf-writeups/posts/202403-utctf/#gibberish 。很关键的一点是，pcap里的`usbhid.data`字段一次最多只能识别同时按下的6个键，而一些速记的组合键超过6个字符，因此可能会识别失败
 293. [SMP](https://seall.dev/posts/tamuctf2024#smp)
 - 分析minecraft服务器日志文件
@@ -2660,24 +2663,24 @@ a=A()
 - PLC文件，后缀`.ckp`，为Click PLC Programming Ladder Logic Project文件。可用相应的软件打开
 295. [Over The Shoulder](https://github.com/tamuctf/tamuctf-2024/tree/master/misc/over-the-shoulder)
 - 可以利用BPF程序的CAP_BPF/CAP_PERFMON来dump all strings passed to write with fd 1。比如cat命令输出的字符串
-- 其他做法: https://gist.github.com/C0nstellati0n/78f5887b5bee235583a026840354ae54#over-the-shoulder 。也可以直接用kernel自带的tracing功能
+- 其他做法: **Over The Shoulder** 。也可以直接用kernel自带的tracing功能
 296. [bears-flagcord](https://hackmd.io/@Zzzzek/HyUXVYQl0#bears-flagcord)
 - discord bot activity分析。若一个bot（application）的flags字段为131072，意味着此bot内部有个activity。可访问`https://[application ID].discordsays.com`来查看详情
-- 更详细wp： https://gerlachsnezka.xhyrom.dev/writeups/amateursctf/2024/misc/bears-flagcord/
-297. [javajail1](https://gerlachsnezka.github.io/writeups/amateursctf/2024/jail/javajail1/)
+- 更详细wp： https://gerlachsnezka.xhyrom.dev/writeups/amateursctf/2024/misc/bears-flagcord
+297. [javajail1](https://gerlachsnezka.github.io/writeups/amateursctf/2024/jail/javajail1)
 - 编写可以读取`flag.txt`文件内容并打印的java程序，但不能使用`import`,`class`,`Main`,`{`,`}`。可以用interface代替class，然后unicode编码代码
-- 其他解法： https://gist.github.com/C0nstellati0n/78f5887b5bee235583a026840354ae54#javajail1
-298. [javajail2](https://gerlachsnezka.github.io/writeups/amateursctf/2024/jail/javajail2/)
+- 其他解法：**javajail1**
+298. [javajail2](https://gerlachsnezka.github.io/writeups/amateursctf/2024/jail/javajail2)
 - 和上面那题一样的要求但是条件和限制更多
-- 其他解法： https://gist.github.com/C0nstellati0n/78f5887b5bee235583a026840354ae54#javajail2
-299. [sansomega](https://gerlachsnezka.github.io/writeups/amateursctf/2024/jail/sansomega/)
+- 其他解法：**javajail2**
+299. [sansomega](https://gerlachsnezka.github.io/writeups/amateursctf/2024/jail/sansomega)
 - 在不使用大小写字母和一些符号的情况下执行bash命令。287条的升级版
-- 其他解法： https://gist.github.com/C0nstellati0n/78f5887b5bee235583a026840354ae54#sansomega
-300. [agile-rut](https://gerlachsnezka.xhyrom.dev/writeups/amateursctf/2024/web/agile-rut/)
-- font字体文件分析。可用的几个网站： https://fontdrop.info/ ， https://www.glyphrstudio.com/app/ ， https://wakamaifondue.com/
-301. [zig-jail-1](https://unvariant.pages.dev/writeups/amateursctf-2024/jail-zig-jail-1/)
+- 其他解法：**sansomega**
+300. [agile-rut](https://gerlachsnezka.xhyrom.dev/writeups/amateursctf/2024/web/agile-rut)
+- font字体文件分析。可用的几个网站： https://fontdrop.info ， https://www.glyphrstudio.com/app ， https://wakamaifondue.com
+301. [zig-jail-1](https://unvariant.pages.dev/writeups/amateursctf-2024/jail-zig-jail-1)
 - zig语言在编译时读取指定文件的几种方式
-302. [zig-jail-2](https://unvariant.pages.dev/writeups/amateursctf-2024/jail-zig-jail-2/)
+302. [zig-jail-2](https://unvariant.pages.dev/writeups/amateursctf-2024/jail-zig-jail-2)
 - zig语言在编译时所执行的代码默认累积向后分支（程序在编译时调用的全部for语句累积循环次数）数上限为1000。若for语句循环次数超过这个数就会报错。可以用`@setEvalBranchQuota`提高上限。可以用结构体来绕过这点（从全部for语句累积次数不超过1000到单次结构体里for语句循环数不超过1000）
 303. [Check Research and Check again](https://hackctfs.blogspot.com/2024/04/shunyactf-aarambha-ctf-writeup-forensics.html)
 - png图片修复：Invalid IHDR interlace method，sRGB invalid rendering intent，RC error in chunk gAMA ，CRC error in chunk PLTE，invalid pHYs unit specifier，inflate error

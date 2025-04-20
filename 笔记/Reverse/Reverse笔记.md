@@ -1412,3 +1412,5 @@ mov     r8, qword [r13]
 214. [Flattened Vyper](https://md.updownup.de/s/IswdBTUYe)
 - 逆向solidity evm code。可以用[evm-run](https://github.com/zemse/evm-run)运行代码
 - [官方wp](https://github.com/Phreaks-2600/PwnMeCTF-2025-quals/blob/main/Reverse/Flattened_Vyper)使用了 https://app.dedaub.com/decompile
+215. [FlagSecurityEngine](https://therandomator.com/posts/kalmarctf-2025-flag-security-engine)
+- 利用monkeypatch（在运行时动态patch函数，而不是直接修改函数的源码）技巧逆向js代码
