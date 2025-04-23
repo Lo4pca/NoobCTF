@@ -4402,3 +4402,6 @@ fopen("$protocol://127.0.0.1:3000/$name", 'r', false, $context)
 - 另一个不错的wp： https://siunam321.github.io/ctf/KalmarCTF-2025/web/G0tchaberg
 534. [KalmarDSL](https://siunam321.github.io/ctf/KalmarCTF-2025/web/KalmarDSL)
 - [Structurizr](https://structurizr.com) 3.1.0 RCE漏洞
+535. [NoSQLi](https://worty.fr/post/writeups/kalmarctf2025)
+- rust mongodb 2.8.1协议层面的sql注入。说是sql注入，其实更像请求走私
+- 简述一下漏洞成因。rust的mongodb库处理收到的packet长度时将u32的整数值转成了i32，导致出现整数溢出。因此服务器认为当前收到的packet长度为0，便将后续收到的数据当作下一个packet处理。后续的数据里包含用户控制的查询的内容，于是攻击者可以借此构造恶意packet，往数据库里插入数据（估计只要格式对了，干啥都行）

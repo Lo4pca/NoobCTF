@@ -1414,3 +1414,4 @@ mov     r8, qword [r13]
 - [官方wp](https://github.com/Phreaks-2600/PwnMeCTF-2025-quals/blob/main/Reverse/Flattened_Vyper)使用了 https://app.dedaub.com/decompile
 215. [FlagSecurityEngine](https://therandomator.com/posts/kalmarctf-2025-flag-security-engine)
 - 利用monkeypatch（在运行时动态patch函数，而不是直接修改函数的源码）技巧逆向js代码
+- 有人提到patch quickjs来获取动态执行的字节码的反编译结果，类似 https://zrzz.site/posts/7d06ef54

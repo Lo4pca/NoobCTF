@@ -439,6 +439,7 @@ print(base64.b64encode(temp.encode()))
 - [RWX](https://emma.rs/kalmarctf2025)
     - 这个系列的题提供了读写文件与执行命令的功能，但能执行的命令的长度有限。目标是执行`/would`文件，且需要有指定的参数
     - bash中可以用`.`来运行shell脚本。即`. ~/x`可以执行家目录下名为x的shell脚本
+    - wp末尾提到的解法的脚本：**rwx diamond**
 
 ## Digital Forensics and Incident Response(DFIR)
 
@@ -2928,3 +2929,17 @@ $ cd a/b
     - 存在一个允许被OIDC provider代入（assume）的role，且该role可以访问含有flag的私有s3 bucket。该role的名称含有3位随机数字后缀，需要爆破
     - 使用[pacu](https://github.com/RhinoSecurityLabs/pacu)（AWS exploitation framework）枚举所有IAM roles并找到上一条提到的role
     - 伪造GitHub Actions workflow并代入上述role，拿到flag
+393. [nix-build as a service](https://diogotc.com/blog/kalmarctf-writeup-nix-build-as-a-service)
+- [nix](https://nixos.org) jail，在受限制的情况下构建读取flag的derivation
+- 完全没用过nix，这里记个做法好了……
+    - 因为题目在很长一段时间内都零解，于是题目作者加了一个将用户控制的derivation转为字符串的操作，意在提示
+    - nix将derivation转为字符串时会递归地查看derivation结构里`outPath`的值，并将其值作为结果
+    - nix并未过滤`outPath`的内容，而其内容完全由攻击者控制。于是出现命令注入得以获取flag的值
+- 预期解如下
+    - 题目的`default.nix`将两个derivation合并成一个：`user-drv = assert lib.isDerivation user-input; pkgs.hello // user-input`,并在下方调用`nativeBuildInputs = [user-drv]`
+    - 当一个derivation被放入nativeBuildInputs时，`mkDerivation`函数内部会调用`lib.getOutput`来获取其存储路径
+    - 当derivation的属性outputSpecified为true时，`lib.getOutput`将返回pkg，这里我理解成derivation自身
+    - nix仍然需要将上述的derivation转为字符串。通过设置`__toString`属性，攻击者可以控制当前derivation该如何被转换成字符串
+    - `__toString`接收一个函数，其参数为derivation自身。于是在这个函数里攻击者可以拿到`user-input`与`pkgs.hello`合并的结果，进而访问`pkgs.hello`的属性
+    - `pkgs.hello`内含对fetchurl的调用。利用`overrideAttrs`可以修改它的目标url。将其改为攻击者的网站并带出flag即可
+- 疑似是两个做法的结合版： https://msanft.foo/blog/kalmarctf-2025-nix-build-as-a-service
