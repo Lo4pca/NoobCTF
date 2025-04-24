@@ -341,6 +341,9 @@ print(base64.b64encode(temp.encode()))
 - [Golf](https://github.com/TheRomanXpl0it/TRX-CTF-2025/blob/main/misc/golf)
     - 只能使用```?.,|^/`;=&~$%```和字母，但环境里存在builtins。感觉思路和上面的warden差不多，都是引入一个模块并覆盖一个不需要参数且可以用特殊方式调用的函数
     - 另一种解法：**Golf**
+- [Pycomment](https://gist.github.com/Lydxn/13b623b4d6eb58f6f012f25264865f7e)
+    - magic headers（[PEP 263](https://peps.python.org/pep-0263)）：只要一个python文件的第一或第二行与`^[ \t\f]*#.*?coding[:=][ \t]*([-_.a-zA-Z0-9]+)`匹配，则整个文件都会以指定的编码格式解析。wp里用到的编码为`hz`，这个编码的特殊之处在于，如果在换行符前加一个`~`(`~\n`)，就可以“取消”掉换行符
+    - 文件写入的条件竞争：若用python同时向一个文件写入不同的内容a和b，最终文件的内容有可能为a和b的结合
 - pyjail cheatsheet
     - https://shirajuki.js.org/blog/pyjail-cheatsheet
     - https://book.hacktricks.wiki/en/generic-methodologies-and-resources/python/bypass-python-sandboxes/index.html
@@ -439,7 +442,9 @@ print(base64.b64encode(temp.encode()))
 - [RWX](https://emma.rs/kalmarctf2025)
     - 这个系列的题提供了读写文件与执行命令的功能，但能执行的命令的长度有限。目标是执行`/would`文件，且需要有指定的参数
     - bash中可以用`.`来运行shell脚本。即`. ~/x`可以执行家目录下名为x的shell脚本
-    - wp末尾提到的解法的脚本：**rwx diamond**
+    - wp末尾提到的解法的脚本：**rwx diamond** 。`x|sh`可以短暂保持一个bash，此时往`/proc/<pid>/fd/0`就能执行命令
+- [RWX - gold](https://nanimokangaeteinai.hateblo.jp/entry/2025/03/10/041721)
+    - 利用gpg命令实现rce。运行`gpg`将自动在家目录下创建`.gnupg`文件夹，往里面写一些配置文件后再运行一次gpg就能执行配置文件中编写的命令
 
 ## Digital Forensics and Incident Response(DFIR)
 
@@ -2942,4 +2947,6 @@ $ cd a/b
     - nix仍然需要将上述的derivation转为字符串。通过设置`__toString`属性，攻击者可以控制当前derivation该如何被转换成字符串
     - `__toString`接收一个函数，其参数为derivation自身。于是在这个函数里攻击者可以拿到`user-input`与`pkgs.hello`合并的结果，进而访问`pkgs.hello`的属性
     - `pkgs.hello`内含对fetchurl的调用。利用`overrideAttrs`可以修改它的目标url。将其改为攻击者的网站并带出flag即可
-- 疑似是两个做法的结合版： https://msanft.foo/blog/kalmarctf-2025-nix-build-as-a-service
+- 其他解法
+    - 疑似是上述两个做法的结合版： https://msanft.foo/blog/kalmarctf-2025-nix-build-as-a-service
+    - **nix-build**

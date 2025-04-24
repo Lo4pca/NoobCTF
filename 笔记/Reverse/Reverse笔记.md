@@ -16,6 +16,7 @@
 - [A child's dream](https://github.com/srdnlen/srdnlenctf-2025_public/blob/main/pwn_A_childs_dream)
   - [Mesen2](https://github.com/SourMesen/Mesen2)
     - Multi-system emulator (NES, SNES, GB, GBA, PCE, SMS/GG, WS) 
+    - 也是一个不错的调试工具。用法示例见[Snake I - Just One More Apple](https://nanimokangaeteinai.hateblo.jp/entry/2025/03/10/041721)
   - ida pro也可以反编译SNES,参考 https://r3kapig-not1on.notion.site/Srdnlen-CTF-2025-Writeup-by-r4kapig-181ec1515fb98004b3e2c42e74ce5fc5
   - 另一个snes调试器：[bsnes-plus](https://github.com/devinacker/bsnes-plus)
 - [diaphora](http://diaphora.re)
