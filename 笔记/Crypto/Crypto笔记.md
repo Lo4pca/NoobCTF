@@ -896,6 +896,11 @@ $$
     - 一些破解ecdsa不安全nonce的工具
         - https://github.com/daedalus/BreakingECDSAwithLLL
         - https://github.com/josephsurin/lattice-based-cryptanalysis/blob/main/lbc_toolkit/attacks/ecdsa_biased_nonce.sage#L25
+- [Not-so-complex multiplication](https://jonathke.github.io/not-so-complex)
+    - CM-curve的相关知识。虽然是入门题，但背景知识仍然相当复杂。然而这题可以通过自己运行脚本观察出一些规律，进而绕过CM-curve的学习
+    - 我的解法（deepseek给我的思路竟然能用，虽然不是预期解且更复杂）：**Not-so-complex**
+- [MonoDOOM](https://jonathke.github.io/monoDOOM)
+    - [monodromy leak](https://eprint.iacr.org/2024/517)
 
 ## AES/DES
 

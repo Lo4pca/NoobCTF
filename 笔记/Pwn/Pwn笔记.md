@@ -2024,3 +2024,10 @@ offset = the_mmap64_plus_23_itself
 238. [Free the monsters](https://github.com/tesuji/ctf-writeups/tree/master/2025/trx/pwn/free)
 - libc 2.41，从double free+堆地址泄漏得到chunk overlapping+tcache poisoning。[详细步骤](./Heap/堆技巧学习.md#利用double-free获取chunk-overlapping和tcache-poisoning)
 - 这篇wp利用environ泄漏栈地址并写rop链。覆盖std_err的fsop解法见 https://github.com/TheRomanXpl0it/TRX-CTF-2025/blob/main/pwn/free_the_monsters 。由于题目允许的chunk大小太小，需要分段写入。但分段写入会导致文件结构内部分内容被堆块的header数据损坏。从`0x10`偏移处写入即可避免重要内容被损坏
+239. [Merger](https://ptr-yudai.hatenablog.com/entry/2025/03/10/123050)
+- double free可以成功的三种情况（自[malloc: tcache double free check patch](https://sourceware.org/git/?p=glibc.git;a=commit;h=bcdaad21d4635931d1bd3b54a7894276925d081d)后）
+  - double free fastbin中的堆块，且不连续free同一块
+  - 先free到fastbin，然后free到tcache bin
+  - 先free到unsortedbin，然后free到tcachebin/largebin/fastbin/smallbin
+- 这题的bug挺隐蔽的。有个merge函数，允许输入两个索引a和b。程序会计算a和b处的数据的长度并在a上调用realloc（注意realloc内部会调用free(a)），最后free b。因此输入两个相同的索引会导致double free。考虑上述情况中的第三种。假设chunk A和B相邻，需要先将B放入unsortedbin后再触发A的double free，因为这样A才能在realloc的free中被合并进unsortedbin，然后在第二个free中进A和B合并后的大小对应的tcache。拿到libc地址后需先修复unsortedbin的结构，再在fastbin里用double free并tcache poisoning
+- 以及喜闻乐见的fsop模板
