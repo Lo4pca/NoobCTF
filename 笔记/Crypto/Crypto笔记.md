@@ -901,6 +901,12 @@ $$
     - 我的解法（deepseek给我的思路竟然能用，虽然不是预期解且更复杂）：**Not-so-complex**
 - [MonoDOOM](https://jonathke.github.io/monoDOOM)
     - [monodromy leak](https://eprint.iacr.org/2024/517)
+- [lance-hard?](https://adib.au/2025/lance-hard)
+    - 这题的设置是，给定一个隐藏的椭圆曲线上的点K和 $Z_p$ 里的一个随机数r，输出1000组 $(a_i\cdot K)_x+r$ 和 $a_i(a_i\in Z_p)$ 的值。要求恢复K点的x坐标和r的值
+    - wp里很重要的一步是将上述问题转换为“Find sparse linear relation”。需要在 $Z_n$ 中找到一个稀疏向量 $V=(v_1,v_2,...,v_n)$ ，使其满足 $\Sigma_{i=1}^nv_ia_i\equiv 0\mod q$ (q为曲线阶数)。这样的话就有 $\Sigma_{i=1}^nv_i\cdot(a_i\cdot K)=(\Sigma_{i=1}^nv_ia_i)\cdot K=0\cdot K=0$ 。意味着多个点 $a_i\cdot K$ 乘上系数 $v_i$ 对应一组和为0的曲线的点。这个关系有自己的名称，为[Semaev’s summation polynomials](https://eprint.iacr.org/2004/031.pdf)。不过我们其实没有完整的x值，只有偏移了r的x值。构造多项式时需要减去r，于是整个多项式变成了关于r的单变量多项式
+    - 一些求解的技巧
+        - 构造上述的多项式时，“传统”的方式是在sagemath里定义一个变量r，然后过一遍定义多项式的函数。但目标多项式次数非常高，sagemath里执行这一操作需要非常长的时间。于是wp里介绍了另一种方式。直接假定多项式最高次数个r的值并传进定义多项式算出值，再拿Lagrange interpolation直接恢复原本的多项式。可以用sagemath自带的lagrange_polynomial或者ProductTree实现
+        - 解复杂多项式同样需要很长的时间。如果可以构造两个拥有相同的根的多项式，直接gcd两者再算`roots()`会更快
 
 ## AES/DES
 
@@ -2936,3 +2942,11 @@ assert crc32(a)^crc32(b)==crc32(c)^crc32(d)
 - Equivalent Keys in TEA Encryption。每个key可以产生其他三个key，这四个key加密同一个明文得到的都是同一个密文。见 https://www.schneier.com/wp-content/uploads/2016/02/paper-key-schedule.pdf
 172. [TooMuchCrypto](https://github.com/delta/PCTF25-Writeups/blob/main/crypto/TooMuchCrypto)
 - BLAKE Preimage Attack。通过部分明文和state values恢复出完整的明文
+173. [short circuit](https://soon.haari.me/2025-kalmarctf)
+- nodejs旧版本（`node:10-alpine`）的神奇`Math.random` bug：当`xorshift128+`的内部state的前12个bit均为1时，js会将其看作NaN值，导致后续的输出全部都是相同数字
+- 官方wp： https://github.com/kalmarunionenctf/kalmarctf/blob/main/2025/crypto/short-circuit
+174. [ZZKAoK](https://soon.haari.me/2025-kalmarctf)
+- 不行我得找个时间学ZKP，这啥啊这是？
+- 题目的非预期解是没有检查证明者提供的merkle tree的叶子pos，导致证明者可以爆破merkle tree里的全部数据，提供给给服务器时找到可以满足服务器要求的叶子-根路径提交即可（不需要是服务器指定的pos）。预期解似乎是仅限这道题的（而且我也没懂），这里就不写了。但这个非预期解感觉之前也见过类似的，应该是一个可以留给下次运用的技巧
+175. [spukhafte Fernwirkung](https://github.com/kalmarunionenctf/kalmarctf/tree/main/2025/web/spukhafte)
+- nodejs `math.random`预测，但是目标是内部seed的seed。`math.random`在密码学上不安全，因为攻击者可以根据其连续输出的几个值恢复内部的seed。但这个seed仅属于当前rng实例（instance），因此这个seed没法预测另一个rng实例输出的随机数。但是，内部seed的生成也来自于XorShift128 rng。所以如果可以拿到多个实例的初始seed，就能恢复内部生成seed的rng的seed，进而预测当前isolate下所有rng实例的随机数

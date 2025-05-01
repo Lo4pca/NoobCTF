@@ -344,6 +344,9 @@ print(base64.b64encode(temp.encode()))
 - [Pycomment](https://gist.github.com/Lydxn/13b623b4d6eb58f6f012f25264865f7e)
     - magic headers（[PEP 263](https://peps.python.org/pep-0263)）：只要一个python文件的第一或第二行与`^[ \t\f]*#.*?coding[:=][ \t]*([-_.a-zA-Z0-9]+)`匹配，则整个文件都会以指定的编码格式解析。wp里用到的编码为`hz`，这个编码的特殊之处在于，如果在换行符前加一个`~`(`~\n`)，就可以“取消”掉换行符
     - 文件写入的条件竞争：若用python同时向一个文件写入不同的内容a和b，最终文件的内容有可能为a和b的结合
+- [Paper Viper](https://github.com/kalmarunionenctf/kalmarctf/tree/main/2025/misc/paper-viper)
+    - asteval 0 day+多行pyjail。wp记录了找漏洞的整体思路，第一次意识到`type()`有多重要
+    - wp里提到的两个解法：**paper-viper**
 - pyjail cheatsheet
     - https://shirajuki.js.org/blog/pyjail-cheatsheet
     - https://book.hacktricks.wiki/en/generic-methodologies-and-resources/python/bypass-python-sandboxes/index.html

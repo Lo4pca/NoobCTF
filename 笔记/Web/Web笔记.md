@@ -4405,3 +4405,6 @@ fopen("$protocol://127.0.0.1:3000/$name", 'r', false, $context)
 535. [NoSQLi](https://worty.fr/post/writeups/kalmarctf2025)
 - rust mongodb 2.8.1协议层面的sql注入。说是sql注入，其实更像请求走私
 - 简述一下漏洞成因。rust的mongodb库处理收到的packet长度时将u32的整数值转成了i32，导致出现整数溢出。因此服务器认为当前收到的packet长度为0，便将后续收到的数据当作下一个packet处理。后续的数据里包含用户控制的查询的内容，于是攻击者可以借此构造恶意packet，往数据库里插入数据（估计只要格式对了，干啥都行）
+536. [Red wEDDIng](https://github.com/kalmarunionenctf/kalmarctf/tree/main/2025/web/red-wedding)
+- [EDDI](https://github.com/labsai/EDDI) 5.5.0前存在zip路径穿越漏洞（zipslip），可以实现任意文件写（覆盖）。利用这个漏洞可以覆盖服务运行时需要的jar文件，从而实现rce
+- 有人给创建恶意jar包写了个工具：[JAR Poisoner](https://github.com/pspaul/jar-poisoner)
