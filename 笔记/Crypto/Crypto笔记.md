@@ -938,7 +938,7 @@ AES是很能出题的。DES则是放在这凑数的
 - [decrypt then eval](https://octo-kumo.me/c/ctf/2024-ductf/crypto/decrypt-then-eval)
   - aes cfb猜明文。cfb模式是 $C=E\bigotimes P$ （具体见 https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Cipher_feedback_(CFB) ）,假如知道C和P，就能找到E，进而自己伪造密文。前提是key和iv重用且我们有足够的oracle
   - [官方wp](https://github.com/DownUnderCTF/Challenges_2024_Public/tree/main/crypto/decrypt-then-eval)处理了更复杂的情况
-  - 其他解法： https://gist.github.com/C0nstellati0n/cf6ae2c5e0e9fe1ecb532d257a56e101#decrypt-then-eval
+  - 其他解法: **decrypt then eval**
 - [cbc](https://github.com/rerrorctf/writeups/tree/main/2024_09_06_CSAWQuals24/crypto/cbc)
     - aes cbc padding oracle attack。题目有个oracle可以解密任意密文，返回密文是否解密成功。目标是解密指定密文
     - 附赠一个rust工具：[rustpad](https://github.com/Kibouo/rustpad)
@@ -949,7 +949,7 @@ AES是很能出题的。DES则是放在这凑数的
     - aes sbox如果有一个重复的字节（即有一个字节不存在于sbox），则可以利用oracle恢复最后一轮的轮密钥，进而破解密文
     - 这题sbox里不会出现的字节是0xea。根据最后一轮的操作（`sub_bytes`,`shift_rows`,`add_round_key`），sub_bytes产生的结果绝对不会有0xea，shift_rows也不会改变这个结果，add_round_key也只是异或。因此假如有一个orcacle（可以得到随机明文的加密结果），用0xea异或其密文，则异或结果不可能是最后一轮的轮密钥。利用这点慢慢排除可能的轮密钥字节就能得到确切的结果
 - [AYES](https://github.com/Seraphin-/ctf/blob/master/2025/irisctf/ayes.md)
-    - 翻转aes sbox指定索引处的指定bit,通过oracle（输入明文获取其密文）恢复密钥。wp的做法我没怎么看懂，比赛时发现和上一题Subathon很像，就直接用了。也能恢复密钥，在我看来还更好理解许多。见 https://gist.github.com/C0nstellati0n/cf6ae2c5e0e9fe1ecb532d257a56e101#ayes
+    - 翻转aes sbox指定索引处的指定bit,通过oracle（输入明文获取其密文）恢复密钥。wp的做法我没怎么看懂，比赛时发现和上一题Subathon很像，就直接用了。也能恢复密钥，在我看来还更好理解许多。见 **AYES**
 - [Enchanted Oracle](https://connor-mccartney.github.io/cryptography/other/EnchantedOracle-UofTCTF2025)
     - aes cbc padding oracle attack，但目标是伪造已知明文的密文。关键是要倒着来推：随便生成16个字节当密文块后通过oracle获得其明文，然后异或期望明文，就能得到下一个密文块。重复此步骤即可
     - 看[另一篇wp](https://merkletr.ee/ctf/2025/uoftctf/aescbc)时发现竟然有人写过Padding Oracle Attack的论文： https://www.usenix.org/legacy/event/woot10/tech/full_papers/Rizzo.pdf
@@ -1927,7 +1927,7 @@ print(msg)
 ```
 37. [scherbius-machine](https://meashiri.github.io/ctf-writeups/posts/202312-pingctf/#scherbius-machine)
 - enigma爆破。在知道大部分解密参数后可以尝试爆破完整参数
-- https://gist.github.com/C0nstellati0n/cf6ae2c5e0e9fe1ecb532d257a56e101#scherbius-machine
+- **scherbius-machine**
 38. [quoted-printable](http://web.chacuo.net/charsetquotedprintable)编码。如果flag包含中文，cyberchef可能解密出乱码，用给的网站链接并把字符集选为utf8即可。
 39. 当铺密码。
 ```python
@@ -2861,7 +2861,7 @@ c2=encrypt(k2,c1)
 - 完全没看懂这题……作者用的符号标记看不懂……但还是有一些不错的工具可以记录。此题为Zero Knowledge Proof，使用了[Fiat-Shamir transform](https://www.zkdocs.com/docs/zkdocs/protocol-primitives/fiat-shamir/)将交互式的证明转换为无需交互的证明（简单来看就是把随机数的生成交给hash函数来做）
 - md5碰撞工具：[fastcoll](https://github.com/brimstone/fastcoll)。给定一段前缀，在前缀后添加两段不同的内容使两者md5 hash值一致
 - 如何求解形如 $x^2+ky^2\equiv m\mod n$ 的方程。见论文： https://dl.acm.org/doi/10.1109/TIT.1987.1057350
-- 此题的求解脚本： https://gist.github.com/C0nstellati0n/cf6ae2c5e0e9fe1ecb532d257a56e101#ZKPOK
+- 此题的求解脚本：**ZKPOK**
 149. [Ilovecrackmes](https://github.com/perfectblue/ctf-writeups/tree/master/2024/googlectf-2024/rev-ilovecrackmes)
 - [paillier cryptosystem](https://blog.openmined.org/the-paillier-cryptosystem/)。这个系统有同态的性质。所以在服务器给出一条密文和公钥后，能伪造出含有特定内容的另一条密文
 150. [IDEA](https://mystiz.hk/posts/2024/2024-06-24-google-ctf-3)
@@ -2897,7 +2897,7 @@ assert crc32(a)^crc32(b)==crc32(c)^crc32(d)
 - [官方wp](https://github.com/ImaginaryCTF/ImaginaryCTF-2024-Challenges-Public/tree/main/Crypto/tango)又用了crc32的另一个性质：`crc32(x ^ y ^ z) = crc32(x) ^ crc32(y) ^ crc32(z)`
 157. [lcasm](https://github.com/ImaginaryCTF/ImaginaryCTF-2024-Challenges-Public/blob/main/Crypto/lcasm)
 - 输入linear congruential generator（lcg）的参数，使其连续输出三个已知的目标值。使用专门解线性模方程的脚本： https://github.com/nneonneo/pwn-stuff/blob/master/math%2Fsolvelinmod.py
-- 其他做法： https://gist.github.com/C0nstellati0n/cf6ae2c5e0e9fe1ecb532d257a56e101#lcasm
+- 其他做法：**lcasm**
 158. [Not an active field for a reason](https://yun.ng/c/ctf/2024-deadsec-ctf/crypto/not-an-active-field-for-a-reason)
 - Neural cryptography中的[Tree parity machine](https://en.wikipedia.org/wiki/Neural_cryptography#Tree_parity_machine)。怎么也没想到有一天密码学和人工智能能扯上关系……
 - 这题大概是让一个Tree parity machine C学习另外两个machine A和B之间建立的关系。有过度拟合的毛病，但这题没关系

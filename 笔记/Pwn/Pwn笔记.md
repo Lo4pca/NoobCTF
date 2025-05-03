@@ -30,6 +30,12 @@
     - 用于标记数组或对象中已删除或未初始化的元素
   - 利用`TheHole`值可以破坏map的size值，比如将size降为-1。原理是v8内部用`TheHole`标记被删除的键值对，即用`TheHole`值补位被删除的键。明显这样的删除方法无法应对被删除的键值对就是`TheHole`的情况，导致可以“无限”删除（实际情况下还需要保证元素数量大于bucket数量除以2），将size削减为负数
   - 利用size为负数的特点配合turbofan的错误代码优化可以实现数组oob。turbofan会将map.size误判为>=0（似乎是直接判为了0？如果是整数的话根据wp提供的exp还是有直接的oob风险的。或者编译器跟我想的不一样？），导致更进一步的优化时移除了数组的范围检查
+- [E-Corp](https://samuzora.com/posts/utctf-2025)
+  - 给了个调换float数组和double数组的map类型的primitve，所以arb_read和arb_write就很容易构造了。不过题目的环境导致不能用wasm法实现rce。wp介绍了一种写rop链的做法
+  - 其他rce方法
+    - 利用JIT： https://0xm4hm0ud.me/posts/utctf-ecorp-part2
+    - 覆盖`__free_hook`： https://github.com/TonySD/writeups/tree/main/utctf/2025/pwn/E-Corp-part-2
+  - wasm方法用不了的原因： https://groups.google.com/g/v8-reviews/c/vQyf4P407zc
 
 ## Kernel
 

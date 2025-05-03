@@ -603,11 +603,11 @@ foo();
 
 理论上这题需要在源码层面插入一些调试语句并自行编译v8，但我纯靠运气和苦力硬是虚空调试猜出来了（主要是因为大佬指出了怎么触发漏洞）
 
-patch提供的bug：如果v8 typer优化一个数字类型的变量成Range后Range的最小值为0，则我们可以拥有无限的数组oob
+patch提供的bug：如果v8 typer优化一个数字类型的变量成Range后Range的最小值为0，则我们可以拥有无限的数组oob primitive
 
 在我做这道题之前，社区服务器里正好有人在讨论这题。引用`lau9098`的话：
 
-You need to cast the integer to SMI first using `x | 0`. `index = Math.max(index | 0, 0)` will set `index.min() == 0`. it would do it without the `x | 0` since it would infer `Math.max(Any, 0)`, and it should be `Math.max(SMI, 0)`
+You need to cast the integer to SMI first using `x | 0`. `index = Math.max(index | 0, 0)` will set `index.min() == 0`. it would not do it without the `x | 0` since it would infer `Math.max(Any, 0)`, and it should be `Math.max(SMI, 0)`
 
 以上就是触发bug的方法。实操中还需要满足上述操作所在的函数被优化的条件。好，就是这个条件卡了我很久。为了让数组的长度被推断成length_type，我需要将这个数组放到函数里面；但不知道为什么，这样会导致所在的函数不被优化。把数组放外面后函数倒是可以被优化，但v8就无法推断数组的length_type了（也有可能是因为数组可以被外部的代码访问，所以v8保守地推断成`Range(0,Inf)`？总之这样没法让`index_type.Min() < length_type.Min()`，因为`index_type.Min()`必须大于等于0）。所以我需要让数组既在函数外面又在函数里面……啊？
 

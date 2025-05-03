@@ -590,6 +590,8 @@ print(base64.b64encode(temp.encode()))
 - [Batman - Gotham's Secret](https://gist.github.com/C0nstellati0n/78f5887b5bee235583a026840354ae54#batman---gothams-secret)
     - 似乎是MacBook（macos）forensics？目标是恢复加密的note
     - 加密的note存储于keychain；keychain database则是用机器的密码（machine's password，可能也是登录的密码）加密。之前在215条`A.R.K`见过，不过这题的机器密码很复杂，没法直接爆破出来。一个技巧是可以查看用户是否开启了Auto Login。一旦开启，电脑上会出现`/etc/kcpassword`文件。此文件用静态密钥+异或加密，因此可以直接恢复原本的密码
+- [Forgotten Footprints](https://github.com/L1NUXexe/UTCTF_2025_Forensics_WU)
+    - 利用[ReclaiMe](https://www.reclaime.com)恢复BTRFS Filesystem img中被删除的文件
 
 ## Network Forensics
 
