@@ -974,6 +974,8 @@ AES是很能出题的。DES则是放在这凑数的
     - AES GCM的mac值计算公式其实是一个 $GF(2^{128})$ 下的多项式。具体怎么算的见wp，总之nonce在这个过程中起到“mask”隐藏掉原多项式的功能，所有mac多项式在最后都会加上nonce末尾补上0的加密结果。如果nonce重复，这个值就固定了，两个多项式相减即可消掉它。消掉后事情就简单了，尽量构造线性关系解方程就完事
     - 补充一点可能困惑的地方。 $GF(2^{128})$ 下加和减都是一个操作，即异或。所以在wp的`Formulating the MAC`部分可以混着说，说是`+`，理解成`-`会更容易些
     - 官方wp没有使用sagemath，直接自己实现 $GF(2^{128})$ 下的运算： https://github.com/uclaacm/lactf-archive/blob/main/2025/crypto/good-hash
+- [ECB++](https://github.com/rerrorctf/writeups/blob/main/2025_03_21_WolvCTF25/crypto/ecb%2B%2B)
+    - aes ecb encryption oracle，但是每次使用的key都不同。不过原理和那种key不改变的题是一样的，只需要让每一次请求包含所有可能的byte即可
 
 ## Z3使用
 
@@ -2676,15 +2678,15 @@ Ep.order() #曲线加法群的阶（the order of the elliptic curve group）
     print(len(zlib.compress(b"good_secret" + b"baad"))) #23
     ```
     脚本： https://github.com/mpgn/CRIME-poc/tree/master
-- [Criminal](https://github.com/rerrorctf/writeups/blob/main/2024_04_07_TamuCTF24/cry/criminal/criminal.md):CRIME攻击的`zlib.compress`+`ChaCha20_Poly1305`版本。不知为何，做这题的时候上面的脚本跑不了，最后还是抄 https://ctftime.org/writeup/27105 （这个题里是Salsa20）出来的。 https://gist.github.com/C0nstellati0n/cf6ae2c5e0e9fe1ecb532d257a56e101#criminal
+- [Criminal](https://github.com/rerrorctf/writeups/blob/main/2024_04_07_TamuCTF24/cry/criminal/criminal.md):CRIME攻击的`zlib.compress`+`ChaCha20_Poly1305`版本。不知为何，做这题的时候上面的脚本跑不了，最后还是抄 https://ctftime.org/writeup/27105 （这个题里是Salsa20）出来的。**Criminal**
 95. [signer](https://meashiri.github.io/ctf-writeups/posts/202307-imaginaryctf/#signer)
 - crc32无法防止collsion，也无法防止数据被篡改。在给定一个crc32值后，可以利用[工具](https://github.com/theonlypwner/crc32)逆向算法，获取该crc32值对应的字符串
-96. [MCTEENX](https://xhacka.github.io/posts/writeup/2023/07/29/MCTEENX/)
+96. [MCTEENX](https://xhacka.github.io/posts/writeup/2023/07/29/MCTEENX)
 - 利用bkcrack爆破ZipCrypto Store： https://www.anter.dev/posts/plaintext-attack-zipcrypto/
 - 利用CyberChef爆破异或密码的key（cribdrag）
-97. [Fermentation](https://xa21.netlify.app/blog/tfcctf-2023/Fermentation/)
+97. [Fermentation](https://xa21.netlify.app/blog/tfcctf-2023/Fermentation)
 - [aes cbc翻转字节攻击](http://www.f0und.icu/article/28.html)。可以在不知道key和iv的情况下，通过修改密文实现解密出来的明文为攻击者期望的内容
-98. [Polypoint](https://maxniederman.com/posts/ctf/lit-2023/polypoint/)
+98. [Polypoint](https://maxniederman.com/posts/ctf/lit-2023/polypoint)
 - 线性方程组缺少一个完全未知的方程的解法。之前见过缺少一个方程组的线性系统，但是那个未知的方程解已知。这题完全不知道。当线性系统缺少方程时，方程组有解且有无数个解，这时就需要通过设置解的范围来确定唯一的的解。wp作者使用的软件为Mathematica
 ```
 Encoded = Import["encoded.csv"]; //导入文件

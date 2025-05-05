@@ -592,6 +592,8 @@ print(base64.b64encode(temp.encode()))
     - 加密的note存储于keychain；keychain database则是用机器的密码（machine's password，可能也是登录的密码）加密。之前在215条`A.R.K`见过，不过这题的机器密码很复杂，没法直接爆破出来。一个技巧是可以查看用户是否开启了Auto Login。一旦开启，电脑上会出现`/etc/kcpassword`文件。此文件用静态密钥+异或加密，因此可以直接恢复原本的密码
 - [Forgotten Footprints](https://github.com/L1NUXexe/UTCTF_2025_Forensics_WU)
     - 利用[ReclaiMe](https://www.reclaime.com)恢复BTRFS Filesystem img中被删除的文件
+- [Active](https://abuctf.github.io/posts/WolvCTF2025)
+    - Active Directory forensics
 
 ## Network Forensics
 
@@ -2955,3 +2957,6 @@ $ cd a/b
 - 其他解法
     - 疑似是上述两个做法的结合版： https://msanft.foo/blog/kalmarctf-2025-nix-build-as-a-service
     - **nix-build**
+394. [Breakout](https://abuctf.github.io/posts/WolvCTF2025)
+- `.ch8`文件（CHIP-8 ROMs）可以用[CHIP-8](https://github.com/wernsey/chip8)模拟运行
+- 在线模拟器： https://johnearnest.github.io/Octo

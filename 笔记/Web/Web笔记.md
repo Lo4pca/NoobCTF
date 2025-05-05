@@ -95,8 +95,13 @@
         - https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/SQL%20Injection/MySQL%20Injection.md
     - sql注入还可以往本地文件系统写文件（之前在php里见过类似的，只在某些权限开启时能用。不确定这里是不是）。看起来好像有两种语法，`OUTFILE`和`DUMPFILE`，有些时候一个能用一个不能用
     - 格式化字符串漏洞rce。有点像pyjail或模板注入时的做法。这题由于引入了[setuptools](https://github.com/pypa/setuptools)模块,多了个用`windows_support.ctypes.cdll`的做法。[官方wp](https://github.com/UofTCTF/uoftctf-2025-chals-public/blob/master/prepared-1)则要复杂一点，从ctypes库拿cdll。这些做法仅限题目有文件上传时使用，因为需要服务器加载恶意`.so`文件
-    - sqlmap高级用法；使用tamper script： https://gist.github.com/C0nstellati0n/248ed49dea0accfef1527788494e2fa5#prepared
+    - sqlmap高级用法；使用tamper script：**prepared**
     - rce部分和这题有点像： https://ctf.gg/blog/buckeyectf-2024/gentleman 。这篇wp关于如何找利用的模块部分很详细
+- [limited](https://lucashanson.fr/writeups/wolvctf_2025)
+    - 比较普通的mysql union注入，补点基础
+        - 无法在order by语句后注入union语句
+        - `INFORMATION_SCHEMA.PROCESSLIST`表中记录数据库服务器内活动进程和线程的信息，比如当前执行的sql语句（可以获取完整的内容，包括语句内注释的部分）
+    - 提取mysql服务器的密码hash： https://mh4ck3r0n3.github.io/posts/2025/03/23/limited-3 。如何用hashcat爆破hash： https://www.percona.com/blog/brute-force-mysql-password-from-a-hash
 
 ## XSS
 
