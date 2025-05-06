@@ -2952,3 +2952,6 @@ assert crc32(a)^crc32(b)==crc32(c)^crc32(d)
 - 题目的非预期解是没有检查证明者提供的merkle tree的叶子pos，导致证明者可以爆破merkle tree里的全部数据，提供给给服务器时找到可以满足服务器要求的叶子-根路径提交即可（不需要是服务器指定的pos）。预期解似乎是仅限这道题的（而且我也没懂），这里就不写了。但这个非预期解感觉之前也见过类似的，应该是一个可以留给下次运用的技巧
 175. [spukhafte Fernwirkung](https://github.com/kalmarunionenctf/kalmarctf/tree/main/2025/web/spukhafte)
 - nodejs `math.random`预测，但是目标是内部seed的seed。`math.random`在密码学上不安全，因为攻击者可以根据其连续输出的几个值恢复内部的seed。但这个seed仅属于当前rng实例（instance），因此这个seed没法预测另一个rng实例输出的随机数。但是，内部seed的生成也来自于XorShift128 rng。所以如果可以拿到多个实例的初始seed，就能恢复内部生成seed的rng的seed，进而预测当前isolate下所有rng实例的随机数
+176. [ShiftHappens](https://github.com/WolvSec/WolvCTF-2025-Challenges-Public/blob/master/crypto/ShiftHappens)
+- lfsr已知（开头）明文攻击
+- 个人在比赛时找到的脚本： **ShiftHappens**

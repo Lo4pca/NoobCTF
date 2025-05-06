@@ -594,6 +594,7 @@ print(base64.b64encode(temp.encode()))
     - 利用[ReclaiMe](https://www.reclaime.com)恢复BTRFS Filesystem img中被删除的文件
 - [Active](https://abuctf.github.io/posts/WolvCTF2025)
     - Active Directory forensics
+    - 官方wp： https://dree.blog/posts/wolvctf-2025-active-series
 
 ## Network Forensics
 
@@ -2960,3 +2961,8 @@ $ cd a/b
 394. [Breakout](https://abuctf.github.io/posts/WolvCTF2025)
 - `.ch8`文件（CHIP-8 ROMs）可以用[CHIP-8](https://github.com/wernsey/chip8)模拟运行
 - 在线模拟器： https://johnearnest.github.io/Octo
+395. [Wasm](https://hackmd.io/@lunbun/rJt-ad0nJe)
+- 编写wasm绕过过滤并调用指定函数
+- 官方解法： https://github.com/WolvSec/WolvCTF-2025-Challenges-Public/blob/master/misc/wasmjail
+396. [Turing Incomplete](https://github.com/KattonTCM/ctf-writeups/blob/main/Turing-Incomplete.md)
+- 在只能使用两个state的前提下编写能够执行三个个位数加法的图灵机

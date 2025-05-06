@@ -159,6 +159,9 @@ kernel pwn题合集。用于纪念我连堆都没搞明白就敢看内核的勇�
 
       假如从低地址开始爆破的话，覆盖`.text`区域会导致程序崩溃
     - exp里的`0x300c6c20`没有什么特殊的意义，只是一个符合modprobe偏移的物理地址，用于寻找基地址
+- [baby_small](https://github.com/manuele-pandolfi/ctf-writeups/blob/main/baby_small)
+  - linux kernel Model-Specific Register任意写。MSR是负责调试，开启CPU功能和性能监控的寄存器之一。比如EFER用于标记是否开启了NX（不过还有其他的寄存器也负责这点）；LSTAR记录CPU执行完syscall后跳转到的内核虚拟地址
+  - 题目的原理大概如下：覆盖EFLAGS的AC bit从而禁用SMAP从而使内核可以访问用户态内存。然后`MSR_GS_BASE`设置假的GS base，从而伪造一块栈内存然后写rop。有一个问题是，`MSR_GS_BASE`全局共用，所以假如CPU调度其他进程时也切换了context，那个进程用的也是假的GS。这会导致kpanic，因为系统调用必须用真实的GS，而且不可能完整伪造一个GS。这步需要条件竞争绕过，题目将`CONFIG_HZ`设置为100来延长竞争窗口
 
 ## Shellcode题合集
 
@@ -269,9 +272,8 @@ ret
     - 注意不能调用execve，因为execve会把当前进程替换为新进程，而新进程继承原本的seccomp
   - 注意和ptrace相关的exp不能用常规的gdb调试方法调试。作者推荐的调试方式是“使shellcode在系统调用失败后进入无限循环，然后gdb连接程序检查寄存器是否有错误“
   - 题目作者的概念poc： **canon event**
-- [baby_small](https://github.com/manuele-pandolfi/ctf-writeups/blob/main/baby_small)
-  - linux kernel Model-Specific Register任意写。MSR是负责调试，开启CPU功能和性能监控的寄存器之一。比如EFER用于标记是否开启了NX（不过还有其他的寄存器也负责这点）；LSTAR记录CPU执行完syscall后跳转到的内核虚拟地址
-  - 题目的原理大概如下：覆盖EFLAGS的AC bit从而禁用SMAP从而使内核可以访问用户态内存。然后`MSR_GS_BASE`设置假的GS base，从而伪造一块栈内存然后写rop。有一个问题是，`MSR_GS_BASE`全局共用，所以假如CPU调度其他进程时也切换了context，那个进程用的也是假的GS。这会导致kpanic，因为系统调用必须用真实的GS，而且不可能完整伪造一个GS。这步需要条件竞争绕过，题目将`CONFIG_HZ`设置为100来延长竞争窗口
+- [LabGrown](https://github.com/WolvSec/WolvCTF-2025-Challenges-Public/tree/master/pwn/LabGrown)
+  - [SynesthesiaYS](https://github.com/RolfRolles/SynesthesiaYS)：自动生成满足特定条件的shellcode
 
 1. 程序关闭标准输出会导致getshell后无法得到cat flag的输出。这时可以用命令`exec 1>&0`将标准输出重定向到标准输入，再执行cat flag就能看见了。因为默认打开一个终端后，0，1，2（标准输入，标准输出，标准错误）都指向同一个位置也就是当前终端。详情见这篇[文章](https://blog.csdn.net/xirenwang/article/details/104139866)。例题：[wustctf2020_closed](https://buuoj.cn/challenges#wustctf2020_closed)
 2. 做菜单类堆题时，添加堆块的函数一般是最重要的，需要通过分析函数来构建出程序对堆块的安排。比如有些笔记管理题会把笔记名称放一个堆中，笔记内容放另一个堆中，再用一个列表记录指针。了解程序是怎么安排堆后才能根据漏洞制定利用计划。如果分析不出来，用gdb调试对着看会好很多。例题：[babyfengshui](https://github.com/C0nstellati0n/NoobCTF/blob/main/CTF/%E6%94%BB%E9%98%B2%E4%B8%96%E7%95%8C/6%E7%BA%A7/Pwn/babyfengshui.md)
