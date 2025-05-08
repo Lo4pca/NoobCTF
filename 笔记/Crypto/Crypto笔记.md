@@ -571,6 +571,8 @@ for i in range(1,e):
 - [vectorial-rsa](https://github.com/TheRomanXpl0it/TRX-CTF-2025/blob/main/crypto/vectorial-rsa)
     - Franklin-Reiter（多项式gcd）。一时间忘了我见过这个考点了……题目用rsa加密了两个多项式，其中多项式c1满足 $f(kA)-cA\equiv 0\mod n$ ，多项式c2则满足 $f(kA+B)-cB\equiv 0\mod n$ ,其中B是一个随机的最大16位的数字。爆破B的值后构造多项式，使用Franklin-Reiter即可解出kA
     - **vectorial-rsa** 的脚本更好理解一点
+- [Verilicious](https://7rocky.github.io/en/ctf/other/htb-cyber-apocalypse/verilicious)
+    - PKCS #1 v1.5 Bleichenbacher’s attack。不过之前见的Bleichenbacher’s attack都是动态题，有oracle实时判断某个密文的明文是否符合规范；这题已经给出了多个解密后符合规范的密文，且不存在oracle。参考这篇[论文](https://eprint.iacr.org/2018/1173.pdf)，需要将这个问题看成hidden number problem，再用lattice解
 
 ## Sagemath
 
@@ -675,6 +677,9 @@ sympy也放这了
 - [quickprime](https://hackmd.io/@lamchcl/S1mHGpDY1l)
     - 使用已知参数的lcg生成rsa的质数。比赛时队友搜到[类似的题](https://project-euphoria.dev/problems/2)了，方程（一元二次方程）也出来了。但那道题的lcg的模数是质数，这道的模数是2的512次幂，导致方程不好解。唯一的问题是一元二次方程的求根公式包含除以2的操作，除以2等同于乘上2的模逆元，显然这个逆元在m下是没有的。不过这不代表就没法除2了。如果分子是2的倍数直接除以2就行： $x=\frac{2k}{2}\mod m,2x=2k\mod m,x=k\mod \frac{m}{2}$ 。模运算中，当分子和分母有公因数d时，方程解的范围缩小为模 $\frac{m}{d}$ 。求出x后需要额外检查 $x+\frac{m}{2}$ ，因为这个数在模 $\frac{m}{2}$ 下等价，但在原方程的模m中不一样
     - 另一种解法： https://github.com/uclaacm/lactf-archive/blob/main/2025/crypto/quickprime
+- [Copperbox](https://7rocky.github.io/en/ctf/other/htb-cyber-apocalypse/copperbox)
+    - 没有模数的lcg。题目提供了 $s_1\cdot s_2^{-1}\mod p$ 和 $s_3\cdot s_4^{-1}\mod p$ 略去低48位的值，要求恢复lcg原本的seed，即 $s_0$
+    - 比赛时想到coppersmith了，也在deepseek的帮助下列出了两个多项式。两个多项式一共有三个变量，两个低位a和b，以及最初的种子x。可以结合两个多项式消掉x，然后用bivariate Coppersmith解a和b。结果我找的脚本太复杂了，sagemath环境也没配置好……特此记录wp使用的脚本
 - 记录个工具： https://github.com/Aeren1564/CTF ，里面的CTF_Library看起来很香
 
 ## Lattice(格)
@@ -864,7 +869,7 @@ $$
         - 重复以上步骤来泄漏剩下的bit
 - [magic_curves](https://github.com/TheRomanXpl0it/TRX-CTF-2025/blob/main/crypto/magic_curves)
     - 输入椭圆曲线的a，b和p参数，并计算`EllipticCurve(Zp, [a, b])`和`EllipticCurve(Zp, [b, a])`上的离散对数
-    - 预期解在固定j不变量的情况下爆破p，使曲线为一个异常曲线（anomalous curve，`E.cardinality() == p`），方便应用smart攻击；同时保证交换a和b参数后曲线的阶为光滑数，保证可以用pohlig_hellman求出离散对数
+    - 预期解在固定j不变量的情况下爆破p，使曲线为一个异常曲线（anomalous curve，`E.cardinality() == p`，即曲线的元素数量等于p），方便应用smart攻击；同时保证交换a和b参数后曲线的阶为光滑数，保证可以用pohlig_hellman求出离散对数
     - 其他解法： https://github.com/Sarkoxed/ctf-writeups/blob/master/trx-2025/magic_curves ，利用了坐标变换。deepseek的讲解如下：
         - 假设存在一个同构映射，将曲线E₁: y² = x³ + a x + b 转换为 E₂: y² = x³ + b x + a。引入坐标变换： $x=\lambda x'，y=\mu y'$
         - 将变换代入E₁的方程,得到 $(\mu y')^2=(\lambda x')^3+a(\lambda x')+b$
