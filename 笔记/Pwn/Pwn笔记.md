@@ -2039,3 +2039,5 @@ offset = the_mmap64_plus_23_itself
   - 先free到unsortedbin，然后free到tcachebin/largebin/fastbin/smallbin
 - 这题的bug挺隐蔽的。有个merge函数，允许输入两个索引a和b。程序会计算a和b处的数据的长度并在a上调用realloc（注意realloc内部会调用free(a)），最后free b。因此输入两个相同的索引会导致double free。考虑上述情况中的第三种。假设chunk A和B相邻，需要先将B放入unsortedbin后再触发A的double free，因为这样A才能在realloc的free中被合并进unsortedbin，然后在第二个free中进A和B合并后的大小对应的tcache。拿到libc地址后需先修复unsortedbin的结构，再在fastbin里用double free并tcache poisoning
 - 以及喜闻乐见的fsop模板
+240. [Vault](https://leo1.cc/posts/writeups/htb25-vault)
+- 发现了一个之前完全没注意的技巧。由于编译器的习惯，大部分libc函数都有这样一句：`mov rbx,rdi`，后续用rbx引用传入的第一个参数。假设需要调用gets，如果能控制rbx但控制不了rdi，直接跳转到`get+13`是差不多的效果

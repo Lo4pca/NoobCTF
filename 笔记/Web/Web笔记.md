@@ -4413,3 +4413,11 @@ fopen("$protocol://127.0.0.1:3000/$name", 'r', false, $context)
 536. [Red wEDDIng](https://github.com/kalmarunionenctf/kalmarctf/tree/main/2025/web/red-wedding)
 - [EDDI](https://github.com/labsai/EDDI) 5.5.0前存在zip路径穿越漏洞（zipslip），可以实现任意文件写（覆盖）。利用这个漏洞可以覆盖服务运行时需要的jar文件，从而实现rce
 - 有人给创建恶意jar包写了个工具：[JAR Poisoner](https://github.com/pspaul/jar-poisoner)
+537. [Cyber Attack](https://100gryphons.wordpress.com/htb-cyber-apocalypse-2025)
+- apache response header注入。如果攻击者可以控制apache服务的response header，就能注入类似如下的内容：
+```
+Location:/x
+Content-Type:proxy:http://attack/
+```
+效果是操控机器访问`http://attack/x`。详情见[Confusion Attacks(ssrf)](https://devco.re/blog/2024/08/09/confusion-attacks-exploiting-hidden-semantic-ambiguity-in-apache-http-server-en/#%ef%b8%8f-3-2-2-arbitrary-handler-to-full-ssrf)
+- ipv6能够在`%`后夹杂其他内容（但不能带`/`），仍然会被判定为有效ip
