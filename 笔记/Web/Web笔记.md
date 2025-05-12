@@ -500,6 +500,10 @@
 - [KalmarNotes](https://mqcybersec.org/writeups/25-kalmar-kalmarnotes)
     - 比赛时找到了xss注入点，但是拥有session的用户只能查看自己的note，故正常情况下只能是个self xss
     - 题目在`default.vcl`（[Varnish Configuration Language](https://varnish-cache.org/docs/trunk/users-guide/vcl.html)，[Varnish HTTP Cache](https://varnish-cache.org)）文件中定义了缓存规则，用于缓存所有静态资源，如`.png`结尾的资源。漏洞在于应用没有仔细核对查看note的url（`/note/<id>/<type>`）。即使type不在预期范围内也会呈现note的内容。于是可以构造`/note/id/a.png`，在自己的session下使应用缓存页面后再让admin访问。由于缓存的优先级高于应用的逻辑，admin看到的是先前缓存的payload，而不是身份验证失败的authentication failed提示
+- [Aurors Archive](https://evangelospro.com/posts/hackthebox---cyberapocalypse-2025-aurors-archive)
+    - admin bot设置比较特别的xss题目。开`puppeteer`时设置了`userDataDir`，于是bot每次运行时的cookie都能保留到下一次，有助于编写多段payload
+    - 网站存在xss，但只有拥有对应用户的cookie才能触发xss（即self xss）；网站还提供了将admin bot登录为某个用户的OAuth端口，但这样会导致admin bot的cookie不再拥有admin的权限，进而无法通过获取admin的cookie提权。解法是利用之前见过的cookie jar overflow，设置多个cookie挤掉admin的旧cookie，并塞入攻击者的cookie（指定`path`，使该cookie只在self xss处有效）。因为当前的cookie只在某个路径处有效，且旧cookie被挤掉了；所以admin bot会重新登录拿新的admin cookie。由此便确保admin bot既拥有admin权限的cookie，又能访问xss payload
+    - Postgre SQL注入。利用union select注入可以获取rce： https://adeadfed.com/posts/postgresql-select-only-rce
 
 ## SSTI
 
@@ -4421,3 +4425,9 @@ Content-Type:proxy:http://attack/
 ```
 效果是操控机器访问`http://attack/x`。详情见[Confusion Attacks(ssrf)](https://devco.re/blog/2024/08/09/confusion-attacks-exploiting-hidden-semantic-ambiguity-in-apache-http-server-en/#%ef%b8%8f-3-2-2-arbitrary-handler-to-full-ssrf)
 - ipv6能够在`%`后夹杂其他内容（但不能带`/`），仍然会被判定为有效ip
+538. [Eldoria Realms](https://medium.com/@dassomnath/eldoria-realms-hackthebox-cyber-apocalypse-2025-ecde31783ec9)
+- go+ruby搭建的网站，漏洞点是ruby的class pollution： https://blog.doyensec.com/2024/10/02/class-pollution-ruby.html 。类似js的原型链污染，特征都是递归的merge函数。效果是修改当前实例甚至是父类的属性值等内容
+- gopher协议的url格式如下：`gopher://<host>:<port>/<gopher-path>`。其中`<gopher-path>`可以由`<gophertype><selector>`组成。`<gophertype>`仅占一个字符，而剩下的`<selector>`会原封不动地用tcp协议传输至服务器。因此gopher协议的行为完全由服务器端定义
+    - 这题用的是[go-gRPC](https://grpc.io/docs/languages/go/basics)，允许客户端像调用本地对象一样调用远程机器上的方法。可以用`gRPCurl`与服务器交互并观察信息是如何传输的
+    - gRPC内部用http/2传输内容
+- 利用class pollution可以修改服务器用curl请求的url。将这个url改为gopher后，便能利用`<selector>`部分“走私”对gRPC服务器的请求

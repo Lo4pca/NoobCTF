@@ -680,6 +680,9 @@ sympy也放这了
 - [Copperbox](https://7rocky.github.io/en/ctf/other/htb-cyber-apocalypse/copperbox)
     - 没有模数的lcg。题目提供了 $s_1\cdot s_2^{-1}\mod p$ 和 $s_3\cdot s_4^{-1}\mod p$ 略去低48位的值，要求恢复lcg原本的seed，即 $s_0$
     - 比赛时想到coppersmith了，也在deepseek的帮助下列出了两个多项式。两个多项式一共有三个变量，两个低位a和b，以及最初的种子x。可以结合两个多项式消掉x，然后用bivariate Coppersmith解a和b。结果我找的脚本太复杂了，sagemath环境也没配置好……特此记录wp使用的脚本
+- [Prelim](https://100gryphons.wordpress.com/htb-cyber-apocalypse-2025)
+    - 题目明面上看是打乱明文，但通过分析代码的实际操作可以发现打乱信息的操作满足群的运算定律。[官方wp](https://github.com/hackthebox/cyber-apocalypse-2025/tree/main/crypto/Prelim)直接指出来了，这题其实还是rsa，需要在一个群里开e次根；但这个群不是模n，而是模对称群 $S_{4919}$
+    - sagemath里有关对称群的操作： https://github.com/forensicskween/ctf-writeups/tree/main/ctfs/HackTheBox/2025/CyberApocalypse/Crypto/Prelim
 - 记录个工具： https://github.com/Aeren1564/CTF ，里面的CTF_Library看起来很香
 
 ## Lattice(格)
