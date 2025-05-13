@@ -573,6 +573,9 @@ for i in range(1,e):
     - **vectorial-rsa** 的脚本更好理解一点
 - [Verilicious](https://7rocky.github.io/en/ctf/other/htb-cyber-apocalypse/verilicious)
     - PKCS #1 v1.5 Bleichenbacher’s attack。不过之前见的Bleichenbacher’s attack都是动态题，有oracle实时判断某个密文的明文是否符合规范；这题已经给出了多个解密后符合规范的密文，且不存在oracle。参考这篇[论文](https://eprint.iacr.org/2018/1173.pdf)，需要将这个问题看成hidden number problem，再用lattice解
+- [Twin Oracle](https://pr1m3dctf.github.io/blog/CTF/writeups/2025/Cyber-Apocalypse-2025/crypto/twin-oracle)
+    - 同时利用lsb oracle（输入密文c，获取其m的最低位是0还是1）和msb oracle（不确定叫什么名字，具体操作是，输入密文c，获取其m是否大于n//2）恢复m
+    - 破解BBS(Blum-Blum-Shub PRNG)。由于题目使用的模数m很小，因此wp遍历了所有可能的起始state并记录其运算后的特征值（比如每个state的奇偶状态）。后续可以通过观察远程实例的特征值恢复原本的state
 
 ## Sagemath
 

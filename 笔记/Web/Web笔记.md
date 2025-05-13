@@ -503,7 +503,10 @@
 - [Aurors Archive](https://evangelospro.com/posts/hackthebox---cyberapocalypse-2025-aurors-archive)
     - admin bot设置比较特别的xss题目。开`puppeteer`时设置了`userDataDir`，于是bot每次运行时的cookie都能保留到下一次，有助于编写多段payload
     - 网站存在xss，但只有拥有对应用户的cookie才能触发xss（即self xss）；网站还提供了将admin bot登录为某个用户的OAuth端口，但这样会导致admin bot的cookie不再拥有admin的权限，进而无法通过获取admin的cookie提权。解法是利用之前见过的cookie jar overflow，设置多个cookie挤掉admin的旧cookie，并塞入攻击者的cookie（指定`path`，使该cookie只在self xss处有效）。因为当前的cookie只在某个路径处有效，且旧cookie被挤掉了；所以admin bot会重新登录拿新的admin cookie。由此便确保admin bot既拥有admin权限的cookie，又能访问xss payload
-    - Postgre SQL注入。利用union select注入可以获取rce： https://adeadfed.com/posts/postgresql-select-only-rce
+    - Postgre SQL注入。利用union select注入可以获取rce：
+        - https://adeadfed.com/posts/postgresql-select-only-rce/
+        - https://pulsesecurity.co.nz/articles/postgres-sqli
+    - 非预期解： https://seall.dev/posts/htbctf2025aurorsarchive 。除了上面提到self xss，还有另一个地方存在xss。漏洞成因是网站只检查了参数的长度不能大于10，但题目使用的express开启了`extended: true`，导致可以用`data[]=x`绕过
 
 ## SSTI
 
@@ -4431,3 +4434,4 @@ Content-Type:proxy:http://attack/
     - 这题用的是[go-gRPC](https://grpc.io/docs/languages/go/basics)，允许客户端像调用本地对象一样调用远程机器上的方法。可以用`gRPCurl`与服务器交互并观察信息是如何传输的
     - gRPC内部用http/2传输内容
 - 利用class pollution可以修改服务器用curl请求的url。将这个url改为gopher后，便能利用`<selector>`部分“走私”对gRPC服务器的请求
+- 另一篇比较简短的wp： https://hackmd.io/@carrot303/SyIPww-Tyg
