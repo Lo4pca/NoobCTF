@@ -507,6 +507,11 @@
         - https://adeadfed.com/posts/postgresql-select-only-rce/
         - https://pulsesecurity.co.nz/articles/postgres-sqli
     - 非预期解： https://seall.dev/posts/htbctf2025aurorsarchive 。除了上面提到self xss，还有另一个地方存在xss。漏洞成因是网站只检查了参数的长度不能大于10，但题目使用的express开启了`extended: true`，导致可以用`data[]=x`绕过
+- [Eldoria Panel](https://blog.elmosalamy.com/posts/htb-cyber-apocalypse-2025-writeup)
+    - [DOMPurify 3.1.2 mutation XSS](https://mizu.re/post/exploring-the-dompurify-library-bypasses-and-fixes)
+    - 绕过`file_exists`和`file_get_contents`。常用的`php://`和`http://`无法绕过前者，但是`ftp://`可以
+    - wp中提到的非预期解见： https://github.com/sebastianosrt/CTF-Writeups/blob/main/HTB/CyberApochalipse25-TalesFromEldoria/Eldoria%20Panel.md ，导致无需用xss获取admin token就能访问admin面板
+        - 类似的middleware错误好像之前见过，都是用了个if语句判断session设置是否正确，但没有中途返回；无论什么情况都会走到最后的放行代码（`return $handler->handle($request)`）
 
 ## SSTI
 
