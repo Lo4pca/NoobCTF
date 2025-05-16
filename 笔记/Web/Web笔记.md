@@ -507,6 +507,7 @@
         - https://adeadfed.com/posts/postgresql-select-only-rce/
         - https://pulsesecurity.co.nz/articles/postgres-sqli
     - 非预期解： https://seall.dev/posts/htbctf2025aurorsarchive 。除了上面提到self xss，还有另一个地方存在xss。漏洞成因是网站只检查了参数的长度不能大于10，但题目使用的express开启了`extended: true`，导致可以用`data[]=x`绕过
+        - 结果wp提到的xss其实也不是预期解。预期解见 https://frevadiscor.dev/blog/2025/03/25/htb-ca-2025-web-writeups ，需要利用Vue Template Compiler的行为（csti，有点像模板注入）用多段payload组成self xss： https://matanber.com/blog/4-char-csti
 - [Eldoria Panel](https://blog.elmosalamy.com/posts/htb-cyber-apocalypse-2025-writeup)
     - [DOMPurify 3.1.2 mutation XSS](https://mizu.re/post/exploring-the-dompurify-library-bypasses-and-fixes)
     - 绕过`file_exists`和`file_get_contents`。常用的`php://`和`http://`无法绕过前者，但是`ftp://`可以

@@ -576,6 +576,7 @@ for i in range(1,e):
 - [Twin Oracle](https://pr1m3dctf.github.io/blog/CTF/writeups/2025/Cyber-Apocalypse-2025/crypto/twin-oracle)
     - 同时利用lsb oracle（输入密文c，获取其m的最低位是0还是1）和msb oracle（不确定叫什么名字，具体操作是，输入密文c，获取其m是否大于n//2）恢复m
     - 破解BBS(Blum-Blum-Shub PRNG)。由于题目使用的模数m很小，因此wp遍历了所有可能的起始state并记录其运算后的特征值（比如每个state的奇偶状态）。后续可以通过观察远程实例的特征值恢复原本的state
+        - 预期解见 https://github.com/hackthebox/cyber-apocalypse-2025/tree/main/crypto/Twin%20Oracles 。BBS的周期是可以计算的，为`λ(λ(M))`。其中`λ()`是Carmichael lambda，M是模数（需要分解M，因此题目的M较小）。得到一轮完整的周期后便能“预测”其以后的输出了
 
 ## Sagemath
 
