@@ -653,6 +653,10 @@ print(base64.b64encode(temp.encode()))
 - [Dura Lesc, Sed Lesc](https://github.com/Phreaks-2600/PwnMeCTF-2025-quals/blob/main/Misc/Dura_Lesc_Sed_Lesc)
     - 使用[crackle](https://github.com/mikeryan/crackle)破解BLE Encryption (Bluetooth Smart)
     - 没有wp，只有来自出题人的脚本：**Dura Lesc**
+- [MuddyWater](https://ilovectfs.com/ctf/swampctf-2025-muddy-water)
+    - 可以用[apackets](https://apackets.com/upload)提取NTLM user authentication过程中的NTLMv2 hash并用hashcat爆破密码
+        - 手动提取并组装hash的做法： https://github.com/Zhenda04/swampCTF/blob/main/swampCTF.md
+    - NTLM使用smb2协议
 
 1. 将tcp流解码为tpkt+openssl检查ASN.1。例题：[arrdeepee](../../CTF/攻防世界/6级/Misc/arrdeepee.md)
 2. mca后缀名文件为游戏Minecraft使用的世界格式。例题:[Russian-zips](https://blog.csdn.net/weixin_44604541/article/details/113741829)

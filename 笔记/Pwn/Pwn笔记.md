@@ -2041,3 +2041,5 @@ offset = the_mmap64_plus_23_itself
 - 以及喜闻乐见的fsop模板
 240. [Vault](https://leo1.cc/posts/writeups/htb25-vault)
 - 发现了一个之前完全没注意的技巧。由于编译器的习惯，大部分libc函数都有这样一句：`mov rbx,rdi`，后续用rbx引用传入的第一个参数。假设需要调用gets，如果能控制rbx但控制不了rdi，直接跳转到`get+13`是差不多的效果
+241. [Greeting as a Service](https://dothidden.xyz/swamp_ctf_2025/greeting_as_a_service)
+- 分析coredump文件
