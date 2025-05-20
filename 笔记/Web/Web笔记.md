@@ -4441,3 +4441,14 @@ Content-Type:proxy:http://attack/
     - gRPC内部用http/2传输内容
 - 利用class pollution可以修改服务器用curl请求的url。将这个url改为gopher后，便能利用`<selector>`部分“走私”对gRPC服务器的请求
 - 另一篇比较简短的wp： https://hackmd.io/@carrot303/SyIPww-Tyg
+539. [pyramid](https://hxuu.github.io/blog/ctf/dice25/pyramid)
+- nodejs http event和express路由的行为区别。参考下面这段代码：
+```js
+app.post('/', (req, res) => {
+    req.on('end', () => {
+        //一些有关token的代码
+    })
+    res.header('set-cookie', `token=x`)
+})
+```
+`app.post`部分是express的路由；路由里的`req.on`是nodejs的事件。end事件只有在http请求的body完全传输完毕后才会调用；而路由里的内容在http请求头传输后就会调用（即使请求还没有传输完body）。因此在这个情况下，能在end处理token之前拿到token

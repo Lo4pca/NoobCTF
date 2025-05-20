@@ -2138,6 +2138,8 @@ for i in "${!data[@]}"; do modbus host:port $((i+19))=${data[$i]}; done
     - 当gpt的输出字符被限制时，可以尝试用全角字符绕过
 - [VulnKart](https://seall.dev/posts/backdoorctf2024)
     - 应该是个例，这题可以注入python ssti payload并由AI执行
+- [diceon](https://cyber-man.pl/DiceCTF-Quals-2025-diceon-misc)
+    - 我愿称之为llm prompt injection的巅峰之作，真的从来没见过这么有创意的题目
 - https://fen1x1a.github.io/posts/one-prompt-to-rule-them-all
 - [LLM Attacks](https://doublespeak.chat/#/handbook)
 134. [Lost Evidence](https://github.com/daffainfo/ctf-writeup/tree/main/Tenable%20CTF%202023/Lost%20Evidence),[wp2](https://ctf.edwinczd.com/2023/tenable-ctf-2023/lost-evidence)
