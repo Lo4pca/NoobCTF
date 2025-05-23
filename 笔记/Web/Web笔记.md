@@ -58,7 +58,10 @@
     ```
     我对这里的`msg.value`的理解是“调用者调用某个函数时附带的eth数“。假如攻击者正常调用两次deposit，就需要付两次eth。但利用上面的for循环+delegatecall，可调用任意次deposit，且只用付一次eth。withdraw的时候就能凭空提取不属于自己的eth
 - [Mafia2](https://github.com/DK27ss/PWNME-CTF-Mafia2-WriteUp)
-    - solidity里的private字段可以通过`cast storage`获得……并非private
+    - solidity里的private字段值可以通过`cast storage`获得……并非private
+- [Golden-Bridge](https://eddwastaken.github.io/posts/dicectf-2025-quals-golden-bridge)
+    - 再一次遇到这类用bridge合约串联Ethereum和Solana的资源的题。不过这次感觉对brdige的概念有了更好的认识。因为Ethereum和Solana之间无法通信，故在将a token转成b token（反之亦然）时双方都无法得知对面是否真的有请求数量这么多的token。所以需要在两个之间插入一个双方都信任的中介同时记录双边token的数量
+    - 漏洞在于将sol token转成eth token时，没有确认solana方已完成转账就交付eth token了（solana转账速度较慢）。所以可以获取比实际数量多得多的eth token（某种意义上很像限时的重入攻击？）
 
 ## SQL注入
 

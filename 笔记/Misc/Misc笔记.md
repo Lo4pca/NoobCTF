@@ -2973,3 +2973,7 @@ $ cd a/b
 - 官方解法： https://github.com/WolvSec/WolvCTF-2025-Challenges-Public/blob/master/misc/wasmjail
 396. [Turing Incomplete](https://github.com/KattonTCM/ctf-writeups/blob/main/Turing-Incomplete.md)
 - 在只能使用两个state的前提下编写能够执行三个个位数加法的图灵机
+397. [glail](https://gist.github.com/CygnusX-26/e1e7403ec7894f6fc2d9a0e2e5ad9012)
+- 过滤import和`@`后，利用旧版本[Gleam](https://gleam.run)编译器编译gleam脚本成js时出现的问题（js里不支持的gleam语言功能在编译时会被忽略，而不是报错）执行系统命令
+- 除了上面提到的bug，还有一个关键的地方在于运行脚本时用的是bun。编译器过滤了js里常见的关键词从而防止用户定义的函数覆盖js的关键词；但bun环境提供了黑名单外的关键词。gleam本身非常依赖导入模块来执行函数，需要结合以上两个关键点来调用js环境里的函数
+- 其他解法:**glail**
