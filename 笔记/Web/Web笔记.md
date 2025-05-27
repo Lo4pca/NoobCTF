@@ -516,6 +516,16 @@
     - 绕过`file_exists`和`file_get_contents`。常用的`php://`和`http://`无法绕过前者，但是`ftp://`可以
     - wp中提到的非预期解见： https://github.com/sebastianosrt/CTF-Writeups/blob/main/HTB/CyberApochalipse25-TalesFromEldoria/Eldoria%20Panel.md ，导致无需用xss获取admin token就能访问admin面板
         - 类似的middleware错误好像之前见过，都是用了个if语句判断session设置是否正确，但没有中途返回；无论什么情况都会走到最后的放行代码（`return $handler->handle($request)`）
+- [safestnote](https://adragos.ro/dice-ctf-2025-quals)
+    - 网站前端的js代码使用户可以通过传get参数将笔记存入localstorage中，并展示localstorage中笔记的内容。可以提交给admin bot任意网址。bot会先将flag存入笔记中再用同一个tab访问提交的网址。笔记内容经过dompurify过滤，但没有csp
+    - session history：当用户填写form的input时，chrome会记忆填写的内容。后续返回到这个网页会自动填充之前的填写的内容。不过填充的位置是相对的。比如chrome记忆填写的内容位于网页的第一个input字段（称为A）；假如后续在A之前插入了另一个input B，则填写的内容会出现在B里
+    - css injection技巧，选定动态填写的input字段里的内容： https://stackoverflow.com/a/29612733 。不过这个技巧要求攻击者可以控制input字段的pattern属性
+    - bfcache会导致缓存页面的js代码不执行。如果能控制页面的js代码的话，加一句`window.addEventListener('unload', ()=>{})`可以阻止这点；或者进行6次以上的navigation，因为bfcache最多记录前6个页面
+- [convenience store](https://github.com/onionymous/ctf_challenges/blob/main/dicectf2025_quals/convenience_store)
+    - 利用[Android Custom Tabs](https://developer.chrome.com/docs/android/custom-tabs)实现xs leak
+        - 漏洞基于这篇论文里的内容： https://minimalblue.com/data/papers/SECWEB22_broken_bridge.pdf
+        - Android Custom Tabs与手机内的浏览器共享状态（比如cookies），且提供了测量Custom Tabs中加载的网站的信号的方法。类似xs leak中将某个网站放进iframe并测量加载时长的方法，但这个方法不会被iframe相关的csp挡住
+    - 此题的admin bot会先访问一个网站存储note，然后运行攻击者提供的android app。网站提供了note的搜索功能，若搜索的note内容存在则加载耗时更长
 
 ## SSTI
 
@@ -4455,3 +4465,5 @@ app.post('/', (req, res) => {
 })
 ```
 `app.post`部分是express的路由；路由里的`req.on`是nodejs的事件。end事件只有在http请求的body完全传输完毕后才会调用；而路由里的内容在http请求头传输后就会调用（即使请求还没有传输完body）。因此在这个情况下，能在end处理token之前拿到token
+540. [old-site-b-side](https://adragos.ro/dice-ctf-2025-quals)
+- `next.js`特性：访问`/_next/image`时使用的是访问者的cookie，但缓存的结果对所有用户开放（持续60秒，且攻击者需要用与目标相同的Accept标头，见[官方wp](https://bulr.boo/writeups/2025/dicectf/quals)）
