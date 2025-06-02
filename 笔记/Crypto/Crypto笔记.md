@@ -577,6 +577,10 @@ for i in range(1,e):
     - 同时利用lsb oracle（输入密文c，获取其m的最低位是0还是1）和msb oracle（不确定叫什么名字，具体操作是，输入密文c，获取其m是否大于n//2）恢复m
     - 破解BBS(Blum-Blum-Shub PRNG)。由于题目使用的模数m很小，因此wp遍历了所有可能的起始state并记录其运算后的特征值（比如每个state的奇偶状态）。后续可以通过观察远程实例的特征值恢复原本的state
         - 预期解见 https://github.com/hackthebox/cyber-apocalypse-2025/tree/main/crypto/Twin%20Oracles 。BBS的周期是可以计算的，为`λ(λ(M))`。其中`λ()`是Carmichael lambda，M是模数（需要分解M，因此题目的M较小）。得到一轮完整的周期后便能“预测”其以后的输出了
+- [vorpal-sword](https://priv.pub/posts/dicectf-2025-quals)
+    - rsa不经意传输（oblivious transfer）。B输入一个值v，A执行特定操作后生成key $k_0$ 和 $k_1$ 加密出 $c_0$ 和 $c_1$ 。设计上根据B输入的值v，B只能恢复 $m_0$ 或者 $m_1$ 。但通过设计特殊的v值，有办法同时恢复两个m，见 https://lazzzaro.github.io/2021/06/20/crypto-%E4%B8%8D%E7%BB%8F%E6%84%8F%E4%BC%A0%E8%BE%93/index.html
+    - 这题算简化版，事先已经知道其中一个m的具体内容。[wp的构造方式](https://github.com/dicegang/dicectf-quals-2025-challenges/blob/main/crypto/vorpal-sword)与个人解法：**vorpal-sword**
+    - 不应多次使用相同的公钥，同系列的另一道题`winxy-pistol`攻击的是重用多次公钥的instance
 
 ## Sagemath
 
