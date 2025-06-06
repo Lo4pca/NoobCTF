@@ -2971,3 +2971,5 @@ assert crc32(a)^crc32(b)==crc32(c)^crc32(d)
 176. [ShiftHappens](https://github.com/WolvSec/WolvCTF-2025-Challenges-Public/blob/master/crypto/ShiftHappens)
 - lfsr已知（开头）明文攻击
 - 个人在比赛时找到的脚本： **ShiftHappens**
+177. [fairy-ring](../../CTF/Others/dicequal-2025-fairy-ring.md)
+- [ring signature scheme](https://en.wikipedia.org/wiki/Ring_signature),Unbalanced oil and vinegar(uov),multivariate quadratic map与Binary Field的性质
