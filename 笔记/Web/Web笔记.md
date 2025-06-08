@@ -526,6 +526,12 @@
         - 漏洞基于这篇论文里的内容： https://minimalblue.com/data/papers/SECWEB22_broken_bridge.pdf
         - Android Custom Tabs与手机内的浏览器共享状态（比如cookies），且提供了测量Custom Tabs中加载的网站的信号的方法。类似xs leak中将某个网站放进iframe并测量加载时长的方法，但这个方法不会被iframe相关的csp挡住
     - 此题的admin bot会先访问一个网站存储note，然后运行攻击者提供的android app。网站提供了note的搜索功能，若搜索的note内容存在则加载耗时更长
+- [nobin](http://blog.maple3142.net/2025/03/31/dicectf-2025-quals-writeups)
+    - 白给了xss，目标是泄漏出shared storage里的内容。使用方可以调用`sharedStorage.set(key,content)`来存储内容，但访问存储的内容时需要定义一个worklet，在worklet内部定义处理内容的逻辑。后续用`sharedStorage.worklet.addModule`加载定义的worklet模块。特别之处在于worklet运行在额外的js环境中，能访问的api很少，就算能访问存储的内容也很难完整地直接传递出去。Private Aggregation API据说可以，但用起来很复杂，不如侧信道
+    - wp里的侧信道的思路在于发现worklet环境中可以访问crypto库。在worklet中反复生成rsa密钥会导致外部环境（调用方）的生成速度变慢。不过这种方案比较绕，api其实提供了`sharedStorage.selectURL`函数，调用方可以传递一组url给worklet，由worklet根据存储的内容决定返回哪个url。其他解法： **nobin** ，提供了额外三个技巧：
+        - 直接在worklet内部调用sleep，这会影响worklet何时传回url的相关信息。调用方可以利用各个iframe的加载速度判断是哪个worklet耗时更长
+        - `console.log(Object.keys(this))`会使整个tab崩溃，观察崩溃的情况可以得到flag的内容
+        - 如何利用Browsing Context Group（BCG）反复进行某个攻击
 
 ## SSTI
 
@@ -4467,3 +4473,24 @@ app.post('/', (req, res) => {
 `app.post`部分是express的路由；路由里的`req.on`是nodejs的事件。end事件只有在http请求的body完全传输完毕后才会调用；而路由里的内容在http请求头传输后就会调用（即使请求还没有传输完body）。因此在这个情况下，能在end处理token之前拿到token
 540. [old-site-b-side](https://adragos.ro/dice-ctf-2025-quals)
 - `next.js`特性：访问`/_next/image`时使用的是访问者的cookie，但缓存的结果对所有用户开放（持续60秒，且攻击者需要用与目标相同的Accept标头，见[官方wp](https://bulr.boo/writeups/2025/dicectf/quals)）
+541. [dicepass](https://blog.maple3142.net/2025/03/31/dicectf-2025-quals-writeups)
+- chrome插件的相关知识
+ - background.js是后台常驻运行的脚本
+ - content.js是注入到网页中的脚本，运行在网页的上下文中。通过`chrome.runtime.sendMessage`与background.js通信。受沙盒限制，被注入的网页无法直接访问插件里的全局变量。但这题是例外， https://github.com/dicegang/dicectf-quals-2025-challenges/blob/main/web/dicepass/chall/extension/src/content.js#L112 使用comlink将变量和函数暴露出来。网页可以用`dicepass.xxx`访问
+- 题目的关键是下面这段：
+```js
+const usernameInput = document.querySelector('[data-dicepass-username]');
+const passwordInput = document.querySelector('[data-dicepass-password]');
+//...
+if (await remote.hasPasswordFor(id)) {
+    const { username, password } = await remote.getLogin(id);
+    context.prevUsername = usernameInput.value;
+    context.prevPassword = passwordInput.value;
+    usernameInput.value = username;
+    passwordInput.value = password;
+    return;
+}
+```
+如果利用dom clobbering使`usernameInput.value`为一个dom元素，就能用`prevUsername.ownerDocument.defaultView`获取该元素所属的document的window对象。而这个window中有chrome对象，得以访问chrome相关的api
+- content.js中存在csp，但仍然可以用`setTimeout(string)`执行任意函数： https://issues.chromium.org/issues/330693450
+- 其他解法：**dicepass**
