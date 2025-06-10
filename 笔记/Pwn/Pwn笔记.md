@@ -162,6 +162,18 @@ kernel pwn题合集。用于纪念我连堆都没搞明白就敢看内核的勇�
 - [baby_small](https://github.com/manuele-pandolfi/ctf-writeups/blob/main/baby_small)
   - linux kernel Model-Specific Register任意写。MSR是负责调试，开启CPU功能和性能监控的寄存器之一。比如EFER用于标记是否开启了NX（不过还有其他的寄存器也负责这点）；LSTAR记录CPU执行完syscall后跳转到的内核虚拟地址
   - 题目的原理大概如下：覆盖EFLAGS的AC bit从而禁用SMAP从而使内核可以访问用户态内存。然后`MSR_GS_BASE`设置假的GS base，从而伪造一块栈内存然后写rop。有一个问题是，`MSR_GS_BASE`全局共用，所以假如CPU调度其他进程时也切换了context，那个进程用的也是假的GS。这会导致kpanic，因为系统调用必须用真实的GS，而且不可能完整伪造一个GS。这步需要条件竞争绕过，题目将`CONFIG_HZ`设置为100来延长竞争窗口
+- [oboe](https://7rocky.github.io/en/ctf/other/dicectf/oboe)
+  - 漏洞以kernel patch的形式呈现，为`unix_create_addr`函数里的off by one（影响`unix_address`结构体）；并移除了`__sys_getsockname`里的canary和`move_addr_to_user`里的栈上变量拷贝检查
+  - 题目开的保护比较松，smap+smep+kpti+kaslr，会让堆利用变得痛苦的`CONFIG_SLAB_FREELIST_RANDOM`和`CONFIG_SLAB_FREELIST_HARDENED`都没开。而且保留了`CONFIG_SLAB_MERGE_DEFAULT=y`，意味着kernel会根据slab缓存的大小合并内存，不区分GFP标志（GFP_KERNEL_ACCOUNT、GFP_KERNEL）。比如`kmalloc-cg-32`的object可能和`kmalloc-32`位于相邻的内存区域。后果是攻击者更容易扩大攻击面。假如存在堆溢出或uaf等漏洞，合并前只能攻击相同类型的结构体，合并后便可能攻击所有相同大小的结构体
+  - 又到了kernel题必备的复述阶段（
+    - 堆喷一些unix_address结构体，为了消耗exp执行前slab中空闲的slot，使接下来分配的两个`unix_address`相邻(注意socket不分配目标结构体，真正分配结构体的是bind)
+    - socket分配s1，s2，s3，s4和seq_operations（后续泄漏地址用）；bind s1和s2。注意先分配的对象在低地址，后分配的对象在高地址
+    - 利用listen-connect-accept增加s2的refcount到2；接着close s1，bind s3。我不太确定此举具体的作用，是让s3占据s1的位置？但这一步的目的是让`unix_create_addr`的栈上包含大量`\x01`，从而让上面提到的off by one能够修改相邻的s2的refcount为1
+    - bind s4。s4与s2内存上相邻且位于更高的地址。运气好的话，off by one会取到s3铺垫的`\x01`，覆盖s2的refcount为1
+    - 使s2的refcount减一。由于前面覆盖了s2的refcount为1，这里将直接free掉s2；但实际上我们仍持有s2的一个引用，实现uaf。直接读取free后的s2可以泄漏kernel堆地址；然后setxattr占用s2所处的slot，修改s2的len字段
+    - `unix_address`的len字段决定可以读取多少数据。于是这里可以读取相邻的seq_operations里的地址，获取kernel基地址
+    - 重复以上uaf利用步骤，但把出现uaf的对象后的`seq_operations`换成另一个`unix_address`，从而让`unix_getname`中的memcpy将rop chain payload拷贝到栈上，调用`commit_creds(init_cred)`+kpti trampoline
+  - 我在一场比赛中尝试使用 https://lkmidas.github.io/posts/20210123-linux-kernel-pwn-part-1 里介绍的kpti trampoline（使用iretq），但是发现失败（后续跟着part 2发现用signal handler可以）。可以学习wp的做法跟着 https://0x434b.dev/dabbling-with-linux-kernel-exploitation-ctf-challenges-to-learn-the-ropes 用sysretq
 
 ## Shellcode题合集
 
