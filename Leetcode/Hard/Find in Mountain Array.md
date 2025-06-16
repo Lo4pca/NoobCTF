@@ -60,4 +60,4 @@ Memory
 Beats
 100%
 ```
-来三次binary search，第一次找mountain array里的peek，参考[Peak Index in a Mountain Array]。然后以peek的index为分割线，前面是递增数组，后面是递减数组，分别进行binary search即可。有个写的非常简短的大佬： https://leetcode.com/problems/find-in-mountain-array/solutions/317603/c-find-peak-162-binary-search
+来三次binary search，第一次找mountain array里的peek，参考[Peak Index in a Mountain Array](../Medium/Peak%20Index%20in%20a%20Mountain%20Array.md)。然后以peek的index为分割线，前面是递增数组，后面是递减数组，分别进行binary search即可。有个写的非常简短的大佬： https://leetcode.com/problems/find-in-mountain-array/solutions/317603/c-find-peak-162-binary-search

