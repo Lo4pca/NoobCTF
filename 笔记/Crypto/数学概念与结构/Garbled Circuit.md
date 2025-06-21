@@ -57,3 +57,24 @@ alice将自己的输入标签A与上述混淆后的真值表的 $w_3$ 栏打乱�
 3. Free-XOR
 - 生成一个全局秘密值 $\Delta\in 0,1^{\lambda}$ (所有长度为 $\lambda$ 比特的二进制字符串的集合，元素数量 $2^{\lambda}$ )，然后生成输入标签，使得 $W_i^0\bigoplus W_i^1=\Delta$ 。或者说， $W_i^x=W_i^0\bigoplus(x\Delta)$ （如果x=0， $x\Delta=0^{\lambda}$ ;如果x=1， $x\Delta=\Delta$ ）。于是对于一个xor门 $G(W_a,W_b)=W_c$ ，有 $W_a^x\bigoplus W_b^x=(W_a^0\bigoplus W_b^0)\bigoplus(x\bigoplus y)\Delta$ 。此时如果让对应0的输出标签 $W_c^0=W_a^0\bigoplus W_b^0$ （对应1的输出标签则是多异或一个 $\Delta$ ）,会发现已经不需要任何密文了，因为接收者可以根据输入标签直接算出对应的输出标签
 - 这个技巧可以与以上两个技巧一起用。使 $LSB(\Delta)=1$ ，就能保证每一对生成的输入标签的color bit，即lsb，不同
+
+然后跳到`Free-XOR Offset Leak`（作者在文章的开头说只读`elementary-optimizations`和`free-xor-offset-leak-attack`就足以理解wp了）
+
+free xor中需要用OT传输的两个信息为 $W_i^0$ 和 $W_i^1$ 。如果攻击者以某种方式同时获取了两个标签，便能得到全局偏移值 $\Delta$ 。[nil-circ](https://github.com/defund/ctf/tree/master/dicectf-quals-2025/nil-circ)中使用的是基于ECDH的Chou-Orlandi OT协议。具体过程如下：
+
+1. 背景
+- 发送者拥有两条秘密 $m_0,m_1$
+- G为curve-25519的公共generator，q为G的阶
+- 下述所有运算均在curve-25519上考虑
+- H为random oracle
+2. 过程
+- 发送者随机选择 $y\in Z_q$ (原文的 $y\in_R Z_q$ 的R就是随机选择，random的意思)，将Y=y\*G发送给接收者
+- 接收者随机选择 $r\in Z_q$ ，然后根据自己的secret bit b（接收者想要知道那条秘密）生成R。若b=0,R=r\*G;若b=1，R=Y-r\*G 。接着计算 $k_b=H(i,r\*Y)$ ，其中i是计数器，用于计数多次OT的索引
+- 接收者计算两条一次性密钥， $k_0=H(i,yR)$ 和 $k_1=H(i,yY-yR)$ 。然后加密两条秘密 $c_0=m_0\bigoplus k_0$ , $c_1=m_1\bigoplus k_1$ 。将 $(c_0,c_1)$ 发送给接收者
+3. 数学原理
+
+注意到当b=0时， $H(i,yR)=H(i,y\*r\*G)=k_b$ ; b=1时， $H(i,yY-yR)=H(i,y\*y\*G-y\*(Y-r\*G))=H(i,y\*y\*G-y\*y\*G+y\*r\*G)=H(i,y\*r\*G)=k_b$ 。所以不论b是什么，接收者的 $k_b$ 与发送者的一条信息的密钥相同，进而可以获取秘密
+
+问题是，并没有手段保证接收者就按照这套标准给发送者发送R。在free xor的背景下，攻击者可以尝试构造 $k_0=k_1\Rightarrow yR=yY-yR\Rightarrow R=\frac{1}{2}Y$ ,就能计算 $\Delta=c_0\bigoplus c_1=m_0\bigoplus m_1=W_i^0\bigoplus W_i^1$
+
+无论如何混淆真值表，真值表毕竟还是真值表，其功能不会改变。因此对于一些不平衡的真值表，可以仅通过标签判断其对应的值。比如前面提到的AND门。四组不同的输入只会产生两个不同的标签，明显出现三次的标签代表0，只出现一次的标签代表1。假设输入标签分别为 $W_a^x,W_a^y,W_b^u,W_b^v$ ，且 $W_a^x$ 和 $W_b^u$ 输出了 $W_c^1$ ，则我们可以推断 $W_a^x=W_a^1,W_b^u=1$ 。接着，由于电路的结构是公开的，我们就能得知所有与 $W_0$ 和 $W_1$ 相关的wire的方程。收集足够多的方程后便能解出所有标签的值
