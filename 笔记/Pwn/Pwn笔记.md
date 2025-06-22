@@ -2063,3 +2063,6 @@ offset = the_mmap64_plus_23_itself
 - 发现了一个之前完全没注意的技巧。由于编译器的习惯，大部分libc函数都有这样一句：`mov rbx,rdi`，后续用rbx引用传入的第一个参数。假设需要调用gets，如果能控制rbx但控制不了rdi，直接跳转到`get+13`是差不多的效果
 241. [Greeting as a Service](https://dothidden.xyz/swamp_ctf_2025/greeting_as_a_service)
 - 分析coredump文件
+242. [Sniper](https://github.com/tamuctf/tamuctf-2025/tree/main/pwn/sniper)
+- 题目设置挺有意思的。printf漏洞+flag已经读到了一个mmap固定地址，理论上可以直接用`%s`泄漏；但地址中包含`0a`，读取payload的fgets无法完整读入。技巧在于printf内部调用的是`vfprintf`，而这个函数内部自己有个缓存buf存payload。于是输入payload时可以随便输个地址，然后用printf漏洞修改`vfprintf`内部的buf将地址改成正确的flag地址，后面的`%s`就能正确打印出flag了。这也是为什么之前说printf的payload好像没法动态修改，因为`vfprintf`实际使用的payload根本不是我们输入的那个，而是缓存后的
+- 非常详细的wp： https://www.youtube.com/watch?v=K690__BET10

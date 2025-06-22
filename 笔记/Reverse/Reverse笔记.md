@@ -28,6 +28,8 @@
   - 提取unity游戏的资源
 - [Analyzing ARCompact Firmware with Ghidra](https://www.sstic.org/media/SSTIC2021/SSTIC-actes/analyzing_arcompact_firmware_with_ghidra/SSTIC2021-Article-analyzing_arcompact_firmware_with_ghidra-iooss.pdf)
   - 工具： https://github.com/JacksonDonaldson/arcompact_be_ghidra
+- [CoSA: CoreIR Symbolic Analyzer](https://github.com/cristian-mattarei/CoSA)
+  - SMT-based symbolic model checker for hardware design
 
 ## Game
 

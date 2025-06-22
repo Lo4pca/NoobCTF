@@ -581,6 +581,9 @@ for i in range(1,e):
     - rsa不经意传输（oblivious transfer）。B输入一个值v，A执行特定操作后生成key $k_0$ 和 $k_1$ 加密出 $c_0$ 和 $c_1$ 。设计上根据B输入的值v，B只能恢复 $m_0$ 或者 $m_1$ 。但通过设计特殊的v值，有办法同时恢复两个m，见 https://lazzzaro.github.io/2021/06/20/crypto-%E4%B8%8D%E7%BB%8F%E6%84%8F%E4%BC%A0%E8%BE%93/index.html
     - 这题算简化版，事先已经知道其中一个m的具体内容。[wp的构造方式](https://github.com/dicegang/dicectf-quals-2025-challenges/blob/main/crypto/vorpal-sword)与个人解法：**vorpal-sword**
     - 不应多次使用相同的公钥，同系列的另一道题`winxy-pistol`攻击的是重用多次公钥的instance
+- [Smelter](https://clemensgooooo.github.io/posts/Smelter)
+    - 依然是PKCS #1 v1.5 Bleichenbacher攻击。但是这次做的时候发现套之前的脚本出了点问题，特此记录新的脚本： https://github.com/maximmasiutin/rsa-bleichenbacher-signature
+    - 个人wp见 **Smelter**
 
 ## Sagemath
 

@@ -2977,3 +2977,5 @@ $ cd a/b
 - 过滤import和`@`后，利用旧版本[Gleam](https://gleam.run)编译器编译gleam脚本成js时出现的问题（js里不支持的gleam语言功能在编译时会被忽略，而不是报错）执行系统命令
 - 除了上面提到的bug，还有一个关键的地方在于运行脚本时用的是bun。编译器过滤了js里常见的关键词从而防止用户定义的函数覆盖js的关键词；但bun环境提供了黑名单外的关键词。gleam本身非常依赖导入模块来执行函数，需要结合以上两个关键点来调用js环境里的函数
 - 其他解法:**glail**
+398. [NII](https://github.com/E-HAX/writeups/tree/main/2025/tamuctf/forensics/nii)
+- [NIFTI file format](https://brainder.org/2012/09/23/the-nifti-file-format)。可以用nifti_tool查看文件的具体信息
