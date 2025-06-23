@@ -2980,3 +2980,6 @@ assert crc32(a)^crc32(b)==crc32(c)^crc32(d)
 - hamiltonian cycle zkp
 - pedersen commitment。在一个大素数阶q的循环群G中，给定两个生成元 $g,h\in G$ ，对一个 $m\in Z_q$ 承诺值为 $C=g^m\times h^r$ 。其中r是一个随机数。在无法计算离散对数的情况下，无法找到m'和r'使得 $g^m\times h^r=g^{m'}\times h^{r'}$
 - 漏洞在于permute_graph中未检查攻击者输入的permutation是合法的permutation，导致可以输入重复的数字值将本来不可能存在hamiltonian cycle图复制成完全图
+179. [rc4-prefix](https://github.com/tamuctf/tamuctf-2025/blob/main/crypto/rc4-prefix)
+- rc4 [Fluhrer, Mantin and Shamir attack](https://en.wikipedia.org/wiki/Fluhrer,_Mantin_and_Shamir_attack)
+- 更简易的脚本：**rc4-prefix**

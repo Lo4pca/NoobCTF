@@ -347,6 +347,8 @@ print(base64.b64encode(temp.encode()))
 - [Paper Viper](https://github.com/kalmarunionenctf/kalmarctf/tree/main/2025/misc/paper-viper)
     - asteval 0 day+多行pyjail。wp记录了找漏洞的整体思路，第一次意识到`type()`有多重要
     - wp里提到的两个解法：**paper-viper**
+- [pycjailplusplus](https://github.com/tamuctf/tamuctf-2025/tree/main/misc/pycjailplusplus)
+    - eval环境无builtins+使用不在`opcode.opmap`里的opcode（或者说未记录在官方文档里的opcode）调用breakpoint函数。这些未记录的opcode，比如说`LOAD_FAST__LOAD_CONST`，没有边界检查。意味着可以从eval的栈帧中跳出来，越界获取main函数栈帧的builtins。从builtins中取出breakpoint函数后不能直接调用，需要调用其`__call__`属性，因为直接调用的话程序会以当前栈帧为调用时的上下文，缺乏builtins
 - pyjail cheatsheet
     - https://shirajuki.js.org/blog/pyjail-cheatsheet
     - https://book.hacktricks.wiki/en/generic-methodologies-and-resources/python/bypass-python-sandboxes/index.html
@@ -448,6 +450,8 @@ print(base64.b64encode(temp.encode()))
     - wp末尾提到的解法的脚本：**rwx diamond** 。`x|sh`可以短暂保持一个bash，此时往`/proc/<pid>/fd/0`就能执行命令
 - [RWX - gold](https://nanimokangaeteinai.hateblo.jp/entry/2025/03/10/041721)
     - 利用gpg命令实现rce。运行`gpg`将自动在家目录下创建`.gnupg`文件夹，往里面写一些配置文件后再运行一次gpg就能执行配置文件中编写的命令
+- [Sandbox](https://github.com/tamuctf/tamuctf-2025/tree/main/misc/sandbox)
+    - 题目的背景是一个以root权限运行的c文件，内部fork后用`setuid/setgid`降权并调用`/bin/bash`。问题在于没有给新生成的shell准备PTY(伪终端),导致攻击者可以通过`/dev/tty`的TIOCSTI ioctl调用向root进程的tty注入命令，以root身份执行
 
 ## Digital Forensics and Incident Response(DFIR)
 
@@ -2979,3 +2983,5 @@ $ cd a/b
 - 其他解法:**glail**
 398. [NII](https://github.com/E-HAX/writeups/tree/main/2025/tamuctf/forensics/nii)
 - [NIFTI file format](https://brainder.org/2012/09/23/the-nifti-file-format)。可以用nifti_tool查看文件的具体信息
+399. [Conspiracy Theory](https://github.com/tamuctf/tamuctf-2025/tree/main/forensics/conspiracy-theory)
+- mp3文件结构解析

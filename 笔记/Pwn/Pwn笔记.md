@@ -1928,7 +1928,7 @@ fn get_ptr<'a, 'b, T: ?Sized>(x: &'a mut T) -> &'b mut T {
 208. [vector-overflow](https://octo-kumo.me/c/ctf/2024-ductf/pwn/vector-overflow)
 - 通过栈溢出修改c++里的vector结构。主要是用gdb观察vector的构造。见 https://stackoverflow.com/questions/52330010/what-does-stdvector-look-like-in-memory
 209. [onewrite](https://github.com/ImaginaryCTF/ImaginaryCTF-2024-Challenges-Public/tree/main/Pwn/onewrite)
-- libc 2.35，只能往任意地址写一次任意内容，获取RCE。预期解是setcontext32。我还试了fsop，不知道为啥之前记的模板都用不了(怀疑某些地址不对，不过这些地址都没有符号，调试也是个问题)，再记一个: https://gist.github.com/C0nstellati0n/c5657f0c8e6d2ef75c342369ee27a6b5#onewrite 。另外用pwntools里的FileStructure时，发现`context.arch`很重要，默认是i386，要是文件结构写的是amd64的内容但是没换arch，转成bytes时就会报错
+- libc 2.35，只能往任意地址写一次任意内容，获取RCE。预期解是setcontext32。我还试了fsop，不知道为啥之前记的模板都用不了(怀疑某些地址不对，不过这些地址都没有符号，调试也是个问题)，再记一个: **onewrite** 。另外用pwntools里的FileStructure时，发现`context.arch`很重要，默认是i386，要是文件结构写的是amd64的内容但是没换arch，转成bytes时就会报错
 210. [User Management](https://www.theflash2k.me/blog/writeups/deadsec23/pwn/user-management)
 - 又是没看到buffer overflow bug的一天……干脆以后所有有输入的地方我都试一遍得了……
 - pwntools的`fmtstr_payload`函数可以设置`no_dollar`为True，这样出来的payload不会包含`$`符号

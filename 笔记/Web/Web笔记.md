@@ -4494,3 +4494,6 @@ if (await remote.hasPasswordFor(id)) {
 如果利用dom clobbering使`usernameInput.value`为一个dom元素，就能用`prevUsername.ownerDocument.defaultView`获取该元素所属的document的window对象。而这个window中有chrome对象，得以访问chrome相关的api
 - content.js中存在csp，但仍然可以用`setTimeout(string)`执行任意函数： https://issues.chromium.org/issues/330693450
 - 其他解法：**dicepass**
+542. [Research](https://github.com/tamuctf/tamuctf-2025/tree/main/web/research)
+- `pdflatex`的内置命令使用
+- 其他wp：**Research**
