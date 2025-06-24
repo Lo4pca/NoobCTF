@@ -4497,3 +4497,9 @@ if (await remote.hasPasswordFor(id)) {
 542. [Research](https://github.com/tamuctf/tamuctf-2025/tree/main/web/research)
 - `pdflatex`的内置命令使用
 - 其他wp：**Research**
+543. [Peek a QL](https://baradika.netlify.app/p/breach-ctf)
+- graphql注入泄漏信息
+- **Peek a QL**
+544. [Framework Follies](https://github.com/CSeCIITB/BreachCTF/tree/main/web/framework-follies)
+- `Next.js`中，函数调用依赖action id。如果一个函数被编译进next.js自动生成的网站却没有被调用，攻击者仍然可以通过获取其函数id手动调用
+- **Framework Follies**

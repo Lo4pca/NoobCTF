@@ -661,6 +661,9 @@ print(base64.b64encode(temp.encode()))
     - 可以用[apackets](https://apackets.com/upload)提取NTLM user authentication过程中的NTLMv2 hash并用hashcat爆破密码
         - 手动提取并组装hash的做法： https://github.com/Zhenda04/swampCTF/blob/main/swampCTF.md
     - NTLM使用smb2协议
+- [Onions Make Me Cry](https://hackmd.io/@keii/Syt5mOyC1x)
+    - 分析tor浏览器的流量
+    - tor的节点（node）的ssl证书名称为随机字符。wireshark中过滤`ssl.handshake`后可以过滤出相关内容。用这个[网站](https://metrics.torproject.org/rs.html#)可以更明显地确认某个ip是不是tor节点
 
 1. 将tcp流解码为tpkt+openssl检查ASN.1。例题：[arrdeepee](../../CTF/攻防世界/6级/Misc/arrdeepee.md)
 2. mca后缀名文件为游戏Minecraft使用的世界格式。例题:[Russian-zips](https://blog.csdn.net/weixin_44604541/article/details/113741829)
