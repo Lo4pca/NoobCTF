@@ -1495,3 +1495,124 @@ int main() {
 结果两个脚本都是概率脚本。是时候看看自己的运气了（
 
 level-8我用一样的exp就过了。结果描述里的“no more USERCOPY”指的是设备里多了个`__check_object_size`啊？做之前我以为是不能用msg_msg越界读了，头疼，毕竟我整个exp都是基于msg_msg的。此时新的问题来了：难道我level-7用的是非预期解？有使`_copy_from_user`越界读用户输入的方法？看社区里大部分人都是用差不多的exp连过两题。我们永远都没法知道预期解是啥了（
+
+## [KylebotFS](https://pwn.college/quarterly-quiz/kylebotfs)
+
+学会1+1了吗？现在可以开始计算偏微分方程啦！
+
+### level1
+
+题目描述说得还真没错，确实是个逆向题……在chatgpt+deepseek的指导下莫名其妙做出了这题（
+
+mount_kbfs用于给用户提供一个调用mount的接口。main函数调用了以下几个函数：
+- check_valid_disk：参数提供的文件是一个普通文件（mode为0x8000），且开头四个字节为KBFS
+- check_valid_mnt_path：参数提供的路径是一个目录
+- mount_loop_device：不用管这个函数，主要是程序挂载磁盘前的准备
+- do_mount：调用mount函数`mount(loop_device_path,disk_file,"kbfs",0,0)`
+
+如果以上函数运行时没有报错，便能得到flag。参数里的kbfs是文件系统类型，具体的代码在challenge.ko里
+
+mount函数最后会调用`kbfs_mount`，然后是`mount_bdev`。`mount_bdev`内部调用的是模块里注册的`kbfs_fill_super`函数。理论上应该开始逆向了，但我直接扔给AI，没想到效果还不错（
+
+`__bread_gfp`用于从块设备读取数据块，函数原型如下：
+```c
+struct buffer_head *__bread_gfp(
+    struct block_device *bdev,  // 目标块设备
+    sector_t block,             // 要读取的块号（扇区号）
+    unsigned size,              // 块大小（字节）
+    gfp_t gfp                   // 内存分配标志（GFP_*）
+);
+```
+需要满足的第一个条件是：
+```c
+  lVar5 = __bread_gfp(s->s_bdev,0,*(undefined4 *)&s->s_blocksize,8);
+  if (lVar5 != 0) {
+    piVar1 = *(int **)(lVar5 + 0x28);
+    if ((((*piVar1 == 0x5346424b) && (piVar1[1] == 1)) && (piVar1[2] == 0x1000)) &&
+       (2 < (uint)piVar1[3]))
+```
+很明显读取的块号是0，lVar5是buffer_head结构体。`*(int **)(lVar5 + 0x28)`取出偏移0x28处存储的指针。根据调试的结果，这个指针正好指向磁盘文件的开头。所以第一个条件很好过，依次把这些值堆到文件开头就好了
+
+下一个条件在这里（中间那一堆东西都不用管）：
+```c
+        piVar7 = kbfs_iget(s,0);
+        if (piVar7 != (inode *)0x0) {
+          pdVar8 = (dentry *)d_make_root(piVar7);
+          s->s_root = pdVar8;
+        }
+```
+调试后发现无法直接让`kbfs_iget`返回0。所以目标变为让`kbfs_iget`返回一个有效的目录inode（我怀疑这里检查没做好，如果`kbfs_iget`返回一个无效的非零值，`d_make_root`会触发kernel panic）。至于为什么是目录inode，因为`d_make_root`的参数必须是代表目录的inode。不过传文件inode也不会kernel panic，只会导致mount报错`Not a directory`
+
+目标是走到`kbfs_iget`末尾的这个分支
+```c
+    if (uVar3 != 0xa000) {
+      if ((uVar3 != 0x4000) || (lVar6 != 0x1000)) goto failed;
+      *(inode_operations **)(_inode_table + 0x10) = &kbfs_dir_inode_operations;
+      *(file_operations **)(_inode_table + 0xb4) = &kbfs_dir_operations;
+      goto LAB_00100420;
+    }
+```
+往上翻，两个关键变量取值于：
+```c
+  lVar6 = *(long *)(_inode_table + 0x28);
+  uVar3 = *_inode_table & 0xf000;
+```
+`_inode_table`在这：
+```c
+  lVar6 = __bread_gfp(*(undefined8 *)(lVar6 + 200),1,*(undefined4 *)(lVar6 + 0x18),8);
+  if (lVar6 == 0) goto LAB_00100398;
+  inode_table = (ushort *)(*(long *)(lVar6 + 0x28) + ino * 0x18); //ino是0
+```
+`__bread_gfp`故技重施，只不过这次取索引为1的块，即磁盘文件偏移4096的位置。然后很关键的几句是：
+```c
+  uVar4 = make_kgid(*(undefined8 *)(*(long *)(_inode_table + 0x14) + 0x428),puVar2[1]);
+  *(undefined4 *)(_inode_table + 4) = uVar4;
+  *(undefined8 *)(_inode_table + 0x28) = *(undefined8 *)(inode_table + 4);
+```
+莫名其妙的点来了。我没搞明白`puVar2[1]`和`*(long *)(_inode_table + 0x14)`的取值……`puVar2`的赋值如下：
+```c
+  _inode_table = (ushort *)iget_locked();
+  if ((*(byte *)(_inode_table + 0x4c) & 8) == 0) {
+    piVar5 = (inode *)__x86_return_thunk();
+    return piVar5;
+  }
+  lVar6 = *(long *)(_inode_table + 0x14);
+  puVar2 = *(undefined2 **)(lVar6 + 0x360);
+```
+这都是哪里啊？但是根据调试（还得是gdb）和chatgpt（还得是AI）给的inode结构(不一定对)：
+```c
+struct kbfs_disk_inode {
+    uint16_t mode;          // 文件类型 + 权限，比如 0x4000 是目录
+    uint16_t unused1;       // 对齐用
+    uint32_t uid;           // 用户 ID
+    uint32_t gid;           // 组 ID
+    uint64_t size;          // 文件大小（或目录大小）
+    uint32_t data_block;    // 数据块号（比如 0x1000）
+    uint32_t unused2;       // 补齐
+};
+```
+`lVar6`的值对应gid字段
+
+直接看脚本吧。我说了一堆，事实上我完全不知道怎么解出来的……
+```py
+import struct
+def write_kbfs_image(filename="kbfs.img"):
+    BLOCK_SIZE = 0x1000
+    image_size = BLOCK_SIZE * 3
+    inode_table_offset=BLOCK_SIZE
+    img = bytearray(image_size)
+    struct.pack_into("<IIII", img, 0, 0x5346424B,1,BLOCK_SIZE,4)
+    inode_data = struct.pack("<HHIIQI",
+        0x41ED,   # mode = directory
+        0,        # padding
+        0x1000, 0x1000, #uid,gid
+        0,        # size
+        0x1000    # data_block
+    )
+    img[inode_table_offset:inode_table_offset+0x18] = inode_data
+    with open(filename, "wb") as f:
+        f.write(img)
+    print(f"[+] Created KBFS image: {filename} ({image_size} bytes)")
+write_kbfs_image()
+```
+运行脚本后命令行运行`/challenge/mount_kbfs ./kbfs.img ./mnt`就能得到flag了
