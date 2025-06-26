@@ -584,6 +584,10 @@ for i in range(1,e):
 - [Smelter](https://clemensgooooo.github.io/posts/Smelter)
     - 依然是PKCS #1 v1.5 Bleichenbacher攻击。但是这次做的时候发现套之前的脚本出了点问题，特此记录新的脚本： https://github.com/maximmasiutin/rsa-bleichenbacher-signature
     - 个人wp见 **Smelter**
+- [Tales from the Crypt](https://jsur.in/posts/2025-04-07-plaid-ctf-2025-tales-from-the-crypt)
+    - RSA签名d lsb翻转攻击。假设 $s=m^d\mod n$ ,d的lsb为1，翻转后的 $d_{faulty}=d-1$ 。那么如果 $s_d = m^{d_{faulty}}\mod n$ 且 $(s_d\*m)^e=m\mod n$ ，攻击者就能判断d的lsb是1。可以继续扩展此攻击，从lsb开始倒着泄漏完整的d
+    - 利用泄漏的d部分lsb+coppersmith恢复p
+    - openssl计算签名时并不是直接计算 $s=m^d\mod n$ ，而是 $s = (m\*A^e)^d (\mod n)$ 。其中A是安全的随机数，满足 $A^(ed) = 1 (\mod n)$ 。如果在单次连接下执行多次handshake（tls renegotiation），则A会更新为 $A^2$ 。相关代码见 https://github.com/openssl/openssl/blob/openssl-3.4/crypto/rsa/rsa_ossl.c#L304
 
 ## Sagemath
 
