@@ -2,6 +2,62 @@
 
 此篇笔记对应的gist： https://gist.github.com/Lo4pca/a066c450ed5d4c8ffbb0c1328283fe14 。题目对应的关键词将加粗
 
+## Z3
+
+想了一下，还是把这部分提到更明显的地方较好
+
+- 有人说，cvc solver有时要比z3更快，还能解出一些z3解不出的题： https://www.youtube.com/watch?app=desktop&v=CNQwSXKBGgw
+- [Guardians of the Kernel](https://github.com/moabid42/CTF-Writeups/tree/master/SekaiCTF/Guardians%20of%20the%20kernel)
+  - 如果在ghidra中看见类似`CONCAT17(buffer[7],CONCAT16(buffer[6],CONCAT15(buffer[5],CONCAT14(buffer[4],buffer._0_4_)`的CONCAT语句，z3里有现成的Concat函数(注意bit length，可以参考ghidra CONCAT函数的命名： https://stackoverflow.com/questions/69430800/what-does-concat15-and-concat412-mean-in-ghidra)
+  - BitVecVal与BitVec的区别： https://stackoverflow.com/questions/49247323/what-is-the-difference-between-bitvec-and-bitvecval-in-z3 ,前者是常数，后者是要求解的symbol
+  - z3 And函数使用（不确定和python的and有啥区别）
+  - 参考 https://mcfx.us/posts/2023-09-01-sekaictf-2023-writeup/#guardians-of-the-kernel ，还有RotatLeft和RotateRight
+- [Wrong Signal](https://trebledj.github.io/posts/ductf-2023-wrong-signal/)
+  - 如何将一个byte分割为4个crumb（2个bit，或者说四分之一byte）
+  - 如何将symbolic crumb组合成一个完整的byte(使用`z3.ZeroExt(n, bv)`，用于将bitvector bv添加n个前缀0)
+  - `z3.If`使用:`z3.If(condition, then_expr, else_expr)`,类似三元表达式，可以嵌套
+  - `z3.Not`，`solver.eval`,`as_long`
+- https://github.com/sam-b/z3-stuff
+- [Secure Computing](https://hackmd.io/@lunashci/SJuEkctd6#Secure-Computing)
+  - 个人之前没见过的逆向方式。题目在init_array里多加了一个函数，函数内部调用了seccomp syscall，flag为SECCOMP_SET_MODE_FILTER。使用seccomp添加filter后，今后所有调用的syscall都会经过这些filter。需要从binary中自行提取出filter内容，然后用seccomp-tools反编译出内容：`seccomp-tools disasm --no-bpf export > chunk1`。比较特别的地方在于，filter内部可以写复杂的针对syscall number的运算汇编
+  - 此题的z3部分在于根据filter内容编写合适的脚本
+  - 另一个[wp](https://the-m3chanic.github.io/2024/01/26/Writeup-Secure-Computing-IRIS-CTF-2024/)讲得更详细。补充知识点：
+    - seccomp-tools大部分情况下都可以使用ptrace自动dump出filter，意味着若程序里已有ptrace调用，需要patch掉后再dump。默认只会dump一个filter，加上`-l` flag可dump出完整的flag
+    - [KLEE](https://klee.github.io/) Symbolic Virtual Machine (Solver)的安装及使用。可直接在C/C++语言文件上实现符号执行
+- [Array Programming Rocks](https://tellnotales.xyz/posts/gcc-ctf24_array_programming_rocks_writeup/)
+    - `.ua`程序逆向，对应的语言是[Uiua](https://www.uiua.org/)
+    - 其他同样是z3解法的脚本： https://gist.github.com/meowmeowxw/f25ad75a2531f8c0ac24923d3bcc86dd
+- [doubledelete's revenge](https://github.com/macenb/WriteUps/tree/main/WolvCTF_2024/doubledelete)
+    - rol的python逆向实现（ror）。以及z3逆向rol的做法: https://gist.github.com/C0nstellati0n/a066c450ed5d4c8ffbb0c1328283fe14#doubledeletes-revenge
+    - 另一种无z3实现方式（更加具有普遍性）： https://ctf.krauq.com/wolvctf-2024#doubledeletes-revenge-105-solves
+- [Palworld](https://ctf.krauq.com/wolvctf-2024#palworld-2-solves)
+    - PLD file(defining digital logic)逆向
+    - 使用z3+symbolic execution engine for circuit logic的解法： https://github.com/kjcolley7/CTF-WriteUps/tree/master/2024/wolvctf/palworld
+- [15min-adventure](https://github.com/cr3mov/cr3ctf-2024/tree/main/challenges/rev/15min-adventure)
+	- RotateLeft的使用（对应ida里的`__ROL1__`操作）。有时候一个状态难写约束可以将其分成两个
+- [decrypt-me](https://github.com/cr3mov/cr3ctf-2024/tree/main/challenges/rev/decrypt-me)
+	- [RNGeesus](https://github.com/deut-erium/RNGeesus)中Mersenne Twister的应用。这是一个利用z3 SMT求解PRNG的工具，除了这题用的MT，还有lcg，lfsr和dual_ec_drbg
+- [mbaboy](https://github.com/cr3mov/cr3ctf-2024/tree/main/challenges/rev/mbaboy)
+	- z3里Array的使用
+- [cagnus-marlsen](https://hackmd.io/@yqroo/TJCTF2024)
+  - 如何将较为复杂的条件转换成在z3里可表示的条件
+  - 如何利用z3获取多个不重复的解
+  - 更复杂的解法： **cagnus-marlsen** 。思路是把整个grid看成一个64 bit的BitVec，然后按照题目要求的方式切成多块并检查（自己做的时候完全没想到这个思路……看到这种题直接就想着用64个1 bit的bitvec，可是这样就很难写那些把几个bit看成一个整体的约束了。整体看成一个的话一个一个切就完事）。涉及： UGE, UGT, ULT, BitVec, BV2Int, Concat, Extract, Solver, Sum, ZeroExt，如何定义Slice函数，如何计算bitvec的hamming weight（ https://stackoverflow.com/a/61331081 ）
+- K-out-of-N constraint（PbEq/PbLe/PbGe）： **archventure-time**
+- [watchdog](https://github.com/ImaginaryCTF/ImaginaryCTF-2024-Challenges-Public/blob/main/Reversing/watchdog)
+	- 又是被z3坑的一天……本来都逆出来逻辑了，是个多项式求值，给定几组(x,y)后逆出系数。本来说用Lagrange，结果发现程序的里的y值只能保存64bit，不是真正的结果。于是用z3，明明都按位或了，结果怎样都不对。搜了一下可能是z3使用带符号数的原因，不过不确定。官方解法是把它看成个线性模方程组，64位整数用模`2**64`代替
+	- 其他解法（sage线性方程组求解和正确z3脚本）： **watchdog**
+- [Floats](https://github.com/imenyoo2/ctf_writeups/blob/main/wwctf2024/Floats.md)
+  - 如何编写有关浮点数计算的z3脚本。这题计算的浮点数比较刁钻，`0.0`和`-0.0`。需要使用正确的类型z3才能正常工作，比如`FP("x", Float32())`。脚本见 **floats**
+  - [官方wp](https://github.com/WorldWideFlags/World-Wide-CTF-2024/tree/main/Reverse%20Engineering/Floats)提到这题的灵感来源： https://orlp.net/blog/subtraction-is-functionally-complete 。话说wp里的z3脚本长得还挺别致的（？）
+  - 此题计算时只用了加和减两种运算，结果很像按位和。所以也可以用简单的bitvec来模拟方程
+- [bloatware](https://sylvie.fyi/posts/bloatware)
+  - 逆向js mixed boolean-arithmetic (MBA) expression混淆。这个混淆方式结合一堆位运算和算术运算，使整个算式看起来非常复杂，但实际上只是在做一些基本的操作。比如`(x ^ y) + 2 * (x & y)`等同于`x+y`。可以用[SiMBA](https://github.com/DenuvoSoftwareSolutions/SiMBA)简化线性MBA
+  - MBA会影响z3，使z3解方程的复杂度变高。需要简化算式后再放入z3，不然可能没法在规定时间内跑出结果。我认为wp作者的做法太聪明了，没有使用上述提到的工具而是直接手搓了遍历ast并简化的代码；题目有1950个条件，利用随机生成的input尝试通过某个条件，然后比对能够通过条件的值找到潜在的规则。这个“潜在的规则”相当于简化了MBA算式方程，这时放到z3里就能解出来了
+- [Prospectors Claim](https://www.youtube.com/watch?v=6hsCQvzzHKM)
+  - z3里有soft constraint和optimizer，用于在众多条件中找到满足条件最多/最少的一组值。部分题目给出的约束存在互斥的情况，这个时候用普通的solver一定找不出来解，得用`Optimize()`
+- 有些时候如果8-bit vector出不来结果，可以尝试用32-bit vector： https://github.com/opcode86/ctf_writeups/tree/main/wwCTF2024
+
 ## Tools
 
 平时见到的乱七八糟的工具
@@ -1000,56 +1056,7 @@ main()
 113. [Hollywood](https://learn-cyber.net/writeup/Hollywood)
 - 当strings一个exe文件，发现里面有.NET字样时，说明这是个c#逆向题，可以用dnSpy反编译
 - dnSpy可以编辑代码然后继续编译，可以利用这点绕过反动调。有时候编辑后会报错，但是仍然可以正常应用修改
-114. z3使用案例
-- 有人说，cvc solver有时要比z3更快，还能解出一些z3解不出的题： https://www.youtube.com/watch?app=desktop&v=CNQwSXKBGgw
-- [Guardians of the Kernel](https://github.com/moabid42/CTF-Writeups/tree/master/SekaiCTF/Guardians%20of%20the%20kernel)
-  - 如果在ghidra中看见类似`CONCAT17(buffer[7],CONCAT16(buffer[6],CONCAT15(buffer[5],CONCAT14(buffer[4],buffer._0_4_)`的CONCAT语句，z3里有现成的Concat函数(注意bit length，可以参考ghidra CONCAT函数的命名： https://stackoverflow.com/questions/69430800/what-does-concat15-and-concat412-mean-in-ghidra)
-  - BitVecVal与BitVec的区别： https://stackoverflow.com/questions/49247323/what-is-the-difference-between-bitvec-and-bitvecval-in-z3 ,前者是常数，后者是要求解的symbol
-  - z3 And函数使用（不确定和python的and有啥区别）
-  - 参考 https://mcfx.us/posts/2023-09-01-sekaictf-2023-writeup/#guardians-of-the-kernel ，还有RotatLeft和RotateRight
-- [Wrong Signal](https://trebledj.github.io/posts/ductf-2023-wrong-signal/)
-  - 如何将一个byte分割为4个crumb（2个bit，或者说四分之一byte）
-  - 如何将symbolic crumb组合成一个完整的byte(使用`z3.ZeroExt(n, bv)`，用于将bitvector bv添加n个前缀0)
-  - `z3.If`使用:`z3.If(condition, then_expr, else_expr)`,类似三元表达式，可以嵌套
-  - `z3.Not`，`solver.eval`,`as_long`
-- https://github.com/sam-b/z3-stuff
-- [Secure Computing](https://hackmd.io/@lunashci/SJuEkctd6#Secure-Computing)
-  - 个人之前没见过的逆向方式。题目在init_array里多加了一个函数，函数内部调用了seccomp syscall，flag为SECCOMP_SET_MODE_FILTER。使用seccomp添加filter后，今后所有调用的syscall都会经过这些filter。需要从binary中自行提取出filter内容，然后用seccomp-tools反编译出内容：`seccomp-tools disasm --no-bpf export > chunk1`。比较特别的地方在于，filter内部可以写复杂的针对syscall number的运算汇编
-  - 此题的z3部分在于根据filter内容编写合适的脚本
-  - 另一个[wp](https://the-m3chanic.github.io/2024/01/26/Writeup-Secure-Computing-IRIS-CTF-2024/)讲得更详细。补充知识点：
-    - seccomp-tools大部分情况下都可以使用ptrace自动dump出filter，意味着若程序里已有ptrace调用，需要patch掉后再dump。默认只会dump一个filter，加上`-l` flag可dump出完整的flag
-    - [KLEE](https://klee.github.io/) Symbolic Virtual Machine (Solver)的安装及使用。可直接在C/C++语言文件上实现符号执行
-- [Array Programming Rocks](https://tellnotales.xyz/posts/gcc-ctf24_array_programming_rocks_writeup/)
-    - `.ua`程序逆向，对应的语言是[Uiua](https://www.uiua.org/)
-    - 其他同样是z3解法的脚本： https://gist.github.com/meowmeowxw/f25ad75a2531f8c0ac24923d3bcc86dd
-- [doubledelete's revenge](https://github.com/macenb/WriteUps/tree/main/WolvCTF_2024/doubledelete)
-    - rol的python逆向实现（ror）。以及z3逆向rol的做法: https://gist.github.com/C0nstellati0n/a066c450ed5d4c8ffbb0c1328283fe14#doubledeletes-revenge
-    - 另一种无z3实现方式（更加具有普遍性）： https://ctf.krauq.com/wolvctf-2024#doubledeletes-revenge-105-solves
-- [Palworld](https://ctf.krauq.com/wolvctf-2024#palworld-2-solves)
-    - PLD file(defining digital logic)逆向
-    - 使用z3+symbolic execution engine for circuit logic的解法： https://github.com/kjcolley7/CTF-WriteUps/tree/master/2024/wolvctf/palworld
-- [15min-adventure](https://github.com/cr3mov/cr3ctf-2024/tree/main/challenges/rev/15min-adventure)
-	- RotateLeft的使用（对应ida里的`__ROL1__`操作）。有时候一个状态难写约束可以将其分成两个
-- [decrypt-me](https://github.com/cr3mov/cr3ctf-2024/tree/main/challenges/rev/decrypt-me)
-	- [RNGeesus](https://github.com/deut-erium/RNGeesus)中Mersenne Twister的应用。这是一个利用z3 SMT求解PRNG的工具，除了这题用的MT，还有lcg，lfsr和dual_ec_drbg
-- [mbaboy](https://github.com/cr3mov/cr3ctf-2024/tree/main/challenges/rev/mbaboy)
-	- z3里Array的使用
-- [cagnus-marlsen](https://hackmd.io/@yqroo/TJCTF2024)
-  - 如何将较为复杂的条件转换成在z3里可表示的条件
-  - 如何利用z3获取多个不重复的解
-  - 更复杂的解法： https://gist.github.com/C0nstellati0n/a066c450ed5d4c8ffbb0c1328283fe14#cagnus-marlsen 。思路是把整个grid看成一个64 bit的BitVec，然后按照题目要求的方式切成多块并检查（自己做的时候完全没想到这个思路……看到这种题直接就想着用64个1 bit的bitvec，可是这样就很难写那些把几个bit看成一个整体的约束了。整体看成一个的话一个一个切就完事）。涉及： UGE, UGT, ULT, BitVec, BV2Int, Concat, Extract, Solver, Sum, ZeroExt，如何定义Slice函数，如何计算bitvec的hamming weight（ https://stackoverflow.com/a/61331081 ）
-- K-out-of-N constraint（PbEq/PbLe/PbGe）： https://gist.github.com/C0nstellati0n/a066c450ed5d4c8ffbb0c1328283fe14#archventure-time
-- [watchdog](https://github.com/ImaginaryCTF/ImaginaryCTF-2024-Challenges-Public/blob/main/Reversing/watchdog)
-	- 又是被z3坑的一天……本来都逆出来逻辑了，是个多项式求值，给定几组(x,y)后逆出系数。本来说用Lagrange，结果发现程序的里的y值只能保存64bit，不是真正的结果。于是用z3，明明都按位或了，结果怎样都不对。搜了一下可能是z3使用带符号数的原因，不过不确定。官方解法是把它看成个线性模方程组，64位整数用模`2**64`代替
-	- 其他解法（sage线性方程组求解和正确z3脚本）： https://gist.github.com/C0nstellati0n/a066c450ed5d4c8ffbb0c1328283fe14#watchdog
-- [Floats](https://github.com/imenyoo2/ctf_writeups/blob/main/wwctf2024/Floats.md)
-  - 如何编写有关浮点数计算的z3脚本。这题计算的浮点数比较刁钻，`0.0`和`-0.0`。需要使用正确的类型z3才能正常工作，比如`FP("x", Float32())`。脚本见 https://gist.github.com/C0nstellati0n/a066c450ed5d4c8ffbb0c1328283fe14#floats
-  - [官方wp](https://github.com/WorldWideFlags/World-Wide-CTF-2024/tree/main/Reverse%20Engineering/Floats)提到这题的灵感来源： https://orlp.net/blog/subtraction-is-functionally-complete 。话说wp里的z3脚本长得还挺别致的（？）
-  - 此题计算时只用了加和减两种运算，结果很像按位和。所以也可以用简单的bitvec来模拟方程
-- [bloatware](https://sylvie.fyi/posts/bloatware)
-  - 逆向js mixed boolean-arithmetic (MBA) expression混淆。这个混淆方式结合一堆位运算和算术运算，使整个算式看起来非常复杂，但实际上只是在做一些基本的操作。比如`(x ^ y) + 2 * (x & y)`等同于`x+y`。可以用[SiMBA](https://github.com/DenuvoSoftwareSolutions/SiMBA)简化线性MBA
-  - MBA会影响z3，使z3解方程的复杂度变高。需要简化算式后再放入z3，不然可能没法在规定时间内跑出结果。我认为wp作者的做法太聪明了，没有使用上述提到的工具而是直接手搓了遍历ast并简化的代码；题目有1950个条件，利用随机生成的input尝试通过某个条件，然后比对能够通过条件的值找到潜在的规则。这个“潜在的规则”相当于简化了MBA算式方程，这时放到z3里就能解出来了
-- 有些时候如果8-bit vector出不来结果，可以尝试用32-bit vector： https://github.com/opcode86/ctf_writeups/tree/main/wwCTF2024
+114. 原z3使用案例，已移到开头的位置
 115. [Conquest of Camelot](https://black-frost.github.io/posts/sekai2023/)
 - OCaml语言binary逆向。这种语言的函数调用约定比较奇怪，ida可能无法生成伪代码。另外，这种语言对数组的操作会自动添加大量的bound checking，函数体会看起来很复杂但逻辑可能很简单
 - 參考 https://mcfx.us/posts/2023-09-01-sekaictf-2023-writeup/#conquest-of-camelot ，（ida里）calling convection应该为`__int64 __usercall func<rax>(__int64 arg0@<rax>, __int64 arg1@<rax>, __int64 arg2@<rdi>)`

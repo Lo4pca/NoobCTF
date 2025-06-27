@@ -2989,3 +2989,5 @@ assert crc32(a)^crc32(b)==crc32(c)^crc32(d)
 - 更简易的脚本：**rc4-prefix**
 180. [Big Stuff](https://thr34dr1pp3r.gitbook.io/ctf/breachctf-2025/crypto-big-stuff)
 - 好像是这篇[论文](https://eprint.iacr.org/2023/1745.pdf)构建的密码系统的错误实现。题目生成A1和A2两个矩阵列表，根据明文的bit选择从哪里取出矩阵 $A_i$ ，乘上最终的密文C。问题在于题目使用的模数p相比于矩阵太大了，导致攻击者可以观察当前 $C_i$ 乘上 $A1_i$ 和 $A2_i$ 的情况来判断明文对应的位是0还是1
+181. [v8-randomness-predictor](https://github.com/PwnFunction/v8-randomness-predictor)
+- 用z3预测v8的math.random
