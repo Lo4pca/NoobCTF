@@ -4503,3 +4503,5 @@ if (await remote.hasPasswordFor(id)) {
 544. [Framework Follies](https://github.com/CSeCIITB/BreachCTF/tree/main/web/framework-follies)
 - `Next.js`中，函数调用依赖action id。如果一个函数被编译进next.js自动生成的网站却没有被调用，攻击者仍然可以通过获取其函数id手动调用
 - **Framework Follies**
+545. [Do Not Cheat](https://1kuzus.github.io/25b/wp-1753ctf-2025)
+- pdf.js库[CVE-2024-4367](https://github.com/LOURC0D3/CVE-2024-4367-PoC)，任意js代码执行。比赛时找到了cve，但是ngrok的转发需要用户交互；后续找到了 https://serveo.net ，但flask忘记设置正确的header了，导致cors错误……

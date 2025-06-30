@@ -735,7 +735,7 @@ mv /tmp/add-symbols /home/hacker/add-symbols
 
 然后我就经历了比chrome v8还噩梦的调试过程。虽然已成功修改`modprobe_path`，但运行时kernel要么崩溃要么直接卡死。前者倒还好，后者直接导致整个session废了，需要重新开一个ssh。然而新的ssh对应的还是同一个实例，失败的exp直接把堆搞乱了，之后再怎么修改都没法成功。只能出去运行`vm restart`。但是`vm restart`后再start再connect后发现登录的还是同一个实例（dmesg打印出来的内容是一样的）？换成`vm stop`后好了些，但仍然会遇到kernel卡死或是vm debug连接不上的情况。这个时候我选择直接退出去重新开一个practice环境。听起来不是很复杂，但考虑每条命令运行的耗时都慢得要死，整个过程就是纯纯折磨
 
-最后找到了原因。`kmem_cache_alloc`会清空分配到的堆块，而`modprobe_path`后存在有用的数据。解决办法是gdb调试查看原本的值是什么，然后全部恢复
+最后找到了原因。`kmem_cache_alloc`会清空分配到的堆块（后面又看了一下，好像不是`kmem_cache_alloc`清空的堆块，而是调用`kmem_cache_alloc`的函数清空的），而`modprobe_path`后存在有用的数据。解决办法是gdb调试查看原本的值是什么，然后全部恢复
 ```c
 #include <stdio.h>
 #include <stdlib.h>
