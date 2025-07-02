@@ -2066,3 +2066,6 @@ offset = the_mmap64_plus_23_itself
 242. [Sniper](https://github.com/tamuctf/tamuctf-2025/tree/main/pwn/sniper)
 - 题目设置挺有意思的。printf漏洞+flag已经读到了一个mmap固定地址，理论上可以直接用`%s`泄漏；但地址中包含`0a`，读取payload的fgets无法完整读入。技巧在于printf内部调用的是`vfprintf`，而这个函数内部自己有个缓存buf存payload。于是输入payload时可以随便输个地址，然后用printf漏洞修改`vfprintf`内部的buf将地址改成正确的flag地址，后面的`%s`就能正确打印出flag了。这也是为什么之前说printf的payload好像没法动态修改，因为`vfprintf`实际使用的payload根本不是我们输入的那个，而是缓存后的
 - 非常详细的wp： https://www.youtube.com/watch?v=K690__BET10
+243. [scanfun](https://al-wasmo.github.io/Blog/posts/b01lersctf-2025)
+- 格式化字符串漏洞，但是scanf。如果能控制scanf的格式，效果和printf导致的漏洞差不多
+- scanf的`%ms`格式可以往自动分配的内存区域写一个任意大小的字符串。若字符串足够大，使用mmap分配的内存区域将靠近libc；同时这块内存的地址位于栈上。配合argv地址链技巧，可以实现libc内的任意地址写
