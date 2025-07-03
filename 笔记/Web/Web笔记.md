@@ -4510,3 +4510,12 @@ if (await remote.hasPasswordFor(id)) {
 - pdf.js库[CVE-2024-4367](https://github.com/LOURC0D3/CVE-2024-4367-PoC)，任意js代码执行。比赛时找到了cve，但是ngrok的转发需要用户交互；后续找到了 https://serveo.net ，但flask忘记设置正确的header了，导致cors错误……
 546. [trouble at the spa](https://mushroom.cat/ctf/react-router-b01lersctf25)
 - single page application。这类应用通过重写当前页面（包括url，但不会向服务器发送对该url的请求）而不是加载新页面来实现用户交互。github网页可能无法正确处理此类网站的逻辑（向不存在的网页发送请求，导致404）。解决办法是自行在console输入`window.history.pushState`手动触发本地的页面变换功能。关键在于变换url时不刷新当前页面
+547. [musicplayer](https://ctf.gg/blog/b01lersctf-2025/musicplayer)
+- python [shutil.unpack_archive](https://docs.python.org/3.11/library/shutil.html#shutil.unpack_archive)存在zipslip，即攻击者可以构造恶意文件名，在函数指定的解压路径外写文件
+- autoreload的利用：给攻击者提供了任意文件写攻击的目标。比如，攻击者可以劫持当前用户家目录下的python site-packages，导致应用autoreload时加载恶意第三方库： https://www.sonarsource.com/blog/pretalx-vulnerabilities-how-to-get-accepted-at-every-conference/#code-execution-via-sitespecific-configuration-hooks
+- 官方wp和其他可能的解法： https://github.com/SuperStormer/writeups/tree/master/b01lers_ctf_2025/web/musicplayer
+548. [njaas](https://simonedimaria.xyz/posts/b01lers-ctf-2025/njaas)
+- [CVE-2025-29927](https://github.com/advisories/GHSA-f82v-jwr5-mffw)：设置`x-middleware-subrequest` header可以绕过next.js的middleware。即使在这个CVE被patch了的版本，如果攻击者能够控制应用的环境变量`NEXT_PRIVATE_TEST_HEADERS`（控制这个key就可以，值无所谓），依然可以利用漏洞
+549. [no-code](https://ctf.gg/blog/b01lersctf-2025/no-code)
+- js原型链污染
+- 在对象内定义一个length属性就能让js的`Array.from`将其识别为数组

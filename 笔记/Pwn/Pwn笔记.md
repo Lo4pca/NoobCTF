@@ -2069,3 +2069,9 @@ offset = the_mmap64_plus_23_itself
 243. [scanfun](https://al-wasmo.github.io/Blog/posts/b01lersctf-2025)
 - 格式化字符串漏洞，但是scanf。如果能控制scanf的格式，效果和printf导致的漏洞差不多
 - scanf的`%ms`格式可以往自动分配的内存区域写一个任意大小的字符串。若字符串足够大，使用mmap分配的内存区域将靠近libc；同时这块内存的地址位于栈上。配合argv地址链技巧，可以实现libc内的任意地址写
+244. [guesswhosstack](https://github.com/tesuji/ctf-writeups/tree/master/2025/b01lers/pwn/guess)
+- printf泄漏地址+两次任意地址写
+- exit函数的利用（均建立在已将`tls->pointer_guard`写为0的基础上）
+  - `__run_exit_handlers`：将`__exit_funcs->fns[0]`写为调用的地址右移17。但无法控制参数，且无法重复用第二次
+  - `__call_tls_dtors `:覆盖`tls_dtor_list`为某个可控16字节的地址处A。A为调用的函数，A+8为调用的参数
+- 官方解法要更为简单。覆盖printf调用的libc got `__memmove_evex_unaligned_erms`为gets，然后覆盖gets调用的libc got `__memchr_evex`为system
