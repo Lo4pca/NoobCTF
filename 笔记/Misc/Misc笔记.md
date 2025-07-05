@@ -349,6 +349,11 @@ print(base64.b64encode(temp.encode()))
     - wp里提到的两个解法：**paper-viper**
 - [pycjailplusplus](https://github.com/tamuctf/tamuctf-2025/tree/main/misc/pycjailplusplus)
     - eval环境无builtins+使用不在`opcode.opmap`里的opcode（或者说未记录在官方文档里的opcode）调用breakpoint函数。这些未记录的opcode，比如说`LOAD_FAST__LOAD_CONST`，没有边界检查。意味着可以从eval的栈帧中跳出来，越界获取main函数栈帧的builtins。从builtins中取出breakpoint函数后不能直接调用，需要调用其`__call__`属性，因为直接调用的话程序会以当前栈帧为调用时的上下文，缺乏builtins
+- [monochromatic](https://github.com/b01lers/b01lers-ctf-2025-public/blob/main/src/jail/monochromatic)
+    - `JUMP_*`系列的opcode不会检查边界，因此可以越界跳到特定的gadget
+- [prismatic](https://github.com/b01lers/b01lers-ctf-2025-public/tree/main/src/jail/prismatic)
+    - exec+仅用小写字母和`.[]; `字符构造payload
+    - **prismatic**
 - pyjail cheatsheet
     - https://shirajuki.js.org/blog/pyjail-cheatsheet
     - https://book.hacktricks.wiki/en/generic-methodologies-and-resources/python/bypass-python-sandboxes/index.html
@@ -2988,3 +2993,12 @@ $ cd a/b
 - [NIFTI file format](https://brainder.org/2012/09/23/the-nifti-file-format)。可以用nifti_tool查看文件的具体信息
 399. [Conspiracy Theory](https://github.com/tamuctf/tamuctf-2025/tree/main/forensics/conspiracy-theory)
 - mp3文件结构解析
+400. [emacs-jail](https://github.com/b01lers/b01lers-ctf-2025-public/tree/main/src/jail/emacs-jail)
+- 退出禁止了部分功能的emacs文本编辑器
+- chatgpt的非预期解：**emacs-jail**
+401. [>>=jail](https://github.com/b01lers/b01lers-ctf-2025-public/tree/main/src/jail/haskelljail)
+- 在haskell中读取文件、构造字符串的不同方式
+- ***>>=jail**
+402. [vibe-coding](https://github.com/b01lers/b01lers-ctf-2025-public/tree/main/src/jail/vibe-coding)
+- java源码中的 unicode 转义序列在编译时会解释为它们编码的字符
+- 将代码放在类的static initialization block中可以直接执行（无需显式调用）
