@@ -1508,9 +1508,7 @@ while (sz-- > 0)
 - pwndbg调试PIE程序。今天终于找到解决办法了，利用pwndbg自带的brva即可。模板如下：
 ```py
 from pwn import *
-import os
 context.arch='amd64'
-os.chdir("./challenge")
 context.terminal = ["tmux", "splitw", "-h"]
 gdbscript='''
     si

@@ -1,6 +1,6 @@
 # Maximum Number of Events That Can Be Attended II
 
-[题目](https://leetcode.com/problems/maximum-number-of-events-that-can-be-attended-ii/)
+[题目](https://leetcode.com/problems/maximum-number-of-events-that-can-be-attended-ii)
 
 又是那种不难看懂代码但是叫我自己写不如杀了我的题目。
 ```c#
@@ -63,4 +63,38 @@ Memory
 Beats
 60.80%
 ```
-所以把binary search和dp初始化的部分拿掉，发现关键逻辑只有dfs的那么几行。所以dp到底哪里难？一个难点可能是Math.Max那里的关系，还有一个可能只有我会这样：我感觉我还不是特别明白递归，我老是被这个dfs给绕进去了，就是想不明白这个value是怎么累加起来返回的。感觉递归就是处理好base case和值是怎么加的，然后递归它自己就把自己处理好了。
+所以把binary search和dp初始化的部分拿掉，发现关键逻辑只有dfs的那么几行。所以dp到底哪里难？一个难点可能是Math.Max那里的关系，还有一个可能只有我会这样：我感觉我还不是特别明白递归，我老是被这个dfs给绕进去了，就是想不明白这个value是怎么累加起来返回的。感觉递归就是处理好base case和值是怎么加的，然后递归它自己就把自己处理好了
+
+今天按照以前的经验写（抄）了个for循环版本
+```c++
+class Solution {
+private:
+    int bisectRight(const vector<vector<int>>& events, int target) {
+        int left = 0, right = events.size();
+        while (left < right) {
+            int mid = (left + right) / 2;
+            if (events[mid][0] <= target) {
+                left = mid + 1;
+            } else {
+                right = mid;
+            }
+        }
+        return left;
+    } 
+public:
+    int maxValue(vector<vector<int>>& events, int k) {
+        sort(events.begin(),events.end());
+        vector<vector<int>> dp(events.size()+1,vector<int>(k+1));
+        for(int i=events.size()-1;i>=0;i--){
+            int next=bisectRight(events,events[i][1]);
+            for(int j=1;j<=k;j++){
+                dp[i][j]=max(dp[i+1][j],events[i][2]+dp[next][j-1]);
+            }
+        }
+        return dp[0][k];
+    }
+};
+```
+突然感觉有点明白了dp的方向。这里外层的for循环需要倒着走，因为假如正着走的话，实施“拿或不拿”的逻辑时会影响到未来的i的选择（当前选择拿i，下一个可以拿的event是i+n=j。那么当for循环循环到j时就不好处理了，不可能根据曾经是否拿了i再额外搞个判断）
+
+至于维度，hmm，这题我可以马后炮地说，需要二维，因为我们不知道当前选择的event i是第几个选择的event。二维dp也理应用两个for循环。但是吧，我下次能自己看出来吗？

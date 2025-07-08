@@ -172,7 +172,7 @@
     - 最简单的做法： https://github.com/satoki/ctf_writeups/tree/master/picoCTF_2024/elements 。题目使用的chromium开启了实验功能，所以直接用实验功能之一的`PendingBeacon API`就能绕过CSP带出flag
 - [Imposter](https://github.com/tamuctf/tamuctf-2024/tree/master/web/imposter)
     - XSS里io socket的使用
-    - 其他payload： https://gist.github.com/C0nstellati0n/248ed49dea0accfef1527788494e2fa5#imposter
+    - 其他payload：**imposter**
 - [modern](https://gist.github.com/avlidienbrunn/ef849803da7607acb00cbaae0a03a4f2)
     - htmx题目，绕过CSP和DOMPurify
     - https://twitter.com/ryotkak/status/1738400596074615238
@@ -180,20 +180,20 @@
     - 使用特殊字体绕过WAF
 - [babylogin](https://github.com/cr3mov/cr3ctf-2024/tree/main/challenges/web/babylogin)
     - cookie-parser技巧：在cookie前加上`j:`前缀会使cookie-parser用`JSON.parse`处理cookie，有原型链污染的可能
-    - xs-search：利用不同的HTTP Status code泄漏内容。参考 https://xsleaks.dev/docs/attacks/error-events/
+    - xs-search：利用不同的HTTP Status code泄漏内容。参考 https://xsleaks.dev/docs/attacks/error-events
 - [im_not_the_ceo](https://github.com/L3AK-TEAM/L3akCTF-2024-public/tree/main/web/im_not_the_ceo)
     - htmx+dompurify xss
-    - 主要都是利用div标签，只是属性的不同： https://gist.github.com/C0nstellati0n/248ed49dea0accfef1527788494e2fa5#im_not_the_ceo
+    - 主要都是利用div标签，只是属性的不同：**im_not_the_ceo**
 - [So Many Flags](https://github.com/luxeria/ctf-writeups/blob/main/GPN%20CTF%202024/So%20many%20flags.md)/[Even more flags](https://github.com/luxeria/ctf-writeups/blob/main/GPN%20CTF%202024/Even%20more%20flags.md)
     - chrome flags分析
-    - 其他解法： https://github.com/lars-ctf/writeup-gpn22/blob/main/even-more-flags.md ， https://gist.github.com/C0nstellati0n/248ed49dea0accfef1527788494e2fa5#even-more-flags 利用命令注入。里面还有一些url的知识：可以在`/`后加上几乎任何东西
+    - 其他解法： https://github.com/lars-ctf/writeup-gpn22/blob/main/even-more-flags.md ，**even more flags** 利用命令注入。里面还有一些url的知识：可以在`/`后加上几乎任何东西
 - [todo](https://github.com/luxeria/ctf-writeups/blob/main/GPN%20CTF%202024/todo.md)/[todo-hard](https://github.com/luxeria/ctf-writeups/blob/main/GPN%20CTF%202024/todo-hard.md)
     - CSP `default-src 'none'; script-src 'self' 'unsafe-inline'`时实现页面的重定向。给我想复杂了，我自己的payload是这样的：
     ```html
     <form method="get" id="theForm" action="./script.js"></form>
     <body onload="document.getElementById('theForm').submit();">
     ```
-    - hard版本会将重定向的页面里的flag使用replace函数替换成别的。这个点我老是忘：既然我们可以执行js代码，自己手动把replace函数换成个别的就行了。其他做法： https://gist.github.com/C0nstellati0n/248ed49dea0accfef1527788494e2fa5#todotodo-hard
+    - hard版本会将重定向的页面里的flag使用replace函数替换成别的。这个点我老是忘：既然我们可以执行js代码，自己手动把replace函数换成个别的就行了。其他做法：**todo-hard**
     - 结果这些利用xss重定向的方法全是非预期解。预期解是这个： https://cyber-man.pl/GPNCTF-2024-todo-web ，利用`Function.prototype.toString.apply`竟然可以打印出class里被注释的代码
 - [secure-notes](https://gist.github.com/C0nstellati0n/248ed49dea0accfef1527788494e2fa5#secure-notes)
     - 类似题目wp： [hCorem](https://ctftime.org/writeup/16642)。一个由编码引发的故事。攻击者可以手动指定Byte Order Mark (BOM) 使xss payload在浏览器里由另一种编码显示，如`utf-16-be`，可过滤payload时处理payload代码的逻辑又将其看成另一种编码,如`utf-16-le`。此时在`utf-16-le`编码下看起来没问题的payload在浏览器里用`utf-16-be`解码就有问题了。总之，不要用utf-16编码，dompurify和chrome两者没法安全处理
@@ -206,13 +206,13 @@
                     headers: new Headers(JSON.parse(params.get("headers") || "{}"))
                 });
     ```
-    - 非预期解法： https://gist.github.com/C0nstellati0n/248ed49dea0accfef1527788494e2fa5#flarenotes 。也是xss，但没用`/cdn-cgi/trace`技巧。主要问题在于，代码里用dompurify过滤代码前忘记解码html entity了，但渲染时又解码了。这种不统一的地方通常就是漏洞点。见 https://stackoverflow.com/questions/22831988/string-attribute-values-in-multiple-lines-html
+    - 非预期解法：**flarenotes** 。也是xss，但没用`/cdn-cgi/trace`技巧。主要问题在于，代码里用dompurify过滤代码前忘记解码html entity了，但渲染时又解码了。这种不统一的地方通常就是漏洞点。见 https://stackoverflow.com/questions/22831988/string-attribute-values-in-multiple-lines-html
 - [Noscript](https://octo-kumo.github.io/c/ctf/2024-wanictf/web/noscript)
     - 题目里有个很明显的xss，但由于csp是`default-src 'self'`和`script-src 'none'`，不能直接在这里xss偷cookie。里面还有个username字段，但这个字段是用plain格式返回的，不是html。虽然我想到了用meta标签重定向，可是不知道重定向到哪。看了这个wp才知道可以用`<object>`标签，在标签里指定`type="text/html"`就能把那个格式为plain的username当成html加载了
-    - meta标签做法和一个比较奇怪的服务器行为： https://gist.github.com/C0nstellati0n/248ed49dea0accfef1527788494e2fa5#noscript 。在用meta或object标签重定向/导入资源时，部分内容会被看作text/html，而部分只会被看成text/plain
+    - meta标签做法和一个比较奇怪的服务器行为：**noscript**。在用meta或object标签重定向/导入资源时，部分内容会被看作text/html，而部分只会被看成text/plain
 - [sappy](https://zimzi.substack.com/p/googlectf-2024-sappy)
     - skill issue时刻。这题我看出来怎么搞xss了，但是不知道怎么绕过validate函数里的getDomain。比赛时和队友试了很久都没试出来怎么欺骗host名。至少现在看了wp又懂了一种url confusion的手段
-    - 其他解法： https://gist.github.com/C0nstellati0n/248ed49dea0accfef1527788494e2fa5 ，包含另一种的url欺骗方式。但似乎利用`data://` url才是官方预期解法（我怎么把这个忘了，我都想到`javascript://`了，结果`javascript://`不能用于fetch，但`data://`可以）
+    - 其他解法：**sappy** ，包含另一种的url欺骗方式。但似乎利用`data://` url才是官方预期解法（我怎么把这个忘了，我都想到`javascript://`了，结果`javascript://`不能用于fetch，但`data://`可以）
     - 其他wp： 
         - https://blog.chummydns.com/blogs/google-ctf-2024 。一些小技巧，比如可以在url后加`#`来将后续内容转换为hash tag忽略掉（见过好多次，老是忘）；iframe内的网站不会带cookie，可以用window.open解决；如何给打开的window/iframe post message
         - https://adragos.ro/google-ctf-2024
@@ -360,7 +360,7 @@
         - 这题有人尝试用css injection做，搭配ligature fonts和`span:nth-child(n)::-webkit-scrollbar`来泄漏flag（这个技巧见 https://github.com/cgvwzq/css-scrollbar-attack ）。这个方法对non-headless Puppeteer有用，然而headless就不行了。因为headless Puppeteer默认隐藏scrollbar，见 https://github.com/puppeteer/puppeteer/issues/4747
 - [Cascade Chaos](https://seall.dev/posts/backdoorctf2024)
     - 比赛时找到了这题的dom clobbering，并且成功注入了xss payload。但是题目由两个机器组成，flag不在出现xss的机器上。试了很久发现无论如何都没法访问到另一个机器。以为是自己没搞懂docker间机器的通信问题（如何通信见 https://stackoverflow.com/questions/47648792/communicating-between-different-docker-services-in-docker-compose ），原来是被CORS挡住了
-    - 这篇wp是非预期解。flag所在的机器在style处有个注入，闭合style标签后就能注入js payload了。预期解见 https://gist.github.com/C0nstellati0n/248ed49dea0accfef1527788494e2fa5#cascade-chaos 。利用`nth-child`和xs leak技巧逐个字符爆破flag
+    - 这篇wp是非预期解。flag所在的机器在style处有个注入，闭合style标签后就能注入js payload了。预期解见 **cascade chaos** 。利用`nth-child`和xs leak技巧逐个字符爆破flag
 - [blogdog](https://jorianwoltjer.com/blog/p/ctf/x3ctf-blogdog-new-css-injection-xs-leak)
     - css injection（xs leak）+csp bypass。题目的csp为`script-src 'self'; object-src 'none'; img-src 'none'`，参考[官方wp](https://github.com/x3ctf/challenges-2025/blob/main/web/blogdog),只需要用css exfiltration并加载非图片的外部资源即可绕过。比如`@font-face`
     - 一个chromium bug： https://issues.chromium.org/issues/382086298 ，用chrome加载这段css代码会导致加载代码的tab连带着与tab同源（same origin）的所有instance全部崩溃，即使在iframe里也一样。这是因为[Full Site Isolation](https://chromium.googlesource.com/chromium/src/+/main/docs/process_model_and_site_isolation.md#Full-Site-Isolation-site_per_process)机制，同源的所有页面在chrome里都是一个进程
@@ -4000,11 +4000,11 @@ window.recaptcha=true;
 - typescript中，假如某个函数只允许返回某个特定类型，可以将其他类型cast成any来绕过。例如只允许返回number类型，用`"a" as any`即可绕过类型检查，返回a
 - typescript的ESLint可以用注释绕过：`/* eslint-disable-line */`。加了这句注释的ts代码不会被eslint检查
 - 有助于理解typescript类型的文章： https://medium.com/free-code-camp/typescript-and-its-types-f509d799947d#14d9
-- 其他解法（此题目标为让单句代码通过eval返回xss payload）： https://gist.github.com/C0nstellati0n/248ed49dea0accfef1527788494e2fa5#calculator-1
+- 其他解法（此题目标为让单句代码通过eval返回xss payload）：**Calculator**
 411. [calculator-2](https://nanimokangaeteinai.hateblo.jp/entry/2024/02/06/051003#Web-135-calculator-2-33-solves)
 - 类似Calculator，但是禁止加注释和使用as与any。解法是利用eval覆盖函数，使返回的数字类型实际上是字符串（更详细内容参考 https://one3147.tistory.com/77 ）
 - 利用window.name缩短xss payload长度
-- 其他解法： https://gist.github.com/C0nstellati0n/248ed49dea0accfef1527788494e2fa5#calculator-2 ，Calculator的其他解法中也有部分可适用于这道题
+- 其他解法：**calculator-2** ，Calculator的其他解法中也有部分可适用于这道题
 412. [floordrop](https://hodl.page/entry/DiceCTF-2024-Quals-floordropblockchain)
 - (完全看不懂)solidity blockchain frontrunning。唯一明白的点是提高gas price让服务器先执行我们要的函数再执行其他函数。作者还提到了一个bomb的概念，用bomb将一个block内所有的gas消耗完毕，剩下的调用会推迟到下一个block执行
 413. [Simple WAF](https://github.com/abdoghazy2015/CTF-Write-Ups/tree/main/0xL4ughCTF2024/Web/Simple%20WAF)
@@ -4519,3 +4519,6 @@ if (await remote.hasPasswordFor(id)) {
 549. [no-code](https://ctf.gg/blog/b01lersctf-2025/no-code)
 - js原型链污染
 - 在对象内定义一个length属性就能让js的`Array.from`将其识别为数组
+550. [atombomb](https://github.com/b01lers/b01lers-ctf-2025-public/tree/main/src/web/atombomb)
+- elixir搭建的网站若不过滤参数，攻击者可以直接传入一个对象
+- **Atom Bomb**
