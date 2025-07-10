@@ -135,12 +135,99 @@ Montgomery's Ladder算法可以满足上述要求。这题要求实现一个最�
 
 ### Smooth Criminal
 
-题目使用的generator G的阶数并不是质数。因此可以用Pohlig-Hellman算法将DLP分成若干个小问题，大大降低复杂度
+题目使用的曲线的阶数并不是质数。因此可以用Pohlig-Hellman算法将DLP分成若干个小问题，大大降低复杂度
 
-假设G的阶数 $q=p_1^{e_1}p_2^{e_2}...p_k^{e_k}$ ，目标是计算k使得Q=k\*G
+假设G的阶数 $q=p_1^{e_1}p_2^{e_2}...p_k^{e_k}$ ，给定Q，目标是计算k使得Q=k\*G
 
 首先对每个 $p_i^{e_i}$ 计算 $k\mod p_i^{e_i}$ 。计算对应的子群生成元 $G_i=\frac{q}{p_i^{e_i}}G$ , $Q_i=\frac{q}{p_i^{e_i}}Q$ 。此时 $G_i$ 的阶为 $p_i^{e_i}$ ，问题转化为在 < $G_i$ >中求解 $Q_i=k_iG_i$
 
 得到所有 $k_i$ 后用crt即可组合出完整的k
 
+(注意这个攻击的条件是曲线的阶不是质数，但实际分解的数是生成器G的阶而不是曲线的阶)
+
 见 https://connor-mccartney.github.io/cryptography/ecc/PrivateCurve-0xl4ughCTF2024
+
+### Curveball
+
+题目使用的fastecdsa库： https://github.com/AntonKueltz/fastecdsa
+
+注意到没有限制private_key的大小，如果输入的d超过了generator的阶会发生什么？会得到点本身，等同于乘上1
+
+### ProSign 3
+
+题目使用的ecdsa库： https://github.com/tlsfuzzer/python-ecdsa
+
+`randrange(1, n)`的n并不是一开始定义的`g.order()`，而是`int(now.strftime("%S"))`……
+
+### Moving Problems
+
+mov攻击： https://risencrypto.github.io/WeilMOV
+
+mov攻击将椭圆曲线群上的离散对数问题转换成有限域乘法群中的离散对数问题（ecdlp转成dlp）。一些前置知识：
+
+双线性映射（bilinear map）：
+- 设U，V，W为向量空间，{ $u,u_1,u_2\in U$ }, { $v,v_1,v_2\in V$ }， $\alpha$ 是标量
+- $f_1:V\rightarrow W$ 是线性映射，如果 
+    - $f_1(v_1+v_2)=f_1(v_1)+f_1(v_2)$
+    - $f_1(\alpha v)=\alpha f_1(v)$
+- $f_2:U\times V\rightarrow W$ 是双线性映射，如果
+    - $f_2(u_1+u_2,v)=f_2(u_1,v)+f_2(u_2,v)$
+    - $f_2(u,v_1+v_2)=f_2(u,v_1)+f_2(u,v_2)$
+    - $f_2(\alpha u,v)=\alpha f_2(u,v)=f_2(u,\alpha v)$
+    - 即，如果v固定，该映射在u上是线性的；反之亦然
+
+单位根（Roots of Unity）：
+- t是n次单位根，如果 $t^n=1$
+- 阶数为质数q的有限域中的任何元素a都是q-1次单位根（拉格朗日定理， $a^{q-1}\equiv 1\mod q$ ）
+
+扩域（Extension Field）：
+- 给定一个有限域 $F_q$ ，可以构造一个扩域 $F_{q^t}$ 。扩域仍然是一个域，有加法、乘法、逆元；域中的元素是在 $F_q$ 上的多项式（多项式的系数是 $F_q$ 中的元素），模一个不可约多项式来构造
+- 所有 $a\in F_{q^t}$ 的阶要么是 $q^t-1$ ，要么是某个整除 $q^t-1$ 的数
+- 于是对于 $F^{q^t}$ 中的所有非零元素，都有 $a^{q^t-1}=1$
+- 因此扩域中的所有非零元素都是 $q^t-1$ 次单位根
+
+嵌入度（Embedding Degree）：
+- 假设E是质数域 $F_q$ 上的椭圆曲线；P是m阶的点且m是质数，与q互质
+- 如果k是满足 $q^k\equiv 1\mod m$ 的最小正整数，则称k为曲线 $E(F_q)$ 关于m的嵌入度
+
+挠点和挠群（Torsion Points and Torsion Groups）：
+- E是质数域 $F_q$ 上的椭圆曲线。满足mP=O的点 $P\in E(F_q)$ 称为m挠点。 $E(F_q)$ 中的所有m挠点构成的子群称为 $F_q$ 的m挠子群。记为 $E(F_q)[m]=$ { $P\in E:mP=O$ }
+- 因为 扩域 $F_{q^t}$ 大于基域 $F_q$ ，所以扩域上的m挠群很有可能大于基域上的m挠群。当t等于曲线关于m的嵌入度时得到的m挠群最大（比 $F_{q^k}$ 更大的扩域无法增加更多的m挠点）。因此 $E(F_{q^k})[m]$ 称为满m挠群（full mtorsion group），其中k是曲线关于m的嵌入度
+- 满m挠群拥有多个子群，下文的Weil Pairing会用到其中两个
+    - $G_1$ : 该子群中的全部点都在 $E(F_q)$ 中
+    - $G_2$ : 该子群中的全部点都在 $E(F_{q^k})$ 中且都不在 $E(F_q)$ 中。有多个子群满足这点，随便选一个即可
+
+韦伊配对（Weil Pairing）：
+- 假设k是曲线关于m的嵌入度 $q^k\equiv 1\mod m$ ，这个式子可以变形成 $q^k-1=mx$ ，因此m整除 $q^k-1$
+- 考虑扩域 $F_{q^k}$ 。该扩域的乘法群 $F^{*}_{q_k}$ (去掉了零元素)的阶为 $q^k-1$ 。因为m整除这个乘法群的阶，所以它有一个唯一的m阶子群 $G^T$ (循环群基本定理,Fundamental Theorem of Cyclic Groups)
+- 当满足额外的条件 $m\nmid (q-1)$ 时，可以构造韦伊配对，或者说 $G_1\times G_2\rightarrow G_T$ 的映射 $e_m$ 。 $e_m$ 接收一对m挠点A和B作为输入， $A\in G_1$ 且 $B\in G_2$ ；输出 $e_m(A,B)$ 为一个m次单位根，即 $e_m(A,B)^m=1$
+- 双线性：
+    - $e_m(A_1+A_2,B)=e_m(A_1,B)\*e_m(A_2,B)$
+    - $e_m(A,B_1+B_2)=e_m(A,B_1)\*e_m(A,B_2)$ （注意这里的双线性是乘法，而不是加法）
+    - 假设 $G_1,G_2$ 分别为两个椭圆曲线群的生成器， $\alpha,\beta$ 为常量。有 $e_m(\alpha G_1,\beta G_2)=e_m(\beta G_1,\alpha G_2)=e_m(\alpha\beta G_1,G_2)=e_m(G_1,\alpha\beta G_2)=e_m(G_1,\alpha G_2)^{\beta}=e_m(G_1,G_2)^{\alpha\beta}$
+- 单位元为 $e_m(A,A)=1,\forall A\in E[m]$
+- 交替性（Alternation）： $e_m(A,B)=e_m(B,A)^{-1},\forall A,B\in E[m]$
+- 非退化性（Non-Degeneracy）：
+    - $e_m(A,O)=1,\forall A\in E[m]$
+    - 如果 $e_m(A,B)=1,\forall B\in E[m]$ ，则A=O
+- 更详细的数学背景见 https://crypto.stanford.edu/pbc/notes/elliptic/weil2.html 。但不建议非数学专业或没有强大数学背景的人阅读。“密码学家应该将其视为一个黑盒的神奇玩意”
+
+好的终于到mov攻击了
+
+考虑 $F_q$ 上的椭圆曲线E。给定满足Q=rP的均为质数m阶的P和Q，目标是找到r。ecdlp。因为P是m挠点且这个点在基域上的曲线中，于是 $P\in G_1$ (Q同理)
+
+攻击步骤：
+1. 计算扩域上的椭圆曲线的阶（ $n=\#E(F_{q^k})$ ）。因为 $E(F_q)$ 的m挠群是 $E(F_{q^k})$ 的子群，m整除n（拉格朗日定理）
+2. 选择一个随机点 $T\in E(F_{q^k})$ ，满足 $T\not\in E(F_q)$
+3. 计算 $S=(\frac{n}{m})T$ 。如果S=O，返回第二步；如果S不是O，则它是一个m阶的点。证明如下：
+- $S=(\frac{n}{m})T$
+- mS=nT
+- 假设T的阶为t。根据拉格朗日定理，t整除 $E(F_{q^k})$ 的阶。因此n可以被写作n=dt。因此mS=dtT
+- 因为tT=O，dtT=O
+- 所以mS=O，S的阶数是m
+4. $P,rP\in G_1,S\in G_2$ 。计算两个韦伊配对值：
+- $u=e_m(P,S)$
+- $v=e_m(rP,S)$
+- $u,v\in F_{q^k}$
+- 因为韦伊配对是双线性的且r是常量，有 $v=e_m(P,S)^r$ 。因为 $u=e_m(P,S)$ ,可得 $v=u^r$ 。这是乘法群 $F_{q^k}$ 上的dlp
+5. 如果 $q^k$ 不大，则对于 $u=v^r$ ，可以借助index calculus找到r
