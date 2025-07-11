@@ -135,15 +135,15 @@ Montgomery's Ladder算法可以满足上述要求。这题要求实现一个最�
 
 ### Smooth Criminal
 
-题目使用的曲线的阶数并不是质数。因此可以用Pohlig-Hellman算法将DLP分成若干个小问题，大大降低复杂度
+题目使用的曲线的阶数并不是质数(阶数的分解结果中不包含大素数)。因此可以用Pohlig-Hellman算法将DLP分成若干个小问题，大大降低复杂度
+
+因为生成器G生成了整个曲线，所以曲线的阶等于G的阶
 
 假设G的阶数 $q=p_1^{e_1}p_2^{e_2}...p_k^{e_k}$ ，给定Q，目标是计算k使得Q=k\*G
 
 首先对每个 $p_i^{e_i}$ 计算 $k\mod p_i^{e_i}$ 。计算对应的子群生成元 $G_i=\frac{q}{p_i^{e_i}}G$ , $Q_i=\frac{q}{p_i^{e_i}}Q$ 。此时 $G_i$ 的阶为 $p_i^{e_i}$ ，问题转化为在 < $G_i$ >中求解 $Q_i=k_iG_i$
 
 得到所有 $k_i$ 后用crt即可组合出完整的k
-
-(注意这个攻击的条件是曲线的阶不是质数，但实际分解的数是生成器G的阶而不是曲线的阶)
 
 见 https://connor-mccartney.github.io/cryptography/ecc/PrivateCurve-0xl4ughCTF2024
 
@@ -217,7 +217,7 @@ mov攻击将椭圆曲线群上的离散对数问题转换成有限域乘法群�
 考虑 $F_q$ 上的椭圆曲线E。给定满足Q=rP的均为质数m阶的P和Q，目标是找到r。ecdlp。因为P是m挠点且这个点在基域上的曲线中，于是 $P\in G_1$ (Q同理)
 
 攻击步骤：
-1. 计算扩域上的椭圆曲线的阶（ $n=\#E(F_{q^k})$ ）。因为 $E(F_q)$ 的m挠群是 $E(F_{q^k})$ 的子群，m整除n（拉格朗日定理）
+1. 计算扩域上的椭圆曲线的阶（ $n=\sharp E(F_{q^k})$ ）。因为 $E(F_q)$ 的m挠群是 $E(F_{q^k})$ 的子群，m整除n（拉格朗日定理）
 2. 选择一个随机点 $T\in E(F_{q^k})$ ，满足 $T\not\in E(F_q)$
 3. 计算 $S=(\frac{n}{m})T$ 。如果S=O，返回第二步；如果S不是O，则它是一个m阶的点。证明如下：
 - $S=(\frac{n}{m})T$
@@ -231,3 +231,39 @@ mov攻击将椭圆曲线群上的离散对数问题转换成有限域乘法群�
 - $u,v\in F_{q^k}$
 - 因为韦伊配对是双线性的且r是常量，有 $v=e_m(P,S)^r$ 。因为 $u=e_m(P,S)$ ,可得 $v=u^r$ 。这是乘法群 $F_{q^k}$ 上的dlp
 5. 如果 $q^k$ 不大，则对于 $u=v^r$ ，可以借助index calculus找到r
+
+### Exceptional Curves
+
+虽然曲线的阶是质数，但是阶完全等于p了。这是[Anomalous Elliptic Curves](https://www.monnerat.info/publications/anomalous.pdf)，可以用smart attack
+
+见 https://connor-mccartney.github.io/cryptography/ecc/Elliptic-GCC-CTF-2024
+
+### Micro Transmissions
+
+从`Smooth Criminal`中得知，如果想要防止攻击者用pohlig hellman求n，就要保证G的阶的分解结果中包含大素数。这样即使攻击者拿到了几个小素数因子上的ecdlp，crt也组不出完整的n
+
+但如果n本身就很小呢？此时小素数因子上的ecdlp就已足够恢复n了
+
+### Elliptic Nodes
+
+两个曲线的点足以恢复a和b。然后就会发现这是个奇异曲线（sagemath定义曲线时会报错）
+
+这篇[论文](https://people.cs.nycu.edu.tw/~rjchen/ECC2012S/Elliptic%20Curves%20Number%20Theory%20And%20Cryptography%202n.pdf)的2.10（73页）讲述了这种情况。奇异曲线就是有奇点（singular point），奇点是多项式 $x^3 + ax + b$ 在域k上的重数（multiplicity）大于1的根。有两种情况：
+- 尖点（cusp）。曲线方程形如 $y^2=(x-\alpha)^3$ ，奇点位于 $(\alpha,0)$ 。除去这个奇点外，剩下的点构成的群与域 $F_p$ 上的加法群同构
+- 节点（node）。曲线方程形如 $y^2=(x-\alpha)^2(x-\beta)$ ，奇点位于 $(\alpha,0)$ 。除去这个奇点外，剩下的点构成的群与域 $F_p$ 的扩域上的乘法群同构
+
+至于怎么判断题目的曲线是哪种情况，解出多项式 $x^3 + ax + b$ 的根后找到重数（multiplicity）为2的根，利用函数偏移的技巧就能确认属于哪种情况：
+```py
+f = x^3 + a * x + b
+f2 = f.subs(x=x+shift)
+print(f2.factor())
+```
+见 https://github.com/elikaski/ECC_Attacks?tab=readme-ov-file#the-curve-is-singular
+
+### Digestive
+
+题目取消了hash，直接返回消息本身。我想着协议要求必须hash消息肯定是有深意的吧？可能是可以通过已知的签名伪造别的消息的签名之类的？但我没找到方法
+
+结果这题的关键和密码一点关系也没有。调试了ecdsa库的源码（sign_number函数），发现其sign的消息是截断了的，意味着加长json而不修改json前面的内容不会修改number
+
+最后是一点点python的特性。json重复键只会取最后一个键

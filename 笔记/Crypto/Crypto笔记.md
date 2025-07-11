@@ -2448,7 +2448,7 @@ print(AES.Decrypt("CTR",ct,key,nonce))
 - rsa签名伪造：[Bleichenbacher's RSA signature forgery based on implementation error](https://mailarchive.ietf.org/arch/msg/openpgp/5rnE9ZRN1AokBVj3VqblGlP63QE/). 此攻击基于PKCS-1 padding的错误实现+e为3。
   - PKCS-1 padding格式如下：`00 01 FF FF FF ... FF 00  ASN.1  HASH`，在按照正常RSA解出m后移走前面的padding即可获取hash。假如不检查hash后是否有多余字节就直接比对，如：`00 01 FF FF ... FF 00  ASN.1  HASH  GARBAGE`，那么攻击者就能构造一个立方数，其立方根即为构造的signature。
 58. [signature-ii](https://github.com/BCACTF/bcactf-4.0/tree/main/signature-ii)
-- 椭圆曲线签名（elliptic curve digital signature，ecc）算法及验签：https://en.wikipedia.org/wiki/Elliptic_Curve_Digital_Signature_Algorithm
+- 椭圆曲线签名（elliptic curve digital signature，ecdsa）算法及验签：https://en.wikipedia.org/wiki/Elliptic_Curve_Digital_Signature_Algorithm
 - 签名参数k共用攻击：签名算法里的k应该是随机且每次签名都不同的。若相同，攻击者在获取两对签名(r,s)和(r,s')以及其对应的明文后即可获取第三个使用相同k的签名(r,s'')所对应的明文。操作如下：
   - $k=\frac{m-m'}{s-s'}$
   - $d_A=\frac{sk-m}{r}$ ( $d_A$ 为私钥)
