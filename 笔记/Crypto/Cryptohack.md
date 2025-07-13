@@ -121,7 +121,7 @@ shared_secret = scalar_mul((x,y),6534)[0]
 
 错误的密码参数选择会导致上述的安全性全部失效。不过吧，即使选择的参数是安全的，错误的实现也会导致这点。侧信道攻击可以通过电路的工作量或是算法运行的时间泄漏出秘密。比如[LadderLeak](https://eprint.iacr.org/2020/615.pdf)，可以完全破坏协议的安全性。关键在于需要让椭圆曲线上的标量乘法永远在常数时间内运行（run in constant time）
 
-Montgomery's Ladder算法可以满足上述要求。这题要求实现一个最基本的版本：Montgomery’s binary algorithm。这个算法的关键在于，无论k的第i个bit是0还是1，需要做的运算都是一个加法和一个倍乘；而最开始介绍的标量乘法则会根据bit的不同选择执行加法或是倍乘。不过这个算法仍不是最安全的，算法执行的步骤数泄漏了k的bit length，而且if语句的分支会泄漏k的结构。可在[Montgomery curves and their arithmetic](https://eprint.iacr.org/2017/212.pdf)的第16页`A uniform Montgomery ladder`找到改进后的算法（里面还有下面提到的加法和倍乘的简洁实现）
+Montgomery's Ladder算法可以满足上述要求。这题要求实现一个最基本的版本：Montgomery’s binary algorithm。这个算法的关键在于，无论k的第i个bit是0还是1，需要做的运算都是一个加法和一个倍乘；而最开始介绍的标量乘法则会根据bit的不同选择只执行加法或是额外执行一个倍乘。不过这个算法仍不是最安全的，算法执行的步骤数泄漏了k的bit length，而且if语句的分支会泄漏k的结构。可在[Montgomery curves and their arithmetic](https://eprint.iacr.org/2017/212.pdf)的第16页`A uniform Montgomery ladder`找到改进后的算法（里面还有下面提到的加法和倍乘的简洁实现）
 
 这题的椭圆曲线遵循Montgomery form： $E:By^2=x^3+Ax^2+x$ 。虽然可以转化成Weierstrass form并使用之前实现的算法，但是为什么不直接实现一个Montgomery form上的算法呢？材料已经给出了仿射坐标（用(x,y)表示曲线上的点，还有射影坐标和雅可比坐标。仿射坐标是最好理解的，但是计算效率比后两者低）下加法和倍乘的伪代码
 
@@ -267,3 +267,47 @@ print(f2.factor())
 结果这题的关键和密码一点关系也没有。调试了ecdsa库的源码（sign_number函数），发现其sign的消息是截断了的，意味着加长json而不修改json前面的内容不会修改number
 
 最后是一点点python的特性。json重复键只会取最后一个键
+
+### Double and Broken
+
+想复杂了。前文说到double and add算法根据bit的不同执行的操作也有所不同。于是我根据之前做的类似能量分析题的经验，以为要画图看bit与操作之间的对应关系：
+```py
+import matplotlib.pyplot as plt
+import numpy as np
+data = eval(open("collected.txt").read())
+arr = np.array(data)
+column_means = np.mean(arr, axis=0)
+plt.figure(figsize=(4, 4))
+plt.plot(column_means, linestyle='-', linewidth=1, color='blue') 
+plt.title('Data Visualization')
+plt.xlabel('Index')
+plt.ylabel('Value')
+plt.grid(True)
+plt.legend()
+plt.show()
+```
+但是横竖看不出来东西。只能从已知的flag前缀入手，查看其二进制位和数据有没有什么关联
+
+结果题目给的能量是double and add算法的for循环消耗的能量。其实很简单，耗能较多的就是1，因为执行了两个操作；否则就是0
+
+也难怪plot不出来东西。for循环才执行了多少次啊（
+
+### No Random, No Bias
+
+看到sha1+拼接的操作后的第一反应是hash extension attack。我这个脑子疑似有点过拟合了。这题控制不了拼接的内容，明显不是
+
+sha1完全是障眼法。关键在于sha1的hash size只有160 bit，而ecdsa使用的曲线是256 bit的。short nonce attack，这篇[文章](https://blog.trailofbits.com/2020/06/11/ecdsa-handle-with-care)的`Breaking ECDSA from bad nonces`章节有提到这篇论文： https://eprint.iacr.org/2019/023.pdf 。在4.5（论文第7页）可以看到一个式子：
+
+$k_i-s_i^{-1}r_id-s_i^{-1}h_i\equiv 0\mod n$
+
+$k_i-(s_i^{-1}r_id+s_i^{-1}h_i)=k_i-(s_i^{-1}(r_id+h_i))=k_i-(k_i(h_i+dr_i)^{-1}(r_id+h_i))\equiv 0\mod n$
+
+这是一个论文前面提过的hidden number problem（4.1，第5页）
+
+直接套现成的脚本 https://github.com/jvdsn/crypto-attacks/blob/master/attacks/hnp/lattice_attack.py
+
+### Edwards Goes Degenerate
+
+发现cryptohack的题目名称很多时候是个提示。于是搜索题目名，得到了这个： https://crypto.stackexchange.com/questions/103954/breaking-ed25519-discrete-logarithm-with-degenerate-curve-attack 。里面又提到了这个： https://crypto.stackexchange.com/questions/98499/ed25519-attacks
+
+说当点(0,y)计算标量乘法时，根据Twisted Edwards Curves的仿射坐标加法公式，得到的结果是 $(0,y^k\mod p)$ 。意味着直接拿y坐标对着p做dlp就能解出私钥k了
