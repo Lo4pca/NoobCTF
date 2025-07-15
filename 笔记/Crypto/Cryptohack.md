@@ -311,3 +311,31 @@ $k_i-(s_i^{-1}r_id+s_i^{-1}h_i)=k_i-(s_i^{-1}(r_id+h_i))=k_i-(k_i(h_i+dr_i)^{-1}
 发现cryptohack的题目名称很多时候是个提示。于是搜索题目名，得到了这个： https://crypto.stackexchange.com/questions/103954/breaking-ed25519-discrete-logarithm-with-degenerate-curve-attack 。里面又提到了这个： https://crypto.stackexchange.com/questions/98499/ed25519-attacks
 
 说当点(0,y)计算标量乘法时，根据Twisted Edwards Curves的仿射坐标加法公式，得到的结果是 $(0,y^k\mod p)$ 。意味着直接拿y坐标对着p做dlp就能解出私钥k了
+
+### Real Curve Crypto
+
+实数域上定义的椭圆曲线。[先前](https://crypto.stackexchange.com/questions/51198/is-ecc-over-real-numbers-possible)确实有人讨论过这个问题。据说可以用数值分析这个方向的方法（numerical approximation）做，但最终我也不知道怎么做……动用一下大佬之力
+
+于是又到了喜闻乐见的“哇[wp](https://hackmd.io/@grhkm/By-_iF795)甩我脸上我都看不懂”时间。当我意识到文章前半部分只用了大佬20分钟的时间理解后，我明白这不是我该来的地方
+
+核心结论如下（只能做个无脑的tldr，保留结论忽略过程）：
+
+定义在复数域上的椭圆曲线 $E(C)\cong C/\Lambda$ ，其中 $\Lambda=Z\omega_1+Z\omega_2$ 。群同构为 $\phi: C/\Lambda\rightarrow E(C),z\mapsto(℘(z),℘'(z)),0\mapsto\infty$
+
+题目的ecdlp等同于 $n℘^{-1}(g_x)\equiv ℘^{-1}(p_x)\mod\Lambda$ ，可用LLL求解
+
+℘是Weierstrass ℘-function，定义为 $℘(z)=℘(z;\Lambda)=z^{-2}+\Sigma_{\omega\in\Lambda,\omega\not={0}}(\frac{1}{(z-\omega)^2}-\frac{1}{\omega^2}),z\not\in\Lambda$
+
+由此可以推导出一个微分方程： $℘'(z)^2=4℘(z)^3-g_2℘(z)-g_3$ 。其中 $g_2$ 和 $g_3$ 为某些常数项，具体的定义可以忽略。不难看出，这个东西很像椭圆曲线。于是就有了上述的映射
+
+作者已在wp的最后放出了求解脚本，不过好像少了算 $\omega_2$ 的部分。根据wp内容， $\omega_2=\frac{\pi}{M(\sqrt{e_3-e_1},\sqrt{e_3-e_2})}$ ，其中 $e_1,e_2,e_3$ 可以通过分解曲线方程 $x^3 - x$ 得到，满足 $e_1$ < $e_2$ < $e_3$
+
+拿到flag后，建议看看其他人的solutions。`neobeo`的解法似乎很像最开始提到的数值分析方法
+
+### A Twisted Mind
+
+在做其他题的时候见过“twisted”这个词，于是意识到题目名再次是个提示： https://crypto.stackexchange.com/questions/19877/understanding-twist-security-with-respect-to-short-weierstrass-curves 。这个链接已经包含了一个示例，跟着做就可以了。不过后续我发现示例里求某个阶的点那一步不是必须的，这步只是为了方便用sagemath内置的discrete_log。如果自行实现pohlig hellman算法的话就不用管。见 https://7rocky.github.io/en/ctf/other/ecsc-2023/twist-and-shout
+
+这题仍然属于invalid curve attack，因为题目没有检查输入的x点在不在定义的曲线上。区别在于题目使用的算法同时依赖了a和b参数，因此一般的依赖于修改参数b的invalid curve attack就不能用了。但是曲线的quadratic twist无需修改a和b参数，只需将曲线放到扩域 $F_{p^2}$ 中。测试一下，发现当某个x坐标处于 $E^2$ 但不处于E中时，题目的scalarmult算的是 $E^2$ 中的结果
+
+E和 $E^2$ 的阶的分解结果除了最后一个因子，剩下的都挺小的。于是在E中选一个点， $E^2$ 中选一个点，只求两者相对于几个小因子的ecdlp；最后crt组出完整的privKey。需要两个点是因为无论单独在哪个曲线上求ecdlp的bit数都不够大（我这里还脑抽了一下，全部在 $E^2$ 中选点，妄想着找到个阶与已知点互质的点进而搞crt……但凡学点群论就知道这有多荒谬了）
