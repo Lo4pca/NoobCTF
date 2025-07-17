@@ -339,3 +339,33 @@ $k_i-(s_i^{-1}r_id+s_i^{-1}h_i)=k_i-(s_i^{-1}(r_id+h_i))=k_i-(k_i(h_i+dr_i)^{-1}
 这题仍然属于invalid curve attack，因为题目没有检查输入的x点在不在定义的曲线上。区别在于题目使用的算法同时依赖了a和b参数，因此一般的依赖于修改参数b的invalid curve attack就不能用了。但是曲线的quadratic twist无需修改a和b参数，只需将曲线放到扩域 $F_{p^2}$ 中。测试一下，发现当某个x坐标处于 $E^2$ 但不处于E中时，题目的scalarmult算的是 $E^2$ 中的结果
 
 E和 $E^2$ 的阶的分解结果除了最后一个因子，剩下的都挺小的。于是在E中选一个点， $E^2$ 中选一个点，只求两者相对于几个小因子的ecdlp；最后crt组出完整的privKey。需要两个点是因为无论单独在哪个曲线上求ecdlp的bit数都不够大（我这里还脑抽了一下，全部在 $E^2$ 中选点，妄想着找到个阶与已知点互质的点进而搞crt……但凡学点群论就知道这有多荒谬了）
+
+### Checkpoint
+
+注意到服务器再次没有验证点是否在曲线上，而且使用的点加算法不依赖参数b。这不就是我上道题说的“一般的invalid curve attack”吗？
+
+https://crypto.stackexchange.com/questions/71065/invalid-curve-attack-finding-low-order-points 里提到了一篇[论文](http://tomlr.free.fr/Math%E9matiques/Math%20Complete/Cryptography/Guide%20to%20Elliptic%20Curve%20Cryptography%20-%20D.%20Hankerson,%20A.%20Menezes,%20S.%20Vanstone.pdf)。链接里提到的那一段在pdf的203页。理是这么个理，但是怎么生成低阶数的点？
+
+翻到了先前记录的wp： https://affine.group/writeup/2024-06-Codegate-Babylogin 。wp的情况和这题太像了，都是不看参数b的invalid curve attack，就连符号的问题都是一样的：由于服务器生成key时只看x坐标，导致生成key的数有两种可能，s模点的阶数和-s模点的阶数。这里我选择了文章提到的method 3， https://www.gsma.com/solutions-and-impact/technologies/security/wp-content/uploads/2023/10/0073-invalid_curve.pdf 的第9页。这个方法的优点是简单易懂，弊端是需要的query数量比其他方法多。幸好这题不限制query数量，于是就没缺点了
+
+另外服务器接收点时接受的是hex格式……我竟然被这玩意卡了至少半个小时……
+
+## [Lattices](https://cryptohack.org/challenges/post-quantum)
+
+### Gram Schmidt
+
+实现算法。但是我发现我不是很明白材料给的伪代码，于是找了原书[An Introduction to Mathematical Cryptography](https://isidore.co/CalibreLibrary/Hoffstein,%20Jeffrey/An%20Introduction%20to%20Mathematical%20Cryptography%20(2nd%20ed.)%20(7710)/An%20Introduction%20to%20Mathematical%20Cryptograp%20-%20Hoffstein,%20Jeffrey.pdf)里的描述（pdf第400页），清晰多了
+
+### Find the Lattice
+
+首先先看看这个密码系统为什么能行
+
+decrypt中的`a=f*e`等同于`fhr+fm`,代入h的公式得 $f\*f^{-1}\*g\*r+f\*m=g\*r+f\*m\mod q$ 。然后`(a*inverse(f, g)) % g`等于 $f^{-1}\*g\*r+f^{-1}\*f\*m=f^{-1}\*g\*r+m$ 。整体模g后就剩下m了
+
+然后就是找线性表达式了。decrypt里面的算式基本不用看，因为大部分值都是未知的。encrypt里可以得到类似`hr-kq-e=-m`的算式。不过我不确定这有没有搞头。题目描述说可以用二维lattice reduction得到答案，但这怎么看都要三维吧？秉承着“我要跟着hint走”的理念，得找找别的
+
+gen_key中的h满足 $fh-g\equiv 0\mod q$ ，换句话说有fh-kq=g。诶这个看着就很二维了。把式子扩张成向量的写法：`f*(h,1)+(-k)*(q,1)=(g,f-k)`，试一下发现确实能得到g，进而得到f，进而decrypt出m
+
+后续翻solutions发现，上述做法能成功的原因是g最大被限制在q/2,即q的一半；f最大也是q的一半，k差不多也是q的一半。因此`(g,f-k)`是格里的最短向量
+
+另外，`7Rocky`的解法用到了`hr-kq-e=-m`。竟然真的有搞头？
