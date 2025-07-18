@@ -350,6 +350,62 @@ https://crypto.stackexchange.com/questions/71065/invalid-curve-attack-finding-lo
 
 另外服务器接收点时接受的是hex格式……我竟然被这玩意卡了至少半个小时……
 
+### An Evil Twisted Mind
+
+注意到模数不是质数。一些合数模数上的椭圆曲线资料：
+- https://crypto.stackexchange.com/questions/72613/elliptic-curve-discrete-log-in-a-composite-ring
+- https://zhuanlan.zhihu.com/p/643176962 （Keymoted）
+
+假如n=pq，那么模n的椭圆曲线等同于相同a，b参数的曲线模p和模q然后合在一起。如果计算点加法A+B的话，等同于把点分别映射到p和q对应的曲线上（x和y坐标模p和q），即将A分成 $A_p$ 和 $A_q$ ，B分成 $B_p$ 和 $B_q$ ，再加在一起： $(A_p+B_p,A_q+B_q)$ 。两个曲线运算时互不干扰。假如任何一个运算等于无限远点，那么A+B的结果不存在于模n的曲线上。所以有将其称作“pseudocurve”的，因为它的运算不封闭，不是群
+
+算标量乘法kA也类似。先计算模p上的 $kA_p$ ，再计算模q上的 $kA_q$ ，然后crt将两个x,y坐标对合在一起。计算ecdlp同理，在模p上算出满足A=xB的x，然后再算模q上的，然后crt组出完整的模n下的x
+
+但是吧，题目没有任何地方提示n可能形如pq，也不像keymoted那道题一样给出分解n的提示。这怎么搞？
+
+摇人。佬说可以用cado-nfs分解：cado在可接受的时间内能分解大约300 bit的数（即这道题）；500 bit需要几天；1024 bit不用想了，还是挺安全的
+
+尝试用`A Twisted Mind`中构造twist的方法，但是发现分解 $p^2$ 上的曲线的阶很慢。后面发现需要用sagemath内置的`quadratic_twist`方法（在之前的[链接](https://crypto.stackexchange.com/questions/19877/understanding-twist-security-with-respect-to-short-weierstrass-curves)中已经知道了 $p^2$ 上的曲线与这个方法返回的曲线其实是同构的），这个方法得到的曲线的阶比较光滑，而且好分解
+
+后面的思路就和上一道题很像了。只是这次要找的点需要同时满足不在 $F_p$ 和 $F_q$ 的曲线上，但在两者的quadratic twist上
+
+看`7rocky`的解法时我有些不明白他为什么这么构造：
+```py
+dp, dq = Fp(1), Fq(1)
+
+while dp.is_square() or dq.is_square():
+    dp += 1
+    dq += 1
+
+dEp = Ep.quadratic_twist(dp) #quadratic_twist的参数要求不是域中的平方数
+dEq = Eq.quadratic_twist(dq)
+
+assert Ep.order() + dEp.order() == 2 * p + 2 #为什么？
+assert Eq.order() + dEq.order() == 2 * q + 2
+
+factors_p = factor(dEp.order())
+factors_q = factor(dEq.order())
+
+for i in range(0, 10000, dp):
+    try:
+        Ep.lift_x(Fp(i))
+    except:
+        Pp = dEp.lift_x(Fp(i * dp * 4)) #为什么要乘上dp再乘4？
+        try:
+            Eq.lift_x(Fq(i))
+        except:
+            Pq = dEq.lift_x(Fq(i * dq * 4))
+            break
+```
+`HappyHacker22`用了 $p^2$ 上的曲线（阶可能是cado-nfs分解的）。如果这么做的话需要手动设置点的阶数，不然sagemath又会分解一遍阶
+
+最后的最后，事实上这题不需要用cado-nfs分解n。`IcingMoon`指出，题目给的order大小大概是模数的平方根，很有可能是 $E_p$ 的阶。所以对于 $E_p$ 中的任意一点，拿阶数与P相乘会得到无限远点。而Montgomery/Brier–Joye ladder中无限远点的z坐标为0。于是模n的曲线上的结果的z坐标与n的gcd可能为p（不确定怎么得到这点的，可能也和crt有关？）
+
+### An Exceptional Twisted Mind
+
+https://affine.group/writeup/2021-01-Zer0pts#pure-division
+
+因为 $Z/p^2Z\subset Z_p\subset Q_p$ ，所以可以像处理Anomalous curve（smart attack）那样将E用change_ring换到 $Q_p$ 来解ecdlp
+
 ## [Lattices](https://cryptohack.org/challenges/post-quantum)
 
 ### Gram Schmidt
@@ -369,3 +425,67 @@ gen_key中的h满足 $fh-g\equiv 0\mod q$ ，换句话说有fh-kq=g。诶这个�
 后续翻solutions发现，上述做法能成功的原因是g最大被限制在q/2,即q的一半；f最大也是q的一半，k差不多也是q的一半。因此`(g,f-k)`是格里的最短向量
 
 另外，`7Rocky`的解法用到了`hr-kq-e=-m`。竟然真的有搞头？
+
+### Backpack Cryptography
+
+脚本小子冲冲冲： https://github.com/hyunsikjeong/LLL/blob/master/low-density-attack/LowDensityAttack.sage
+
+### LWE Intro
+
+Learning With Errors (LWE) 问题：给定一个线性函数f(A)，参数为环上的值；在获取函数的噪声样本后确定f(A) （原文是learning a linear function，hmmm啥是学习线性函数？）。样本形如(A,⟨A,S⟩+e)，其中S是定义了线性函数的秘密元素（secret element），e是分布于已知范围内的小误差项，A是环中的已知元素。⟨A,S⟩表示矩阵乘法，矩阵A乘上向量S
+
+基于LWE的密码系统有很多种，不过通常有以下共同的特点：
+- 在两个不同的模数下进行模运算：明文模数（plaintext modulus）和密文模数（ciphertext modulus）
+- 密钥是模n下的向量空间里的元素
+- 通过将编码的噪声信息（noisy message）与较大的点积相加来加密消息
+
+噪声信息是消息与误差项或噪声项的和（具有特殊构造）
+
+点积是密钥与向量空间中的随机元素的点积；密文会提供这个随机元素。如 (A,⟨A,S⟩+encoded(m,e))
+
+如果密钥已知，则可以自行减去点积的结果，剩下encoded(m,e)。上文提到的特殊构造允许直接将噪声与消息分离，于是得到m
+
+至于特殊构造是什么，通常有两种做法。将消息放在LWE样本的高位，噪声放在低位；或者反过来
+
+题目的答案是`Gaussian elimination`。在给的[资料](https://cims.nyu.edu/~regev/papers/lwesurvey.pdf)的第2页有
+
+### LWE High Bits Message
+
+不确定decrypt中说`not modulo q`具体是什么意思
+```py
+q = 0x10001
+p = 257
+delta=round(q/p)
+S=vector(ZZ,[...])
+A=vector(ZZ,[...])
+b = 44007
+x=(b-A*S)%q
+print(round(x/delta))
+```
+### LWE Low Bits Message
+
+```py
+#https://crypto.stackexchange.com/questions/102852/fhe-modular-reduction-in-specific-range
+def centered_mod(x,q):
+    return ((x+(q//2-1))%q)-(q//2-1)
+p = 257
+q = 0x10001
+S=vector(ZZ,[...])
+A=vector(ZZ,[...])
+b = 11507
+x=b-A*S
+print(centered_mod(x,q)%p)
+```
+python的`%`给出的数位于[0,p-1]，但这题要求的是“centered modular reduction”，位于 $(-q/2,q/2]$ ，所以需要改动一下
+
+另外，c++的`%`是centered modular reduction
+
+### From Private to Public Key LWE
+
+利用LWE的加法同态（additively homomorphic）特性可以将其转换为公钥密码系统。给出m的密文(A,b)后，任何人都可以将其转为 $m+m_2$ 的密文。对于消息在低位的系统，(A, $b+m_2$ )为修改后的密文；消息在高位的系统则是(A, $b+\Delta m_2$ )
+
+类似地，将两个LWE密文加起来也可以得到一个有效的密文，为两个密文对应的明文之和的密文。私钥的拥有者可以发布多组“零的加密”作为公钥，而加密者需要从这些公钥中随机选出一个子集并将其加在一起。和的结果仍然是零的有效密文。然后加密者可以将自己的消息加进去，得到m的有效密文。这些步骤要求发布者精心选择噪声样本，保证多个误差项的和仍然在解密时需要的阈值之内
+
+为了保证以上加密系统的安全性，必须保证第三方难以分辨出哪些公钥样本被选入子集。因此公钥的样本数量需要显著大于LWE的维度， $n^2log(q)$ bits
+
+https://openquantumsafe.org/liboqs/algorithms/kem/kyber.html
