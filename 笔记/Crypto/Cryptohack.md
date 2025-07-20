@@ -489,3 +489,39 @@ python的`%`给出的数位于[0,p-1]，但这题要求的是“centered modular
 为了保证以上加密系统的安全性，必须保证第三方难以分辨出哪些公钥样本被选入子集。因此公钥的样本数量需要显著大于LWE的维度， $n^2log(q)$ bits
 
 https://openquantumsafe.org/liboqs/algorithms/kem/kyber.html
+
+### Noise Free
+
+没有noise的话整个密码系统就是个线性方程组。拿到64个A后组成矩阵搞 $A^{-1}B=S$ 即可
+
+记得在GF(q)里运算
+
+### Too Many Errors
+
+误差项e根据seed决定，因此只要多次调用reset，e的值就是固定的。然而a也是固定的。幸好a有几率发生“突变”，即原先根据seed生成的a中的一个分量有可能变成别的。借此可以获取多个线性无关的向量。只需爆破e的所有可能值恢复正确的b，后面就和上一题一样了
+
+然而这好像不是预期解。上述方法能用完全是基于e范围很小的前提（跨度太大就不好爆破了）。预期解可能为solutions区`r4sti`的解法，对e的跨度没有要求
+
+### Nativity
+
+这题其实就是上文说的LWE public key system，更详细的讲解见 https://65610.csail.mit.edu/2024/lec/l07-pke.pdf
+
+……吗？
+
+翻到材料的第4页会发现系统识别明文bit依赖于判断 $|c^T(−s|1)|\leq\frac{q}{4}$ （`−s|1`是拼接）。然而这题在生成的时候只生成偶数项的噪声：`2*sample((m,), normal)`，后续通过判断解密出的内容是否是偶数来确认加密时使用的明文bit是0还是1
+
+这明显很怪。然而我仍然没反应出来该怎么攻击……只想着lattice了。据说lattice是非预期解，但是512乘上64还是太为难我的电脑了。关键在于将整个系统看作是模2下的。此时整个“LWE”就变成了完全没有误差的线性方程组，因为添加的噪声`2*sample((m,), normal)`在模2下等同于啥也没干。找s等同于找kernel（solve_right函数）
+
+### Bounded Noise
+
+在上道题的pdf同属的课程下找到了 https://65610.csail.mit.edu/2024/lec/l20-lweattack.pdf ，介绍了Arora and Ge攻击。如果误差的范围很小的话，比如像这题一样在{0,1}内，可以构造类似 $(A^Ts-b)(A^Ts-b-1)=0$ 的方程组。虽然这样做会出现 $s_is_j$ 项，但是可以做个替换，比如让 $s_is_j=z$ ，整个系统就是线性的了
+
+该攻击需要满足两个条件：
+- 误差范围较小。范围变大之后时间复杂度将呈超越多项式时间增长（superpolynomial time，我猜原因是误差范围多起来后缠在一起的未知变量就多了，而且以指数倍增长）
+- 有足够的样本（方程）
+
+一些资料：
+- https://github.com/jvdsn/crypto-attacks/blob/master/attacks/lwe/arora_ge.py
+- https://eprint.iacr.org/2020/666.pdf
+
+也可以用LLL，尝试找到所有的误差项，然后当作正常线性方程组解
