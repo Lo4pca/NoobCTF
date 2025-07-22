@@ -525,3 +525,51 @@ https://openquantumsafe.org/liboqs/algorithms/kem/kyber.html
 - https://eprint.iacr.org/2020/666.pdf
 
 也可以用LLL，尝试找到所有的误差项，然后当作正常线性方程组解
+
+### Missing Modulus
+
+chatgpt帮我搜到了这个： https://crypto.stackexchange.com/questions/108356/as-a-high-level-intuition-why-is-lwe-without-modular-reduction-easy-to-solve 。里面提到了一篇论文： https://eprint.iacr.org/2018/822.pdf 。第9页说可以用Least Squares Method解。numpy里有这个函数： https://numpy.org/doc/stable/reference/generated/numpy.linalg.lstsq.html 。再加上最小二乘法的[定义](https://zh.wikipedia.org/wiki/%E6%9C%80%E5%B0%8F%E4%BA%8C%E4%B9%98%E6%B3%95)，看起来这玩意就是专门解带误差的线性系统的。这不就是这道题吗，直接套用就出了
+
+这个方法取样本时得多取一点，和维度数一样的样本（512）不够（不过我又看了solutions，似乎是因为512样本的lstsq在real上求解出s后我没round到最近的整数。看其他人的解法里拿到A方阵后直接求逆再round就好了。直接求逆需要的样本数比较小，但是时间较长）
+
+以及，可以用LLL找s
+
+### Noise Cheap
+
+搜了一下，以为是primal lattice attack。跟着一个[视频](https://www.youtube.com/watch?v=iW8dVkYhCuM)复现了里面的攻击，但那里面的方法适用于AS+e的情况，而这题是AS+pe。想着自己改一下格的构造，但那里面用到了reduced echelon form且没说为什么要用，导致我不会改……
+
+我有点钻牛角尖了。我下意识地认为这题必须构造一个只包含误差项的格，因此虽然看到了最明显的线性方程，但这种构造方式会把S也扩进去，于是我认为这样构造出来的格就不够短了（事实上原因是我没有没有处理pe，见下方）
+
+佬的格构造：
+
+![lattice](https://cdn.discordapp.com/attachments/1388708228388618260/1397024451400306759/image.png?ex=688037e8&is=687ee668&hm=5f6cecd79567d08073a5648e3c9cbbfdc4b4e7c8fb47446427f0ac44468cd832&)
+
+加了点weight后顺利解出（如果不考虑实现时细枝末节的错误的话……）。我错过的地方是忘记把方程的左边除以p（乘上 $p^{-1}\mod q$ ）了……
+
+看了`r4sti`的构造后发现左边不除p也可以，就是加weight时复杂了些
+
+## [Isogenies](https://cryptohack.org/challenges/isogenies)
+
+### Introduction to Isogenies
+
+椭圆曲线之间的同源（Isogenies）本质上是两样东西。首先，这是椭圆曲线间的有理映射（rational maps，有理函数定义的映射），而且是满态射（surjective morphism，好像就是满射？）。同时，映射保留从定义域（domain）到陪域（codomain）的群结构，意味着它们同时是群同态（group homomorphism）。将从定义域E映射到陪域E'的同源记为 $\phi:E\rightarrow E'$
+
+接下来会关注可分离的同源（separable isogenies），这类同源的映射的度（degree）正好等于核的大小（核是定义域中映射到陪域的无限远点的点集）。虽然同源的数学背景很复杂，远远超出了密码学的应用范围，但一般来说会关注两件事。其一是给定点的子群H，目标是计算核为H的同源（因此度为#H）。其二是从定义域中取出任意点，计算该点处的同源并得到它在陪域对应的点
+
+同源的密码性来自于不同椭圆曲线之间的同源路径（long paths of isogenies）。如果我们固定某个质数l，那么l同源图是一个顶点为椭圆曲线（的同构类），边为l度的同源（有理映射中出现的多项式的最高度数为l）的图。一般来说，当我们考虑超奇异椭圆曲线（supersingular elliptic curves）的同源图时，最终会得到一个及其混乱的图(SIDH上确实如此，不过CSIDH上限制了一组特殊的同源，因此图会有更多的结构)
+
+当l很小时，计算l同源不难。可以通过计算许多l同源来遍历图，最终落到某个顶点处。基于同源的密码将这个由多个同源组成的路径作为私钥，起始节点和终点节点为公钥。协议的过程是，在曲线之间行走（secret walks），交换具体的曲线（有时还有其他数据），然后重复行走过程，最后落到一个共享的秘密顶点。这个顶点可用于创建对称密钥。类似ECDH中用椭圆曲线上的共享秘密点创建密钥
+
+题目的答案是65537，因为一个separable isogeny的度就是其kernel的大小
+
+### The j-invariant
+
+类似模运算——许多运算只在模n下相等；在基于同源的密码学中，许多运算只有在同构时才相等。对于协议的两个参与者来说，仅仅比较曲线方程是不够的，还需要检查两条曲线是否同构
+
+一种判断两条曲线是否同构的方法是比较两者的不变量（invariant）。对于椭圆曲线，我们选择j不变量（j-invariant），记为j(E)
+> 如果两条曲线同构，它们具有相同的j不变量;但具有相同的j不变量的两条曲线可能不在基域上同构，而是在某个扩域上同构。一个例子是两条通过二次扭曲（quadratic twist）关联的曲线。它们会有相同的j不变量，但仅在二次扩域中上同构
+
+```py
+E=EllipticCurve(GF(163),[145,49])
+print(E.j_invariant())
+```
