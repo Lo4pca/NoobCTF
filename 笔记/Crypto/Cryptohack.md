@@ -92,7 +92,7 @@ def scalar_mul(P,n):
 标量乘法好算但是不好逆（离散对数，ECDLP）。即使是效率最高的算法也需要 $q^{\frac{1}{2}}$ 的复杂度，其中点P生成的子群（点P生成的循环子群，通过点P不断加自己得到）的大小为q。非常好的陷门函数
 
 Elliptic Curve Diffie-Hellman Key Exchange协议如下：
-- 选定曲线E，质数p，生成器（generator）G，其中G生成的子群H=< G >的阶数为质数q
+- 选定曲线E，质数p，生成元（generator）G，其中G生成的子群H=< G >的阶数为质数q
 - A生成随机数 $n_A$ 并计算 $Q_A=[n_A]G$
 - B生成随机数 $n_B$ 并计算 $Q_B=[n_B]G$
 - A发给B $Q_A$ ，B发给A $Q_B$ 。因为ECDLP的困难性，窃听者无法从这些点中计算出 $n_{A/B}$
@@ -137,7 +137,7 @@ Montgomery's Ladder算法可以满足上述要求。这题要求实现一个最�
 
 题目使用的曲线的阶数并不是质数(阶数的分解结果中不包含大素数)。因此可以用Pohlig-Hellman算法将DLP分成若干个小问题，大大降低复杂度
 
-因为生成器G生成了整个曲线，所以曲线的阶等于G的阶
+因为生成元G生成了整个曲线，所以曲线的阶等于G的阶
 
 假设G的阶数 $q=p_1^{e_1}p_2^{e_2}...p_k^{e_k}$ ，给定Q，目标是计算k使得Q=k\*G
 
@@ -204,7 +204,7 @@ mov攻击将椭圆曲线群上的离散对数问题转换成有限域乘法群�
 - 双线性：
     - $e_m(A_1+A_2,B)=e_m(A_1,B)\*e_m(A_2,B)$
     - $e_m(A,B_1+B_2)=e_m(A,B_1)\*e_m(A,B_2)$ （注意这里的双线性是乘法，而不是加法）
-    - 假设 $G_1,G_2$ 分别为两个椭圆曲线群的生成器， $\alpha,\beta$ 为常量。有 $e_m(\alpha G_1,\beta G_2)=e_m(\beta G_1,\alpha G_2)=e_m(\alpha\beta G_1,G_2)=e_m(G_1,\alpha\beta G_2)=e_m(G_1,\alpha G_2)^{\beta}=e_m(G_1,G_2)^{\alpha\beta}$
+    - 假设 $G_1,G_2$ 分别为两个椭圆曲线群的生成元， $\alpha,\beta$ 为常量。有 $e_m(\alpha G_1,\beta G_2)=e_m(\beta G_1,\alpha G_2)=e_m(\alpha\beta G_1,G_2)=e_m(G_1,\alpha\beta G_2)=e_m(G_1,\alpha G_2)^{\beta}=e_m(G_1,G_2)^{\alpha\beta}$
 - 单位元为 $e_m(A,A)=1,\forall A\in E[m]$
 - 交替性（Alternation）： $e_m(A,B)=e_m(B,A)^{-1},\forall A,B\in E[m]$
 - 非退化性（Non-Degeneracy）：
@@ -538,7 +538,7 @@ chatgpt帮我搜到了这个： https://crypto.stackexchange.com/questions/10835
 
 搜了一下，以为是primal lattice attack。跟着一个[视频](https://www.youtube.com/watch?v=iW8dVkYhCuM)复现了里面的攻击，但那里面的方法适用于AS+e的情况，而这题是AS+pe。想着自己改一下格的构造，但那里面用到了reduced echelon form且没说为什么要用，导致我不会改……
 
-我有点钻牛角尖了。我下意识地认为这题必须构造一个只包含误差项的格，因此虽然看到了最明显的线性方程，但这种构造方式会把S也扩进去，于是我认为这样构造出来的格就不够短了（事实上原因是我没有没有处理pe，见下方）
+我有点钻牛角尖了。我下意识地认为这题必须构造一个只包含误差项的格，因此虽然看到了最明显的线性方程，但这种构造方式会把S也扩进去，于是我认为这样构造出来的格就不够短了（事实上原因是我没有处理pe，见下方）
 
 佬的格构造：
 
@@ -554,9 +554,9 @@ chatgpt帮我搜到了这个： https://crypto.stackexchange.com/questions/10835
 
 椭圆曲线之间的同源（Isogenies）本质上是两样东西。首先，这是椭圆曲线间的有理映射（rational maps，有理函数定义的映射），而且是满态射（surjective morphism，好像就是满射？）。同时，映射保留从定义域（domain）到陪域（codomain）的群结构，意味着它们同时是群同态（group homomorphism）。将从定义域E映射到陪域E'的同源记为 $\phi:E\rightarrow E'$
 
-接下来会关注可分离的同源（separable isogenies），这类同源的映射的度（degree）正好等于核的大小（核是定义域中映射到陪域的无限远点的点集）。虽然同源的数学背景很复杂，远远超出了密码学的应用范围，但一般来说会关注两件事。其一是给定点的子群H，目标是计算核为H的同源（因此度为#H）。其二是从定义域中取出任意点，计算该点处的同源并得到它在陪域对应的点
+接下来会关注可分离的同源（separable isogenies），这类同源的映射的度（degree）正好等于其核的大小（kernel，核是定义域中映射到陪域的无限远点的点集）。虽然同源的数学背景很复杂，远远超出了密码学的应用范围，但一般来说会关注两件事。其一是给定点的子群H，目标是计算核为H的同源（因此度为#H）。其二是从定义域中取出任意点，计算该点处的同源并得到它在陪域对应的点
 
-同源的密码性来自于不同椭圆曲线之间的同源路径（long paths of isogenies）。如果我们固定某个质数l，那么l同源图是一个顶点为椭圆曲线（的同构类），边为l度的同源（有理映射中出现的多项式的最高度数为l）的图。一般来说，当我们考虑超奇异椭圆曲线（supersingular elliptic curves）的同源图时，最终会得到一个及其混乱的图(SIDH上确实如此，不过CSIDH上限制了一组特殊的同源，因此图会有更多的结构)
+同源的密码性来自于不同椭圆曲线之间的长同源路径（long paths of isogenies）。如果我们固定某个质数l，那么l同源图是一个顶点为椭圆曲线（的同构类），边为l度的同源（有理映射中出现的多项式的最高度数为l）的图。一般来说，当我们考虑超奇异椭圆曲线（supersingular elliptic curves）的同源图时，最终会得到一个极其混乱的图(SIDH上确实如此，不过CSIDH上限制了一组特殊的同源，因此图会有更多的结构)
 
 当l很小时，计算l同源不难。可以通过计算许多l同源来遍历图，最终落到某个顶点处。基于同源的密码将这个由多个同源组成的路径作为私钥，起始节点和终点节点为公钥。协议的过程是，在曲线之间行走（secret walks），交换具体的曲线（有时还有其他数据），然后重复行走过程，最后落到一个共享的秘密顶点。这个顶点可用于创建对称密钥。类似ECDH中用椭圆曲线上的共享秘密点创建密钥
 
@@ -567,9 +567,62 @@ chatgpt帮我搜到了这个： https://crypto.stackexchange.com/questions/10835
 类似模运算——许多运算只在模n下相等；在基于同源的密码学中，许多运算只有在同构时才相等。对于协议的两个参与者来说，仅仅比较曲线方程是不够的，还需要检查两条曲线是否同构
 
 一种判断两条曲线是否同构的方法是比较两者的不变量（invariant）。对于椭圆曲线，我们选择j不变量（j-invariant），记为j(E)
-> 如果两条曲线同构，它们具有相同的j不变量;但具有相同的j不变量的两条曲线可能不在基域上同构，而是在某个扩域上同构。一个例子是两条通过二次扭曲（quadratic twist）关联的曲线。它们会有相同的j不变量，但仅在二次扩域中上同构
+> 如果两条曲线同构，它们具有相同的j不变量;但具有相同的j不变量的两条曲线可能不在基域上同构，而是在某个扩域上同构。一个例子是两条通过二次扭曲（quadratic twist）关联的曲线。它们会有相同的j不变量，但仅在二次扩域上同构
 
 ```py
 E=EllipticCurve(GF(163),[145,49])
 print(E.j_invariant())
 ```
+
+### Where's the Supersingular Curve
+
+绝大多数时候我们关心的是计算超奇异椭圆曲线之间的同源。从密码学角度来说，这是因为超奇异椭圆曲线的l同源图是l+1正则图（regular graph，无向图G中若存在自然数k，使得每个顶点的度（与该顶点相连的边的数量）都等于k，则称G为k正则图）且是具有最优扩展性质（optimal expansion properties）的拉马努金图（Ramanujan graph）。这意味着在图中随机游走容易“迷路”。基于得知路径的起点和终点难以恢复路径本身这点建立了同源问题
+
+数学上，“超奇异”这个名称源于这些椭圆曲线的自同态环（endomorphism ring，从E到自身的群同态，即自同态，组成的环结构）非常大（super-sized）。它们不是奇异曲线（singular curves），注意所有椭圆曲线都是非奇异的。它们的“奇异”来源于它们的特殊（稀有）性，而不是几何意义上的奇点
+```py
+p = 2**127 - 1
+F = GF(p)
+A_coefficients=[...]
+for A in A_coefficients:
+    E = EllipticCurve(F, [0, A, 0, 1, 0])
+    if E.is_supersingular():
+        print(A)
+```
+
+### Image Point Arithmetic
+
+前面说过，同源不仅是曲线之间的有理映射，还保留了曲线间的群结构。意味着即使某个同源 $\phi:E\rightarrow E'$ 是未知的，给定 $\phi(P)$ 和 $\phi(Q)$ ，仍然可以确定 $\phi(P+Q)$ 的结果
+
+```py
+gx,gy=(48622,27709)
+px,py=(9460,13819)
+p=63079
+eq1=(pow(gy,2,p)-pow(gx,3,p))%p
+eq2=(pow(py,2,p)-pow(px,3,p))%p
+a=((eq1-eq2)*inverse_mod(gx-px,p))%p
+b=(eq1-a*gx)%p
+E=EllipticCurve(GF(p),[a,b])
+P=E(gx,gy)
+Q=E(px,py)
+print((P+Q).x())
+```
+
+### Montgomery Curves
+
+曲线之间的同构是一度的同源。一个经常计算的同构是不同曲线模型之间的映射。比如这题的Weierstrass到Montgomery
+
+```py
+E=EllipticCurve(GF(1912812599),[312589632,654443578])
+print(E.montgomery_model())
+```
+建议看看其他人的解法，直接用sagemath太作弊了（
+
+### DLOG on the Surface
+
+通常用由单个点生成的核计算同源（isogeny from a kernel generated by a single point。假设在椭圆曲线E上有一个有限子群 $G\subset E$ ，只要知道这个子群就可以构造出核为G的同源 $\phi$ 。若这个子群正好是循环子群，即G=< P >由一个点P生成，则称为单点生成的核）。因此n度的同源对应一个n阶点
+
+对于在 $F_{p^2}$ 上的超奇异曲线，其点所构成的阿贝尔群同构于 $Z/(p+1)\times Z/(p+1)$ （两个相同结构循环群的直和，从两个群里分别取出一个元素放在一起构成有序对(a,b)。运算为 $(a,b)+(a',b')=(a+a'\mod n),(b+b'\mod n)$ ）
+
+挠子群（torsion subgroup）E[n]有两个生成元P和Q，均为n阶点。通常一个核的生成元形如[a]P+[b]Q,对于一组固定的基（生成元P，Q）来说。这里指E[n]是一个秩为2的有限阿贝尔群，因此可以找到两点P和Q，使得任何n挠点都可以表示为 $aP+bQ,a,b\in Z/n$ 。因为上文讨论的是核为一组n挠点构成的循环子群的同源，因此一定能找到某个R生成整个内核。又因为 $R\in E[n]$ ，R一定可以被写为基(P,Q)的线性组合aP+bQ
+
+在ECDH中，求解ecdlp十分困难。然而对于基于同源的密码学来说，通常要求曲线的阶p+1是光滑的，因此ecdlp比较简单。不过算得更多的是关于基点的二维离散对数（假如 $P'\in E[n]$ ，已知P'可表示为[x]P+[y]Q,“关于基点的二维离散对数”指的就是找到x和y）
