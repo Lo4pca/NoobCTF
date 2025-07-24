@@ -626,3 +626,141 @@ print(E.montgomery_model())
 挠子群（torsion subgroup）E[n]有两个生成元P和Q，均为n阶点。通常一个核的生成元形如[a]P+[b]Q,对于一组固定的基（生成元P，Q）来说。这里指E[n]是一个秩为2的有限阿贝尔群，因此可以找到两点P和Q，使得任何n挠点都可以表示为 $aP+bQ,a,b\in Z/n$ 。因为上文讨论的是核为一组n挠点构成的循环子群的同源，因此一定能找到某个R生成整个内核。又因为 $R\in E[n]$ ，R一定可以被写为基(P,Q)的线性组合aP+bQ
 
 在ECDH中，求解ecdlp十分困难。然而对于基于同源的密码学来说，通常要求曲线的阶p+1是光滑的，因此ecdlp比较简单。不过算得更多的是关于基点的二维离散对数（假如 $P'\in E[n]$ ，已知P'可表示为[x]P+[y]Q,“关于基点的二维离散对数”指的就是找到x和y）
+
+没啥思路，但有幸找到了一位大佬的记录： https://hackmd.io/@giangnd/BymiyNVAC 。发现佬用了weil_pairing解。嗯？我好像在mov attack里见过？首先先看看佬提供的两份资料：
+- https://github.com/defeo/MathematicsOfIBC/blob/popayan-temp/poly.pdf （17页）
+- https://www.sagemath.org/files/thesis/hansen-thesis-2009.pdf （48页）
+
+均介绍了weil_pairing的性质。这个我在上面已经抄过了，所以没啥问题。但是为啥超奇异椭圆曲线能直接套weil_pairing解？问了chatgpt，说是因为超奇异曲线的嵌入度基本都很小，因此天然满足“pairing-friendly”性质，即构造pairing时简单又高效
+
+最后是一点简单的运算
+```
+e(R,Q)
+e(aP+bQ,Q)
+e(aP,Q)*e(bQ,Q) #双线性
+e(P,Q)^a*e(Q,Q)^b #双线性和单位元
+e(P,Q)^a
+a=e(P,Q)^a.log(e(P,Q))
+
+e(R,P)
+e(aP+bQ,P)
+e(aP,P)*e(bQ,P)
+e(P,P)^a*e(Q,P)^b
+e(Q,P)^b
+e(P,Q)^-b #交替性
+-b=(e(P,Q)^-b).log(e(P,Q))
+```
+```py
+p = 2**127 - 1
+F.<i> = GF(p^2, modulus=[1,0,1])
+E = EllipticCurve(F, [1,0])
+P=
+Q=
+R=
+S=
+n=P.order()
+assert n==Q.order()
+base=P.weil_pairing(Q,n)
+a=R.weil_pairing(Q,n).log(base)%n
+b=-R.weil_pairing(P,n).log(base)%n
+c=S.weil_pairing(Q,n).log(base)%n
+d=-S.weil_pairing(P,n).log(base)%n
+from Crypto.Cipher import AES
+from hashlib import sha256
+def decrypt_flag(a, b, c, d,iv,ct):
+    data_abcd = str(a) + str(b) + str(c) + str(d)
+    key = sha256(data_abcd.encode()).digest()[:128]
+    iv = bytes.fromhex(iv)
+    cipher = AES.new(key, AES.MODE_CBC, iv)
+    print(cipher.decrypt(bytes.fromhex(ct)))
+decrypt_flag(a,b,c,d,iv,ct)
+```
+日常去看其他人的解法
+
+`Blupper`的解法完全没有用到weil_pairing。虽说不会解R=aP+bQ中的a和b，但如果式子是R=aP，配合材料里说的“ecdlp比较简单”，就会解了。把R=aP+bQ变成R=aP意味着模掉Q，即任何Q的倍数都等于0。Q的任意倍数可以联想到Q生成的循环群。所以如果构造一个以Q生成的循环群为核的同源，然后在同源映射后的结构中求ecdlp，就能完美满足上述需求。sagemath神力让这件事变得很简单： https://doc.sagemath.org/html/en/reference/arithmetic_curves/sage/schemes/elliptic_curves/ell_field.html#sage.schemes.elliptic_curves.ell_field.EllipticCurve_field.isogeny
+
+`Warri`的解法更“神奇”了。注意到曲线的trace of frobenius模p等于0，即这是个超奇异曲线，因此上面的点的阶数为p+1= $2^{127}$ （如果域K是q阶有限域，则K上的椭圆曲线是超奇异的当且仅当trace of the q-power Frobenius endomorphism模q等于零）。与题目材料说的“群同构于(Z/(p+1) + Z/(p+1))”一致。题目等同于说求 $R = (a\mod 2^{127})P + (b \mod 2^{127})Q$ (这里估计也是为什么上述脚本求出来的a要模n)
+
+因为P,Q,R的阶均为 $2^{128}$ ，所以通过计算 $X\in$ {P,Q,R}， $2^{128-k}X$ 可以将点X提升（lift）到阶为 $2^k$ 的子群中。于是得到hP, hQ, hR。群同构保留了椭圆曲线的加法性质，因此子群中有 $hR = (a \mod 2^k)hP + (b \mod 2^k)hQ$ 。假如能够知道 $(a \mod 2^{k-1}, b \mod 2^{k-1})$ ，只需爆破四种情况就能确认 $(a \mod 2^k, b \mod 2^k)$
+
+（这里补一点chatgpt的说法。原始大群和小子群之间的映射其实是取阶数“降维”，它在系数空间上对应于“取低k位数值”的操作。因为这个关系是严格的同构（即群运算保持、无信息丢失），才能用子群中的点运算来恢复出系数。所以，即便阶小于原群，也没破坏这些线性组合关系，从而能逐步完整还原出a和b）
+
+题目已经固定了a和b的lsb为1。因此可以重复以上步骤直到恢复完整的a和b
+
+从`gilcu3`的解法中发现sagemath早已准备了一个函数： https://doc.sagemath.org/html/en/reference/groups/sage/groups/additive_abelian/additive_abelian_wrapper.html#sage.groups.additive_abelian.additive_abelian_wrapper.AdditiveAbelianGroupWrapper.discrete_log ，完全符合这题的需求……
+
+## [ZKPs](https://cryptohack.org/challenges/zkp)
+
+### ZKP Introduction
+
+零知识证明（zero-knowledge proof，ZKP）允许一方（证明者）向另一方（验证者）证明某个陈述是真的，同时不泄漏任何除了“陈述是真的”之外的信息。核心思想在于，虽然通过披露知识来证明你拥有某些知识很简单，但真正的挑战在于如何在不实际披露知识本身或任何相关细节的情况下证明你拥有该知识
+
+有效的零知识证明算法应拥有以下三个性质：完整性（Completeness）、健全性（Soundness）和零知识性（Zero-Knowledge）
+
+基本上，有意义的零知识证明需要证明者和验证者之间进行某种形式的交互。通常是验证者问证明者一个或多个随机的问题。问题的随机性配合证明者正确的答案能够使验证者相信证明者的知识。如果没有交互的话，验证者可以将证明给第三方，错误地暗示他们也有秘密知识
+
+答案是1985，最上面写了"The foundation for ZKPs was laid in 1985 by Goldwasser..."。我以为是1989， https://epubs.siam.org/doi/10.1137/0218012 记录的日期是1989
+
+### Proofs of Knowledge
+
+这题是一个证明离散对数相关知识的协议。证明者（P）想要向验证者（V）证明自己知道一个w，满足 $g^w\equiv y\mod p$ 。其中g生成了 $F^{\*}_p$ 群（为生成元）
+
+更一般地说，对于DLOG关系 $R_{dlog}$ ，有声明（statement）(p,q,g,y)定义了g生成的q阶 $F^{\*}_p$ 的子群，其中p和q是素数，y是子群中的一个元素。w是y相对于g的离散对数，记为 $((p,q,g,y),w)\in R_{dlog}$
+
+Schnorr提出的协议如下：
+- P在 $Z_q$ 中随机选择一个r，然后计算 $a=g^r\mod p$ 。发送给V
+- V在 $Z_C$ 中随机选择一个e，发送个P
+- P计算 $z=r+ew\mod q$ ，发送给V（ $Z_C$ 表示挑战随机数e所在的整数集合， $Z_C\subseteq Z_q$ ）
+- 假如 $g^z=ay^e\mod p$ ，V接收该证明
+
+上述协议为Sigma协议，通常表示为Σ协议（Σ-Protocol）。这个协议需要满足额外的三个性质：
+- 完整性：如果P和V双方在公共输入x和私有输入w， $(x,w)\in R$ 上实现协议，则V返回⊤（accept）
+- 特殊健全性（Special Soundness）：如果P可以说服V，则说明P知道w
+- Special-Honest-Verifier-Zero-Knowledge（SHVZK）：V无法从P那里得到任何w的信息
+
+这题先看完整性，剩下两个后面再看
+
+```py
+from pwn import *
+import random
+import json
+conn=remote("socket.cryptohack.org",13425)
+p = 
+q = 
+w = 
+g = 
+conn.recvline()
+r=random.randint(1,q)
+conn.sendline(json.dumps({"a":pow(g,r,p)}))
+e=json.loads(conn.recvline(keepends=False))['e']
+conn.sendline(json.dumps({"z":(r+e*w)%q}))
+print(json.loads(conn.recvline(keepends=False))['flag'])
+```
+
+### Special Soundness
+
+一个协议想要成为Σ协议必须满足的第二个条件是特殊健全性。称P和V之间发送的信息(a,e,z)为一组记录（transcript）
+
+特殊健全性大概如下：给定两组证明相同关系的被接收的记录(a,e,z)和(a,e',z')且 $e\not=e'$ ，可以计算满足 $g^w\equiv y\mod p$ 的w
+> 计算出来的w不一定和P使用的是一个w。虽然在这里的案例中w是唯一的，因此两者肯定是一样的；但存在其他类型的关系存在多个有效的w。计算任意有效的w足以满足特殊健全性
+
+假设P发给V一个a，然后收到一个随机挑战e。P需要计算一个z来让V接受记录。假如P可以完成这件事，要么P只能对某个特殊的e完成一组记录（ $\frac{1}{2^t}$ 的概率，在当前设置的安全参数下可以忽略不计）；要么P能够对更多e完成更多组记录
+
+然而，如果某人可以完成一组以上的记录，这等同于说这个人可以在本地完成至少两组被接受的记录，等同于他可以计算w
+> 如果P可以计算某个z使得V承诺某个a后接受至少两组的记录，那么可以说要么P知道w，或者知道计算w的信息
+
+```py
+from pwn import *
+import json
+conn=remote("socket.cryptohack.org",13426)
+q = 
+conn.recvline()
+conn.recvline()
+conn.sendline(json.dumps({"e":2}))
+z=json.loads(conn.recvline(keepends=False))['z']
+conn.recvline()
+conn.sendline(json.dumps({"e":1}))
+z2=json.loads(conn.recvline(keepends=False))['z2']
+flag=(z-z2)%q
+print(int.to_bytes(int(flag), (flag.bit_length()+7)//8, 'big'))
+```
