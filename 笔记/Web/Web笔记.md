@@ -4108,7 +4108,7 @@ for _, bi := range ba {
 - 这个[脚本](https://gist.github.com/C0nstellati0n/248ed49dea0accfef1527788494e2fa5#utf-wait)可能好理解一点
 452. [ToppleContainer](https://ayusshh.medium.com/tjctf-topplecontainer-web-d2928599e6c6)
 - jwt JWKS spoofing。说得很玄乎，其实就是网站里出现了某种漏洞，导致攻击者可以控制网站验签时使用的key
-- 漏洞很好理解，一些实现上的细节见wp。个人的做法稍微有点不一样： https://gist.github.com/C0nstellati0n/248ed49dea0accfef1527788494e2fa5#topplecontainer 。关键在于如何生成jwks.json
+- 漏洞很好理解，一些实现上的细节见wp。个人的做法稍微有点不一样：**ToppleContainer** 。关键在于如何生成jwks.json
 453. [WP Elevator](https://siunam321.github.io/ctf/NahamCon-CTF-2024/Sponsorship/WP-Elevator/)
 - wordpress插件php代码分析
 - 在这题也稍微了解了下wordpress的一些构造。比如：[REST API endpoint](https://developer.wordpress.org/rest-api/),[AJAX actions](https://developer.wordpress.org/plugins/javascript/ajax/)，重置密码（reset password）的过程即逻辑等

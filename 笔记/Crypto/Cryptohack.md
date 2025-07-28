@@ -873,3 +873,33 @@ OR-proof:给定两个Σ协议 $\Sigma_1,\Sigma_2$ ,存在通用的转换生成�
 于是“V用openings验证回路中的每条路径都是对1的承诺”指pedersen_commit函数的逆操作“pedersen_open”返回1，即验证成功
 
 通过爆破参数使`hash_committed_graph`一直返回0即可。不过看了`r4sti`的解法，全是1也是可以的，只要用example里提供的图即可（检查回路的挑战不检查使用的图等于题目用的图）
+
+### Pairing-Based Cryptography
+
+基于配对的密码学是密码学的一个分支，构造时使用双线性配对（bilinear pairings）或耦合（couplings）。“配对”是一种非退化双线性映射（non-degenerate bilinear map）
+
+利用这些工具可以开发诸如决策性Diffie-Hellman假设（Decisional Diffie-Hellman (DDH) assumption）这类不止依赖单个满足加密性质的群的加密方案（cryptographic schemes that are not feasible with just a single group satisfying cryptographic properties）
+
+DDH问题大概是，给定有限循环群G，生成元g,DH密钥交换的 $g^a,g^b$ 和另一个元素x，判断x是 $g^{ab}$ 还是一个随机的群元素。如果不存在区分 $g^{ab}$ 和随机元素的算法，则群G满足DDH假设。在这里和pairing的关系是，假设有 $p,q,r\in Z$ ，以及（加法）阿贝尔群里的G，P，G，R，满足P=[p]G,Q=[q]G,R=[r]G；配对函数可以通过检查是否pairing(P,Q)=R来验证是否pq=r
+
+配对指一个双线性的函数 $e:G_1\times G_2\rightarrow G_T$ ，意味着它满足：
+- 对于任意整数(a,b)和任意群元素(g,h)，有方程 $e([a]g,[b]h)=e(g,h)^{ab}$
+- 一定是非退化的（degenerate），即e(g,h)=0当且仅当g=0或h=0。此处0指群中的单位元
+- 对于密码学应用来说，配对函数e需要在多项式时间内计算出来
+
+配对基本分为两类：对称（symmetric），指两个起始群（source groups）是一样的 $G_1=G_2$ ；而它们不一样时为非对称（asymmetric）
+
+再细分的话可以分成强非对称配对和弱非对称配对。强非对称配对需要保证 $G_1$ 和 $G_2$ 之间难以建立同态，否则是弱非对称配对。所以总共是三种
+
+一个ZKP中的例子是Boneh–Lynn–Shacham (BLS)数字签名协议。该方案采用双线性配对进行验证，签名以椭圆曲线群的元素表示
+
+1. Key Generation
+- 选择一个元素x，范围0 < x < r(r为生成元的阶)。x为私钥
+- 公钥为[x]g，将椭圆曲线的生成元g乘上x
+2. 签名
+- 签名m时计算m的哈希h=H(m)，签名结果S=[x]h
+3. 验证
+- 对公钥[x]g验证签名S时，需要检查签名和生成元g的双线性配对e(S,g)是否等于m的哈希和公钥的配对e(h,[x]g)
+- 若验证成功则说明签名的确是由私钥生成的
+
+可以看一下`r4sti`的解法，不用第三方库直接在sagemath中实现
