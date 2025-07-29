@@ -535,6 +535,14 @@
         - 直接在worklet内部调用sleep，这会影响worklet何时传回url的相关信息。调用方可以利用各个iframe的加载速度判断是哪个worklet耗时更长
         - `console.log(Object.keys(this))`会使整个tab崩溃，观察崩溃的情况可以得到flag的内容
         - 如何利用Browsing Context Group（BCG）反复进行某个攻击
+- [A Minecraft Movie](https://adrianjunge.de/ctf/umdctf/A%20Minecraft%20Movie)
+    - DOMPurify Client-side XSS过滤。允许src为`youtube.com/embed`的iframe，同时admin bot（puppeteer）固定点击id为`dislike-button`的元素。目标是让admin like某个post。没想到竟然能有四种解法
+    - DOM clobbering。网站使用了js全局对象`window.sessionNumber`控制post请求发送的参数：`sessionNumber=${window.sessionNumber}&likes=-10`。于是可以构造`<a href="&likes=10" id="sessionNumber">`，使得`window.sessionNumber`的值为`&likes=10`，覆盖后面的同名参数
+    - DOMPurify没有禁止form元素，同时selenium/puppeteer内部使用的`document.getElementById('id')`会返回dom中第一个id为`id`的元素（如果有重复）。所以可以自行创建一个id为`dislike-button`的form实现csrf
+    - `youtube.com/embed`只允许目的地为google相关域名。但存在一个`googleads`产品允许重定向至任意网站。加上cookie的属性为`sameSite=none`，可以直接在别的网站执行攻击
+    - 创建一个id为`dislike-button`的div元素，同时通过style属性设置其css，将div移到like按钮下。bot会选中这个元素，但在执行click操作时，由于代码模拟的是真实的鼠标点击，实际点到的是like按钮而不是div元素
+    - 其他稍有不同的解法：**A Minecraft Movie**
+    - 以及，这题是react网站，因此上述逻辑需要去混淆后才能看到。直接拿AI就好： https://fireshellsecurity.team/umdctf2025-web-writeups
 
 ## SSTI
 
