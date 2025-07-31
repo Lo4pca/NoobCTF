@@ -3002,3 +3002,5 @@ $ cd a/b
 402. [vibe-coding](https://github.com/b01lers/b01lers-ctf-2025-public/tree/main/src/jail/vibe-coding)
 - java源码中的 unicode 转义序列在编译时会解释为它们编码的字符
 - 将代码放在类的static initialization block中可以直接执行（无需显式调用）
+403. [Tiktok Revenge](https://github.com/halexys/UciTeam1/blob/main/UMDCTF_2025/Misc/Tiktok_Revenge)
+- dns [Message compression](https://datatracker.ietf.org/doc/html/rfc1035)。本意是压缩dns消息的大小，消除域名中重复的部分，用指向偏移的指针代替。在域名没有重复部分的时候也可以使用，构造特殊的dns查询信息

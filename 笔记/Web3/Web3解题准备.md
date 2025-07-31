@@ -18,9 +18,13 @@ print(web3.eth.chain_id)
 
 这样应该就可以了，后面正常写攻击合约正常deploy并调用函数即可，用大白话说就是“Remix该怎么用咱们就怎么用”。顺便再说一句，开头提到的那篇wp确实是最适合初学者入门的，包括里面攻击合约的编写也是最基础的
 
+remix改版后稍微有点不一样了。还是点击`Deploy & run transactioins`按钮（不过不是倒数第二个了），会发现最上方的ENVIRONMENT点开后有个WalletConnect选项。点击即可连接至metamask（如果显示metamask未安装等一系列内容的话，插件处唤出metamask然后刷新一下）。连接完成后（metamask右上角会显示“已连接”）还是在ENVIRONMENT里，点击`Inject Provider - MetaMask`即可
+
+(但是我连上后发现deploy不了contract……可能是metamask相关的bug，总之还是foundry稳定且好用)
+
 ## Foundry
 
-最近发现metamask连不到rpc url了，依靠metamask的remix自然也用不了。再记录一个foundry的用法
+再记录一个foundry的用法
 
 参考 https://book.getfoundry.sh/getting-started/installation ，直接`curl -L https://foundry.paradigm.xyz | bash`，然后运行`foundryup`（可能需要开个新的terminal）即可安装好foundry工具
 
@@ -42,7 +46,7 @@ Project/
 再记录一些杂项内容
 
 - 一般web3题目都会给个nc地址用来管理instance。一定要保存好instance给出的内容。听起来像废话，然而我一直以为终端会给我保存好，我想用的时候可以往上翻。结果foundry会打印一些特殊字符，把我的记录刷掉了……
-- 使用`cast call`时，被调用的函数得到的`msg.sender`是address(0)。可以用`--from`参数指定msg.sender
+- 使用`cast call`(view和pure函数)/`cast send`（修改状态的函数）时，被调用的函数得到的`msg.sender`是address(0)。可以用`--from`参数指定msg.sender
 - foundry内部会查看一些环境变量。比较常用的如下：
     - `ETH_RPC_URL`：默认使用的rpc url
     - `PRIVATE_KEY`:默认的私钥
@@ -50,6 +54,8 @@ Project/
 设置了这些变量后，调用命令时就无需指定`--rpc-url`或`--private-key`了
 
 另外`--broadcast`是必须的，不带的话就是在本地测试网络下运行，不影响外部内容
+
+如果想用一个项目做多道题，每道题做完后需运行`forge clean`，防止缓存上一道题不需要的文件
 
 ## Sepolia testnet
 
