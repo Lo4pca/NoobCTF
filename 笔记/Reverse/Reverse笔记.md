@@ -1429,3 +1429,6 @@ mov     r8, qword [r13]
 - 有人提到patch quickjs来获取动态执行的字节码的反编译结果，类似 https://zrzz.site/posts/7d06ef54
 216. [Gateway](https://github.com/hackthebox/cyber-apocalypse-2025/tree/main/reversing/%5BHard%5D%20Gateway)
 - 逆向[Heaven's Gate](https://0xk4n3ki.github.io/posts/Heavens-Gate-Technique)+32/64位程序polyglot。`Heaven's Gate`技巧可以让32位程序暂时以64位程序执行，从而调用一些只有在64位api中存在的函数。配合polyglot可以混淆程序实际调用的函数（用反编译器按照32/64位反编译的结果不同）
+217. [Computational Subway Surfers](https://hackmd.io/@lamchcl/rysguMggle)
+- 一个基于css和html的vm……
+- 代码： https://github.com/UMD-CSEC/UMDCTF-Public-Challenges/tree/main/UMDCTF2025/rev/css

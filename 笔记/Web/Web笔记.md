@@ -3901,7 +3901,7 @@ for _, bi := range ba {
 458. [Inspect Element](https://github.com/luxeria/ctf-writeups/blob/main/GPN%20CTF%202024/Inspect%20Element.md)
 - chrome debugger任意文件读取： https://blog.pentesteracademy.com/chrome-debugger-arbitrary-file-read-1ff2c41320d1
 - 无msf纯手动做法： https://cyber-man.pl/GPNCTF-2024-inspect-element-web
-- 另外两个python脚本自动化做法： https://gist.github.com/C0nstellati0n/248ed49dea0accfef1527788494e2fa5#inspect-element
+- 另外两个python脚本自动化做法：**inspect element**
 - 参考资料： -failures-with-chromiums-remote-debugger-8a4c4d19429f#3a81 ， https://book.jorianwoltjer.com/web/chrome-remote-devtools
 459. php 和 golang http lib body parser的区别
 - 假如发送`x.php\x00abc`，php里会将其看成`x.php`，而golang里则不是（后缀不是`.php`）

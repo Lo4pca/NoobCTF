@@ -19,7 +19,7 @@
     - 调用指定地址的contract的函数
         - `cast send <addr> <func,exa:0x3c5269d8> --rpc-url $RPC_URL --private-key $PRIVATE_KEY --legacy`.private_key可以通过在另一个窗口运行anvil获取，不过我运行的时候提示gas超了，把gas改高了又有新问题
         - 使用solidity。用remix释放的话需要有metamask，然后选项里的environment选injected provider,连上自己的provider即可（如metamask）。参考：https://avan.sh/posts/hero-ctf-v5/
-        ```sol
+        ```solidity
         contract hero2300_pwn
         {
             function exploit(address addr) public 
@@ -43,7 +43,7 @@
     To prevent vulnerabilities caused by the selfdestruct function, developers can use a local state variable to update the current balance of the contract when the user deposits funds, instead of using address(this).balance.
     ```
     攻击合约例子：
-    ```sol
+    ```solidity
     pragma solidity 0.8.17;
 
     contract Selfdestruct{
@@ -62,7 +62,7 @@
     cast send 0x[Selfdestruct] "kill(address)" 0x[target address] --rpc-url $RPC_URL --private-key $PRIVATE_KEY
     ```
     攻击原理：攻击合约实现了selfdestruct，kill函数的addr填题目的address。这样执行攻击合约的kill函数就会把攻击合约全部的ether转给题目合约。由于题目合约依赖`address(this).balance`计算自身balance，但又有局部变量计算应该有的balance：
-    ```sol
+    ```solidity
         function sell(uint256 _amount) external {
             require(userBalances[msg.sender] >= _amount, "Insufficient balance");
 
@@ -233,7 +233,7 @@ D,E,F和G为要保存的数据的hash，比如D保存的数据是d，D里存储�
 - 此题的漏洞在于，实现Abstract Account system的wrapper时关键正则部分写错了，导致攻击者可以将beneficiary(bundlers)填写为任意地址，进而获取多余的ETH
 10. [Arctic Vault](https://writeups.hanz.dev/GCTF24MostBlockchainChallenges.pdf)
 - delegatecall相关漏洞。去年在GlacierVault见过这个知识点。这题做个补充。delegatecall保留`msg.sender`和`msg.value`的值。所以类似这样的结构是危险的：
-```sol
+```solidity
 for(uint256 i = 0; i < _data.length; i++)
 {
     (bool success, ) = address(this).delegatecall(_data[i]); //设想这里如果调用deposit会发生什么

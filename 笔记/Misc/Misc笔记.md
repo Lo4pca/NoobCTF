@@ -3004,3 +3004,4 @@ $ cd a/b
 - 将代码放在类的static initialization block中可以直接执行（无需显式调用）
 403. [Tiktok Revenge](https://github.com/halexys/UciTeam1/blob/main/UMDCTF_2025/Misc/Tiktok_Revenge)
 - dns [Message compression](https://datatracker.ietf.org/doc/html/rfc1035)。本意是压缩dns消息的大小，消除域名中重复的部分，用指向偏移的指针代替。在域名没有重复部分的时候也可以使用，构造特殊的dns查询信息
+- 稍微详细一点的脚本：**Tiktok Revenge**

@@ -36,6 +36,11 @@
     - 利用JIT： https://0xm4hm0ud.me/posts/utctf-ecorp-part2
     - 覆盖`__free_hook`： https://github.com/TonySD/writeups/tree/main/utctf/2025/pwn/E-Corp-part-2
   - wasm方法用不了的原因： https://groups.google.com/g/v8-reviews/c/vQyf4P407zc
+- [literally-1985](https://github.com/Lobsterge/CTF-Writeups/tree/main/UMDCTF%202025/literally-1985)
+  - patch内容：v8 JIT编译器(Turbofan)处理加法时，2+2的结果会返回5。但Turbofan的typer仍然认为值为4，导致优化时去除边界检查，触发oob。虽然听起来很简单，但不知道为啥比赛时我触发不了bug
+  - 堆喷：通过申请多个大型数组使v8分配地址固定的堆块。这块我的经验是，流程一般都挺稳定的。比如这题要求在某个地址x处为某个数组的elements，只要一次成功了，后续多次运行基本都能成功
+  - rce手段是经典的“覆盖wasm函数的rwx区域“
+  - 这个触发方式稍微好懂点：**literally 1985**
 
 ## Kernel
 
@@ -2073,3 +2078,5 @@ offset = the_mmap64_plus_23_itself
   - `__run_exit_handlers`：将`__exit_funcs->fns[0]`写为调用的地址右移17。但无法控制参数，且无法重复用第二次
   - `__call_tls_dtors `:覆盖`tls_dtor_list`为某个可控16字节的地址处A。A为调用的函数，A+8为调用的参数
 - 官方解法要更为简单。覆盖printf调用的libc got `__memmove_evex_unaligned_erms`为gets，然后覆盖gets调用的libc got `__memchr_evex`为system
+245. [Unfinished](https://github.com/halexys/UciTeam1/blob/main/UMDCTF_2025/Pwn/Unfinished/Unfinished.md)
+- c++中，分配过大的内存通常会失败，留下一个未初始化完毕的结构体后调用`std::get_new_handler()`（内存分配函数失败时，包括new，调用此函数）。通常来说得到的是null，随后报错。但如果结构体的周围出现bof，则可以覆盖`std::__new_handler`指针，进而控制程序流
