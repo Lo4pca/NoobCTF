@@ -689,6 +689,43 @@ decrypt_flag(a,b,c,d,iv,ct)
 
 从`gilcu3`的解法中发现sagemath早已准备了一个函数： https://doc.sagemath.org/html/en/reference/groups/sage/groups/additive_abelian/additive_abelian_wrapper.html#sage.groups.additive_abelian.additive_abelian_wrapper.AdditiveAbelianGroupWrapper.discrete_log ，完全符合这题的需求……
 
+### Two Isogenies
+
+做上一题时学到了sagemath里自带的isogeny用法，所以直接秒了（
+
+如果用题目给的定义`F=GF(p**2, names="i", modulus=[1,0,1])`，需要额外加一步`i = F.gen()`才能定义出`K = E(i, 0)`。直接用`F.<i> = GF(p^2, modulus=[1,0,1])`可以省略那步
+
+可以看看`r4sti`的预期解，使用了提供的[资料](https://ocw.mit.edu/courses/18-783-elliptic-curves-spring-2021/680a7686aabd24b22a15eeb96e733838_MIT18_783S21_notes5.pdf)：`Theorem 5.13 (Vélu)`
+
+如果用sagemath自带的函数的话，`Three Isogenies`的解法和这题一样；用资料的话得看`Theorem 5.15 (Vélu)`
+
+### Composite Isogenies
+
+上述算法的时间复杂度是n（n为同源的度数），因为需要计算核的所有n个倍点
+
+如果同源的度数为合数 $n=p_0^{e_0}p_1^{e_1}...p_k^{e_k}$ ，可以通过结合 $e_0$ 个 $p_0$ 度的同源、 $e_1$ 个 $p_1$ 度的同源……以此类推，最后得到目标的n度同源
+
+假设有一个同源 $\phi:E\rightarrow E'$ ，已知用该同源运算一个核里的点会得到单位点（通俗理解，就是“消去”核点的阶数）。假如将核生成器K的阶缩为 $p_0$ ，则可以计算一个度为 $p_0$ 的同源 $\phi_0$ ，运算后得到 $K'=\phi_0(K)$ ，K'的阶数为 $p_0^{e_0-1}p_1^{e_1}...p_k^{e_k}$ 。然后对K'和 $\phi_0$ 的陪域实施以上操作，得到K''和 $\phi_1$ ……一直重复，直到像的阶变为0。最后把这一堆 $\phi_i$ 合起来就是要算的n度同源
+
+可以自己实现上述逻辑，但sagemath里仍然提供好了现成工具：`E.isogeny(K,algorithm='factored')`
+
+### SIDH Key Exchange
+
+SIDH协议的公共参数：
+- 起始曲线 $E_0$
+- 两组挠点基底（torsion basis）：复习一下，指一对挠点 $P,Q\in E[n]$ ，其中P和Q的阶均为n，且 < P > + < Q > =E[n]，即生成整个n挠子群
+    - $E[2^{eA}]=(P_2,Q_2)$
+    - $E[3^{eB}]=(P_3,Q_3)$
+    - SIDH中的p通常形如 $2^{e_A}3^{e_B}-1$ ，即上一题处理的p
+
+生成公钥时，A计算由点 $K_A=P_2+[s_A]Q_2$ 生成的 $2^{eA}$ 阶同源 $\phi_A:E_0\rightarrow E_A$ ，并计算其像 $\phi_A(P_3),\phi_A(Q_3)$ 。A发送给B $E_A,\phi_A(P_3),\phi_A(Q_3)$ ， $s_A$ 为自己的私钥
+
+B要做的事情类似。计算由点 $K_B=P_3+[s_B]Q_3$ 生成的 $3^{eA}$ 阶同源 $\phi_B:E_0\rightarrow E_B$ ，并计算其像 $\phi_B(P_2),\phi_B(Q_2)$ 。B发送给A $E_B,\phi_B(P_2),\phi_B(Q_2)$ ， $s_B$ 为自己的私钥
+
+共享秘密来自于两者计算的第二个同源。A计算核为 $K_{SA}=\phi_B(P_2)+[s_A]\phi_B(Q_2)$ 的同源 $\phi_{SA}:E_B\rightarrow E_{SA}$ 。B则是计算由核为 $K_{SB}=\phi_A(P_3)+[s_B]\phi_A(Q_3)$ 的同源 $\phi_{SB}:E_A\rightarrow E_{SB}$ 。共享秘密是两个同源的陪域的j不变量： $j(E_{SA})=j(E_{SB})$
+
+老老实实完成协议后，去看`user202729`的解法就会发现：因为这题我们已经有了双方的私钥，所以一行代码就能直接计算最终的同源
+
 ## [ZKPs](https://cryptohack.org/challenges/zkp)
 
 ### ZKP Introduction
@@ -705,7 +742,7 @@ decrypt_flag(a,b,c,d,iv,ct)
 
 这题是一个证明离散对数相关知识的协议。证明者（P）想要向验证者（V）证明自己知道一个w，满足 $g^w\equiv y\mod p$ 。其中g生成了 $F^{\*}_p$ 群（为生成元）
 
-更一般地说，对于DLOG关系 $R_{dlog}$ ，有声明（statement）(p,q,g,y)定义了g生成的q阶 $F^{*}_p$ 的子群，其中p和q是素数，y是子群中的一个元素。w是y相对于g的离散对数，记为 $((p,q,g,y),w)\in R_{dlog}$
+更一般地说，对于DLOG关系 $R_{dlog}$ ，有声明（statement）(p,q,g,y)定义了g生成的q阶 $F^{\*}_p$ 的子群，其中p和q是素数，y是子群中的一个元素。w是y相对于g的离散对数，记为 $((p,q,g,y),w)\in R_{dlog}$
 
 Schnorr提出的协议如下：
 - P在 $Z_q$ 中随机选择一个r，然后计算 $a=g^r\mod p$ 。发送给V
@@ -903,3 +940,9 @@ DDH问题大概是，给定有限循环群G，生成元g,DH密钥交换的 $g^a,
 - 若验证成功则说明签名的确是由私钥生成的
 
 可以看一下`r4sti`的解法，不用第三方库直接在sagemath中实现
+
+### Couples
+
+题目的实现并非BLS，多了个可以控制的参数z。在最后进行比较的`pairing(xzH, G1)`和`pairing(received_H, xzG)`中，唯一可以利用的性质为其非退化性，让xzH等于0后一切就好办了
+
+因此这题可以说是数论题：要使poly的返回值为0，等同于让`pow(x,power+7,p)`等于`pow(x,3,p)`。虽然有`0 < new_z < p`的限制，但是可以用费马小定理 $x^{p}=x\mod p$ 绕过

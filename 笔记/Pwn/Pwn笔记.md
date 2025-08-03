@@ -2080,3 +2080,6 @@ offset = the_mmap64_plus_23_itself
 - 官方解法要更为简单。覆盖printf调用的libc got `__memmove_evex_unaligned_erms`为gets，然后覆盖gets调用的libc got `__memchr_evex`为system
 245. [Unfinished](https://github.com/halexys/UciTeam1/blob/main/UMDCTF_2025/Pwn/Unfinished/Unfinished.md)
 - c++中，分配过大的内存通常会失败，留下一个未初始化完毕的结构体后调用`std::get_new_handler()`（内存分配函数失败时，包括new，调用此函数）。通常来说得到的是null，随后报错。但如果结构体的周围出现bof，则可以覆盖`std::__new_handler`指针，进而控制程序流
+246. [Prison Realm](https://github.com/UMD-CSEC/UMDCTF-Public-Challenges/tree/main/UMDCTF2025/pwn/prison-realm)
+- 基础的bof，但是不存在明显的gadget（如直接控制参数的gadget）和csu。主要记录各位佬的各显神通（
+- **prison-realm** ,其中的[ret2dlresolve](https://acad.garywei.dev/blog/2022/ctf-zip-parser/#yet-another-approach-to-ret2dlresolve---manually-forge-link_map)是通用技巧

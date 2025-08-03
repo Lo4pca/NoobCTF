@@ -25,3 +25,8 @@
 经典咏流传：fsop相关文章
 - https://blog.kylebot.net/2022/10/22/angry-FSROP
 - https://niftic.ca/posts/fsop
+
+## ret2dlresolve
+
+- https://acad.garywei.dev/blog/2022/ctf-zip-parser
+- https://blog.csdn.net/qq_51868336/article/details/114644569
