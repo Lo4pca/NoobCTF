@@ -26,6 +26,9 @@
 - https://blog.kylebot.net/2022/10/22/angry-FSROP
 - https://niftic.ca/posts/fsop
 
+libc 2.23之前可以通过伪造vtable的方法直接拿RCE
+- 32位+伪造整个文件结构（只能覆盖指向文件结构的指针，无法写入文件结构）： https://blog.srikavin.me/posts/pwnable-tw-seethefile
+
 ## ret2dlresolve
 
 - https://acad.garywei.dev/blog/2022/ctf-zip-parser

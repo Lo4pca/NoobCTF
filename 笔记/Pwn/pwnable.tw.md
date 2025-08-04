@@ -408,3 +408,9 @@ handler函数的输入变量位于ebp-0x22:
 p.sendafter(b'>', p32(libc.symbols['system']) + b';/bin/sh;') #于是此处用system覆盖了atoi的got表，紧接着就调用atoi触发system
 p.interactive()
 ```
+
+## seethefile
+
+libc 2.23 fsop。这个版本可以通过伪造vtable得到rce： https://ctf-wiki.org/pwn/linux/user-mode/io-file/fake-vtable-exploit 。比如fclose函数最终会调用`_IO_file_close`，把vtable覆盖成某块可控制的内存区域然后把`_IO_file_close`对应的偏移处改成system即可。但这题需要伪造整个文件结构，没法直接莽了（
+
+可以通过`/proc/self/maps`得到libc的地址。不过由于上述fclose路径需要处理太多东西，建议按照这篇[wp](https://blog.srikavin.me/posts/pwnable-tw-seethefile)的方法走`_IO_FINISH`路径

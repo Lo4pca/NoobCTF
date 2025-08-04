@@ -1891,7 +1891,7 @@ struct.unpack('d', bytes.fromhex(p64(data).hex()))[0]
 - libc 2.39 UAF+FSOP RCE。wp里有个FSOP的利用模板。另外新开的第一个文件的file structure也可以泄露libc地址，因为单向链表的性质，其`_chain`正好指向一个libc里的文件结构
 - 官方wp： https://github.com/L3AK-TEAM/L3akCTF-2024-public/tree/main/pwn/chonccfile ，对fsop的分析详细些
 200. [Real-vm](https://hackmd.io/Fu4PG9dqRg2K7XEyM6HtgQ)
-- libc 2.23 kvm(vm escape)+FSOP RCE。虽然是kernel上的虚拟机，但还是用户态下的pwn
+- 64位libc 2.23 kvm(vm escape)+FSOP RCE。虽然是kernel上的虚拟机，但还是用户态下的pwn
 - 这个kvm用起来挺复杂的，设置和调用需要用ioctl，逆向起来也烦。可以用`strace -v`查看ioctl的参数。在long mode下运行还要自行设置page table。查看程序设置的page table是什么只需要在其设置寄存器时查看cr3的值，它指向的地址就是page table的起始处。同理，假如vm内部运行用户的代码，攻击者也可以伪造page table并设置cr3来访问任意地址。在kvm内部访问特定的物理内存会触发KVM_EXIT_MMIO
 - 另一道题，关于页表（page table）等知识讲得更详细： https://github.com/kscieslinski/CTF/tree/master/pwn/conf2020/kvm
 201. [pors](https://github.com/L3AK-TEAM/L3akCTF-2024-public/tree/main/pwn/pors)
