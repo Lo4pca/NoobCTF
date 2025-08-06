@@ -170,10 +170,10 @@
     - solidity blockchain Reentrancy attack
     - `(msg.sender).call`会调用msg.sender的fallback()函数。用receive()也行： https://github.com/Brivan-26/GlacierCTF2k23-SmartContracts-writeups
     - forge script使用
-- [GlacierVault](https://themj0ln1r.github.io/posts/glacierctf23)
+- [GlacierVault](https://themj0ln1r.github.io/writeups/glacierctf23)
     - solidity blockchain [delegatecall使用](https://medium.com/@ajaotosinserah/mastering-delegatecall-in-solidity-a-comprehensive-guide-with-evm-walkthrough-6ddf027175c7)。简单来说，假设合约A使用delegatecall调用合约B的某个方法C，则执行方法C时内部所使用的storage是合约A而不是B的。也就是，本来方法C内部修改的是合约B的某些字段，假设在D处；但使用delegatecall后，实际修改的storage是合约A在D处的内存
     - 其他wp： https://github.com/Brivan-26/GlacierCTF2k23-SmartContracts-writeups
-- [ChairLift](https://themj0ln1r.github.io/posts/glacierctf23)
+- [ChairLift](https://themj0ln1r.github.io/writeups/glacierctf23)
     - solidity blockchain erecover的特殊情况。erecover的函数签名如下：`ecrecover(digest, v, r, s)`，用于恢复签名者的地址。当v，r和s都是0时，会恢复出address(0)（这种情况表示签名invalid，代码中应该有检查签名是否valid然后revert的逻辑）
     - 其他wp： https://github.com/Brivan-26/GlacierCTF2k23-SmartContracts-writeups
 - [BabyBlackJack](https://github.com/n0kto/ctf-writeups/tree/main/BackdoorCTF/BabyBlackJack)
@@ -214,7 +214,7 @@
 D,E,F和G为要保存的数据的hash，比如D保存的数据是d，D里存储的就是`H(d)`。接着`H(B)=H(H(D)+H(E))`,C同理。一直这么递推上去，最后root处为`H(A)=H(H(B)+H(C))`。注意leaf存储的数据的长度不能正好是使用的hash函数输出字节的长度的两倍。否则就会出现second preimage attack。攻击者可以把B看成leaf（此时这个“leaf”代表的数据为`H(D)+H(E)`），提供C作为proof，也是一个正确的proof（merkle proof建议看上面提供的链接，有图会比较好理解）。当然，如果leaf不满足这个攻击前提，攻击者就没法把中间node B看成leaf，因为`H(D)+H(E)`的长度不满足合法leaf的数据长度
 
 7. [Play to Earn](https://blog.blockmagnates.com/sekai-ctf-2024-deep-dive-into-the-play-to-earn-blockchain-challenge-a8156be9d44e)
-- 这题的知识点之前见过：[ChairLift](https://themj0ln1r.github.io/posts/glacierctf23)，主要是erecover无法正确处理address(0)。整个bug我都找出来了，但是不知道为什么remix连不上远程rpc还是什么别的，无法调用函数……这篇wp提供了python web3模块的远程交互代码，下次用这个试试（foundry还是太难配置了，懒）
+- 这题的知识点之前见过：[ChairLift](https://themj0ln1r.github.io/writeups/glacierctf23)，主要是erecover无法正确处理address(0)。整个bug我都找出来了，但是不知道为什么remix连不上远程rpc还是什么别的，无法调用函数……这篇wp提供了python web3模块的远程交互代码，下次用这个试试（foundry还是太难配置了，懒）
 - 使用cast命令行工具的做法： https://7rocky.github.io/en/ctf/other/sekaictf/play-to-earn 。终于找到个记录如何配置的wp，下次试试
 8. [zoo](https://blog.soreatu.com/posts/writeup-for-3-blockchain-challs-in-sekaictf-2024)
 - 这题是个很诡异的东西。虽然是solidity，但是具体原理和pwn差不多……还是放在web3分类下吧

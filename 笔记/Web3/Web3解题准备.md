@@ -51,7 +51,7 @@ Project/
     - `ETH_RPC_URL`：默认使用的rpc url
     - `PRIVATE_KEY`:默认的私钥
 
-设置了这些变量后，调用命令时就无需指定`--rpc-url`或`--private-key`了
+用`forge create`设置了这些变量后，调用命令时就无需指定`--rpc-url`或`--private-key`了
 
 另外`--broadcast`是必须的，不带的话就是在本地测试网络下运行，不影响外部内容
 
