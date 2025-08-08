@@ -2083,3 +2083,7 @@ offset = the_mmap64_plus_23_itself
 246. [Prison Realm](https://github.com/UMD-CSEC/UMDCTF-Public-Challenges/tree/main/UMDCTF2025/pwn/prison-realm)
 - 基础的bof，但是不存在明显的gadget（如直接控制参数的gadget）和csu。主要记录各位佬的各显神通（
 - **prison-realm** ,其中的[ret2dlresolve](https://acad.garywei.dev/blog/2022/ctf-zip-parser/#yet-another-approach-to-ret2dlresolve---manually-forge-link_map)是通用技巧
+247. [MIPS](http://www.feyrer.de/redir/BYUCTF2025-Writeup.html)
+- mips架构堆溢出ret2win。具体操作与x64没什么不同，只是mips binary中的got中保存着指向canary的指针
+- 官方wp： https://github.com/BYU-CSA/BYUCTF-2025/tree/main/pwn/mips
+- 如何调试：**MIPS**

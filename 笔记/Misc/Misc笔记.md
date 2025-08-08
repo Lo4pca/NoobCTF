@@ -364,6 +364,10 @@ print(base64.b64encode(temp.encode()))
 
 - [Bitwarden PIN Bruteforce](https://github.com/JorianWoltjer/bitwarden-pin-bruteforce)
     - Bitwarden好像是个chrome插件，用来存储密码。用户可以选择用master password或是pin码来查看存储的全部密码。如果是后者的话，爆破的选择就少了很多，可以离线爆破出pin码
+- [block-parser](https://github.com/matthewdunwoody/block-parser)
+    - 处理Windows PowerShell script block logging events
+- [sysmon](https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon)
+    - windows forensic中常需要查看sysmon日志
 
 ## AI
 
@@ -406,6 +410,7 @@ print(base64.b64encode(temp.encode()))
     - [Universal Radio Hacker](https://github.com/jopohl/urh)处理digital FSK modulation。这工具还可以直接加载iq文件
 - [oscilloscope](https://nikzu.dev/writeups/oscilloscope)
     - 从I2C信号中提取数据
+    - 补充一道与I2C和`.sal`文件（Logic 2）有关的题：[alpha](https://github.com/BYU-CSA/BYUCTF-2025/tree/main/misc/alpha)
 - [Old Skool](https://mindcrafters.xyz/writeups/hardware-bitskrieg)
     - 解码`.iq`数据。之前的脚本好像用不了，在我搞清楚之前只能不断积累脚本了……
 - [EHAX Radio](https://github.com/E-HAX/EHAX-CTF-2025/tree/master/forensics/ehax_radio)
@@ -457,6 +462,13 @@ print(base64.b64encode(temp.encode()))
     - 利用gpg命令实现rce。运行`gpg`将自动在家目录下创建`.gnupg`文件夹，往里面写一些配置文件后再运行一次gpg就能执行配置文件中编写的命令
 - [Sandbox](https://github.com/tamuctf/tamuctf-2025/tree/main/misc/sandbox)
     - 题目的背景是一个以root权限运行的c文件，内部fork后用`setuid/setgid`降权并调用`/bin/bash`。问题在于没有给新生成的shell准备PTY(伪终端),导致攻击者可以通过`/dev/tty`的TIOCSTI ioctl调用向root进程的tty注入命令，以root身份执行
+- [enabled](https://github.com/BYU-CSA/BYUCTF-2025/blob/main/misc/enabled)
+    - 禁用部分bash内建命令（`exec`,`command`,`type`,`hash`,`cd`,`enable`）和特殊符号(`<`,`>`,`/`,`;`,`&`,`$`,`(`,\`)，目标是只使用bash builtin读取flag文件
+    - **enabled**
+        - pushd更改目录
+        - `printf -v`设置PATH变量
+        - read命令恢复PATH变量
+        - `shopt -s lastpipe`修改管道行为
 
 ## Digital Forensics and Incident Response(DFIR)
 

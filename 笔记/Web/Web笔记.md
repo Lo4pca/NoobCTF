@@ -486,6 +486,9 @@
     - 创建一个id为`dislike-button`的div元素，同时通过style属性设置其css，将div移到like按钮下。bot会选中这个元素，但在执行click操作时，由于代码模拟的是真实的鼠标点击，实际点到的是like按钮而不是div元素
     - 其他稍有不同的解法：**A Minecraft Movie**
     - 以及，这题是react网站，因此上述逻辑需要去混淆后才能看到。直接拿AI就好： https://fireshellsecurity.team/umdctf2025-web-writeups
+- [Wembsoncket](https://github.com/BYU-CSA/BYUCTF-2025/tree/main/web/wembsoncket)
+    - Cross-Site WebSocket Hijacking (CSWSH)。websocket没有同源策略，因此可以从任何origin发起连接，所谓“Cross-Site”。其实是可以用验证cookie等手段防止劫持的，但这题admin bot的cookie设置为samesite=none
+    - 一个使用cloudflared替代ngrok的方法： https://baozongwi.xyz/2025/05/17/BYUCTF2025 。`cloudflared tunnel --url http://localhost:8000`，不需要账号或者域名，可得到一个`xxx.trycloudflare.com`子域名
 
 ## SSTI
 
@@ -4295,3 +4298,6 @@ if (await remote.hasPasswordFor(id)) {
 550. [atombomb](https://github.com/b01lers/b01lers-ctf-2025-public/tree/main/src/web/atombomb)
 - elixir搭建的网站若不过滤参数，攻击者可以直接传入一个对象
 - **Atom Bomb**
+551. [Willy Wonka Web](https://github.com/BYU-CSA/BYUCTF-2025/tree/main/web/wonka)
+- Apache 2.4.55 CVE-2023-25690请求走私： https://github.com/dhmosfunk/CVE-2023-25690-POC
+- **Willy Wonka**
