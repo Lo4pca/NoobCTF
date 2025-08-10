@@ -1068,7 +1068,7 @@ main()
 118. [patchwork](https://github.com/MindSystemm/CTF-WriteUps/blob/master/Challenges/PatriotCTF23/Writeups.md#patchwork)
 - 可配置ghidra使其反编译无法到达的代码段
 119. [Impossibrawler!](https://github.com/D13David/ctf-writeups/tree/main/csaw23/rev/impossibrawler)
-- godot engine游戏逆向。可利用工具 https://github.com/bruvzg/gdsdecomp recover project，然后在引擎内打开
+- godot engine游戏逆向。可利用工具 https://github.com/GDRETools/gdsdecomp recover project，然后在引擎内打开
 - 也可以参考 https://github.com/n132/CTF-Write-Up/tree/main/2023-CSAW-CTF-Quals/Impossibrawler ，用工具并修改脚本后重新build： https://docs.godotengine.org/en/latest/contributing/development/compiling/index.html
 120. [ANNS](https://github.com/sahuang/my-ctf-challenges/tree/main/vsctf-2023/rev_anns)
 - python使用faiss库
@@ -1284,7 +1284,7 @@ mov     r8, qword [r13]
 166. [wonderful](https://github.com/cr3mov/cr3ctf-2024/tree/main/challenges/rev/wonderful)
 - 若binary内部有一个名为`.themida`的PE section，说明此binary被Themida加密过了。wp记录了这类binary的分析过程
 167. [food-without-salt](https://fastcall.dev/posts/sdctf-rev-2024/)
-- godot engine游戏逆向。之前记过要用[gdsdecomp](https://github.com/bruvzg/gdsdecomp)反编译出工程文件，但这题多了个花样，工程文件被加密了。参考 https://godot.community/topic/35/protecting-your-godot-project-from-decompilation 。长话短说，可用[gdke](https://github.com/char-ptr/gdke)提取出密钥，将密钥输入到gdsdecomp即可
+- godot engine游戏逆向。之前记过要用[gdsdecomp](https://github.com/GDRETools/gdsdecomp)反编译出工程文件，但这题多了个花样，工程文件被加密了。参考 https://godot.community/topic/35/protecting-your-godot-project-from-decompilation 。长话短说，可用[gdke](https://github.com/char-ptr/gdke)提取出密钥，将密钥输入到gdsdecomp即可
 168. [Fly Away!](https://hackmd.io/@avila-pwn-notes/r183kzlEA)
 - [Flutter](https://flutter.dev/) android apk逆向工具[reFlutter](https://github.com/Impact-I/reFlutter)使用。这个工具替换要逆向的apk的lib文件，使其在执行过程中打印出供调试的信息，后续还可用burpsuite监控流量。还能搭配frida框架hook函数
 169. [Perfectly Legit Crypto Casino](https://github.com/LazyTitan33/CTF-Writeups/blob/main/Nahamcon-2024/Malware/Perfectly_Legit_Crypto_Casino.md)
@@ -1432,3 +1432,5 @@ mov     r8, qword [r13]
 217. [Computational Subway Surfers](https://hackmd.io/@lamchcl/rysguMggle)
 - 一个基于css和html的vm……
 - 代码： https://github.com/UMD-CSEC/UMDCTF-Public-Challenges/tree/main/UMDCTF2025/rev/css
+218. [baby_rev](https://drkasbr.medium.com/reverse-challenges-for-no-hack-no-ctf-2025-b0c7591c7523)
+- 使用JEB Pro反编译wasm

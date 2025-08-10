@@ -966,3 +966,49 @@ DDH问题大概是，给定有限循环群G，生成元g,DH密钥交换的 $g^a,
 结果又是参数大小的锅。（结合`maple3142`的方法） $r\equiv v - cf\mod p-1$ ，v 512位，cf不到p的1024位，所以r在Z中是一个绝对值小于p-1的负数。 $-x\equiv m-x\mod m$ 。因此拿到模p-1的r后直接减去p-1就拿到了Z中的r。此时如果按照`maple3142`的方法继续做下去，拿到r后模去c就有了模c下的v。又因为v和c都是512位，通过不断加c的方式恢复真正的v不需要太久。最后在Z下解出f
 
 但如果走佬提到的`klmn`的方法，拿两个proof m-x和m-x'并相减，得到 -v+cf+v'-c'f，或者说v'-v+(c-c')f。v'-v相比于后面来说很小，所以直接整除`(c-c')`就能拿到f
+
+### Let's Prove It Again
+
+参数大小的问题仍然存在，加一个爆破正确的c的逻辑即可
+
+另外，这好像已经不是zkp了……理论上zkp不允许在双方均可计算的c中加随机值
+
+### Mister Saplin's Preview
+
+注意request_checker是在另一个进程执行的。所以只要随便输一个很大的数字，使其卡在for循环中，来不及更新`balance_validated`到false即可
+
+所以这和zkp有啥关系？
+
+## [Hash Functions](https://cryptohack.org/challenges/hashes)
+
+ZKP里的`Mister Saplin's Preview`要求先把Merkle Trees做了
+
+### Merkle Trees
+
+默克尔树（Merkle tree，也称哈希树）常用于区块链和数字货币中，保证数据完整性和验证过程的效率。类似普通的树结构，但其叶子为数据块的哈希值
+
+树的最底部为叶子，为各种数据（比如加密货币中的交易内容）的哈希值。往树的上面走，每两个子节点组成一对，共同形成下一层的节点的哈希值。以上步骤一直重复到树的顶点，称为默克尔根（Merkle root）
+
+![merkle_tree](https://cryptohack.org/static/img/Hash_Tree.png)
+
+如果想要验证某段数据是否在集合中，不需要查看整个数据集；只需要从某个特定的节点开始，检查这个节点到默克尔根的路径上的哈希值
+
+```py
+from hashlib import sha256
+from Crypto.Util.number import *
+def hash256(data):
+    return sha256(data).digest()
+def merge_nodes(a, b):
+    return hash256(a+b)
+content=open("output.txt").read().splitlines()
+flag=''
+for i in content:
+    a,b,c,d,root=eval(i)
+    left = merge_nodes(bytes.fromhex(a), bytes.fromhex(b))
+    right = merge_nodes(bytes.fromhex(c), bytes.fromhex(d))
+    if merge_nodes(left, right)!=bytes.fromhex(root):
+        flag+='0'
+    else:
+        flag+='1'
+print(long_to_bytes(int(flag,2)))
+```
