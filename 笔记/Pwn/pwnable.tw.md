@@ -414,3 +414,44 @@ p.interactive()
 libc 2.23 fsop。这个版本可以通过伪造vtable得到rce： https://ctf-wiki.org/pwn/linux/user-mode/io-file/fake-vtable-exploit 。比如fclose函数最终会调用`_IO_file_close`，把vtable覆盖成某块可控制的内存区域然后把`_IO_file_close`对应的偏移处改成system即可。但这题需要伪造整个文件结构，没法直接莽了（
 
 可以通过`/proc/self/maps`得到libc的地址。不过由于上述fclose路径需要处理太多东西，建议按照这篇[wp](https://blog.srikavin.me/posts/pwnable-tw-seethefile)的方法走`_IO_FINISH`路径
+
+## Death Note
+
+很明显的负索引溢出，借show_note可以从got项中泄漏出libc地址。再借用整数溢出，可以实现任意地址读。想着这题的栈可执行，最终肯定要和栈扯上关系吧？于是顺便读了environ，得到栈地址
+
+然后我不会了。这题没有办法写太多东西，只有“任意地址写不可控的堆地址”。我记不起来要做啥了（另外，后续看writeup区Lnevx的wp发现此处应该做[house of spirit](https://github.com/shellphish/how2heap/blob/master/glibc_2.23/house_of_spirit.c)，我之前学过的，忘了……不行我得做个备忘录，太多house技巧了，根本记不住）
+
+结果我发现了 https://kazma.tw/2024/06/07/Pwnable-tw-Death-Note-Writeup 。不是哥们，你这个是什么奇怪的解法？我最开始就注意到可以覆盖got表，但堆不可执行啊？这不会炸掉吗？本地运行了这个exp，果然不行；但远程却可以。嗯？难道又是docker环境的锅？遂build了一个18.04的环境，堆仍然是不可执行的啊？我从未见过可执行的堆（至少在程序内没有任何设置的情况下），是怎么猜到远程的堆可执行的？
+
+放个调试用的dockerfile：
+```dockerfile
+FROM ubuntu:18.04
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && \
+    apt-get install -y \
+        python3 python3-dev python3-pip \
+        build-essential \
+        gdb gdbserver \
+        netcat \
+        strace ltrace \
+        git wget curl vim nano \
+        libssl-dev libffi-dev \
+        lib32z1 libc6-dbg lib32gcc1 lib32stdc++6 \
+        tmux \
+    && rm -rf /var/lib/apt/lists/*
+RUN pip3 install --upgrade pip
+RUN pip3 install pwntools==4.7.0 && \
+    pip3 install pyelftools==0.27
+RUN curl -qsL 'https://install.pwndbg.re' | sh -s -- -t pwndbg-gdb
+WORKDIR /root/work
+CMD ["/bin/bash"]
+```
+```sh
+docker build -t pwn-env .
+```
+```sh
+docker run -it --rm \
+    --security-opt seccomp=unconfined \
+    -v $(pwd):/root/work \
+    pwn-env
+```
