@@ -4301,3 +4301,5 @@ if (await remote.hasPasswordFor(id)) {
 551. [Willy Wonka Web](https://github.com/BYU-CSA/BYUCTF-2025/tree/main/web/wonka)
 - Apache 2.4.55 CVE-2023-25690请求走私： https://github.com/dhmosfunk/CVE-2023-25690-POC
 - **Willy Wonka**
+552. [When?](https://github.com/tankist0x01/no-hack-no-ctf)
+- php fast-cgi代码执行

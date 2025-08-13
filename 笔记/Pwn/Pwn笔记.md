@@ -179,6 +179,9 @@ kernel pwn题合集。用于纪念我连堆都没搞明白就敢看内核的勇�
     - `unix_address`的len字段决定可以读取多少数据。于是这里可以读取相邻的seq_operations里的地址，获取kernel基地址
     - 重复以上uaf利用步骤，但把出现uaf的对象后的`seq_operations`换成另一个`unix_address`，从而让`unix_getname`中的memcpy将rop chain payload拷贝到栈上，调用`commit_creds(init_cred)`+kpti trampoline
   - 我在一场比赛中尝试使用 https://lkmidas.github.io/posts/20210123-linux-kernel-pwn-part-1 里介绍的kpti trampoline（使用iretq），但是发现失败（后续跟着part 2发现用signal handler可以）。可以学习wp的做法跟着 https://0x434b.dev/dabbling-with-linux-kernel-exploitation-ctf-challenges-to-learn-the-ropes 用sysretq
+- [No.5️⃣4️⃣9️⃣](https://naup.mygo.tw/2025/06/30/Linux-Kernel-Patched-exec-remove-legacy-custom-binfmt-modules-autoloading)
+  - kernel新版本(6.14.0)后，无法再用之前（调用未知文件）的方式触发modprobe_path，但仍有其他办法
+  - **No.5️⃣4️⃣9️⃣**
 
 ## Shellcode题合集
 

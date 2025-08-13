@@ -67,6 +67,8 @@ system("cat /tmp/flag");
 ```
 完整exp：https://lkmidas.github.io/posts/20210223-linux-kernel-pwn-modprobe/modprobe.c
 
+kernel新版本(6.14.0)后无法再用以上方式触发，但仍存在其他的触发方式： https://naup.mygo.tw/2025/06/30/Linux-Kernel-Patched-exec-remove-legacy-custom-binfmt-modules-autoloading
+
 ### [Cross-Cache attack](https://xz.aliyun.com/t/12898)
 
 Cross-Cache attack个人其实没找到明确定义，只在标题的文章中看见作者提了一嘴。大概是：说每个结构体/object都有对应的slab管理器，而kernel中常用的攻击手法——堆喷——目标是让kernel中的某一个重要结构体与我们能控制的内存重合（是吧？）。那要是题目中所有结构体所在的slab里没有可以利用的重要结构体，就寄了？并没有。在这篇[文章](https://brieflyx.me/2020/heap/linux-kernel-slab-101/)中可以看到slab在内存中以页为单位存在。如果我们free某个内存页中所有的结构体，使整个内存页完全空闲，kernel就会回收这个内存页。这时我们分配一个重要结构体，kernel就会把刚才那个回收的内存页用做这个结构体所在的slab。至此我们成功让某个内存页出现在了两个slab中，即“cross”

@@ -368,6 +368,9 @@ print(base64.b64encode(temp.encode()))
     - 处理Windows PowerShell script block logging events
 - [sysmon](https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon)
     - windows forensic中常需要查看sysmon日志
+- [Github Secrets](https://github.com/neodyme-labs/github-secrets)
+    - 搜索“dangling or force-pushed commits”中的信息
+    - [gitgit](https://blog.ummit.dev/posts/ctf/nhnc/2025)的解法之一，还可通过直接访问仓库的`/activity`页面解出
 
 ## AI
 
@@ -378,6 +381,8 @@ print(base64.b64encode(temp.encode()))
     - 我也不明白在干什么，什么“gradient descent“，“Adam“之类的东西，也不懂为啥这样就能找到更好的noise……但是更详细有注释的exp见 **Multi Image**
 - [walk-in-the-forest](https://github.com/UofTCTF/uoftctf-2025-chals-public/tree/master/walk-in-the-forest)
     - [DRAFT](https://github.com/vidalt/DRAFT)攻击。给定由一组数据训练出的决策树随机森林模型，尝试寻找训练用的数据
+- [Attack CCN?](https://azad1n.github.io/en/posts/no-hack-no-ctf-2025-writeup)
+    - 对抗式机器学习（Adversarial ML）与黑盒对抗攻击（Adversarial Attack）：通过分析两个模型的混淆矩阵（Confusion Matrix），生成一张图片使得两个模型给出不一样的判断，且置信度（Confidence）之间存在较大差距
 
 ## Hardware
 
