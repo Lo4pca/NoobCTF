@@ -621,6 +621,13 @@ print(base64.b64encode(temp.encode()))
 - [Active](https://abuctf.github.io/posts/WolvCTF2025)
     - Active Directory forensics
     - 官方wp： https://dree.blog/posts/wolvctf-2025-active-series
+- [Crackme](https://blog.ummit.dev/posts/ctf/nhnc/2025)
+    - qcow2（QEMU Copy-On-Write version 2）+Linux/Arch Linux digital forensics
+    - 利用GRUB（GRand Unified Bootloader）绕过登录：系统启动时，GRUB会显示一个菜单，允许用户按`e`来编辑内核启动参数。在启动命令的末尾加上`init=/bin/bash`便能在启动后进入root shell。给GRUB设置密码可以防止该攻击
+    - LUKS（Linux Unified Key Setup）相关命令cryptsetup的使用：查看某个分区是否是LUKS分区；用密码解锁加密分区
+    - 使用TestDisk & PhotoRec恢复删除的文件
+    - 爆破LUKS加密分区的密码
+    - **crackme**
 
 ## Network Forensics
 
@@ -2172,7 +2179,7 @@ for i in "${!data[@]}"; do modbus host:port $((i+19))=${data[$i]}; done
 - https://fen1x1a.github.io/posts/one-prompt-to-rule-them-all
 - [LLM Attacks](https://doublespeak.chat/#/handbook)
 134. [Lost Evidence](https://github.com/daffainfo/ctf-writeup/tree/main/Tenable%20CTF%202023/Lost%20Evidence),[wp2](https://ctf.edwinczd.com/2023/tenable-ctf-2023/lost-evidence)
-- linux [LUKS](https://zhuanlan.zhihu.com/p/36870751)磁盘加密。可尝试用[photores](https://github.com/cgsecurity/testdisk)恢复masterKey
+- linux [LUKS](https://zhuanlan.zhihu.com/p/36870751)磁盘加密。可尝试用[testdisk/photorec](https://github.com/cgsecurity/testdisk)恢复masterKey
     - `photorec LUKS_MAGIC_file`：恢复成功后摘抄MK dump内容
     - 将MK dump中的key转换成文件。`print "content" | tr -d ' ' | xxd -r -ps > key.bin`
     - 设置自定义密码（set our custom password）：`sudo cryptsetup luksAddKey --master-key-file=key.bin new_file`

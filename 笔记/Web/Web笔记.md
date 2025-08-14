@@ -489,6 +489,8 @@
 - [Wembsoncket](https://github.com/BYU-CSA/BYUCTF-2025/tree/main/web/wembsoncket)
     - Cross-Site WebSocket Hijacking (CSWSH)。websocket没有同源策略，因此可以从任何origin发起连接，所谓“Cross-Site”。其实是可以用验证cookie等手段防止劫持的，但这题admin bot的cookie设置为samesite=none
     - 一个使用cloudflared替代ngrok的方法： https://baozongwi.xyz/2025/05/17/BYUCTF2025 。`cloudflared tunnel --url http://localhost:8000`，不需要账号或者域名，可得到一个`xxx.trycloudflare.com`子域名
+- [XXS XSS](https://hackmd.io/VXBgjljNTKatGeOx1O8v7A)
+    - `javascript:`协议的利用。可以控制`window.location.href`的值，但长度不能超过15：让url等于`javascript:name`(必须是name，协议只识别这个名称，随后原封不动地渲染其内容),然后get传name参数设置执行的html
 
 ## SSTI
 
@@ -4302,4 +4304,7 @@ if (await remote.hasPasswordFor(id)) {
 - Apache 2.4.55 CVE-2023-25690请求走私： https://github.com/dhmosfunk/CVE-2023-25690-POC
 - **Willy Wonka**
 552. [When?](https://github.com/tankist0x01/no-hack-no-ctf)
-- php fast-cgi代码执行
+- php fast-cgi（PHP-FPM）代码执行（错误配置`auto_prepend_file = php://input`和`allow_url_include = On`）
+553. [Catch The Goose](https://blog.frankk.uk/posts/nhnc-2025)
+- 如何用grpc协议进行交互
+- 另一篇wp： https://humdrum-beanie-d4b.notion.site/Web-catch-the-goose-2290c5a009e3803dae85cc21fb62e126

@@ -6,6 +6,8 @@
 
 打CTF最重要的就是开心了！Have fun！
 
+今天偶然注意到github自带的搜索（按`/`键）已经不覆盖web笔记后面的内容了，可能是文件太大了吧。还是`ctrl+f`好（
+
 长期寻找CTF搭子ᶘ ᵒᴥᵒᶅ！如果任何人有任何问题/想一起打CTF/学习的话，欢迎随时联系我！
 - 邮箱:`c0nst4llati0n@gmail.com`
 - discord id:`lo4pca`
