@@ -96,6 +96,8 @@
 - [Russian Roulette](https://gist.github.com/C0nstellati0n/a066c450ed5d4c8ffbb0c1328283fe14#russian-roulette)
     - IL2Cpp unity apk逆向： https://palant.info/2021/02/18/reverse-engineering-a-unity-based-android-game 。其实和IL2Cpp exe差不多，都需要用[Il2CppDumper(GUI)](https://github.com/AndnixSH/Il2CppDumper-GUI)。注意工具输出的`Assemble-CSharp.dll`只包含函数签名而没有实际的代码，还需要用ida pro/ghidra配合工具提供的script反编译`libil2cpp.so`
     - 如何用[frida-il2cpp-bridge](https://github.com/vfsfitvnm/frida-il2cpp-bridge)调用任意函数
+- [Yep another smake game](https://hackmd.io/VXBgjljNTKatGeOx1O8v7A)
+  - wasm游戏的Cheat Engine：[Cetus](https://github.com/Qwokka/Cetus)
 
 ## APK
 

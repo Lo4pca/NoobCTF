@@ -385,7 +385,7 @@ e =
 m1 = attack(c1, c2 e)
 print(binascii.unhexlify("%x" % int(m1)))
 ```
-相关信息攻击的关键点在于找出两条信息具有线性关系的方程。通常方程形如 $((a\*m)+b)^e\mod n$ 和 $((c\*m)+d)^e\mod n$ ，也是脚本中需要自己填写的a，b，c和d值的由来。[unusualrsa2](https://4xwi11.github.io/posts/80806ae5/#unusualrsa2)。另外今天又发现个不错的例题+解析：[Twin](https://github.com/Warriii/CTF-Writeups/blob/main/akasec/crypto_twin.md)
+相关信息攻击的关键点在于找出两条信息具有线性关系的方程。通常方程形如 $((a\*m)+b)^e\mod n$ 和 $((c\*m)+d)^e\mod n$ ，也是脚本中需要自己填写的a，b，c和d值的由来。[unusualrsa2](https://4xwi11.github.io/posts/80806ae5/#unusualrsa2)。另外今天又发现个不错的例题+解析：[Twin](https://github.com/Warriii/CTF-Writeups/blob/main/akasec24/crypto_twin.md)
 - 给出p+q（(p-2)(q-2)一个作用）和n时，构造多项式即可获取p或q。
 
 $f(x)=(x-p)(x-q)$<br>
@@ -730,7 +730,7 @@ sympy也放这了
 - [Crypto on the Rocks](https://github.com/supaaasuge/CTF-Challenges/tree/main/crypto-on-the-rocks)
     - PuTTY NIST P-521 elliptic curve biased k: https://www.chiark.greenend.org.uk/~sgtatham/putty/wishlist/vuln-p521-bias.html 。PuTTY工具使用了NIST P-521椭圆曲线，由于一些实现错误导致选择的k的9个msb bit均为0。于是便有了[hidden number problem](https://lazzzaro.github.io/2020/11/07/crypto-%E6%A0%BC%E5%AF%86%E7%A0%81/index.html#%E9%9A%90%E8%97%8F%E6%95%B0%E9%97%AE%E9%A2%98%EF%BC%88HNP-Hidden-Number-Problem%EF%BC%89) （这题是hnp的一个小分支：dsa known msb），可用lattice求解： https://github.com/jvdsn/crypto-attacks/blob/master/attacks/hnp/lattice_attack.py
 - [uf](https://connor-mccartney.github.io/cryptography/other/WaniCTF2024)
-    - 求解approximate gcd问题。说有这么一组数，它们的gcd为m。但是由于某种原因，多了一个较小的误差项：
+    - 求解approximate gcd（AGCD）问题。说有这么一组数，它们的gcd为m。但是由于某种原因，多了一个较小的误差项：
     ```py
     #理论上
     assert m == gcd([x0, x1, x2, x3])
@@ -740,7 +740,10 @@ sympy也放这了
     #x2 = y2*m + z2
     #x3 = y3*m + z3
     ```
-    - 相关论文/资料： https://eprint.iacr.org/2016/215.pdf ， https://ur4ndom.dev/static/files/latticetraining/practical_lattice_reductions.pdf
+    - 相关论文/资料。核心思想是，将上述关系转成线性方程，其中根远远小于系数，变成LLL问题
+        - https://eprint.iacr.org/2016/215.pdf
+        - https://ur4ndom.dev/static/files/latticetraining/practical_lattice_reductions.pdf
+        - https://martinralbrecht.wordpress.com/2020/03/21/the-approximate-gcd-problem
 - [Bigger and better](https://connor-mccartney.github.io/cryptography/small-roots/Bigger-and-better-crew-CTF-2024)
 	- 经典LLL题只能懂一半……大致是给出了一个在Z/nZ上的5变量高阶多项式，要求找到根。配合[官方wp](https://gist.github.com/Babafaba/b561e663299bfaa0bb6002b1b4946b0f)能把思路看得更明白点。虽然每个根相比多项式来说很小，但高阶+多变量使得5-variate coppersmith不太可能。所以把这个5变量的高阶多项式换成25变量的一阶多项式，加上模数n过大不破坏其线性关系，用LLL找到转换后多项式的根，然后用groebner_basis或者直接solve找到原本多项式的5个根
 - [Read between the lines](https://gist.github.com/7Rocky/5777a73648a3befdee58a0eac90d7b0d)
@@ -2966,3 +2969,6 @@ assert crc32(a)^crc32(b)==crc32(c)^crc32(d)
 - 用z3预测v8的math.random
 182. [leetprime](https://github.com/b01lers/b01lers-ctf-2025-public/tree/main/src/crypto/leetprime)
 - 构造可以通过多轮 rabin Miller Test 的合数： https://www.ams.org/journals/mcom/1995-64-209/S0025-5718-1995-1260124-2/S0025-5718-1995-1260124-2.pdf
+183. [Verifier +](https://hackmd.io/VXBgjljNTKatGeOx1O8v7A)
+- 预测MT19937，但是每次得到的是65 bit的输出。一个不错的工具：[gf2bv](https://github.com/maple3142/gf2bv)，用来解GF(2)下的线性方程，内部自带MT19937
+- rsa Franklin-Reiter多项式gcd

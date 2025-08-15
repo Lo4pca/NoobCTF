@@ -491,6 +491,10 @@
     - 一个使用cloudflared替代ngrok的方法： https://baozongwi.xyz/2025/05/17/BYUCTF2025 。`cloudflared tunnel --url http://localhost:8000`，不需要账号或者域名，可得到一个`xxx.trycloudflare.com`子域名
 - [XXS XSS](https://hackmd.io/VXBgjljNTKatGeOx1O8v7A)
     - `javascript:`协议的利用。可以控制`window.location.href`的值，但长度不能超过15：让url等于`javascript:name`(必须是name，协议只识别这个名称，随后原封不动地渲染其内容),然后get传name参数设置执行的html
+- [NOT XSS](https://hackmd.io/VXBgjljNTKatGeOx1O8v7A)
+    - cookie长度通常存在上限，浏览器会拒绝超过长度上限的cookie
+    - xs leak。当猜对部分flag时app会增加cookie的长度，并渲染cookie中存储的note。如果将cookie长度设为`上限-1`，就能根据note的渲染情况，一个字符一个字符地爆破flag
+    - https://github.com/runasy-koonta/nhnc-2025-not-xss-solver
 
 ## SSTI
 
@@ -686,9 +690,9 @@ for i in range(300,1000):
 > cat<br>[sort](https://www.cnblogs.com/51linux/archive/2012/05/23/2515299.html)。sort本是排序命令，但是默认会把执行后的结果输出到终端。<Br>[tail](https://www.runoob.com/linux/linux-comm-tail.html)，默认显示文件尾部的内容。由于flag文件基本不会超过十行，所以作用差不多<br>tac，倒序输出文件内容
 1.  [浏览器设置编码](https://blog.csdn.net/jnx1142410525/article/details/55271037)。如果浏览器的编码不对就会出现乱码。
 2.  php md5相关特性。
-- md5原始二进制利用+0e绕过md5弱等于+数组绕过md5强等于：[Easy MD5](https://github.com/C0nstellati0n/NoobCTF/blob/main/CTF/BUUCTF/Web/Easy%20MD5.md)。
+- md5原始二进制利用+0e绕过md5弱等于+数组绕过md5强等于：[Easy MD5](../../CTF/BUUCTF/Web/Easy%20MD5.md)。
 - 一个0e开头且其md5值也是0e开头的字符串，可用于弱等于：`0e215962017`
-1.  php 5 intval特性：intval会截断科学计数法下的字符串，但当以科学计数法表示的字符串进行运算后便不会截断，会返回其运算后的值。例题：[[WUSTCTF2020]朴实无华](https://github.com/C0nstellati0n/NoobCTF/blob/main/CTF/BUUCTF/Web/%5BWUSTCTF2020%5D%E6%9C%B4%E5%AE%9E%E6%97%A0%E5%8D%8E.md)
+1.  php 5 intval特性：intval会截断科学计数法下的字符串，但当以科学计数法表示的字符串进行运算后便不会截断，会返回其运算后的值。例题：[[WUSTCTF2020]朴实无华](../../CTF/BUUCTF/Web/[WUSTCTF2020]朴实无华.md)
 2.  githacker基本命令
 - githacker --url http://example.com/.git --output-folder ./output
 
