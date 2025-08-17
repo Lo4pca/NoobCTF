@@ -1331,7 +1331,8 @@ DECIMAL       HEXADECIMAL     DESCRIPTION
 130. Sketch celtic ancient letters,viking runes字母表。
 ![runes](../images/runes.jpeg)
 
-每个符号对应一个词语，每个词语的开头是其对应的字母。
+每个符号对应一个词语，每个词语的开头是其对应的字母
+
 131. png图片的IDAT块会影响图片的显示。比如一张有多个IDAT块的图片，也许删除几个才能正常显示。可用[tweakpng](https://entropymine.com/jason/tweakpng/)修改。[misc11&12](https://blog.csdn.net/qq_46230755/article/details/115261625#t14)
 
 132. 解密smb2流量需要两个值：

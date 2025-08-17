@@ -979,6 +979,33 @@ DDH问题大概是，给定有限循环群G，生成元g,DH密钥交换的 $g^a,
 
 所以这和zkp有啥关系？
 
+### Mister Saplins The Prover
+
+get_node可以传入负索引，获取第2层的第一个node，即第一层前两个叶节点合并的结果
+
+注意到flag长度为47，而这是一个表示64字节的merkle tree。意味着secret长度只有17。前16个字节形成前两个叶节点，最后一个字节和已知的flag前缀组成第三个叶节点
+
+关键在于flag叶节点在多次连接中保持一致。利用多次连接可以拿到第一层后面的5个固定的叶节点，然后就能在最后一次连接中获取前两个叶节点（的合并结果）并爆破剩下的一个字节
+
+### Fischlin Transform
+
+Fischlin Transform不需要rewinding lemma保证安全性（这个rewinding lemma指先前见过的，提取器extractor在证明者P提交一个a并获取一个e后将其“倒带”到刚刚发送a的时间，获取第二个不一样的e，进而提取出w，证明P知道w），而是Random Oracle的读取权限
+- 仅给出P的RO调用和证明的记录，提取器可以提取出一个满足关系的w，概率与P给出合格证明的概率相同
+
+与Fiat-Shamir类似，[Fischlin transformation](https://crypto.ethz.ch/publications/files/Fischl05b.pdf)可以将任意Σ协议转换成NIZK。思路是强制证明者对给定的a向RO发出查询，并提供合格的记录；然后利用特殊健全性从记录中提取出w
+
+https://eprint.iacr.org/2024/526.pdf 没有那么正式，方便了解算法
+
+这题在 $\Sigma_{OR}$ 上应用Fischlins Transform。 $\Sigma_{OR}$ 应具有Witness-Indistinguishability (WI)性质：仅通过与证明者交互，验证者无法区分证明者到底用了哪个witness（通俗来说，走了哪个分支）。等价的说法是，无法区分使用不同witness的证明者给出的证明
+
+我竟然一个资料不看独立做出来了这题，哇最不脑雾的一集（
+
+proof中的e值说明了for循环执行的次数，间接说明了题目选择的b值对应的有效proof最少需要e次才能拿到。倘若我们用1-b对应的顺序重新排列参数并在e次循环前得到了有效的proof的话，就能100%确定题目选择的是b而不是1-b
+
+可以假设题目选择了0，则我们也选择泄漏w0，随后算出r。e_sim是e1。如果用b=0的参数顺序跑for循环并在e次循环前得到了一个proof的话，说明远程选的肯定不是0，答案是1。不过要是没有结果的话也不能确认远程选的一定是0，毕竟另一边的proof不一定就比选定的一边先出
+
+看了别人的解法后发现这篇[论文](https://eprint.iacr.org/2022/393.pdf)的34页给出了攻击算法。因为它无法满足WI，所以Fischlin Transform不能用于构造 $\Sigma_{OR}$ 协议
+
 ## [Hash Functions](https://cryptohack.org/challenges/hashes)
 
 ZKP里的`Mister Saplin's Preview`要求先把Merkle Trees做了
