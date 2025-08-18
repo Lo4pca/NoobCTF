@@ -23,7 +23,7 @@ print(f"{enc_phi = }")
 print(f"{enc_flag = }")
 ```
 
-题目还算是正常的rsa，但是e很小，同时给出了phi和d的密文。然而flag非常大，导致我们不能用普通低加密指数的思路做。出题人的[预期解](https://github.com/y011d4/my-ctf-challenges/blob/main/2023-HackTMCTF-2023/crypto/d-phi-enc/sol/README.md)思路已经写得很清楚了（但我还是不知道z是哪来的，r.h.s又是什么）。将d和phi的密文分别记为 $E_d, E_{\phi}$ ，有：
+题目还算是正常的rsa，但是e很小，同时给出了phi和d的密文。然而flag非常大，导致我们不能用普通低加密指数的思路做。出题人的[预期解](https://github.com/y011d4/my-ctf-challenges/blob/main/2023-HackTMCTF-2023/crypto/d-phi-enc/sol/README.md)思路已经写得很清楚了（但我还是不知道z是哪来的，r.h.s又是什么。未来人报道：这应该是right hand side的缩写）。将d和phi的密文分别记为 $E_d, E_{\phi}$ ，有：
 
 $$
 \begin{align*}

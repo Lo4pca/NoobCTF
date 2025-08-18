@@ -1988,7 +1988,7 @@ fn get_ptr<'a, 'b, T: ?Sized>(x: &'a mut T) -> &'b mut T {
 - libc 2.39 house of tangerine+unlink+fsop
 - 重点的house of tangerine+unlink都放在堆技巧学习了，再稍微简述一下利用过程。题目只允许调用一次free，但是edit功能有堆溢出。house of tangerine可以在这种情况下实现和tcache poisoning同样的效果，这里选择劫持tcache_perthread_struct获取进一步的任意地址malloc。接着用unlink泄漏libc地址。拿到libc地址后再利用fsop泄漏environ里的栈地址。最后往栈上写rop链
 222. [Genie in an ELF](https://github.com/LosFuzzys/GlacierCTF2024_writeups/blob/master/pwn/genie_in_an_elf)
-- 又是一道“任意地址写任意字节”类型的题目。这次利用了`/proc/self/mem`，所以标有只读的地址也可以写。预期解很复杂，首先要patch汇编代码使程序多次重入main（这步的计算可太困难了），然后再写shellcode。不知道下次遇见类似的题还能不能借用……不过我想记这个是因为有人发现只写两个字节也能getshell（甚至是爆破出来的）： https://gist.github.com/C0nstellati0n/c5657f0c8e6d2ef75c342369ee27a6b5#genie-in-an-elf
+- 又是一道“任意地址写任意字节”类型的题目。这次利用了`/proc/self/mem`，所以标有只读的地址也可以写。预期解很复杂，首先要patch汇编代码使程序多次重入main（这步的计算可太困难了），然后再写shellcode。不知道下次遇见类似的题还能不能借用……不过我想记这个是因为有人发现只写两个字节也能getshell（甚至是爆破出来的）：**Genie in an ELF**
 223. [Free My Man Pascal](https://kileak.github.io/ctf/2024/wwctf2024-freemymanpascal)
 - Free Pascal是编译Pascal语言的编译器。这题漏洞是UAF。可能底层是一样的吧，也能通过写next指针拿到任意地址chunk分配。getshell则是利用了exitfuncs，通过实验确认了攻击的全局函数指针目标`U_$SYSTEM_$$_STDOUT`（不是怎么换了个语言还有你？）。不过这里的stdout利用方式和c里的不一样，佬的探索过程也值得学习
 224. [CTF Registration](https://kileak.github.io/ctf/2024/wwctf2024-ctfreg)
@@ -1996,7 +1996,7 @@ fn get_ptr<'a, 'b, T: ?Sized>(x: &'a mut T) -> &'b mut T {
 - 总感觉见过很多次的技巧：mmap chunk与libc的偏移固定。不过具体的偏移量和是否开启aslr有关，也和机子的不同有关（本地和远程不一定一样）
 - https://github.com/nobodyisnobody/docs/tree/main/code.execution.on.last.libc#1---targetting-libc-got-entries 的实践。`__vfprintf_internal`内部调用的`*ABS*+0xa86a0`是常用目标
 225. [Mixed Signals](https://github.com/rerrorctf/writeups/blob/main/2024_12_13_NiteCTF24/pwn/mixed_signal)
-- 自己的做法在这： https://gist.github.com/C0nstellati0n/c5657f0c8e6d2ef75c342369ee27a6b5#mixed-signals 。原来比赛中做这题的痛苦一大半都是我自己给自己找的……
+- 自己的做法在这：**Mixed Signals** 。原来比赛中做这题的痛苦一大半都是我自己给自己找的……
 - 一个卡了我很久的地方是，程序自己打开了flag文件，但fd未知。本地的fd是3，但是docker里可能是因为开了socket，fd为5。以后要注意
 226. got gadget
 - a got gadget is just a snippet of instructions that end in a jump or call to a function pointer on the global offset table, depending on the libraries protections, the entry on the got can be rewritten, so you chain snippets of code together where the instructions before the jump to the next gadget perform what you are trying to get the binary to do

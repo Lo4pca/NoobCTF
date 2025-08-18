@@ -53,3 +53,34 @@ a=b和a < b的情况下q的取值固定，参考上一题，一定小于b
 4. 假设有 $a=bq_1+r_1=bq_2+r_2,0\leq r_1$ < b, $0\leq r_2$ < b 。证明 $q_1=q_2$ 且 $r_1=r_2$
 
 $r_1=a-bq_1$ ，因a和b固定，因此如果存在一个 $r_2=a-bq_2\not =r_1$ ，必定有 $q_1\not =q_2$ 。说明两者的差一定是b的倍数。最小的b的倍数是1，假设 $r_2-r_1=b$ ，即使 $r_1$ 取最小值0，仍有 $r_2=b$ ，不满足其应该小于b的定义。因此必须有 $r_1=r_2$ 。 $q_1=\frac{a-r_1}{b}$ , $q_2=\frac{a-r_2}{b}$ 。若 $r_1=r_2$ ，也有 $q_1=q_2$
+
+### Exercise 1.12
+
+1. 证明以下算法计算正整数 a 和 b 的最大公约数 g，以及方程 au + bv = gcd(a, b) 的整数解 (u,v)
+    1. 让u=1，g=a，x=0，y=b
+    2. 如果y=0，让v=(g−au)/b，返回(g,u,v)
+    3. g除以y，余数为t:g=qy+t,0 ≤ t < y
+    4. s=u−qx
+    5. u=x 然后 g=y
+    6. x=s 然后 y=t
+    7. 返回第二步
+
+先把二三四小问做了：
+```py
+from Crypto.Util.number import GCD
+def egcd(a,b):
+    if b==0:
+        return a,1,0
+    u,g,x,y=1,a,0,b
+    while y!=0:
+        q=g//y
+        t=g%y
+        s=u-q*x
+        u,g=x,y
+        x,y=s,t
+    return g,u,(g-a*u)//b
+def check(a,b):
+    g,u,v=egcd(a,b)
+    return g == GCD(a, b) and a*u + b*v == g
+assert check(527, 1258) and check(228, 1056) and check(163961, 167181) and check(3892394, 239847) and check(0,0)
+```

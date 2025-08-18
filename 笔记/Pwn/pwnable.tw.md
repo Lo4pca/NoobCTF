@@ -455,3 +455,29 @@ docker run -it --rm \
     -v $(pwd):/root/work \
     pwn-env
 ```
+## Tcache Tear
+
+事实证明我根本就不知道怎么做fake chunk
+
+libc 2.27，有double free。依稀记得某个版本前（后面发现是2.33前）double free的检查都较为宽松，试了一下发现果然如此。再加个tcache poisoning，很快就有了任意地址写
+
+但是没有多少地址，菜单也没给leak选项。现在想想或许可以分配到stdout上用fsop泄漏？但当时我只想看看有什么办法能整出个unsorted bin里的chunk。就在这时我发现malloc_chunk里有个堆溢出，可以输入负数size，read时size会被转成无符号数。但是这题对堆块的操控有局限性，只能往最近分配到的chunk里写值；而且堆溢出到其他的chunk似乎没什么用？
+
+name很可疑，为什么info函数会打印最开始输入的name？这时我就想，能不能free掉name，使其落入unsorted bin？于是开头输入name时我尝试伪造堆块结构`p64(0)+p64(0x521)`，然而free后仍然报错
+
+我以为是我没有伪造出完整的fake chunk，在这卡了很久。后续看[wp](https://www.theflash2k.me/blog/writeups/pwnable.tw/tcache_tear)后发现是因为需要在fake chunk之后再放两个fake chunk。再参考 https://pwnable.tw/writeup/33/23230 会比较清晰：
+```
+chunk A B C（地址上的先后顺序）
+
+当free A时，glibc检查B是否在用，因此会检查C的prev_inused位
+如果B是空闲状态，glibc会unlink B，可能会触发consolidate将多个chunk合并（有时合并至top chunk）
+如果B是占用状态，glibc会将其prev_inused位设为0，标记A此时是空闲的
+```
+另外，第一篇wp的图画错了。应该是：
+```
+| -- PREV_SIZE -- | --- SIZE ---- |
+| ---- FD ----- | ----- BK ------ |
+```
+用户数据（DATA）和fd/bk字段是重合的。虽然脚本中flat的字段数量符合wp中画的图，但这是因为wp中有一个错误。攻击成功的原因根本不是里面说的“Unsorted Bin Attack”：“控制某个chunk的bk字段，进而通过将某个chunk free至unsorted bin来向bk-0x10处写入libc地址”。bk字段仅在空闲状态下的chunk有效，而这里伪造的是占用状态下的chunk，控制fd/bk字段根本就毫无意义。不过运行脚本会发现去掉那个地址的确不行，这是因为name和chunk是相邻的，脚本中布置bk字段的位置正好与chunk的地址重合。所谓的“设置bk”其实是在覆盖chunk的内容，从而将fake chunk free至unsorted bin
+
+第二篇wp会更清楚一些
