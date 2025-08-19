@@ -65,7 +65,17 @@ $r_1=a-bq_1$ ，因a和b固定，因此如果存在一个 $r_2=a-bq_2\not =r_1$ 
     6. x=s 然后 y=t
     7. 返回第二步
 
-先把二三四小问做了：
+第3步和第5、6步明显是辗转相除法：计算出g除去y的商q和余数t后，转而计算q和t的商和余数，因为两组数的gcd相同。第2步判断y==0就是在看上一个计算的式子余数是否为0，为0的话上个式子的商g就是原a和b的最大公因数。书中`Theorem 1.7 (The Euclidean Algorithm)`已经详细说明了原因
+
+s，u和x我没看出来在干啥。但第二步返回的式子已经说明了为什么方程一定成立: $au+bv=au+b\frac{g-au}{b}=au+g-au=g$ (不过考虑到算法返回时的局限性，可能要证明g-au是b的倍数？)
+
+问了问ai，u和x在每一次循环结束时都满足：
+- $g=au+bv_g$
+- $y=ax+bv_y$
+
+s则是新一轮辗转相除法中y的等式中a的系数。 $t=g-qy=(au+bv_g)-q(ax+bv_y)=a(u-qx)+b(v_g-qv_y)$ 。而新的g等于旧的y，因此直接u=x即可
+
+二三四小问分别为实现算法、验证结果和处理b=0的edge case，一起做了：
 ```py
 from Crypto.Util.number import GCD
 def egcd(a,b):

@@ -1004,7 +1004,7 @@ proof中的e值说明了for循环执行的次数，间接说明了题目选择�
 
 可以假设题目选择了0，则我们也选择泄漏w0，随后算出r。e_sim是e1。如果用b=0的参数顺序跑for循环并在e次循环前得到了一个proof的话，说明远程选的肯定不是0，答案是1。不过要是没有结果的话也不能确认远程选的一定是0，毕竟另一边的proof不一定就比选定的一边先出
 
-看了别人的解法后发现这篇[论文](https://eprint.iacr.org/2022/393.pdf)的34页给出了攻击算法。因为它无法满足WI，所以Fischlin Transform不能用于构造 $\Sigma_{OR}$ 协议
+看了别人的解法后发现这篇[论文](https://eprint.iacr.org/2022/393.pdf)的34页给出了攻击算法。所以Fischlin Transform不能用于构造 $\Sigma_{OR}$ 协议，因其构造出来的OR协议无法满足WI
 
 ## [Hash Functions](https://cryptohack.org/challenges/hashes)
 

@@ -125,6 +125,12 @@
   - 另一篇更详细的wp： https://majix.notion.site/Cold-Storage-13f2c37daa29807a930eed847be939f8 。没经过签名的apk无法运行，不过可以自行生成key并签名
 - [Remind's funny stories 3](https://github.com/Qynklee/Public_CTF_Writeups/blob/main/WWFCTF-2024/Remind's%20funny%20stories%203)
   - 继续逆向flutter apk。可以在blutter输出的`pp.txt`中找到程序使用的字符串
+- [PricelessL3ak](https://hackmd.io/@d3vnu11/H1S8u9frge)
+  - lifecycle intent vulnerability。一个activity可以有onCreate和onNewIntent两个生命周期事件。对于一个导出的activity来说，两个事件均可以由外部触发且在生命周期内都可以共享状态（类中的属性），因此需要验证intent的来源。个人认为不能算作是lifecycle的漏洞，关键在于没有校验调用者身份
+  - IPC Parcel Communication：android内部的轻量跨进程通信方案`Parcel`，接口为Parcelable，定义跨进程传递的对象的读写行为
+  - 有时jadx无法正常反编译函数，只能给出似乎是代码的注释。在设置里打开`Show inconsistent code`可以强行得到代码
+- [Apkocalypse](https://hackmd.io/@d3vnu11/rkYZiWmSge)
+  - 使用frida hook apk和native lib里的函数
 
 ## IDA使用
 
