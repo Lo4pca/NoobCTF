@@ -75,7 +75,7 @@ s，u和x我没看出来在干啥。但第二步返回的式子已经说明了�
 
 s则是新一轮辗转相除法中y的等式中a的系数。 $t=g-qy=(au+bv_g)-q(ax+bv_y)=a(u-qx)+b(v_g-qv_y)$ 。而新的g等于旧的y，因此直接u=x即可
 
-二三四小问分别为实现算法、验证结果和处理b=0的edge case，一起做了：
+二三四五小问分别为实现算法、验证结果、处理b=0的edge case和使返回的u大于0，一起做了：
 ```py
 from Crypto.Util.number import GCD
 def egcd(a,b):
@@ -88,9 +88,28 @@ def egcd(a,b):
         s=u-q*x
         u,g=x,y
         x,y=s,t
-    return g,u,(g-a*u)//b
+    v=(g-a*u)//b
+    if u==0:
+        u+=b//g
+        v-=a//g
+    return g,u,v
 def check(a,b):
     g,u,v=egcd(a,b)
     return g == GCD(a, b) and a*u + b*v == g
 assert check(527, 1258) and check(228, 1056) and check(163961, 167181) and check(3892394, 239847) and check(0,0)
 ```
+### Exercise 1.11
+
+a和b为正整数
+
+1. 假设有整数u和v满足au+bv=1，证明gcd(a,b)=1
+
+假设gcd(a,b)=d,有正整数x和y满足xdu+ydv=d(xu+yv)=1。若 $d\not =1$ ，有 $xu+yv=\frac{1}{d}$ ，不是一个整数。而这是不可能的。因此只能有d=1，即gcd(a,b)=1
+
+2. 假设有整数u和v满足au+bv=6，一定有gcd(a,b)=6吗？如果不是，请给出一个具体的反例，并概述gcd(a,b)的所有可能值（describe in general all of the possible values of gcd(a,b)）
+
+被题目带偏了……我想着gcd(a,b)只有一个固定的值，所以回答“不是”的这个分支肯定是不对的，因为gcd(a,b)哪来的“可能值”？但这题说的“可能值”其实是接下来的这个意思
+
+书接上文，xdu+ydv=d(xu+yv)=6， $xu+yv=\frac{6}{d}$ ，只能推出d|6，推不出d=6。因此如果有au+bv=6，gcd(a,b)的值一定是6的因子，1，2，3或者6
+
+举例：2\*3+2\*0=6，gcd(2,2)=2
