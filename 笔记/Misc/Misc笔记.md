@@ -628,6 +628,21 @@ print(base64.b64encode(temp.encode()))
     - 使用TestDisk & PhotoRec恢复删除的文件
     - 爆破LUKS加密分区的密码
     - **crackme**
+- [Wi-Fight A Ghost?](https://medium.com/@OG13/l3akctf-2025-forensics-write-up-6420777822de)
+    - windows信息forensics
+    - 所有的Local Machine hives (HKLM) 均位于路径`C:\Windows\System32\config`，包含：
+        - 计算机名称
+        - Network Interfaces
+            - 连接的网络的SSID和连接的先后顺序
+            - DHCP以及分配的ip地址
+            - DHCP租约时间（lease time）
+        - 用户使用的浏览器
+        - 地理位置（国家）
+        - 时区
+    - 如何查看chrome/bing浏览器的历史记录和下载记录
+    - NTFS文件系统中存在Master File Table (MFT)系统文件，存储着每个文件和目录的详细信息，包括元数据、文件内容及其在磁盘上的物理位置，通常大小为1024字节。但小于约700字节的文件将直接存储于MFT文件中，称为resident data
+    - Wi-Fi 适配器（adapter）的相关信息，如mac地址，适配器名称，SSID和连接信息可在`WLAN-AutoConfig`事件日志里找到。位于`C:\Windows\System32\winevt\logs\Microsoft-Windows-WLAN-AutoConfig%4Operational.evtx`，可用[Event Log Explorer](https://eventlogxp.com/downloads)查看
+    - `C:\Users\<name>\AppData\Local\Microsoft\Windows\WebCache`缓存了浏览器数据和网络相关的活动
 
 ## Network Forensics
 
@@ -1164,6 +1179,11 @@ flag.export("./flag.mp3", format="mp3")
 - [Batman Investigation II](https://blog.bi0s.in/2024/02/27/Forensics/BatmanInvestigationII-GothamUndergroundCorruption-bi0sCTF2024/)
     - `vol -f ctf.raw windows.pslist.PsList`:List active process list
     - `vol -f ctf.raw windows.mftscan.MFTScan`:获取[MFT](https://www.sciencedirect.com/topics/computer-science/master-file-table)文件
+- [Invisible](https://medium.com/@rifqiaramadhan/insmod-kernel-rootkit-and-network-carving-another-linux-memory-forensics-approach-l3akctf-b1e547e8c1b6)
+    - `vol.py -f memdump.elf linux.lsmod`:获取加载的kernel module
+    - `vol.py -f memdump.elf linux.hidden_modules`：获取隐藏的module
+    - `vol.py -f memdump.elf linux.pagecache.RecoverFs`:dump整个文件系统，包括内核加载的模块
+    - [bulk_extractor](https://github.com/simsong/bulk_extractor)可以提取网络流量并生成pcap
 - [LovelyMem](https://github.com/Tokeii0/LovelyMem):一个图形界面取证工具
 102. [Huffman coding](https://en.wikipedia.org/wiki/Huffman_coding)，例题:[Tree of Secrets](https://medium.com/@vj35.cool/the-bytebandits-ctf-2023-449a2d64c7b4),例题是文件夹形式的Huffman coding。动图解释：https://zhuanlan.zhihu.com/p/63362804
 103. [private-bin](https://github.com/5t0n3/ctf-writeups/blob/main/2023-lactf/misc/private-bin/README.md)

