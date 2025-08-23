@@ -618,9 +618,10 @@ print(base64.b64encode(temp.encode()))
     - 加密的note存储于keychain；keychain database则是用机器的密码（machine's password，可能也是登录的密码）加密。之前在215条`A.R.K`见过，不过这题的机器密码很复杂，没法直接爆破出来。一个技巧是可以查看用户是否开启了Auto Login。一旦开启，电脑上会出现`/etc/kcpassword`文件。此文件用静态密钥+异或加密，因此可以直接恢复原本的密码
 - [Forgotten Footprints](https://github.com/L1NUXexe/UTCTF_2025_Forensics_WU)
     - 利用[ReclaiMe](https://www.reclaime.com)恢复BTRFS Filesystem img中被删除的文件
-- [Active](https://abuctf.github.io/posts/WolvCTF2025)
+- [Active](https://abu.h7tex.com/docs/docs/ctf/2025/wolvctf2025)
     - Active Directory forensics
     - 官方wp： https://dree.blog/posts/wolvctf-2025-active-series
+    - 另一道也是Active Directory的题：[L3ak Advanced Defenders](https://hackmd.io/@iFU7XfwVQzO4osBSBippfg/HJILaFbIxe),使用工具[Active Directory Explorer](https://learn.microsoft.com/en-us/sysinternals/downloads/adexplorer)
 - [Crackme](https://blog.ummit.dev/posts/ctf/nhnc/2025)
     - qcow2（QEMU Copy-On-Write version 2）+Linux/Arch Linux digital forensics
     - 利用GRUB（GRand Unified Bootloader）绕过登录：系统启动时，GRUB会显示一个菜单，允许用户按`e`来编辑内核启动参数。在启动命令的末尾加上`init=/bin/bash`便能在启动后进入root shell。给GRUB设置密码可以防止该攻击
@@ -643,6 +644,17 @@ print(base64.b64encode(temp.encode()))
     - NTFS文件系统中存在Master File Table (MFT)系统文件，存储着每个文件和目录的详细信息，包括元数据、文件内容及其在磁盘上的物理位置，通常大小为1024字节。但小于约700字节的文件将直接存储于MFT文件中，称为resident data
     - Wi-Fi 适配器（adapter）的相关信息，如mac地址，适配器名称，SSID和连接信息可在`WLAN-AutoConfig`事件日志里找到。位于`C:\Windows\System32\winevt\logs\Microsoft-Windows-WLAN-AutoConfig%4Operational.evtx`，可用[Event Log Explorer](https://eventlogxp.com/downloads)查看
     - `C:\Users\<name>\AppData\Local\Microsoft\Windows\WebCache`缓存了浏览器数据和网络相关的活动
+- [Breadcrumbs](https://abdelrahme.github.io/posts/L3akCTF-2025)
+    - DLL side-loading：因为windows优先加载同级目录的dll，所以在无害的exe的同级目录放置恶意dll可以执行任意代码。forensic中可以通过关注常见exe（如`7za.exe`）的同级目录识别这个技巧
+    - process injection特征：使用CreateProcessW加CREATE_SUSPENDED标志创建一个暂停的进程，加载shellcode（比如用FindResourceW和LoadResource）并在进程中用VirtualAllocEx分配一块内存，然后用WriteProcessMemory将shellcode写入进程内存。最后CreateRemoteThread执行shellcode
+    - [Resource Hacker](https://www.angusj.com/resourcehacker):查看/编辑可执行文件里的资源、`.res`,`.mui`后缀资源库
+    - [sRDI](https://github.com/monoxgas/sRDI):将dll文件转成position independent shellcode（不依赖加载地址的shellcode）。由该工具生成的shellcode开头字节为`E8 00 00 00 00`（`call $+5`），`59`(`pop rcx`),`49 89 C8`(`mov r8, rcx`)。可以用binwalk从shellcode中提取出原本的dll
+    - 分析TLS流量包（TLS_RSA_WITH_AES_256_GCM_SHA384）
+        - 提取服务器证书
+        - 使用[rsatool](https://github.com/ius/rsatool)从私钥生成pem格式的私钥
+        - wireshark导入私钥解密通信
+    - 如果strings某个exe出现python代码，可能是PyInstaller打包的程序。可以用pyinstxtractor提取出原pyc
+    - DPAPI(Data Protection API)：允许用户加密、解密数据。浏览器（Chrome/Edge）也会使用这个api存储密码和密钥。加密的master key位于`C:\Users\<name>\AppData\Roaming\Microsoft\Protect\<SID>\`。假如有用户的Security Identifier (SID)和登录密码，可以用[mimikatz](https://github.com/gentilkiwi/mimikatz)解密
 
 ## Network Forensics
 
@@ -650,7 +662,7 @@ print(base64.b64encode(temp.encode()))
 
 任何和network相关的也放这
 
-- [Sussy](https://auteqia.garden/posts/write-ups/akasec2024/sussy/)
+- [Sussy](https://auteqia.garden/posts/write-ups/akasec2024/sussy)
     - 在docker里使用[zeek](https://zeek.org)分析流量包
     - john爆破7z和pdf文件密码
 - [I_wanna_be_a_streamer](https://odintheprotector.github.io/2024/06/23/wanictf-forensic-writeup.html)
@@ -1140,10 +1152,10 @@ flag.export("./flag.mp3", format="mp3")
 - http://20.121.121.120/./secret.php
 - http://20.121.121.120/%2f/secret.php 
 
-等。一个局限性较大的技巧是去[Wayback Machine](https://archive.org/web/)搜对应网址。要求题目网址提前上线过。
+等。一个局限性较大的技巧是去[Wayback Machine](https://archive.org/web)搜对应网址。要求题目网址提前上线过
 
-97. [OSINT思维导图](https://osintframework.com/)。
-98. 某些电子邮件的密码可能在[pastebin](https://pastebin.com/)泄露。
+97. [OSINT思维导图](https://osintframework.com)。
+98. 某些电子邮件的密码可能在[pastebin](https://pastebin.com)泄露。
 99. [Fish](https://esolangs.org/wiki/Fish)编程语言+[解释器](https://gist.github.com/anonymous/6392418)。例题:[Flowers](https://github.com/ZorzalG/the-big-MHSCTF2023-writeups/blob/main/Flowers.md)
 100. Powershell命令历史存储于ConsoleHost_history.txt。
 101. volatility3使用。关于volatility的教程大多都是volatility2的，记录一些平时看到的命令。注意镜像（如img后缀）和内存（如mem）后缀是不同的，工具不能混用。比如volatility就不能用来分析镜像。(volatility3似乎没有找profile的插件，只能用volatility2找：`python2 vol.py -f ctf.raw imageinfo`)
@@ -1151,6 +1163,7 @@ flag.export("./flag.mp3", format="mp3")
   - 搜寻Memdump.raw中的文件,会给出文件对应的偏移
 - python3 vol.py -f Memdump.raw windows.dumpfiles.DumpFiles --virtaddr(`--physaddr`) 0xc88f21961af0
   - 根据文件偏移提取文件
+  - dump出来的文件通常末尾带有null字节，特别是`ImageSectionObject`。可能导致hash结果不匹配。建议用工具移除末尾的null字节后再比对hash
 - python3 vol.py -f mem.raw windows.cmdline.CmdLine
   - cmd中运行的命令
 - python3 vol.py -f mem.raw windows.info

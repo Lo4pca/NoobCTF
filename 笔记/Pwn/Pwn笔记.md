@@ -2090,3 +2090,5 @@ offset = the_mmap64_plus_23_itself
 - mips架构堆溢出ret2win。具体操作与x64没什么不同，只是mips binary中的got中保存着指向canary的指针
 - 官方wp： https://github.com/BYU-CSA/BYUCTF-2025/tree/main/pwn/mips
 - 如何调试：**MIPS**
+248. [cosmofile](https://razvan.sh/writeups/cosmofile-l3akctf)
+- [Cosmopolitan Libc](https://github.com/jart/cosmopolitan)下的fsop任意地址写。这个版本的libc的文件结构与普通libc不同
