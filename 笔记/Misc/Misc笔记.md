@@ -724,36 +724,14 @@ print(base64.b64encode(temp.encode()))
 1. 将tcp流解码为tpkt+openssl检查ASN.1。例题：[arrdeepee](../../CTF/攻防世界/6级/Misc/arrdeepee.md)
 2. mca后缀名文件为游戏Minecraft使用的世界格式。例题:[Russian-zips](https://blog.csdn.net/weixin_44604541/article/details/113741829)
 3. 传感器相关知识点（差分曼彻斯特、曼彻斯特编码，crc校验）。[传感器1](../../CTF/攻防世界/3级/Misc/传感器1.md)
-4. 有时候会遇见需要改宽高的情况，一般会根据图片的crc值爆破出正确的宽高。
-
-```python
-import binascii
-import struct
-CRC=0x6D7C7135
-with open("dabai.png", "rb") as f:
-    crcbp=f.read()
-for i in range(2000):
-    for j in range(2000):
-        data = crcbp[12:16] + \
-            struct.pack('>i', i)+struct.pack('>i', j)+crcbp[24:29]
-        crc32 = binascii.crc32(data) & 0xffffffff
-        if(crc32 == CRC):
-            print(i, j)
-            print('hex:', hex(i), hex(j))
-            break
-```
-
-也可以考虑下面这个脚本自动改宽高并生成文件(仅限png):
-
+4. 有时候会遇见需要改宽高的情况，一般会根据图片的crc值爆破出正确的宽高
 ```python
 import zlib
 import struct
-file = '/Users/constellation/Downloads/misc26.png'
+file = 'ctf.png'
 fr = open(file,'rb').read()
 data = bytearray(fr[12:29])
-#crc32key = str(fr[29:33]).replace('\\x','').replace("b'",'0x').replace("'",'')
-crc32key = 0xEC9CCBC6 #补上0x，copy hex value
-#data = bytearray(b'\x49\x48\x44\x52\x00\x00\x01\xF4\x00\x00\x01\xF1\x08\x06\x00\x00\x00')  #hex下copy grep hex
+crc32key = int(str(fr[29:33]).replace('\\x','').replace("b'",'0x').replace("'",''),16)
 n = 4095 #理论上0xffffffff,但考虑到屏幕实际，0x0fff就差不多了
 for w in range(n):#高和宽一起爆破
     width = bytearray(struct.pack('>i', w))#q为8字节，i为4字节，h为2字节

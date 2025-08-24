@@ -1006,6 +1006,20 @@ proof中的e值说明了for循环执行的次数，间接说明了题目选择�
 
 看了别人的解法后发现这篇[论文](https://eprint.iacr.org/2022/393.pdf)的34页给出了攻击算法。所以Fischlin Transform不能用于构造 $\Sigma_{OR}$ 协议，因其构造出来的OR协议无法满足WI
 
+### Hamiltonicity 2
+
+与`Hamiltonicity 1`的区别在于需要一次给出全部的proof并计算`challenge_bits`，意味着没法利用爆破控制`challenge_bits`
+
+好的我自然是想不出来的。于是把`7Rocky`佬的思路放在这
+
+不可能在不存在哈密顿回路的图中证明存在哈密顿回路，因此一定要引入一个存在哈密顿回路的图。将前者称为 $G_1$ ,后者称为 $G_2$ 。问题在于如何保证challenge bit 1对应 $G_2$ ，0对应 $G_1$ 。明显不可能，因为决定proof后才知道具体的`challenge_bits`
+
+于是要把思路逆转过来：先拿到`challenge_bits`再构造proof。假如 $G_1$ 和 $G_2$ 的`hash_committed_graph`值一样，都是X；计算`challenge_bits`时等同于拿一个占位符X代替实际的图，后续根据`challenge_bits`的值决定把X换成 $G_1$ 还是 $G_2$
+
+需要在 $G_2$ 的commitment中做手脚，因为 $G_1$ 要经过`open_graph`；而 $G_2$ 只检查回路，只open回路相关的node，其余node的值不重要，可以随意改变
+
+另一个关键的点在于可以简化`pedersen_commit`的逻辑，使其固定返回`(1,0)`或`(h1,0)`，方便构造 $G_2$ 的假commitment
+
 ## [Hash Functions](https://cryptohack.org/challenges/hashes)
 
 ZKP里的`Mister Saplin's Preview`要求先把Merkle Trees做了

@@ -3664,7 +3664,7 @@ window.recaptcha=true;
 - pocketbase js SDK使用
 380. [Warmup](https://github.com/rixinsc/ctf-writeups/blob/master/wgmy2023.md#warmup---web)
 - 利用chrome调试前端混淆js代码逻辑。可用api： https://developer.chrome.com/docs/devtools/console/utilities?hl=zh-cn#debug-function
-- 文件包含漏洞：php filter的利用。如果黑名单禁掉了一些关键词，可以用某些较为冷门的filter，比如wp使用的zlib.deflate。完整filter目录： https://www.php.net/manual/en/filters.php 。另一篇[wp](https://d0ublew.github.io/posts/wgmy2023/web/warmup/)更清晰地展示了如何利用PHP PEARCMD从文件包含到getshell。参考 https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/File%20Inclusion#lfi-to-rce-via-php-pearcmd
+- 文件包含漏洞：php filter的利用。如果黑名单禁掉了一些关键词，可以用某些较为冷门的filter，比如wp使用的zlib.deflate。完整filter目录： https://www.php.net/manual/en/filters.php 。另一篇[wp](https://d0ublew.github.io/posts/wgmy2023/web/warmup/)更清晰地展示了如何利用PHP PEARCMD从文件包含到getshell。参考 https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/File%20Inclusion/LFI-to-RCE.md#lfi-to-rce-via-php-pearcmd
 381. [Pet Store Viewer](https://github.com/rixinsc/ctf-writeups/blob/master/wgmy2023.md#pet-store-viewer)
 - python中的格式化字符串漏洞。若str.format执行之前str本身包含用户可控制的内容，则可以注入出全局变量等内容
 - python格式化字符串漏洞参考链接：
