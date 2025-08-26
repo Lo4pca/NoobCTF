@@ -1933,6 +1933,14 @@ fn get_ptr<'a, 'b, T: ?Sized>(x: &'a mut T) -> &'b mut T {
 会导致uaf。`'a`这种东西是rust里的lifetime variable，用来标记某个变量的lifetime。使用前需要在尖括号`<>`定义，名字无所谓。作用是返回一个指向参数的指针，过程中修改其lifetime，比如从`b'`修改到`a'`。问题是，假如`b'`比`a'`短呢？意味着我们仍然保留着已经被free的变量的指针。rust应该阻止这段代码编译的，但由于这个bug，只要这么写就不会阻止
 208. [vector-overflow](https://octo-kumo.me/c/ctf/2024-ductf/pwn/vector-overflow)
 - 通过栈溢出修改c++里的vector结构。主要是用gdb观察vector的构造。见 https://stackoverflow.com/questions/52330010/what-does-stdvector-look-like-in-memory
+- 另一道关于vector的题目：[Notes++](https://github.com/ilyaAgibor/ctf-writeups/blob/main/pwn/notes%2B%2B.md)。vector中的元素是堆上的结构
+- 使用`std::vector::erase`移除索引i处的对象时（即使索引是不合法的负索引），c++会调用那个对象的析构函数（除非那个元素是null），并将剩余元素向前挪一格
+- vector分配元素/重分配元素的行为：
+
+![allocated_elements](https://github.com/ilyaAgibor/ctf-writeups/raw/main/pwn/allocations-1.gif)
+
+![reallocate_elements](https://github.com/ilyaAgibor/ctf-writeups/raw/main/pwn/vector_realloc.gif)
+
 209. [onewrite](https://github.com/ImaginaryCTF/ImaginaryCTF-2024-Challenges-Public/tree/main/Pwn/onewrite)
 - libc 2.35，只能往任意地址写一次任意内容，获取RCE。预期解是setcontext32。我还试了fsop，不知道为啥之前记的模板都用不了(怀疑某些地址不对，不过这些地址都没有符号，调试也是个问题)，再记一个: **onewrite** 。另外用pwntools里的FileStructure时，发现`context.arch`很重要，默认是i386，要是文件结构写的是amd64的内容但是没换arch，转成bytes时就会报错
 210. [User Management](https://www.theflash2k.me/blog/writeups/deadsec23/pwn/user-management)
