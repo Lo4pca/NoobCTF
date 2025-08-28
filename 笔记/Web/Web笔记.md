@@ -495,6 +495,10 @@
     - cookie长度通常存在上限，浏览器会拒绝超过长度上限的cookie
     - xs leak。当猜对部分flag时app会增加cookie的长度，并渲染cookie中存储的note。如果将cookie长度设为`上限-1`，就能根据note的渲染情况，一个字符一个字符地爆破flag
     - https://github.com/runasy-koonta/nhnc-2025-not-xss-solver
+- [Window-of-Opportunity](https://hxuu.github.io/blog/ctf/l3ak25/window-of-opportunity)
+    - puppeteer `--disable-web-security` flag禁用Same-Origin Policy (SOP)
+    - 这题的关键在于admin bot使用`window.open(Url, "_blank")`访问页面`Url`时没有配置`noopener`和`noreferrer`，导致`Url`页面可以访问`window.opener`，进而操控`window.opener.location`，读取`window.opener.document.body.innerText`（仅在同源或禁用sop时可以这么做）
+    - 题目源码： https://github.com/L3AK-TEAM/L3akCTF-2025-public/tree/main/web/Window_of_Opportunity 。似乎因为没有检查url，导致可以直接用`javascript:eval`执行xss
 
 ## SSTI
 

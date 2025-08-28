@@ -6,7 +6,7 @@ cryptohack服务器里有很多人推荐这本书，让我看看！
 
 第一章的内容比较基础，懒得做笔记了，直接从基础的题目做起（然而不一定做得出来……）
 
-按正文中提到的练习顺序排序
+按正文中提到的练习顺序排序，会跳过一些简单的题
 
 ### Exercise 1.6
 
@@ -254,3 +254,68 @@ $k_2=c_1-k_1m_1\mod p$
 这是一个p的倍数。意味着 $(c_1-c_2)(m_2-m_3)-(c_2-c_3)(m_1-m_2)$ 的因子中包含p
 
 拿到p后就和2一样了
+
+### Exercise 1.44
+
+考虑如下定义的希尔密码（Hill cipher）：
+
+- $e_k(m)\equiv k_1m+k_2\mod p$
+- $d_k(c)\equiv k_1^{-1}(c-k_2)\mod p$
+
+其中 $m,c,k_2$ 为n维的列向量， $k_1$ 为 $n\times n$ 的矩阵
+
+2. 解释为什么希尔密码无法抵御已知明文攻击
+
+假设有三组明文/密文对：
+- $c_1=k_1m_1+k_2\mod p$
+- $c_2=k_1m_2+k_2\mod p$
+- $c_3=k_1m_3+k_2\mod p$
+
+两两相减得到:
+- $k_1(m_2-m_3)\mod p$
+- $k_1(m_1-m_2)\mod p$
+
+是一个线性方程组（用行向量表示）：
+
+$$
+k_1
+\begin{pmatrix}
+m_2-m_3 \\
+m_1-m_2
+\end{pmatrix}
+=\begin{pmatrix}
+c_2-c_3 \\
+c_1-c_2
+\end{pmatrix}
+$$
+
+（我不想打markdown了，直接来sagemath代码）
+
+```py
+#第三小问的例子
+P=GF(11)
+m1=vector(P,[5,4])
+m2=vector(P,[8,10])
+m3=vector(P,[7,1])
+c1=vector(P,[1,8])
+c2=vector(P,[8,5])
+c3=vector(P,[8,7])
+c=Matrix(P,[c2-c3,c1-c2])
+m=Matrix(P,[m2-m3,m1-m2])
+k1=c.T*m.T.inverse() #题目用的是列向量，但sagemath用的是行向量
+k2=c1-k1*m1
+def encrypt(m):
+    return k1*m+k2
+assert encrypt(m1)==c1 and encrypt(m2)==c2 and encrypt(m3)==c3
+```
+4. 解释为什么涉及字母排列的简单替换密码可视作希尔密码的特例
+
+$k_2$ 为零向量， $k_1$ 为置换矩阵（[置换矩阵](https://zh.wikipedia.org/wiki/%E7%BD%AE%E6%8D%A2%E7%9F%A9%E9%98%B5)可以把基向量重新排列，完全符合这题的需求）
+
+```py
+p_list = [2, 1, 3] #1->2, 2->1, 3->3
+perm = Permutation(p_list).to_matrix()
+original=vector([1,2,3])
+print(perm*original)
+```
+（二级结论真好用啊）
