@@ -319,3 +319,73 @@ original=vector([1,2,3])
 print(perm*original)
 ```
 （二级结论真好用啊）
+
+### Exercise 1.5
+
+(从这里开始，做的是正文没提到的Exercises中比较有意思的题)
+
+假设有一个由26个字母组成的字母表
+
+1. 有多少种简单替换密码？
+
+`26!`，具体分析在书中讲过，见第4页，`1.1.1`
+
+2. 如果某个字母的加密结果是其本身，则称该字母是固定的（fixed）。有多少种简单替换密码满足：
+    1. 没有固定字母
+    2. 至少有一个固定字母
+    3. 正好有一个固定字母
+    4. 至少有两个固定字母
+
+(1). 让我们使用瞪眼法，写一个函数观察规律
+```py
+import itertools
+letters=''
+length=len(letters)
+count=0
+for i in itertools.permutations(letters,length):
+    flag=True
+    for j in range(length):
+        if i[j]==letters[j]:
+            flag=False
+            break
+    if flag:
+        count+=1
+        print(f"{''.join(i)} {count}")
+print(count)
+```
+注意到无论letters的长度是多少，其输出永远可以按开头字母分成n-1组。拿n=5的一组举例：
+```
+badec 1
+baecd 2
+bcaed 3
+bcdea 4
+bcead 5
+bdaec 6
+bdeac 7
+bdeca 8
+beacd 9
+bedac 10
+bedca 11
+```
+如果剔除开头的b，注意到剩下的字符串中除了以a开头的内容数量是2，其余数量都是3
+
+如果选a，那么剩下的三个字母的排列数量等于`n=3`时的情况；如果选除了a以外的字母，整体四个字母的排列数量等于`n=4`时的情况。于是总结公式：
+```py
+#f(i)=(i-1)*(f(i-1)+f(i-2))
+import functools
+@functools.cache
+def calculate(n):
+    if n==1:
+        return 0
+    elif n==2:
+        return 1
+    else:
+        return (n-1)*(calculate(n-1)+calculate(n-2))
+```
+实验发现对接下来的几个n都正确，但由于n=26时数量太大，无法模拟来验证公式是否准确
+
+那问问chatgpt吧。我非常确信这道题在组合数学里也有，说不定它能给我搜到正确答案（？）
+
+好的答案正确。这类问题叫错排数（subfactorial，也叫derangement）。上面的式子是等价递推，也有直接的公式：
+
+$$!n=n!\Sigma_{k=0}^n\frac{(-1)^k}{k!}$$

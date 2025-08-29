@@ -2516,6 +2516,10 @@ ${dwf.newInstance(ec,null)("cmd")}
   - HEAD文件
   - config文件（也是插入payload的地方）
   - objects和refs文件夹。这两个文件夹可以是空的，但是必须要有
+- 另一道题：[GitBad](https://blog.gehaxelt.in/p/l3ak-ctf-2025-writeups-2025-07-13)
+    - 如果当前repo使用`git submodule`添加了子repo，则子repo中配置的fsmonitor仍然可以触发rce
+    - https://github.com/justinsteven/advisories/blob/main/2022_git_buried_bare_repos_and_fsmonitor_various_abuses.md
+    - 若禁用了fsmonitor，还可以像 https://enigma522.online/posts/ctf/gitbad-l3ak 一样触发http请求
 221. [[GKCTF 2021]CheckBot](https://blog.csdn.net/cjdgg/article/details/121504021)
 - xss（或者csrf？）假设可以将任意url发送给admin bot，以下为本地服务器部署的提取flag的html。
 ```html
