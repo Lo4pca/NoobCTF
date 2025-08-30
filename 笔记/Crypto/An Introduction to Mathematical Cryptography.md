@@ -336,6 +336,8 @@ print(perm*original)
     3. 正好有一个固定字母
     4. 至少有两个固定字母
 
+（不会证明，最后只有代码）
+
 (1). 让我们使用瞪眼法，写一个函数观察规律
 ```py
 import itertools
@@ -351,7 +353,6 @@ for i in itertools.permutations(letters,length):
     if flag:
         count+=1
         print(f"{''.join(i)} {count}")
-print(count)
 ```
 注意到无论letters的长度是多少，其输出永远可以按开头字母分成n-1组。拿n=5的一组举例：
 ```
@@ -369,19 +370,8 @@ bedca 11
 ```
 如果剔除开头的b，注意到剩下的字符串中除了以a开头的内容数量是2，其余数量都是3
 
-如果选a，那么剩下的三个字母的排列数量等于`n=3`时的情况；如果选除了a以外的字母，整体四个字母的排列数量等于`n=4`时的情况。于是总结公式：
-```py
-#f(i)=(i-1)*(f(i-1)+f(i-2))
-import functools
-@functools.cache
-def calculate(n):
-    if n==1:
-        return 0
-    elif n==2:
-        return 1
-    else:
-        return (n-1)*(calculate(n-1)+calculate(n-2))
-```
+如果选a，那么剩下的三个字母的排列数量等于`n=3`时的情况；如果选除了a以外的字母，整体四个字母的排列数量等于`n=4`时的情况。于是总结公式：f(i)=(i-1)*(f(i-1)+f(i-2))
+
 实验发现对接下来的几个n都正确，但由于n=26时数量太大，无法模拟来验证公式是否准确
 
 那问问chatgpt吧。我非常确信这道题在组合数学里也有，说不定它能给我搜到正确答案（？）
@@ -389,3 +379,41 @@ def calculate(n):
 好的答案正确。这类问题叫错排数（subfactorial，也叫derangement）。上面的式子是等价递推，也有直接的公式：
 
 $$!n=n!\Sigma_{k=0}^n\frac{(-1)^k}{k!}$$
+
+(2). 至少有一个固定字母的排列数量=全排列数量-错排的数量
+
+$$n!-!n$$
+
+(3). 如果一个字母固定的话，剩下的字母必须都是不固定的，即错排数
+
+(4). 一定要用前几小题的结论.jpg
+
+至少有两个固定字母的排列数量=全排数-错排数-只有一个字母固定的排列数量
+
+然后代一下第二小题的结论
+
+=至少有一个固定字母的排列数量-只有一个字母固定的排列数量
+
+```py
+import functools
+@functools.cache
+def derangement(n):
+    if n==1:
+        return 0
+    elif n==2:
+        return 1
+    else:
+        return (n-1)*(derangement(n-1)+derangement(n-2))
+def factorial(n):
+    if n==0 or n==1:
+        return 1
+    return n*factorial(n-1)
+def one_fixed(n):
+    if n==1:
+        return 1
+    return n*derangement(n-1)
+def at_least_one_fixed(n):
+    return factorial(n)-derangement(n)
+def at_least_two_fixed(n):
+    return at_least_one_fixed(n)-one_fixed(n)
+```
