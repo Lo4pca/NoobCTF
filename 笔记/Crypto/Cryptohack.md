@@ -1020,6 +1020,43 @@ proof中的e值说明了for循环执行的次数，间接说明了题目选择�
 
 另一个关键的点在于可以简化`pedersen_commit`的逻辑，使其固定返回`(1,0)`或`(h1,0)`，方便构造 $G_2$ 的假commitment
 
+### Ticket Maestro
+
+其实是osint（
+
+没有头绪，但注意到供题人是 https://www.zksecurity.xyz 。发现这是一个和zkp安全相关的组织。主页下面有他们的github： https://github.com/zksecurity 。顺藤摸瓜找到[zkbugs](https://github.com/zksecurity/zkbugs)库，里面记录了和zkp相关的漏洞。用github自带的搜索功能搜索`groth16`，找到这个文件： https://github.com/zksecurity/zkbugs/tree/main/tools/circomspect 和`groth16 malleability attack`
+
+虽然不知道为什么它们提供的链接点进去是空的，但有了这个关键词我们就能自己搜了。得到这篇文章： https://medium.com/@cryptofairy/exploring-vulnerabilities-the-zksnark-malleability-attack-on-the-groth16-protocol-8c80d13751c5 。groth16的proof是A、B和C三个椭圆曲线上的点，满足这个公式：
+
+![verification](https://miro.medium.com/v2/resize:fit:1400/format:webp/1*pCzxjoqaiD7EVOqjQbmlgA.png)
+
+很明显-A、-B和C仍然是一个有效的proof。然而只延伸出一个有效的proof还不够，因为proof和proof'的价值只有2，等同于请求一个proof的价格。需要用别的伪造方法才能盈利
+
+那篇文章好就好在给了另一种构造方式，见 https://www.beosin.com/resources/beosin%E2%80%99s-research--transaction-malleability-attack-of-groth 。虽然更复杂，但可以构造出几乎无限个有效的proof。取两个随机数 $r_1,r_2$ ，构造：
+
+$A' = r_1^{-1}A,B'=r_1B + r_1r_2\delta,C' = C + r_2A$
+
+其中 $\delta$ 来自服务器使用的VerifyingKey
+
+结果这题最大的难点在于怎么写rust：
+- 如何序列化和反序列化proof和ticket？
+- 为啥题目里的反序列化逻辑不能直接抄？
+- 什么叫函数拿走了变量的所有权导致我不能再用了？
+- 原来`Cargo.toml`不是摆设啊？
+- 文章末尾给的rust代码怎么没法直接运行
+- 怎么与远程交互？
+- 笨蛋AI你给的代码怎么报这么多错？
+
+最后也是找到了不是解决办法的办法：
+- 题目原逻辑的`hex::decode(ticket.proof)?;`中的`?`只能用在返回`Result<>`的函数中。要么用`hex::decode(ticket.proof).expect('x')`,要么像原代码一样包一层函数
+- 看这个函数签名：`redeem(&mut self, ticket: Ticket)`，表示redeem函数会拿走ticket的所有权（ownership），调用后原来的ticket就不能再使用了。可以换成`redeem(&mut self, ticket: &Ticket)`，或者调用时传入`ticket.clone()`
+- `Cargo.toml`记录了项目的dependencies和package相关信息
+- 我选择直接把那段代码丢给AI改。虽然改出来之后还是不能用的，但运行`cargo run`时rust编译器会指出错误的地方（缺了什么引用，语法哪里有问题等），且提供编译器推断的正确代码。人工根据那些提示改掉错误即可。如果遇见自己不会改的就把错误和代码一起扔给AI，它会出手
+    - 当然很大概率它出手后仍然不能跑……但这时报的可能就是其他的错误了，重复以上步骤直到全部代码能跑即可（？）
+- AI记忆力不好，在改出没有报错的代码后，一定要把改完的代码粘贴给它，并在告诉它在这份代码的基础上加新功能。deepseek在最后直接把我的（并非我的）poc整合成远程交互代码，速度快且没有任何报错
+
+看了其他人的solutions后发现还有另一种构造方式： https://slowmist.medium.com/zkp-series-principles-and-implementation-of-extensibility-attacks-on-groth16-proofs-aedcd703323a 。 $\forall x\in F$ , $A'=Ax,B'=Bx^{-1}$
+
 ## [Hash Functions](https://cryptohack.org/challenges/hashes)
 
 ZKP里的`Mister Saplin's Preview`要求先把Merkle Trees做了
