@@ -477,3 +477,25 @@ $$
 这就是所求的整数解 $u_i=c_{i,k}$。
 
 （chatgpt额外指出不要用那堆不好追踪乱七八糟的下标）
+
+### Exercise 1.19
+
+假设 $g^a\equiv 1\mod m$ 且 $g^b\equiv 1\mod m$ 。证明 $g^{gcd(a,b)}\equiv 1\mod m$
+
+有u和v满足 $au+bv=gcd(a,b)$ 。 $g^{au+bv}=g^{au}g^{bv}=(g^{a})^u(g^b)^v=1\times 1\equiv 1\mod m$
+
+### Exercise 1.23
+
+m为奇数，a为任意整数。证明 $2m+a^2$ 永远不会是完全平方数
+
+提示：如果一个数是完全平方数，那么它模4的可能值有哪些？
+
+分类讨论：
+- 若 $x\equiv 0\mod 4$ ，则 $x^2\equiv 0\mod 4$
+- 若 $x\equiv 1\mod 4$ ，则 $x^2\equiv 1\mod 4$
+- 若 $x\equiv 2\mod 4$ ，则 $x^2\equiv 0\mod 4$
+- 若 $x\equiv 3\mod 4$ ，则 $x^2\equiv 1\mod 4$
+
+可以看出一个完全平方数模4的余数只有0或者1。m是奇数，故可以写成2x+1的形式。所以原式等于 $2(2x+1)+a^2\equiv 2+a^2\mod 4$ 。无论 $a^2$ 模4等于0还是1，其整体模4的结果均不会是0或1
+
+（这题最难的地方已经在提示里了。为什么会想到拿模4作分类啊？）
