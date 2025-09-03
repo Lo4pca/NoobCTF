@@ -672,6 +672,7 @@ sympy也放这了
 - [Raul Rosas](https://tsumiiiiiiii.github.io/deadsec24)
 	- bivariate coppersmith使用，相关脚本： https://github.com/defund/coppersmith 。真的是有点憨，coppersmith我想到了，方程的表示我也想到了，结果没想到爆破一个最小的未知数使方程只剩下两个未知数从而用bivariate coppersmith。注意使用coppersmith法时，构造的方程如果有很明显的平凡解法（比如0,0），需要变形方程使其避开这种情况
 	- 假如两个位数差距很大的数相乘，如一个1024位的数A乘上一个300位的数B，两者相乘的结果模 $2^{400}$ 等于A的低300位乘上B再模 $2^{400}$ 。也就是说位数低的数字相乘时只会影响另一个数字相应的低位。分解时考虑低位就好，高位不重要
+    - 再来一个multivariate coppersmith脚本：[cuso](https://github.com/keeganryan/cuso)
 - [One more bit](../../CTF/moectf/2024/Crypto/One%20more%20bit.md)
     - “增强版”wiener attack。想要wiener attack成功有个条件：d必须小于关于n的特定bit数。`Verheul and van Tilborg’s Extension`可以将这个条件变得宽松些，见 https://citeseerx.ist.psu.edu/document?repid=rep1&type=pdf&doi=158dd0abfe27fdf2ceba24c3d168df93743af569 第7页式子`(7)`
 - [babe-Lifting](../../CTF/moectf/2024/Crypto/babe-Lifting.md)
