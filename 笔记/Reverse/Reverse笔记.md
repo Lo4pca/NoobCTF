@@ -1442,3 +1442,5 @@ mov     r8, qword [r13]
 - 代码： https://github.com/UMD-CSEC/UMDCTF-Public-Challenges/tree/main/UMDCTF2025/rev/css
 218. [baby_rev](https://drkasbr.medium.com/reverse-challenges-for-no-hack-no-ctf-2025-b0c7591c7523)
 - 使用JEB Pro反编译wasm
+219. [Useless VM](https://gist.github.com/TechnologicNick/278696fab8d26e94f0af0e736da1420d)
+- 使用chrome开发者工具调试node js环境

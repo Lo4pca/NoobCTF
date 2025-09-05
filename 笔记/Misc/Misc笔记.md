@@ -354,6 +354,9 @@ print(base64.b64encode(temp.encode()))
 - [prismatic](https://github.com/b01lers/b01lers-ctf-2025-public/tree/main/src/jail/prismatic)
     - exec+仅用小写字母和`.[]; `字符构造payload
     - **prismatic**
+- [RNJail](https://github.com/L3AK-TEAM/L3akCTF-2025-public/blob/main/misc/rnjail)
+    - 利用海象运算符（walrus operator）为变量赋值
+    - 利用特殊编码缩减payload的长度： https://gist.github.com/raster0x2a/6e5d81972d61793e74574d65287c7aab
 - pyjail cheatsheet
     - https://shirajuki.js.org/blog/pyjail-cheatsheet
     - https://book.hacktricks.wiki/en/generic-methodologies-and-resources/python/bypass-python-sandboxes/index.html
@@ -1153,7 +1156,8 @@ flag.export("./flag.mp3", format="mp3")
 - python3 vol.py -f mem.raw windows.registry.printkey.PrintKey --offset 0xf8a0000212d0
   - 通过上一步获取到注册表后，根据获得的偏移进一步获取键名信息。
 - python3 vol.py -f mem.raw windows.registry.printkey.PrintKey --offset 0xf8a0000212d0 --key "ControlSet001\Control\ComputerName\ComputerName"  
-  - 可以一直沿着获取的键名走下去。上面的命令用于获取主机名。详情见[此处](https://www.bnessy.com/archives/%E7%94%B5%E5%AD%90%E6%95%B0%E6%8D%AE%E5%8F%96%E8%AF%81-volatility),内含基础例题。
+  - 可以一直沿着获取的键名走下去。上面的命令用于获取主机名。详情见[此处](https://www.bnessy.com/archives/%E7%94%B5%E5%AD%90%E6%95%B0%E6%8D%AE%E5%8F%96%E8%AF%81-volatility),内含基础例题
+- 设置外部volatility symbol表:`python3 vol.py --remote-isf-url 'https://github.com/Abyss-W4tcher/volatility3-symbols/raw/master/banners/banners.json' -f mem.raw <plugin>`
 - [Dumpster Dive](https://github.com/project-sekai-ctf/sekaictf-2023/tree/main/forensics/dumpster-dive)
     - linux.bash for bash history
     - linux.pslist to get pid of processes

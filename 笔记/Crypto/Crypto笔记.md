@@ -801,6 +801,8 @@ $$
     - 其他解法： **knutsacque** 。果然有人跟我类似思路，不过我没想到竟然有现成脚本： https://github.com/TheBlupper/linineq
 - [zk-Openings](https://github.com/srdnlen/srdnlenctf-2025_public/blob/main/crypto_zk-openings)
     - Zero-knowledge+Lattice。太难了，难到全场零解。只知道这和[Plonkup](https://eprint.iacr.org/2022/086.pdf)有关
+- [Mersenne Mayhem](https://github.com/L3AK-TEAM/L3akCTF-2025-public/blob/main/crypto/mersenne-mayhem)
+    - [Improved Lattice-Based Attack on Mersenne Low Hamming Ratio Search Problem](https://eprint.iacr.org/2024/2080.pdf)
 
 ## Elliptic Curves(ECC,椭圆曲线)
 
@@ -1014,6 +1016,10 @@ AES是很能出题的。DES则是放在这凑数的
     - 其他wp： https://github.com/quasar098/ctf-writeups/tree/main/dicectf-2024/rps-casino 。bitvec不知为何无法使用，便用bool类型代替
 - [Quantum L3ak](https://github.com/lrnzsir/ctf-writeups/tree/main/L3akCTF%202024/Quantum%20L3ak)
     - python qiskit量子计算+z3实现MersenneTwister并预测Random生成的随机数
+- [v8-randomness-predictor](https://github.com/PwnFunction/v8-randomness-predictor)
+    - 用z3预测v8的math.random
+- [shiro-hero](https://thebusfactor-writeups.vercel.app/posts/2025-07-14-Shiro-Hero-writeup)
+    - z3预测Xoshiro256
 
 ## Math
 
@@ -2966,10 +2972,8 @@ assert crc32(a)^crc32(b)==crc32(c)^crc32(d)
 - 更简易的脚本：**rc4-prefix**
 180. [Big Stuff](https://thr34dr1pp3r.gitbook.io/ctf/breachctf-2025/crypto-big-stuff)
 - 好像是这篇[论文](https://eprint.iacr.org/2023/1745.pdf)构建的密码系统的错误实现。题目生成A1和A2两个矩阵列表，根据明文的bit选择从哪里取出矩阵 $A_i$ ，乘上最终的密文C。问题在于题目使用的模数p相比于矩阵太大了，导致攻击者可以观察当前 $C_i$ 乘上 $A1_i$ 和 $A2_i$ 的情况来判断明文对应的位是0还是1
-181. [v8-randomness-predictor](https://github.com/PwnFunction/v8-randomness-predictor)
-- 用z3预测v8的math.random
-182. [leetprime](https://github.com/b01lers/b01lers-ctf-2025-public/tree/main/src/crypto/leetprime)
+181. [leetprime](https://github.com/b01lers/b01lers-ctf-2025-public/tree/main/src/crypto/leetprime)
 - 构造可以通过多轮 rabin Miller Test 的合数： https://www.ams.org/journals/mcom/1995-64-209/S0025-5718-1995-1260124-2/S0025-5718-1995-1260124-2.pdf
-183. [Verifier +](https://hackmd.io/VXBgjljNTKatGeOx1O8v7A)
+182. [Verifier +](https://hackmd.io/VXBgjljNTKatGeOx1O8v7A)
 - 预测MT19937，但是每次得到的是65 bit的输出。一个不错的工具：[gf2bv](https://github.com/maple3142/gf2bv)，用来解GF(2)下的线性方程，内部自带MT19937
 - rsa Franklin-Reiter多项式gcd

@@ -444,28 +444,28 @@ $$
 
 - $r=2$ 时，由扩展欧几里得，存在 $c_{1,2},c_{2,2}$ 使
 
-  $$
-  g_2=\gcd(a_1,a_2)=c_{1,2}a_1+c_{2,2}a_2.
-  $$
+$$
+g_2=\gcd(a_1,a_2)=c_{1,2}a_1+c_{2,2}a_2.
+$$
 
 - 设命题对 $r-1$ 成立，即
 
-  $$
-  g_{r-1}=\sum_{i=1}^{r-1} c_{i,r-1}a_i.
-  $$
+$$
+g_{r-1}=\sum_{i=1}^{r-1} c_{i,r-1}a_i.
+$$
 
   再对 $(g_{r-1},a_r)$ 应用二元裴蜀，取整数 $\alpha_r,\beta_r$ 使
 
-  $$
-  g_r=\gcd(g_{r-1},a_r)=\alpha_r\,g_{r-1}+\beta_r\,a_r.
-  $$
+$$
+g_r=\gcd(g_{r-1},a_r)=\alpha_r\,g_{r-1}+\beta_r\,a_r.
+$$
 
   代入归纳式得
 
-  $$
-  g_r=\alpha_r\Big(\sum_{i=1}^{r-1} c_{i,r-1}a_i\Big)+\beta_r a_r
+$$
+g_r=\alpha_r\Big(\sum_{i=1}^{r-1} c_{i,r-1}a_i\Big)+\beta_r a_r
       =\sum_{i=1}^{r-1} (\alpha_r c_{i,r-1})a_i+\beta_r a_r.
-  $$
+$$
 
   于是取 $c_{i,r}=\alpha_r c_{i,r-1}\ (1\le i\le r-1)$，$c_{r,r}=\beta_r$ 即可。
 
@@ -532,6 +532,38 @@ x=my+a, $my+a\equiv b\mod n,y=(b-a)m^{-1}$ 。只要m和n互质，即 $m^{-1}\mo
 
 如果gcd(a,m)=1，直接求a的逆元即可解出方程
 
-如果 $gcd(a,m)=g\not =1$ ， $ga'x\equiv c\mod m$ 。若g|c，又可以写成 $ga'x\equiv gc'\mod m\Rightarrow a'x\equiv c'\mod m$ 。重复以上步骤，直至gcd(a',m)=1
+如果 $gcd(a,m)=g\not =1$ ， $ga'x\equiv c\mod m$ 。若g|c，又可以写成 $ga'x\equiv gc'\mod dm'\Rightarrow a'x\equiv c'\mod m'$ 。重复以上步骤，直至gcd(a',m')=1
 
 若 $gcd(a,m)\not =1$ 且 $g\nmid c$ ，从以上方程可知无法求出g对m的逆元，因此不可解
+
+2. 如果方程有解，证明正好有gcd(a,m)个不同的解
+
+（提示仍然是使用`Theorem 1.11`）
+
+（我不会，请AI教我）
+
+如果有一个解 $x_0$ 满足 $a'x_0\equiv c'\mod m'$ ，对任意 $0\leq t\leq g-1$ ，令 $x_t=x_0+tm'$ ，则 $ax_t\equiv ga'(x_0+tm')\equiv ga'x_0\equiv a'x_0\mod m'$
+
+上述解两两均不相同。若 $x_i\equiv x_j\mod m$ ，则 $x_i-x_j=(t_i-t_j)m'\equiv 0\mod gm'\Rightarrow t_i-t_j|g$ 。唯一的可能性是 $t_i=t_j$
+
+假如有解没有落入上述集合中，意味着某个x满足 $a'x\equiv c'\mod m'$ ,则 $x\equiv x_0,x=x_0+km',k\in Z$ 。让k=qg+r，有 $x=x_0+qgm'+rm'\equiv x_0+rm'\mod m$ 。但r按照定义有 $0\leq r\leq g-1$ ，因此必定落于上述集合中
+
+每个解形如 $x\equiv x_0+t\frac{m}{g}\mod m$ （唯一一处和`Theorem 1.11`有间接关系的地方，此处结论类似当时的结论）
+
+### Exercise 1.33
+
+假设p为质数，有质数q整除p-1
+
+1. $a\in F_p^{\*}$ ， $b=a^{\frac{p-1}{q}}$ 。证明要么b=1，要么b的阶为q
+
+$b^q=a^{p-1}=1$ 。如果另一个q'同样满足这个条件，即 $b^{q'}=a^{\frac{q'(p-1)}{q}}=1$ ;则若将p-1表示为kq，原式等于 $a^{q'k}=1$ 。根据`Proposition 1.29`，a的阶应整除q'k；同时，a的阶应整除qk。除非a=1，否则必然有q'=q
+
+问了下chatgpt，它说思路基本是对的，但是太冗余了（
+
+直接使用`Proposition 1.29`即可。 $b^q=1$ ，因此ord(b)|q。q是质数，因此ord(b)=1或者ord(b)=q。若是前者，说明b=1，否则b的阶就是q
+
+（chatgpt还是说得太轻了）
+
+2. 假设我们要在 $F_p^{\*}$ 里找到一个q阶的元素。利用(1)，我们可以随机选择元素 $a\in F_p^{\*}$ 并检查 $b=a^{\frac{p-1}{q}}\not =1$ 。该检查通过的概率是多少？换句话说，计算如下比例：
+
+$$\frac{#\{a\in F_p^{\*}:a^{\frac{p-1}{q}}\not =1\}}{#F_p^{\*}}$$
