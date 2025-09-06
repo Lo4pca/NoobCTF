@@ -499,6 +499,9 @@
     - puppeteer `--disable-web-security` flag禁用Same-Origin Policy (SOP)
     - 这题的关键在于admin bot使用`window.open(Url, "_blank")`访问页面`Url`时没有配置`noopener`和`noreferrer`，导致`Url`页面可以访问`window.opener`，进而操控`window.opener.location`，读取`window.opener.document.body.innerText`（仅在同源或禁用sop时可以这么做）
     - 题目源码： https://github.com/L3AK-TEAM/L3akCTF-2025-public/tree/main/web/Window_of_Opportunity 。似乎因为没有检查url，导致可以直接用`javascript:eval`执行xss
+- [Mutant](https://github.com/typicallhavok/CTF/blob/main/Writeups/DownUnderCTF/mutant.md)
+    - dom clobbering，但是dom node。如果在form标签里放置名为x的input标签的话，`form.x`优先取出form的input标签而不是同名属性（如attributes）
+    - 利用style标签和style属性（`onanimationend`）触发xss，无需用户交互。之前在`neko-note`见过
 
 ## SSTI
 

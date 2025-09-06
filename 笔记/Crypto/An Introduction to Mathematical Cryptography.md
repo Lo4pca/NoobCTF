@@ -566,4 +566,19 @@ $b^q=a^{p-1}=1$ 。如果另一个q'同样满足这个条件，即 $b^{q'}=a^{\f
 
 2. 假设我们要在 $F_p^{\*}$ 里找到一个q阶的元素。利用(1)，我们可以随机选择元素 $a\in F_p^{\*}$ 并检查 $b=a^{\frac{p-1}{q}}\not =1$ 。该检查通过的概率是多少？换句话说，计算如下比例：
 
-$$\frac{#\{a\in F_p^{\*}:a^{\frac{p-1}{q}}\not =1\}}{#F_p^{\*}}$$
+$$\frac{\#\{a\in F_p^{\*}:a^{\frac{p-1}{q}}\not =1\}}{\#F_p^{\*}}$$
+
+提示：使用`Theorem 1.30`(Primitive Root Theorem)
+
+$F_p^{\*}$ 中的每个元素都是某个原根g的x（大于0小于p-1）次方，因此 $a^{\frac{p-1}{q}}=g^{\frac{x(p-1)}{q}}$ 。b是否等于0取决于是否有 $\frac{x(p-1)}{q}\equiv 0\mod p-1$ 。换句话说， $x\equiv 0\mod q$ 。 $F_p^{\*}$ 中能被q整除的数有 $\frac{p-1}{q}$ 个，所以不能被q整除的数有 $p-1-\frac{p-1}{q}$ 。因此题目要求的比例为 $\frac{p-1-\frac{p-1}{q}}{p-1}=\frac{q-1}{q}$
+
+### Exercise 1.35
+
+假设有一个质数p， $q=\frac{1}{2}(p-1)$ 也是一个质数。假设整数g满足：
+- $g\not\equiv 0\mod p$
+- $g\not\equiv\pm 1\mod p$
+- $g^q\not\equiv 1\mod p$
+
+证明g是模p的原根
+
+$g^{p-1}\equiv 1\mod p$ 。如果存在一个更小的数x满足 $g^x\equiv 1\mod p$ ，有x|p-1。根据题目的条件，整除p-1的数只有q和2，且x不会是q。x也不能是2，因为 $g^2\equiv 1\Rightarrow g\times g\equiv 1\Rightarrow g\equiv\pm 1$ 。因此不存在一个这样的x；p-1就是g的阶，进而g是原根
