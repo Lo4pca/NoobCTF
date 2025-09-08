@@ -566,7 +566,7 @@ $b^q=a^{p-1}=1$ 。如果另一个q'同样满足这个条件，即 $b^{q'}=a^{\f
 
 2. 假设我们要在 $F_p^{\*}$ 里找到一个q阶的元素。利用(1)，我们可以随机选择元素 $a\in F_p^{\*}$ 并检查 $b=a^{\frac{p-1}{q}}\not =1$ 。该检查通过的概率是多少？换句话说，计算如下比例：
 
-$$\frac{\#\{a\in F_p^{\*}:a^{\frac{p-1}{q}}\not =1\}}{\#F_p^{\*}}$$
+$$\frac{\sharp\{a\in F_p^{\*}:a^{\frac{p-1}{q}}\not =1\}}{\sharp F_p^{\*}}$$
 
 提示：使用`Theorem 1.30`(Primitive Root Theorem)
 
@@ -582,3 +582,29 @@ $F_p^{\*}$ 中的每个元素都是某个原根g的x（大于0小于p-1）次方
 证明g是模p的原根
 
 $g^{p-1}\equiv 1\mod p$ 。如果存在一个更小的数x满足 $g^x\equiv 1\mod p$ ，有x|p-1。根据题目的条件，整除p-1的数只有q和2，且x不会是q。x也不能是2，因为 $g^2\equiv 1\Rightarrow g\times g\equiv 1\Rightarrow g\equiv\pm 1$ 。因此不存在一个这样的x；p-1就是g的阶，进而g是原根
+
+### Exercise 1.36
+
+1. 假设p是一个奇质数，有整数b满足 $p\nmid b$ 。证明b模p要么有两个平方根，要么没有平方根。换句话说，证明 $X^2\equiv b\mod p$ 在Z/pZ下要么有两个解，要么没有解（p=2会发生什么？p|b会发生什么？）
+
+$X^2=b+kp$ 。假设有另外的X'和k'满足 $(X')^2=b+k'p,X^2-(X')^2=b+kp-(b+k'p)=(k-k')p$ ，推出 $p|X^2-(X')^2=(X+X')(X-X')$ 。说明要么p|X+X',要么p|X-X'。得到 $X\equiv X'\mod p$ 或 $X\equiv -X'\mod p$
+
+p=2的话任何b的平方根都是自身，且只有一个。p|b的话 $b\equiv 0\mod p$ ，因此平方根也只有一个，是0
+
+4. 假设p是一个奇质数，g为模p的原根。则任意数a都等于g的某个幂次模p，假设为 $a\equiv g^k\mod p$ 。证明仅在k为偶数时，a模p有平方根
+
+$X^2\equiv g^k\mod p$ 。若k为偶数，可以将其写为 $(g^{\frac{k}{2}})^2$ ，因此 $g^{\frac{k}{2}}$ 就是要求的平方根。而如果k不是偶数就无法将其写成 $(g^y)^2$ 的形式，或者说无法解出2y=k
+
+### Exercise 1.37
+
+假设质数 $p\geq 3$ ，且 $X^2\equiv b\mod p$ 有解
+
+1. 证明对任何指数 $e\geq 1$ ，方程 $X^2\equiv b\mod p^e$ 有解
+
+提示：用归纳法（induction）。通过修改模 $p^e$ 的解给出模 $p^{e+1}$ 的解
+
+根据条件，e=1时有解，即 $X^2=b+kp$ 对某个k有解
+
+假设指数为e时方程成立： $X^2\equiv b\mod p^e$ 有解；那么e+1，方程等于 $X'^2=b+k'p^{e+1}\Rightarrow X'^2=b+kp^e+ap^e,a\in Z$
+
+不会了，明天再写（

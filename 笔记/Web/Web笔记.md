@@ -562,7 +562,7 @@ for i in range(300,1000):
 `{{().__class__.__base__.__subclasses__().__getitem__(455)(request.args.shell,shell=True,stdout=(1).__neg__()).communicate()}}`:用getitem绕`[]`过滤，`(1).__neg__()`绕负号过滤
 - [My First App](https://ireland.re/posts/UofTCTF_2024/#webmy-first-app)
     - 过滤方括号、下划线及引号。利用lipsum逃逸，`|attr()`代替方括号，并将带有下划线的项放在请求头，用`request.pragma.0`访问（有些header里面没法放下划线，Pragma可以，所以用多个Pragma传递带有下划线的项，数字表示第i个Pragma里的内容）
-    - https://gist.github.com/C0nstellati0n/248ed49dea0accfef1527788494e2fa5#my-first-app
+    - **My First App**
 - [My Second App](https://hubert.hackin.ca/posts/uoftctf25-my-second-app)
     - python flask ssti绕过滤的究极题目。关键是用filter语法`|`（jinjia独有，普通pyjail不能用）
     - 这题还有个hash extension attack
@@ -656,20 +656,20 @@ for i in range(300,1000):
 
 4. flask session伪造
 
-[例题](https://github.com/C0nstellati0n/NoobCTF/blob/main/CTF/ctfshow/Web/%E6%8A%BD%E8%80%81%E5%A9%86.md)。这题还有个任意文件下载的考点，也很经典。
+[例题](../../CTF/ctfshow/Web/抽老婆.md)。这题还有个任意文件下载的考点，也很经典。
 
 5. [php伪协议](https://segmentfault.com/a/1190000018991087)
 
-[例题](https://github.com/C0nstellati0n/NoobCTF/blob/main/CTF/%E6%94%BB%E9%98%B2%E4%B8%96%E7%95%8C/1%E7%BA%A7/Web/fileclude.md)。很多时候用来读取源代码，标志函数为include函数系列。注意php://filter伪协议还可以套另一层协议，不一定非要写`php://filter/read=convert.base64-encode/resource=flag.php`这类的，写`php://filter/read=convert.base64-encode/xxx/resource=flag.php`也行，xxx自定，可用于绕过滤。如[这道题](https://blog.csdn.net/mochu7777777/article/details/105204141)。或者大小写混用，不要read也可以:`pHp://filter/convert.baSe64-encode/resource=/flag`。如果base64等关键字符被过滤了，可以考虑双urlencode绕过，如`php://filter/read=convert.%2562%2561%2573%2565%2536%2534-encode/resource=flag.php`。[例题2](https://blog.csdn.net/m0_56059226/article/details/119758074)，使用zip伪协议，这个协议忽视后缀，不是zip，例如jpg后缀也可以读取。格式为`zip://[压缩文件绝对路径（网站上相对路径也行）]%23[压缩文件内的子文件名（木马）]（#编码为%23，#在get请求中会将后面的参数忽略所以使用get请求时候应进行url编码）`。
+[例题](../../CTF/攻防世界/1级/Web/fileclude.md)。很多时候用来读取源代码，标志函数为include函数系列。注意php://filter伪协议还可以套另一层协议，不一定非要写`php://filter/read=convert.base64-encode/resource=flag.php`这类的，写`php://filter/read=convert.base64-encode/xxx/resource=flag.php`也行，xxx自定，可用于绕过滤。如[这道题](https://blog.csdn.net/mochu7777777/article/details/105204141)。或者大小写混用，不要read也可以:`pHp://filter/convert.baSe64-encode/resource=/flag`。如果base64等关键字符被过滤了，可以考虑双urlencode绕过，如`php://filter/read=convert.%2562%2561%2573%2565%2536%2534-encode/resource=flag.php`。[例题2](https://blog.csdn.net/m0_56059226/article/details/119758074)，使用zip伪协议，这个协议忽视后缀，不是zip，例如jpg后缀也可以读取。格式为`zip://[压缩文件绝对路径（网站上相对路径也行）]%23[压缩文件内的子文件名（木马）]（#编码为%23，#在get请求中会将后面的参数忽略所以使用get请求时候应进行url编码）`。
 
 1. php preg_replace函数/e选项会导致命令执行
 
-这篇[文章](https://xz.aliyun.com/t/2557)讲的很好。[ics-05](https://github.com/C0nstellati0n/NoobCTF/blob/main/CTF/%E6%94%BB%E9%98%B2%E4%B8%96%E7%95%8C/3%E7%BA%A7/Web/ics-05.md)是一道关于该漏洞的例题。还有和文章中提到的利用方法思路完全一样的题：[[BJDCTF2020]ZJCTF，不过如此](https://github.com/C0nstellati0n/NoobCTF/blob/main/CTF/BUUCTF/Web/%5BBJDCTF2020%5DZJCTF%EF%BC%8C%E4%B8%8D%E8%BF%87%E5%A6%82%E6%AD%A4.md)。
+这篇[文章](https://xz.aliyun.com/t/2557)讲的很好。[ics-05](../../CTF/攻防世界/3级/Web/ics-05.md)是一道关于该漏洞的例题。还有和文章中提到的利用方法思路完全一样的题：[[BJDCTF2020]ZJCTF，不过如此](../../CTF/BUUCTF/Web/[BJDCTF2020]ZJCTF，不过如此.md)。
 
-7. php rce之<?=和反引号的利用。例题：[RCE挑战1](https://github.com/C0nstellati0n/NoobCTF/blob/main/CTF/ctfshow/Web/RCE%E6%8C%91%E6%88%981.md)
+7. php rce之<?=和反引号的利用。例题：[RCE挑战1](../../CTF/ctfshow/Web/RCE挑战1.md)
 
-8. php无字母数字rce之自增利用。例题：[RCE挑战2](https://github.com/C0nstellati0n/NoobCTF/blob/main/CTF/ctfshow/Web/RCE%E6%8C%91%E6%88%982.md)
-9. xml基本xxe利用。例题：[[NCTF2019]Fake XML cookbook](https://github.com/C0nstellati0n/NoobCTF/blob/main/CTF/BUUCTF/Web/%5BNCTF2019%5DFake%20XML%20cookbook.md)。注意[svg文件](https://baike.baidu.com/item/SVG%E6%A0%BC%E5%BC%8F/3463453)也是基于xml开发的，同样也有xxe。例题:[[BSidesCF 2019]SVGMagic](https://blog.csdn.net/shinygod/article/details/124052707)
+8. php无字母数字rce之自增利用。例题：[RCE挑战2](../../CTF/ctfshow/Web/RCE挑战2.md)
+9. xml基本xxe利用。例题：[[NCTF2019]Fake XML cookbook](../../CTF/BUUCTF/Web/[NCTF2019]Fake%20XML%20cookbook.md)。注意[svg文件](https://baike.baidu.com/item/SVG%E6%A0%BC%E5%BC%8F/3463453)也是基于xml开发的，同样也有xxe。例题:[[BSidesCF 2019]SVGMagic](https://blog.csdn.net/shinygod/article/details/124052707)
 ```xml
 <?xml version="1.0"?>
 <!DOCTYPE xxe [
@@ -3759,7 +3759,7 @@ window.recaptcha=true;
 - 类似题及参考链接：
     - https://ctftime.org/writeup/36079
     - https://github.com/b-viguier/PhpFk
-    - https://www.cnblogs.com/hetianlab/p/14143480.html 。利用里面提到的最后一种方法的wp： https://gist.github.com/C0nstellati0n/248ed49dea0accfef1527788494e2fa5#stress-release-service
+    - https://www.cnblogs.com/hetianlab/p/14143480.html 。利用里面提到的最后一种方法的wp：**stress release service**
 403. Nepxion/Discovery[漏洞](https://securitylab.github.com/advisories/GHSL-2022-033_GHSL-2022-034_Discovery/)：SpEL注入以及SSRF
 404. [ChatterBox](https://vozec.fr/writeups/chatterbox-realworld-ctf-2024/)
 - PostgreSQL sql注入
