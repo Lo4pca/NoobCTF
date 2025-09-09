@@ -182,6 +182,8 @@ kernel pwn题合集。用于纪念我连堆都没搞明白就敢看内核的勇�
 - [No.5️⃣4️⃣9️⃣](https://naup.mygo.tw/2025/06/30/Linux-Kernel-Patched-exec-remove-legacy-custom-binfmt-modules-autoloading)
   - kernel新版本(6.14.0)后，无法再用之前（调用未知文件）的方式触发modprobe_path，但仍有其他办法
   - **No.5️⃣4️⃣9️⃣**
+- [backdoor](https://naup.mygo.tw/2025/07/20/2025-downunderCTF-writeup)
+  - kernel汇编中，可以用`mov ecx, 0xC0000082;rdmsr`（MSR(IA32_LSTAR = 0xC0000082)）得到kernel text基地址
 
 ## Shellcode题合集
 
@@ -1022,19 +1024,6 @@ int pthread_cond_signal (pthread_cond_t * cond);
 - safe linking下的tcache poisoning要将fd mangle加密，且目标地址要与16对齐（地址末尾一定是0）
 - plt与got表深入理解：https://zhuanlan.zhihu.com/p/130271689 。一个函数的plt表是3条指令：jmp addr;push num;jmp addr。
 - 可利用`setbuf(stderr,(char *)0x0);`getshell。stderr在bss段，因此只要能泄露地址/没有PIE+partial relro，就能尝试将setbuf的got表改成system，再往stderr里写入sh。甚至可以再找个方便控制调用的函数，将其got改为改动后的setbuf。如果system在改之前已经加载过，got表里填写的system plt地址就能往下写一条（从第一条jmp addr的地址写到push num）
-- pwntools gdb.debug使用。
-```py
-context.terminal = ["tmux", "splitw", "-h"]
-p = gdb.debug( #使用gdb.debug需要安装gdbserver：sudo apt-get install gdbserver
-         "./vuln",
-         "\n".join(
-            [
-                "此处写gdb脚本",
-                "一句是list的一个元素"
-            ]
-         ),
-    )
-```
 77. 如何让python加载C libc并使用libc里的函数：
 ```py
 from ctypes import CDLL
@@ -1517,6 +1506,8 @@ while (sz-- > 0)
 ```py
 from pwn import *
 context.arch='amd64'
+#如果独立安装pwndbg
+#gdb.binary = lambda: 'pwndbg'
 context.terminal = ["tmux", "splitw", "-h"]
 gdbscript='''
     si
@@ -2100,3 +2091,9 @@ offset = the_mmap64_plus_23_itself
 - 如何调试：**MIPS**
 248. [cosmofile](https://razvan.sh/writeups/cosmofile-l3akctf)
 - [Cosmopolitan Libc](https://github.com/jart/cosmopolitan)下的fsop任意地址写。这个版本的libc的文件结构与普通libc不同
+249. [RW.py](https://github.com/oxo-crab/Writeup/blob/main/DUCTF25/rw)
+- 相对地址读写，但是相对的是python里的一个对象
+- gdb调试python进程。带符号的python见 https://aur.archlinux.org/packages/python-dbg
+- 其他wp：
+  - https://github.com/DownUnderCTF/Challenges_2025_Public/blob/main/pwn/rw.py
+  - https://vulnx.dev/blog/posts/DUCTF2025 （伪造`PyDict_Type`并覆盖`__str__`为one_gadget）

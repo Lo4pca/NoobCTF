@@ -4323,3 +4323,6 @@ if (await remote.hasPasswordFor(id)) {
 553. [Catch The Goose](https://blog.frankk.uk/posts/nhnc-2025)
 - 如何用grpc协议进行交互
 - 另一篇wp： https://humdrum-beanie-d4b.notion.site/Web-catch-the-goose-2290c5a009e3803dae85cc21fb62e126
+554. [sodium](https://siunam321.github.io/ctf/DownUnderCTF-2025/web/sodium)
+- [pound](https://github.com/graygnuorg/pound)在转发请求时会自动加上一些`X-Forwarded`请求头，如`X-Forwarded-For`。如果用户发送请求时已经添加了一个`X-Forwarded-For`，则服务器端得到的字段内容为用户提供的值用逗号拼接上检测到的ip。但如果用户发送了两个`X-Forwarded-For`，此时服务器端就只能得到用户给的最后一个`X-Forwarded-For`的值
+- [Funky chunks: abusing ambiguous chunk line terminators for request smuggling](https://w4ke.info/2025/06/18/funky-chunks.html):proxy和服务器对HTTP/1.1 Chunk Extensions语法的解析差异导致的请求走私

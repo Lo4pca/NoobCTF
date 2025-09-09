@@ -603,8 +603,22 @@ $X^2\equiv g^k\mod p$ 。若k为偶数，可以将其写为 $(g^{\frac{k}{2}})^2
 
 提示：用归纳法（induction）。通过修改模 $p^e$ 的解给出模 $p^{e+1}$ 的解
 
+（提示拉不动我，还是找chatgpt救吧）
+
 根据条件，e=1时有解，即 $X^2=b+kp$ 对某个k有解
 
-假设指数为e时方程成立： $X^2\equiv b\mod p^e$ 有解；那么e+1，方程等于 $X'^2=b+k'p^{e+1}\Rightarrow X'^2=b+kp^e+ap^e,a\in Z$
+假设指数为k时方程成立：存在整数 $x_k^2\equiv b\mod p^k$ 。再假设存在t使得 $x_{k+1}=x_k+tp^k$ 使得 $x_{k+1}^2\equiv b\mod p^{k+1}$ 。展开 $x_{k+1}^2$ 得到 $t^2 p^{2k}+2tx_kp^k+x_k^2\equiv 2tx_kp^k+x_k^2\mod p^{k+1}$ （马后炮发现这一段是最重要的）
 
-不会了，明天再写（
+因为 $x_k^2\equiv b\mod p^k$ ，所以存在整数s满足 $x_k^2=sp^k+b$ 。代入上式，得到 $2tx_kp^k+sp^k+b\equiv b\mod p^{k+1}\Rightarrow 2tx_kp^k+sp^k\equiv 0\mod p^{k+1}$ 。在模p的意义下， $2tx_k+s\equiv 0\mod p$ 。需要 $2x_k$ 的逆元在模p下存在才能解出t
+
+若 $p\nmid x_k$ ，则由于质数p大于等于3， $2x_k$ 在Z/pZ中可逆。套用上述公式算出 $x_{k+1}$ 即可
+
+若 $p|x_k$ ，则 $x_k\equiv 0\mod p$ 。代入先前的方程，发现 $x_k^2\equiv 0\mod p^k$ ，因此b=0。易见 $x_{k+1}=0$ 是一个满足更高幂方程的解
+
+### Exercise 1.49
+
+Alice和Bob创造了一个对称密码。k为密钥，明文为d位的整数，或者说 $M=\{m\in Z:0\leq m < 10^d\}$
+
+加密明文时，Alice计算 $\sqrt{k}$ 并保留d位小数，这个小数部分称为 $\alpha$ 。 $c\equiv m+\alpha\mod 10^d$
+
+4. 如果得到一组明文/密文对，且 $10^d$ 相比于k来说很大，可以恢复k吗？
