@@ -622,3 +622,113 @@ Alice和Bob创造了一个对称密码。k为密钥，明文为d位的整数，�
 加密明文时，Alice计算 $\sqrt{k}$ 并保留d位小数，这个小数部分称为 $\alpha$ 。 $c\equiv m+\alpha\mod 10^d$
 
 4. 如果得到一组明文/密文对，且 $10^d$ 相比于k来说很大，可以恢复k吗？
+
+搜到了这个： https://mathoverflow.net/questions/462096/how-to-recover-integer-part-from-known-fractional-root-part
+
+答案1省流：无平方因子数（squarefree number,其质因数分解中不包含平方数的数，或者说 $p_i^k$ 的每个k都是1或0）的平方根可以展开成周期性连分数（[Periodic Continued Fraction](https://mathworld.wolfram.com/PeriodicContinuedFraction.html)），形如：
+
+![continued_fraction](https://mathworld.wolfram.com/images/equations/PeriodicContinuedFraction/NumberedEquation1.svg)
+
+其循环的序列（除了最后一个数）呈对称结构；而这最后一个数是我们要找的整数部分的二倍
+
+问题是，无平方因子数不等于non-square number，上述规律不适用于非无平方因子数。所以得尝试答案2的整数线性规划（integer linear program）
+
+假设我们拿到的小数部分为f，要求的整数部分是n。则 $(n+f)^2=n^2+2nf+f^2$ 也是一个整数，假设为Q。变形一下得到 $f^2+2nf=Q-n^2$ ，再假设 $Q-n^2$ 为m
+
+由于我们拿不到完整的f，只能拿到某个截断值，因此上述方程的等号不完全成立，据此得到两个不等式 $f^2+2nf\leq m$ 和 $f^2+2nf\geq m$ （因为m的值也不确定，所以得通过上下界确定在正负方向最好的n）
+
+现在我们要将上述式子转成整数。因为 $f=\frac{a}{b}$ ，所以 $\frac{a^2}{b^2}+2n\frac{a}{b}\leq m\Rightarrow a^22nab\leq mb^2$ ,另一个方向同理
+
+为了方便接下来用sagemath的[Mixed Integer Linear Programming](https://doc.sagemath.org/html/en/reference/numerical/sage/numerical/mip.html)模型表示上述内容，引入一个变量d，将两个方向的逼近转换为“求最小绝对值”问题，即 $b^2d=|a^22nab-mb^2|$ ,minimize d。`add_constraint`的两个约束为：
+- $b^2d\geq a^22nab-mb^2$
+- $b^2d\geq -(a^22nab-mb^2)$
+
+`set_objective`的目标为最小化d。chatgpt的实现如下：
+```py
+from math import sqrt
+from random import randint
+from sage.all import MixedIntegerLinearProgram, Integer
+BOUND=32
+D=15
+def gen(d,bound=2**BOUND):
+    k=randint(1,bound)
+    k_rooted=sqrt(k)
+    return k_rooted,int(10**d*(k_rooted-int(k_rooted)))
+def recover_n_from_fractional_rational(p_int, q_int, R, solver='glpk'):
+    """
+    使用有理近似 f = p_int / q_int 来恢复整数部分 n，
+    假设真正 n 满足 0 <= n <= R，
+    且 (n + f)^2 是整数 m。
+
+    返回 (n_val, m_val, d_val) —— 最小误差 d 对应的解。
+    """
+    # 检查输入类型
+    p_int = Integer(p_int)
+    q_int = Integer(q_int)
+    R = Integer(R)
+
+    # 构造 MILP，指定 minimization
+    p = MixedIntegerLinearProgram(maximization=False, solver=solver)
+
+    # 创建变量簇
+    X = p.new_variable(integer=True)   # 整数变量簇
+    Y = p.new_variable(real=True, nonnegative=True)  # 实数误差变量簇
+
+    # 索引具体变量
+    n = X['n']
+    m = X['m']
+    d = Y['d']
+
+    # 去分母
+    # 把不等式写成整数或有理数系数形式
+    # 将两边乘以 q^2，使所有系数整除或有理
+    q2 = q_int * q_int
+    p2 = p_int * p_int
+    # 2 * n * f * q^2 = 2 * n * p_int * q_int
+    # f^2 * q^2 = p_int^2
+
+    # 变量范围约束
+    p.add_constraint(n >= 0)
+    p.add_constraint(n <= R)
+
+    # 约束1: d >= | (2*n*f + f^2) - m |
+    # 即两个线性不等式：
+    #    d >= 2*n*f + f^2 - m
+    #    d >= -(2*n*f + f^2 - m)
+
+    # 为避免分母，将每个不等式乘以 q^2：
+    #    q^2 * d >= 2 * p_int * q_int * n + p_int^2 - q^2 * m
+    #    q^2 * d >= -( 2 * p_int * q_int * n + p_int^2 - q^2 * m )
+
+    # 添加这两个约束
+    p.add_constraint(q2 * d >= 2 * p_int * q_int * n + p2 - q2 * m)
+    p.add_constraint(q2 * d >= -(2 * p_int * q_int * n + p2 - q2 * m))
+    p.add_constraint(n>=2) #防止trivial case
+    # 设定目标函数为最小化 d
+    p.set_objective(d)
+
+    # 求解
+    p.solve()
+
+    # 取解
+    Xvals = p.get_values(X)
+    Yvals = p.get_values(Y)
+
+    # 把返回值类型整理
+    n_val = Xvals.get('n')
+    m_val = Xvals.get('m')
+    d_val = Yvals.get('d')
+
+    return n_val, m_val, d_val
+expected,data=gen(D)
+n_val, m_val, d_val = recover_n_from_fractional_rational(data, 10^D, R=2^BOUND)
+print("n =", n_val, "m =", m_val, "d =", d_val)
+print(f"{expected=}")
+```
+这玩意确实能跑，但有以下几种结果：
+- n为正确答案
+- n为错误答案
+- `MIPSolverException: GLPK: Problem has no feasible solution`
+- 提升BOUND后成功率骤然下降。或许可以换成ppl模型，但耗时更长
+
+仍不能100%恢复k。没办法了，燃尽了（

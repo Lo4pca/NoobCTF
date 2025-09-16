@@ -502,6 +502,10 @@
 - [Mutant](https://github.com/typicallhavok/CTF/blob/main/Writeups/DownUnderCTF/mutant.md)
     - dom clobbering，但是dom node。如果在form标签里放置名为x的input标签的话，`form.x`优先取出form的input标签而不是同名属性（如attributes）
     - 利用style标签和style属性（`onanimationend`）触发xss，无需用户交互。之前在`neko-note`见过
+    - 其他解法：**mutant**
+        - 预期的mutation xss
+        - 利用form的autofocus和onfocus自动触发xss
+    - https://jorianwoltjer.com/blog/p/research/mutation-xss
 
 ## SSTI
 
@@ -629,6 +633,9 @@ for i in range(300,1000):
 - [Ez ⛳ v3](https://mariosk1574.com/posts/kalmar-ctf-2025-ez-v3)
     - caddyfile `httpInclude`模板注入。比赛时真正卡住我的地方竟然是如何连接服务器……文件内存在`strict_sni_host insecure_off`，可以用openssl以一种特定的方式连接；但是用浏览器的话会显示没有指定的mtls证书
     - 指定`Host` header也能绕过mtls连接（以及一个更灵活的注入方式）：**Ez ⛳ v3** 和 https://mqcybersec.org/writeups/25-kalmar-ezv3
+- [Request Handling](https://github.com/Yazan03/CTF-writeups2025/tree/main/DU%20CTF/Request%20Handling)
+    - [Handlebars](https://handlebarsjs.com)的`Handlebars.compile`函数的source参数可以传入字符串或ast；ast模式下的ssti过滤没有字符串下的那么严格
+    - ssti解法：**Request Handling**
 - [更多模板注入payload](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Server%20Side%20Template%20Injection/Python.md)
     - `{% for x in ().__class__.__base__.__subclasses__() %}{% if "warning" in x.__name__ %}{{x()._module.__builtins__['__import__']('os').popen("cmd").read()}}{%endif%}{% endfor %}`
     - https://sanlokii.eu/writeups/downunderctf/parrot-the-emu
@@ -2303,7 +2310,8 @@ response = client.get_function(FunctionName="wani_function")
 
 pprint(response)
 ```
-官方[wp](https://github.com/wani-hackase/wanictf2023-writeup/tree/main/web/lambda)给的是命令行的解法。
+官方[wp](https://github.com/wani-hackase/wanictf2023-writeup/tree/main/web/lambda)给的是命令行的解法
+- 另一道类似的题：[Mary had a little lambda](https://lrc-1.gitbook.io/lrc-docs/mary-had-a-little-lambda)
 
 207. [screenshot](https://github.com/wani-hackase/wanictf2023-writeup/tree/main/web/screenshot)
 - SSRF常出现于服务器访问用户提供的url时。此时可用file://协议读取本地文件。

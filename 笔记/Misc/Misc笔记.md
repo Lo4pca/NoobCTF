@@ -2012,6 +2012,7 @@ for i in "${!data[@]}"; do modbus host:port $((i+19))=${data[$i]}; done
 119. [nobigdeal](https://github.com/CyberHeroRS/writeups/blob/main/NahamConCTF/2023/Networks/nobigdeal.md)
 - Network Block Device([NBD](https://github.com/NetworkBlockDevice/nbd/blob/master/doc/proto.md))协议通信工具：[nbd-client](https://sourceforge.net/projects/nbd/files/nbd/)。新旧版本nbd互相不兼容，按需下载对应版本。`sudo nbd-client server.com port /dev/nbd0`
     - 或者使用python： https://gist.github.com/gabriel-samfira/499f7c1844b0948b5d40eef08b18c1f5 。参考 https://www.youtube.com/watch?v=o7q4ndTF_0o&list=PLldZ8EeOcu7fbu4tdAzVxVxJBr0RLnloa&index=4
+- 更详细的题目：[Network Disk Forensics](https://github.com/samcsss/Writeups/blob/main/2025-DUCTF/RE_Network_Disk_Forensics.md)
 120. [vulpes-vuples](https://github.com/hsncsclub/hsctf-10-challenges/tree/main/misc/vulpes-vuples),[wp2](https://ebonyx.notion.site/misc-vulpes-vulpes-4292cc40a66046c9b0d60a07694d5f2e)
 - Mozilla Firefox profile folder分析。使用[firefed](https://github.com/numirias/firefed)获取profile的历史浏览记录：`firefed -p ./profile visits`,或者在profile文件夹中找到places.sqlite文件，手动查询。
 - [Tampermonkey Firefox userscript storage location](https://stackoverflow.com/questions/67246384/tampermonkey-firefox-user-scripts-storage-location):`storage/default/<url>^userContextId=4294967295/idb/3647222921wleabcEoxlt-eengsairo.sqlite`，其中url为moz-extension:// url，不同人不一样。这个文件是可以修改的，参考 https://stackoverflow.com/questions/54920939/parsing-fb-puritys-firefox-idb-indexed-database-api-object-data-blob-from-lin ，工具：[moz-idb-edit](https://gitlab.com/ntninja/moz-idb-edit/-/tree/main/)
