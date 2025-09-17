@@ -688,7 +688,7 @@ def recover_n_from_fractional_rational(p_int, q_int, R, solver='glpk'):
     # f^2 * q^2 = p_int^2
 
     # 变量范围约束
-    p.add_constraint(n >= 0)
+    p.add_constraint(n >= 2)
     p.add_constraint(n <= R)
 
     # 约束1: d >= | (2*n*f + f^2) - m |
@@ -703,7 +703,6 @@ def recover_n_from_fractional_rational(p_int, q_int, R, solver='glpk'):
     # 添加这两个约束
     p.add_constraint(q2 * d >= 2 * p_int * q_int * n + p2 - q2 * m)
     p.add_constraint(q2 * d >= -(2 * p_int * q_int * n + p2 - q2 * m))
-    p.add_constraint(n>=2) #防止trivial case
     # 设定目标函数为最小化 d
     p.set_objective(d)
 
@@ -732,3 +731,29 @@ print(f"{expected=}")
 - 提升BOUND后成功率骤然下降。或许可以换成ppl模型，但耗时更长
 
 仍不能100%恢复k。没办法了，燃尽了（
+
+## Discrete Logarithms and Diffie–Hellman
+
+### Exercise 2.3
+
+g是 $F_p$ 下的原根
+
+1. 假设x=a和x=b都是 $g^x\equiv h\mod p$ 的整数解。证明 $a\equiv b\mod p-1$ 。解释为什么这说明了以下映射是良定义（well-defined）的：
+
+$$log_g:F^{\*}_p\rightarrow\frac{Z}{(p-1)Z}$$
+
+良定义：假设有一个映射 $f:A\rightarrow B$ ， $\forall a\in A$ ，都有唯一的一个 $b\in B$ 与之对应，且这个对应关系不依赖于代表元的选择，就说f是良定义的
+
+g是原根，所以一定存在且只存在一个大于0小于等于p-1的x满足 $g^x\equiv h\mod p$ 。根据费马小定理，其他解一定形如 $x+k(p-1)$ 。故 $a\equiv b\equiv x\mod p-1$ 。几个整数下不同的解在模p-1下都是相同的，即 $\frac{Z}{(p-1)Z}$ 下只有唯一的解。符合良定义的定义
+
+2. 证明 $log_g(h_1h_2)=log_g(h_1)+log_g(h_2),\forall h_1,h_2\in F^{\*}_p$
+
+$log_g(h_1h_2)=log_g(g^ag^b)=log_g(g^{a+b})=a+b$
+
+$log_g(h_1)+log_g(h_2)=log_g(g^a)+log_g(g^b)=a+b$
+
+3. 证明 $log_g(h^n)=nlog_g(h),\forall h\in F^{\*}_p,n\in Z$
+
+$log_g(h^n)=log_g(g^{an})=an$
+
+$nlog_g(h)=nlog_g(g^a)=an$
