@@ -2977,3 +2977,6 @@ assert crc32(a)^crc32(b)==crc32(c)^crc32(d)
 182. [Verifier +](https://hackmd.io/VXBgjljNTKatGeOx1O8v7A)
 - 预测MT19937，但是每次得到的是65 bit的输出。一个不错的工具：[gf2bv](https://github.com/maple3142/gf2bv)，用来解GF(2)下的线性方程，内部自带MT19937
 - rsa Franklin-Reiter多项式gcd
+183. [yet-another-login](https://blog.tanglee.top/2025/07/20/DownUnderCTF-2025-Crypto-Writeup.html)
+- Paillier Decryption Oracle。利用检查解密是否成功的oracle恢复某个c对应的m。要求模数远大于m，且比对时使用的是截断比对
+- 简易版poc：**yet-another-login**

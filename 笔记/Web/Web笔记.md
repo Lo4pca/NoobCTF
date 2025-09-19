@@ -634,8 +634,11 @@ for i in range(300,1000):
     - caddyfile `httpInclude`模板注入。比赛时真正卡住我的地方竟然是如何连接服务器……文件内存在`strict_sni_host insecure_off`，可以用openssl以一种特定的方式连接；但是用浏览器的话会显示没有指定的mtls证书
     - 指定`Host` header也能绕过mtls连接（以及一个更灵活的注入方式）：**Ez ⛳ v3** 和 https://mqcybersec.org/writeups/25-kalmar-ezv3
 - [Request Handling](https://github.com/Yazan03/CTF-writeups2025/tree/main/DU%20CTF/Request%20Handling)
-    - [Handlebars](https://handlebarsjs.com)的`Handlebars.compile`函数的source参数可以传入字符串或ast；ast模式下的ssti过滤没有字符串下的那么严格
-    - ssti解法：**Request Handling**
+    - [Handlebars](https://handlebarsjs.com)的`Handlebars.compile`函数的source参数可以传入字符串或ast(ast injection)
+    - 其他资料
+        - ssti解法：**Request Handling**
+        - 原理解析： https://enoch.host/archives/Handlebars-AST-syntax-tree-injection-issue
+        - 模板引擎pug里的类似漏洞/如何利用原型链污染触发： https://po6ix.github.io/AST-Injection
 - [更多模板注入payload](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Server%20Side%20Template%20Injection/Python.md)
     - `{% for x in ().__class__.__base__.__subclasses__() %}{% if "warning" in x.__name__ %}{{x()._module.__builtins__['__import__']('os').popen("cmd").read()}}{%endif%}{% endfor %}`
     - https://sanlokii.eu/writeups/downunderctf/parrot-the-emu
