@@ -1320,7 +1320,7 @@ index()
 119. python利用type函数[动态创建类](http://c.biancheng.net/view/2292.html)。
 120. python路径拼接os.path.join()函数当其中一个参数为绝对路径时，前面的参数会被舍弃，利用这个特点可以绕过一些路径限制。例题:[[HFCTF 2021 Final]easyflask](https://blog.csdn.net/LYJ20010728/article/details/117422046)
 121. 一段数据以rO0AB开头，基本可以确定这串就是Java序列化base64加密的数据;如果以aced开头，那么是一段Java序列化的16进制。
-122. java [JDBCsql注入](https://www.wangan.com/docs/94)+burpsuite java Deserialization Scanner插件+ysoserial（java反序列化漏洞工具）。例题:[[网鼎杯 2020 朱雀组]Think Java](https://blog.csdn.net/RABCDXB/article/details/124003575)
+122. java [JDBCsql注入](https://www.wangan.com/docs/94)+burpsuite java Deserialization Scanner插件+[ysoserial](https://github.com/frohoff/ysoserial)（java反序列化漏洞利用工具）。例题:[[网鼎杯 2020 朱雀组]Think Java](https://blog.csdn.net/RABCDXB/article/details/124003575)
 123. 在phpsession里如果在php.ini中设置session.auto_start=On，那么PHP每次处理PHP文件的时候都会自动执行session_start()，但是session.auto_start默认为Off。与Session相关的另一个设置叫[session.upload_progress.enabled](https://xz.aliyun.com/t/9545)，默认为On，在这个选项被打开后，在multipart POST时传入PHP_SESSION_UPLOAD_PROGRESS，PHP会执行session_start()。借此可以绕过一些需要session才能访问的文件的限制，甚至RCE。例题:[[PwnThyBytes 2019]Baby_SQL](https://blog.csdn.net/SopRomeo/article/details/108967248)。
 124. node.js早期版本（<8.0)中，沙箱vm2有个特性：当 Buffer 的构造函数传入数字时, 会得到与数字长度一致的一个 Buffer，并且这个 Buffer 是未清零的。8.0 之后的版本可以通过另一个函数 Buffer.allocUnsafe(size) 来获得未清空的内存。一个调用过的变量，一定会存在内存中，也就是说，我们可以使用Buffer函数读取沙箱之外的变量内容，实现沙箱逃逸。例题:[[HITCON 2016]Leaking](https://blog.csdn.net/weixin_44037296/article/details/112387663)
 125. 对于SSRF，127.0.0.1无法使用的情况下，可以考虑0.0.0.0。
@@ -3989,7 +3989,7 @@ Content-Type: text/plain
 465. [HackerNickName](https://blog.hamayanhamayan.com)
 - java jackson `@JacksonInject`字段注入。可以将key设置为空字符串来插入被标记为`@JacksonInject`的字段。见 https://blog.kuron3k0.vip/2021/04/10/vulns-of-misunderstanding-annotation/
 - 一个[curl globbing](https://everything.curl.dev/cmdline/globbing.html)和URL相关的绕过滤技巧。具体过滤代码见wp，总之可以用`https://{a@url1/path1,b@url2/path2}`（`http://{127.0.0.1:8090,@nicknameservice:5000/}`）使java的URL库识别hostname为`nicknameservice`而curl真正访问的url为`127.0.0.1:8090`
-- 其他wp： https://gist.github.com/C0nstellati0n/248ed49dea0accfef1527788494e2fa5#hackernickname 。这题原来还有java 反序列化（SSTI）的内容，见404条。也跟 https://vulncheck.com/blog/cve-2023-44604-activemq-in-memory 沾点边
+- 其他wp： **HackerNickName** 。这题原来还有java 反序列化（SSTI）的内容，见404条。也跟 https://vulncheck.com/blog/cve-2023-44604-activemq-in-memory 沾点边
 466. [Duck Finder](https://github.com/D13David/ctf-writeups/tree/main/bcactf5/web/duckfinder)
 - js ejs库3.1.6 RCE漏洞： https://eslam.io/posts/ejs-server-side-template-injection-rce/
 467. [tls_spec](https://github.com/southball/ctf-writeups/tree/main/Wani-CTF-2024/web/tls_spec)

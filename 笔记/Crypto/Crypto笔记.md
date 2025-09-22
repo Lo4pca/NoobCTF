@@ -1005,6 +1005,9 @@ AES是很能出题的。DES则是放在这凑数的
     - 官方wp没有使用sagemath，直接自己实现 $GF(2^{128})$ 下的运算： https://github.com/uclaacm/lactf-archive/blob/main/2025/crypto/good-hash
 - [ECB++](https://github.com/rerrorctf/writeups/blob/main/2025_03_21_WolvCTF25/crypto/ecb%2B%2B)
     - aes ecb encryption oracle，但是每次使用的key都不同。不过原理和那种key不改变的题是一样的，只需要让每一次请求包含所有可能的byte即可
+- [speak friend, and enter](https://blog.tanglee.top/2025/07/20/DownUnderCTF-2025-Crypto-Writeup.html)
+    - 伪造给出指定cmac(CBC-MAC类似) tag的明文
+    - cmac内部为aes cbc，原理和cbc翻转攻击类似
 
 ## Z3使用
 
