@@ -732,6 +732,8 @@ print(f"{expected=}")
 
 仍不能100%恢复k。没办法了，燃尽了（
 
+（偷看了solution manual，预期解是lattice……有时间的话我尝试实现一下它的构造）
+
 ## Discrete Logarithms and Diffie–Hellman
 
 ### Exercise 2.3
@@ -827,3 +829,30 @@ chatgpt推荐用计数列向量的方法做：第i个向量不能位于前i-1个
 $$|GL_n(F_p)|=\prod_{i=0}^{n-1}(p^n-p^i)$$
 
 事实证明，如果直接算数量是可行的，就不要绕一个圈子去算概率
+
+### Exercise 2.20
+
+让a,b,m和n为整数，满足gcd(m,n)=1。让 $c\equiv (b-a)m^{-1}\mod n$ 。证明 $x=a+cm$ 是 $x\equiv a\mod m,x\equiv b\mod n$ 的解；且该方程组的每一个解形如 $x = a + cm + ymn,y\in Z$
+
+首先x=a+cm模m明显等于a。 $a+cm\equiv a+((b-a)m^{-1})m\equiv a+b-a\equiv b\mod n$
+
+假设除了我们用上述方法构造出来的 $x_0$ 外，还有一个x满足上述方程组。由此得到 $m|x-x_0$ 且 $n|x-x_0$ ，进而得到 $mn|x-x_0$ （下一题的结论）
+
+因此存在某个y使得 $ymn=x-x_0\Rightarrow x=x_0+ymn$
+
+### Exercise 2.21
+
+1. a,b,c为整数，有a|c,b|c,gcd(a,b)=1。证明ab|c
+
+假设c的所有质因数构成一个集合C，a和b的质因数分别为C的子集A和B，且A、B之间无重合。ab的质因数等于求两个集合的并集。明显这个并集不会包含集合C之外的元素，且最大为C
+
+2. 让x=c和x=c'为下述同余方程组的两个解。证明 $c\equiv c'\mod m_1m_2...m_k$
+
+- $x\equiv a_1\mod m_1$
+- $x\equiv a_2\mod m_2$
+- ...
+- $x\equiv a_k\mod m_k$
+
+(这题为`Theorem 2.24`的一部分，隐藏的条件是所有 $m_i$ 两两互质)
+
+仿照上一题，假设除了初始构造出来的 $x_0$ 外，还有另一个x满足上述方程组。能得到 $m_1|x-x_0,m_2|x-x_0,...,m_k|x-x_0$ 。因为所有的 $m_i$ 两两互质，有 $m_1m_2...m_k|x-x_0\Rightarrow x\equiv x_0\mod m_1m_2...m_k$
