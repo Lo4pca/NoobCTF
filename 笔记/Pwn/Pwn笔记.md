@@ -184,6 +184,17 @@ kernel pwn题合集。用于纪念我连堆都没搞明白就敢看内核的勇�
   - **No.5️⃣4️⃣9️⃣**
 - [backdoor](https://naup.mygo.tw/2025/07/20/2025-downunderCTF-writeup)
   - kernel汇编中，可以用`mov ecx, 0xC0000082;rdmsr`（MSR(IA32_LSTAR = 0xC0000082)）得到kernel text基地址
+- [rolling around](https://keksite.in/posts/DownUnderCTF25)
+  - eBPF验证器推断的值和实际运行时的值出现分歧导致的漏洞。eBPF允许用户在不修改内核源代码或加载内核模块的情况下运行经验证器检查无害的程序。这题给eBPF加了一个实现ROL操作的patch，但验证器取到的值和运行时实际得到的值不同
+  - eBPF程序使用eBPF Map存储和共享数据：用户空间和eBPF程序均可访问map，且数据在eBPF程序退出后仍会保留
+    - eBPF程序可以用`BPF_FUNC_map_lookup_elem`获取某个键对应的存储槽的地址，但验证器在多数情况下会保证程序不会将这个指针存回map，防止地址泄漏
+    - 指针相关操作在底层会触发`adjust_ptr_min_max_vals`，若`umin_val`大于`umax_val`（正是漏洞可以触发的分支），则将相关寄存器标记为未知标量
+    - 指针和已知标量的运算结果无法存入map，但指针与未知标量的运算结果可以。exp中被误标记为未知值的寄存器为r6。map中的指针与其运算后被放回map中，但实际上r6的值攻击者已确定，借此可泄漏出kernel地址
+  - `bpf_skb_load_bytes`用于从socket中读取数据。函数存在一个length参数，但验证器会检查length是否存在溢出
+    - 由于验证器和实际运行的值不一致，验证器眼中安全的长度实际运行时可能导致溢出
+    - 于是可以在栈上放一个指针，并用`bpf_skb_load_bytes`读取数据覆盖指针，获取任意地址读
+    - 不过不能用类似的思路获取任意地址写，因为指针（运行时）的写操作验证更严格，不仅检查指针有效性，还会检查写入的值
+    - 利用任意读可以获取canary，然后用类似的操作写rop链：commit_creds+kpti_trampoline
 
 ## Shellcode题合集
 
