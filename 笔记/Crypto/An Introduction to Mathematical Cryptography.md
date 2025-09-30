@@ -732,7 +732,15 @@ print(f"{expected=}")
 
 仍不能100%恢复k。没办法了，燃尽了（
 
-（偷看了solution manual，预期解是lattice……有时间的话我尝试实现一下它的构造）
+solution manual中的预期解是lattice
+
+假设 $\beta=\frac{\alpha}{10^d}$ ,则对于某个 $L\in Z$ ,有 $\sqrt{k}=L+\beta$
+
+这个式子里的未知数是k和L，唯一知道的线索是两者都是整数。两边平方得到 $k=L^2+2L\beta+\beta^2$ 。让 $A=2L,B=L^2-k$ ，原式等于 $\beta^2+A\beta+B=0$ 。解出A和B后便可以得到 $k=\frac{A^2-4B}{4}$
+
+手册中并没有给出格的具体构造。而且看看 $\beta$ ，这哪是整数啊。所以我们还得乘回 $10^d$ 。记 $N=10^d$ ,等式两边乘上 $N^2$ 后有 $\alpha^2+A\alpha N+BN^2=0$
+
+(然后迟迟找不到合适的格构造方式)
 
 ## Discrete Logarithms and Diffie–Hellman
 

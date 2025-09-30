@@ -658,6 +658,8 @@ print(base64.b64encode(temp.encode()))
         - wireshark导入私钥解密通信
     - 如果strings某个exe出现python代码，可能是PyInstaller打包的程序。可以用pyinstxtractor提取出原pyc
     - DPAPI(Data Protection API)：允许用户加密、解密数据。浏览器（Chrome/Edge）也会使用这个api存储密码和密钥。加密的master key位于`C:\Users\<name>\AppData\Roaming\Microsoft\Protect\<SID>\`。假如有用户的Security Identifier (SID)和登录密码，可以用[mimikatz](https://github.com/gentilkiwi/mimikatz)解密
+- [Forensics Golf](https://github.com/DownUnderCTF/Challenges_2025_Public/blob/main/misc/for_golf_hard)
+    - 限制能从Network Block Device（nbd） server读取的字节数量，目标是恢复flag图片文件
 
 ## Network Forensics
 
@@ -3046,3 +3048,7 @@ $ cd a/b
 403. [Tiktok Revenge](https://github.com/halexys/UciTeam1/blob/main/UMDCTF_2025/Misc/Tiktok_Revenge)
 - dns [Message compression](https://datatracker.ietf.org/doc/html/rfc1035)。本意是压缩dns消息的大小，消除域名中重复的部分，用指向偏移的指针代替。在域名没有重复部分的时候也可以使用，构造特殊的dns查询信息
 - 稍微详细一点的脚本：**Tiktok Revenge**
+404. [dualzip](https://github.com/DownUnderCTF/Challenges_2025_Public/blob/main/misc/dualzip)
+- 用户可以上传zip，并选择用zip或7z命令提取zip，最后返回压缩全部内容的zip。目标是读取flag文件
+- 虽然存在symlink技巧，但与常见的zip题目不同的是，这题返回的是打包后的zip，且保留symlink本身而不读取指向的文件
+- unzip没有symlink保护且7z支持multidisk archive。预期解是用unzip解压出multidisk文件（`.z01`,`.z02`），并使`.z02`为指向flag的symlink。这样7z在解压这个multidisk archive时便会读取这个symlink代表的实际文件，从而引入flag

@@ -195,6 +195,7 @@ kernel pwn题合集。用于纪念我连堆都没搞明白就敢看内核的勇�
     - 于是可以在栈上放一个指针，并用`bpf_skb_load_bytes`读取数据覆盖指针，获取任意地址读
     - 不过不能用类似的思路获取任意地址写，因为指针（运行时）的写操作验证更严格，不仅检查指针有效性，还会检查写入的值
     - 利用任意读可以获取canary，然后用类似的操作写rop链：commit_creds+kpti_trampoline
+  - 官方wp https://github.com/DownUnderCTF/Challenges_2025_Public/blob/main/pwn/rolling_around 使用了一套eBPF相关模板。漏洞利用过程更复杂，但通过修改`bpf_map`的字段实现了任意地址写
 
 ## Shellcode题合集
 

@@ -636,7 +636,7 @@ for i in range(300,1000):
 - [Request Handling](https://github.com/Yazan03/CTF-writeups2025/tree/main/DU%20CTF/Request%20Handling)
     - [Handlebars](https://handlebarsjs.com)的`Handlebars.compile`函数的source参数可以传入字符串或ast(ast injection)
     - 其他资料
-        - ssti解法：**Request Handling**
+        - ssti解法：**Request Handling** （在可获取req对象的情况下：`Handlebars.compile(req.query.x)({req})`）
         - 原理解析： https://enoch.host/archives/Handlebars-AST-syntax-tree-injection-issue
         - 模板引擎pug里的类似漏洞/如何利用原型链污染触发： https://po6ix.github.io/AST-Injection
 - [更多模板注入payload](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Server%20Side%20Template%20Injection/Python.md)
@@ -4337,3 +4337,5 @@ if (await remote.hasPasswordFor(id)) {
 554. [sodium](https://siunam321.github.io/ctf/DownUnderCTF-2025/web/sodium)
 - [pound](https://github.com/graygnuorg/pound)在转发请求时会自动加上一些`X-Forwarded`请求头，如`X-Forwarded-For`。如果用户发送请求时已经添加了一个`X-Forwarded-For`，则服务器端得到的字段内容为用户提供的值用逗号拼接上检测到的ip。但如果用户发送了两个`X-Forwarded-For`，此时服务器端就只能得到用户给的最后一个`X-Forwarded-For`的值
 - [Funky chunks: abusing ambiguous chunk line terminators for request smuggling](https://w4ke.info/2025/06/18/funky-chunks.html):proxy和服务器对HTTP/1.1 Chunk Extensions语法的解析差异导致的请求走私
+555. [mini-me](https://github.com/DownUnderCTF/Challenges_2025_Public/blob/main/web/mini_me)
+- 从source map文件恢复js源码：[Sourcemapper](https://github.com/denandz/sourcemapper)
