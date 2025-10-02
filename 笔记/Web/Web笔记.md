@@ -51,6 +51,11 @@
 - [what-the-crypto](https://hackmd.io/@Arnav-Vora/r14esQ3Jxg)
     - sqlite glob通配符的用法
     - 这题还有个aes cbc的背景。利用翻转攻击修改cbc第n+1块的密文会毁掉第n块的明文，利用多行注释`/**/`跳过被毁坏的内容
+- [legendary](https://github.com/DownUnderCTF/Challenges_2025_Public/blob/main/web/legendary),[wp](https://slcyber.io/assetnote-security-research-center/a-novel-technique-for-sql-injection-in-pdos-prepared-statements)
+    - PHP PDO prepared语句内的sql注入。有时会遇到这样的配置：`$pdo->prepare("SELECT $col FROM fruit WHERE name = ?");`,其中`$col`是“过滤”后的用户输入
+    - 漏洞的第二个关键点在于`PDO::ATTR_EMULATE_PREPARES`属性。该属性为True表示PDO会先处理sql语句（转义字符，将占位符换成实际值等），再将处理后的语句发送至数据库。然而PDO使用的处理器是自己实现的，对null、`?`等字符的处理有问题
+    - mysql（默认开启`PDO::ATTR_EMULATE_PREPARES`）和Postgres（需手动开启`PDO::ATTR_EMULATE_PREPARES`）中存在这个漏洞；但sqlite中不存在，因为sqlite本身不支持null字符
+    - `$pdo->quote`默认用反斜杠转义字符串，即使是那些不支持反斜杠转义的引擎，如Postgres。此处同样可能导致sql注入
 
 ## XSS
 
@@ -506,6 +511,10 @@
         - 预期的mutation xss
         - 利用form的autofocus和onfocus自动触发xss
     - https://jorianwoltjer.com/blog/p/research/mutation-xss
+- [Sweet Treat](https://github.com/DownUnderCTF/Challenges_2025_Public/blob/main/web/sweet_treat)
+    - 利用[cookie sandwich](https://portswigger.net/research/stealing-httponly-cookies-with-the-cookie-sandwich-technique)偷取httponly cookie。不过局限性较大，要求网站本身存在一个回显用户cookie字段的地方
+    - Apache tomcat允许用户发送`$Version` cookie将使用的cookie parser降级为legacy版本。攻击利用了legacy的一个特殊语法：cookie可以包含引号，且引号也是值的一部分
+    - 因此攻击者可以构造start和end，使两者包住目标cookie：`start="a;secret=flag;end="`。由于tomcat读取cookie时会完整地读取引号包裹的内容，网页回显`start`的内容会泄漏secret的内容
 
 ## SSTI
 

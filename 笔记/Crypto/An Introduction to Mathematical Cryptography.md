@@ -740,7 +740,7 @@ solution manual中的预期解是lattice
 
 手册中并没有给出格的具体构造。而且看看 $\beta$ ，这哪是整数啊。所以我们还得乘回 $10^d$ 。记 $N=10^d$ ,等式两边乘上 $N^2$ 后有 $\alpha^2+A\alpha N+BN^2=0$
 
-(然后迟迟找不到合适的格构造方式)
+(然后我迟迟找不到合适的格构造方式。因为这题的 $\beta$ 是截断的，不完全是等式。下次再研究)
 
 ## Discrete Logarithms and Diffie–Hellman
 
