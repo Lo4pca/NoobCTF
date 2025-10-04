@@ -59,6 +59,9 @@ kernel pwn题合集。用于纪念我连堆都没搞明白就敢看内核的勇�
 
 ### Linux
 
+- [pwnc](https://github.com/les-amateurs/pwnc)
+  - kernel杂项工具
+
 在一场比赛中看见有人用[Accessing physical memory from userspace on Linux](https://codentium.com/accessing-physical-memory-from-userspace-on-linux)里的内容直接速通了一道题（[Hidden Key Recovery](https://github.com/Phreaks-2600/PwnMeCTF-2025-quals/tree/main/Pwn/HiddenKeyRecovery)）。但是他没写是咋干的，记一下就当我学会了（
 
 - [Virtio-note](https://github.com/nobodyisnobody/write-ups/tree/main/bi0sCTF.2024/pwn/virtio-note)

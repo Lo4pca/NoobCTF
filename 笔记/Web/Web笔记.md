@@ -8,6 +8,11 @@
 
 ## SQL注入
 
+资料链接：
+- https://media.defcon.org/DEF%20CON%2032/DEF%20CON%2032%20presentations/DEF%20CON%2032%20-%20Paul%20Gerste%20-%20SQL%20Injection%20Isn%27t%20Dead%20Smuggling%20Queries%20at%20the%20Protocol%20Level.pdf
+    - go语言的整数溢出导致的sql注入
+    - 一道同样是整数溢出漏洞的题:[gomail](https://github.com/DownUnderCTF/Challenges_2025_Public/blob/main/web/gomail)
+
 之前开过一个SQL分区，感觉之后的还是放在这里比较好。顺便记一些NoSQL数据库和一些类似SQL注入的漏洞
 - [Penguin-Login](https://dothidden.xyz/la_ctf_2024/penguin-login)
     - 仅能使用`a-zA-Z0-9{_}`且不能使用LIKE和注释符的PostgreSQL盲注。LIKE的功能可以用BETWEEN代替
@@ -515,6 +520,9 @@
     - 利用[cookie sandwich](https://portswigger.net/research/stealing-httponly-cookies-with-the-cookie-sandwich-technique)偷取httponly cookie。不过局限性较大，要求网站本身存在一个回显用户cookie字段的地方
     - Apache tomcat允许用户发送`$Version` cookie将使用的cookie parser降级为legacy版本。攻击利用了legacy的一个特殊语法：cookie可以包含引号，且引号也是值的一部分
     - 因此攻击者可以构造start和end，使两者包住目标cookie：`start="a;secret=flag;end="`。由于tomcat读取cookie时会完整地读取引号包裹的内容，网页回显`start`的内容会泄漏secret的内容
+- [file_upload](https://github.com/DownUnderCTF/Challenges_2025_Public/blob/main/web/file_upload)
+    - 使用`navigator.serviceWorker.register`可以注册一个js文件，绕过可能的Cross-Origin-Opener-Policy(COOP)。service worker文件的mime type必须是`text/javascript`，且与注册service worker的html同源
+    - 在旧版本的chrome可以直接open：**file_upload**
 
 ## SSTI
 
@@ -4348,3 +4356,10 @@ if (await remote.hasPasswordFor(id)) {
 - [Funky chunks: abusing ambiguous chunk line terminators for request smuggling](https://w4ke.info/2025/06/18/funky-chunks.html):proxy和服务器对HTTP/1.1 Chunk Extensions语法的解析差异导致的请求走私
 555. [mini-me](https://github.com/DownUnderCTF/Challenges_2025_Public/blob/main/web/mini_me)
 - 从source map文件恢复js源码：[Sourcemapper](https://github.com/denandz/sourcemapper)
+556. [off_dah_rails_m8](https://github.com/DownUnderCTF/Challenges_2025_Public/blob/main/web/off_dah_rails_m8)
+- go语言的`net/url`模块默认检查url中未转义的控制字符（如`\n`），但`#`后的部分除外
+- redis blind ssrf
+- ruby中不安全的反射（unsafe relection）配合第三方库的gadget可以实现rce： https://www.elttam.com/blog/rails-sqlite-gadget-rce （ruby on rails/rack）
+    - 这题反射漏洞出现在`config_hash["type"].constantize.new(config_hash["arg"])`，gadget为`Mysql2::Client`，可用于连接任何远程/本地的mysql/mariadb数据库
+    - `Mysql2::Client.new`允许传入`local_infile`参数指定mysql是否可以用`LOAD DATA LOCAL INFILE`读取本地文件。利用这点可以向任意远程数据库传任意路径已知的本地文件，包括`/proc/self/`下的文件
+- 其他解法：**off_dah_rails_m8** ,`Bundler::GemHelper`是比预期解（盲注）更快的gadget
