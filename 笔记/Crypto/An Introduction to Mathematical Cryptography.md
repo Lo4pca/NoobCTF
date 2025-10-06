@@ -864,3 +864,55 @@ $$|GL_n(F_p)|=\prod_{i=0}^{n-1}(p^n-p^i)$$
 (这题为`Theorem 2.24`的一部分，隐藏的条件是所有 $m_i$ 两两互质)
 
 仿照上一题，假设除了初始构造出来的 $x_0$ 外，还有另一个x满足上述方程组。能得到 $m_1|x-x_0,m_2|x-x_0,...,m_k|x-x_0$ 。因为所有的 $m_i$ 两两互质，有 $m_1m_2...m_k|x-x_0\Rightarrow x\equiv x_0\mod m_1m_2...m_k$
+
+### Exercise 2.24
+
+假设p是奇质数，a为不能被p整除的整数，b为a模p的平方根
+
+目前做这种题还是要chatgpt的帮助，它说这题是hensel lifting的一种具体情况
+
+1. 证明对于某个k，b+kp是a模 $p^2$ 的平方根，即 $(b+kp)^2\equiv a\mod p^2$
+
+因为 $b^2\equiv a\mod p$ ，所以 $p|b^2-a,k'p=b^2-a$ 。 $(b+kp)^2=b^2+2bkp+k^2p^2\equiv b^2+2bkp\mod p^2$ 。目标变为证明 $b^2+2bkp-a=k'p+2bkp=p(k'+2bk)\equiv 0\mod p^2$ 。称 $k'+2bk$ 为E(k)， $pE(k)\equiv 0\mod p^2\Rightarrow pE(k)=p^2m\Rightarrow p|E(k)\Rightarrow E(k)\equiv 0\mod p\Rightarrow k'+2bk\equiv 0\mod p\Rightarrow k=-k'(2b)^{-1}\mod p$ 。既然a不能被p整除，b自然也不能，且p是奇质数的也保证了2不整除p；故 $(2b)^{-1}\mod p$ 存在
+
+3. 假设b是a模 $p^n$ 的平方根。证明对于某个j， $b+jp^n$ 是a模 $p^{n+1}$ 的平方根
+
+仿照上一小题。 $b^2-a=k'p^n$ ， $(b+jp^n)^2=b^2+2bjp^n+j^2p^{2n}$ 。因此原式等于 $b^2+2bjp^n+j^2p^{2n}-a\equiv 0\mod p^{n+1}\Rightarrow k'p^n+2bjp^n\equiv 0\mod p^{n+1}\Rightarrow p^n(k'+2bj)\equiv 0\mod p^{n+1}$ 。这次让 $E(j)=k'+2bj$ ， $p^nE(j)=mp^{n+1}\Rightarrow E(j)=mp\Rightarrow E(j)\equiv 0\mod p$ 。到这里解出j的步骤就和上一小题一样了
+
+### Exercise 2.30
+
+假设R为一个环。从`2.10.1`介绍的环的公理出发，证明以下R的性质
+
+（这本书里的环指的是具有乘法单位元的交换环）
+
+1. 加法单位元 $0\in R$ 是唯一的。即，证明R中只有一个元素满足0+a=a+0=a， $\forall a\in R$
+
+假设有另一个加法单位元0'满足0'+a=a+0'=a=0+a，0'+a=0+a,0'=0
+
+但是吧，chatgpt说不能假设减法存在，因为证明这个命题时通常还没有证明加法逆元存在且唯一。所以要这么做：
+
+0'+a=a，代入a=0，有0'+0=0。但是0也是单位元，所以0'+0=0'。0'=0'+0=0
+
+2. 乘法单位元 $1\in R$ 是唯一的
+
+仿照上一题，1'a=a1'=a，代入a=1，有 $1'\times 1=1$ 。但是1也是乘法单位元，所以 $1'\times 1=1'$ 。 $1'=1'\times 1=1$
+
+3. R中的任何元素都有唯一的加法逆元
+
+对于元素a，加法逆元b应满足a + b = b + a = 0。假设a有另一个逆元b'也满足a + b' = b' + a = 0，那么两边加上b'可以得到a+b+b'=b'。因为a+b'=0，所以0+b=b',b=b'
+
+4. $\forall a\in R$ ，证明 $0\times a=a\times 0=0$
+
+假设b是a的加法逆元， $a\times 0=a\times(a+b)=a\times(0+0)=a\times 0+a\times 0$ 。两边加上 $a\times 0$ 的逆元，有 $0=a\times 0$ 。另一个方向同理
+
+5. 记a的加法逆元为-a。证明-(-a)=a
+
+假设b=-(-a)，则b+(-a)等于0。根据定义，也有a+(-a)=0。根据第三小题，只能有b=a
+
+6. 假设-1是乘法单位元 $1\in R$ 的加法逆元。证明 $(-1)\times (-1)=1$
+
+$(1+(-1))\times (1+(-1))=1(1+(-1))+(-1)(1+(-1))=1+(-1)+(-1)+(-1)\times(-1)=0+(-1)+(-1)\times(-1)$ 。同时 $(1+(-1))\times (1+(-1))=0\times 0=0$ 。所以 $(-1)+(-1)\times(-1)=0$ 。已知-1的加法逆元为1且加法逆元唯一， $(-1)\times(-1)=1$
+
+8. 证明R中的元素最多有一个乘法逆元
+
+如果ab=1且ac=1， $b\times 1=b\times(ac)=(ba)\times c=1\times c\Rightarrow b=c$
