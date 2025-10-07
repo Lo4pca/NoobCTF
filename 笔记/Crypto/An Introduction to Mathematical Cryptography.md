@@ -916,3 +916,39 @@ $(1+(-1))\times (1+(-1))=1(1+(-1))+(-1)(1+(-1))=1+(-1)+(-1)+(-1)\times(-1)=0+(-1
 8. 证明R中的元素最多有一个乘法逆元
 
 如果ab=1且ac=1， $b\times 1=b\times(ac)=(ba)\times c=1\times c\Rightarrow b=c$
+
+### Exercise 2.32
+
+证明`Proposition 2.41`:
+
+让R为一个环。 $m\in R\not =0$ 。如果 $a_1\equiv a_2\mod m$ 且 $b_1\equiv b_2\mod m$ ，则 $a_1\pm b_1\equiv a_2\pm b_2\mod m$ 且 $a_1\times b_1\equiv a_2\times b_2\mod m$
+
+$a_1\equiv a_2\mod m$ 意味着 $m|a_1-a_2\Rightarrow a_2=a_1-km$ 。同理 $b_2=b_1-k'm$ 。 $a_2+b_2=(a_1-km)+(b_1-k'm)=a_1+b_1-(k+k')m\equiv a_1+b_1\mod m$
+
+加法变成减法，以及方向改变后的证明与上同理
+
+### Exercise 2.33
+
+证明`Proposition 2.43`:
+
+- $\overline{a}+\overline{b}=\overline{a+b}$
+- $\overline{a}\times\overline{b}=\overline{a\times b}$
+
+上述公式给出了同余类集合R/(m)上良定义的加法和乘法，且R/(m)是一个环
+
+提示：用`Exercise 2.32`的结论证明同余类 $\overline{a+b}$ 和 $\overline{a\times b}$ 仅依赖a和b的同余类
+
+根据同余的定义，一个同余类的任意两个代表元满足 $a\equiv a'\mod m$ 。根据`Exercise 2.32`，只要 $a\equiv a'\mod m$ 且 $b\equiv b'\mod m$ ，一定有 $a+b\equiv a'+b'\mod m$ ，即 $\overline{a+b}=\overline{a'+b'}$ 。可知该运算的结果只与同余类有关，与选取的代表元无关。乘法的良定义证明与其类似
+
+至于证明环的那部分，好像要逐条证明所有公理
+
+**加法**
+- Identity Law： $\overline{0}$ 给出了加法的单位元
+- Inverse Law： 对于任意 $\overline{a}$ ， $\overline{-a}$ 为其加法逆元
+- Associative Law/Commutative Law：因R是环，自然从原环R取出代表元形成的R/(m)也满足这两条
+
+**乘法**
+-  $\overline{1}$ 给出了乘法的单位元
+- Associative Law/Commutative Law的情况与加法类似
+
+chatgpt帮我补了一句：因为在R/(m)上的加法与乘法是由R中的对应运算经商映射定义的，且运算已被证明是良定义，所以R中满足的结合律、交换律在R/(m)中仍成立

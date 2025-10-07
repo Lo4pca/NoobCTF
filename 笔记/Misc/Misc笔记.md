@@ -493,7 +493,7 @@ print(base64.b64encode(temp.encode()))
     - [Google Drive forensics](https://amgedwageh.medium.com/drivefs-sleuth-investigating-google-drive-file-streams-disk-artifacts-0b5ea637c980)：可用[DriveFS Sleuth](https://github.com/AmgdGocha/DriveFS-Sleuth)处理Google Drive File Stream disk artifacts，并辨认已删除的文件
     - AnyDesk（帮助远程控制计算机的软件）软件所在目录以及[AnyDesk forensics](https://medium.com/@tylerbrozek/anydesk-forensics-anydesk-log-analysis-b77ea37b90f1)。成功的AnyDesk连接存储于ad.trace日志文件。只需在文件内搜索incoming即可获取连接的详情（时间，user id）
     - 已删除的可执行文件的详细信息（如运行时间）可在prefetch文件中找到
-    - 重置windows密码的安全问题的答案和内容可在SAM hive的ResetData entry中找到，或`ROOT\SAM\Domains\Account\Users` ， https://anugrahn1.github.io/pico2024#dear-diary-400-pts 使用Autopsy
+    - 重置windows密码的安全问题的答案和内容可在SAM（Security Account Manager） hive的ResetData entry中找到，或`ROOT\SAM\Domains\Account\Users` ， https://anugrahn1.github.io/pico2024#dear-diary-400-pts 使用Autopsy
     - [Clipboard Forensics](https://www.inversecos.com/2022/05/how-to-perform-clipboard-forensics.html):获取剪贴板的信息以及复制内容时的时间。位于ActivitiesCache.db文件
     - 其他wp： 
         - https://seall.dev/posts/verbotenbi0sctf2024
@@ -660,6 +660,11 @@ print(base64.b64encode(temp.encode()))
     - DPAPI(Data Protection API)：允许用户加密、解密数据。浏览器（Chrome/Edge）也会使用这个api存储密码和密钥。加密的master key位于`C:\Users\<name>\AppData\Roaming\Microsoft\Protect\<SID>\`。假如有用户的Security Identifier (SID)和登录密码，可以用[mimikatz](https://github.com/gentilkiwi/mimikatz)解密
 - [Forensics Golf](https://github.com/DownUnderCTF/Challenges_2025_Public/blob/main/misc/for_golf_hard)
     - 限制能从Network Block Device（nbd） server读取的字节数量，目标是恢复flag图片文件
+- [TradeTrap_3](https://medium.com/@mustafa-alzaareer/deadsec-ctf-2025-forensics-writeup-5c8c60a9990d)
+    - password manager `Enpass`相关forensic
+        - `Enpass` vault文件夹路径
+        - key derivation function (KDF)轮数
+        - `vault.enpassdb`是存储密码等敏感内容的主要文件。可以用`enpass2john`转成hash后（可能需要手动修改轮数）用`John the Ripper`爆破密码
 
 ## Network Forensics
 
@@ -1988,10 +1993,14 @@ for i in "${!data[@]}"; do modbus host:port $((i+19))=${data[$i]}; done
 - [gum](https://github.com/charmbracelet/gum)用法案例。注意`guess_date=$(gum input --placeholder $guess_date)`并不安全，用户仍然能随意控制guess_date的值。
 - root用户的ssh私钥：`/root/.ssh/id_rsa`。有了这个私钥，ssh时就能以root身份连接
 115. [Fetch](https://github.com/LazyTitan33/CTF-Writeups/blob/main/Nahamcon2023/Forensics/Fetch.md)
-- windows imaging image(WIM) forensic。使用wimtools（sudo apt-get install wimtools）挂载image后可能看到一些prefetch文件（后缀.pf）。参考这篇[文章](https://www.hackingarticles.in/forensic-investigation-prefetch-file/)，可用[WinPrefetch View](https://www.nirsoft.net/utils/win_prefetch_view.html)/FTK imager，[PECmd](https://github.com/EricZimmerman/PECmd)（参考[wp](https://github.com/D13David/ctf-writeups/tree/main/nahamcon23/forensics/fetch),使用命令`PECmd.exe -d D:\CTF\nahamcon\fetch_output_dir | findstr /i "flag"`）等工具。
+- windows imaging image(WIM) forensic。使用wimtools（sudo apt-get install wimtools）挂载image后可能看到一些prefetch文件（后缀.pf）。参考这篇[文章](https://www.hackingarticles.in/forensic-investigation-prefetch-file)，可用[WinPrefetch View](https://www.nirsoft.net/utils/win_prefetch_view.html)/FTK imager，[PECmd](https://github.com/EricZimmerman/PECmd)（参考[wp](https://github.com/D13David/ctf-writeups/tree/main/nahamcon23/forensics/fetch),使用命令`PECmd.exe -d D:\CTF\nahamcon\fetch_output_dir | findstr /i "flag"`）等工具。
 - WIM文件用7z解压也能获取到prefetch文件。或者用dism( https://0xoffset.github.io/2023/06/18/NahamCon-CTF-2023-Forensics-Writeups.html#fetch-easy-166-solves )：
     - `mkdir fetch_output_dir`
     - `dism /mount-wim /wimfile:D:\CTF\nahamcon\fetch /index:1 /mountdir:D:\CTF\nahamcon\fetch_output_dir`
+- 补充题目：[TradeTrap_2](https://medium.com/@mustafa-alzaareer/deadsec-ctf-2025-forensics-writeup-5c8c60a9990d)
+    - windows自动生成的Prefetch文件用于加速应用程序的启动过程。文件内存储了应用程序加载时的元数据，比如：
+        - 其访问的文件和dll
+        - 运行次数和运行时间
 116. [Blobber](https://github.com/LazyTitan33/CTF-Writeups/blob/main/Nahamcon2023/Warmups/Blobber.md)
 - python sqlite模块处理SQLite database文件（连接数据库，执行查询）
 - [online sqlite viewer](https://inloop.github.io/sqlite-viewer/)
@@ -2585,7 +2594,7 @@ for i in "${!data[@]}"; do modbus host:port $((i+19))=${data[$i]}; done
 - docm后缀文件宏提取工具：[oletools](https://github.com/decalage2/oletools)
 244. [Hourglass](https://medium.com/@mando_elnino/university-of-toronto-ctf-writeups-f5a5f30b46d9)
 - `Users/<username>/AppData/Local/ConnectedDevicesPlatform/L.analyst/ActiveCache.db`：history of what application was used and any files that were made
-- 另一个[wp](https://medium.com/@refaim643/uoftctf-forensics-writeup-40fdf89b38f0)使用了`$Extend\$USNJrnl`文件（参考 https://www.orionforensics.com/forensics-tools/ntfs-journal-viewer-jv/ ），可用[MFTECmd](https://github.com/EricZimmerman/MFTECmd)将该文件处理成csv，然后再用[Timeline Explorer](https://ericzimmerman.github.io/#!index.md打开)
+- 另一个[wp](https://medium.com/@refaim643/uoftctf-forensics-writeup-40fdf89b38f0)使用了`$Extend\$USNJrnl`文件（参考 https://www.orionforensics.com/forensics-tools/ntfs-journal-viewer-jv ），可用[MFTECmd](https://github.com/EricZimmerman/MFTECmd)将该文件处理成csv，然后再用[Timeline Explorer](https://ericzimmerman.github.io)打开
 245. [Baby's First IoT Flag 4](https://t0pn0xch.gitbook.io/uoftctf-2024/uoftctf-2024/category-iot/babys-first-iot-flag-4-500-points)
 - `printenv`:获取U-Boot环境变量值
 - `bootargs=${bootargs} init=/bin/sh`:修改bootargs，使其在boot阶段spawn一个shell
@@ -2631,12 +2640,12 @@ for i in "${!data[@]}"; do modbus host:port $((i+19))=${data[$i]}; done
 - Autopsy使用
     - 可导出event log，再用Windows event viewer打开，可获取下载文件的的位置，大小等信息
     - 选项OS Accounts可获取系统上账号的创建时间等内容
-- [USN journal](https://en.wikipedia.org/wiki/USN_Journal)文件记录了NTFS文件系统上的改动，可用工具[MFTECmd](https://ericzimmerman.github.io/#!index.md)处理
-- https://abdelrahme.github.io/posts/0xl4ugh2024/ 使用了[MagnetAxiom](https://www.magnetforensics.com/products/magnet-axiom/)
+- [USN journal](https://en.wikipedia.org/wiki/USN_Journal)文件记录了NTFS文件系统上的改动，可用工具[MFTECmd](https://ericzimmerman.github.io)处理
+- https://abdelrahme.github.io/posts/0xl4ugh2024 使用了[MagnetAxiom](https://www.magnetforensics.com/products/magnet-axiom)
 257. [CID](https://github.com/Pamdi8888/My_CTF_Chals/tree/main/CID)
 - `.ged`后缀文件分析。可用 http://www.drawmyfamilytree.co.uk/gedcom_viewer.php 打开这类文件
 258. [0.69 Day](https://odintheprotector.github.io/2024/02/17/bitsctf2024-dfir.html)
-- 和winRAR有关的漏洞：[CVE-2023-38831](https://www.mcafee.com/blogs/other-blogs/mcafee-labs/exploring-winrar-vulnerability-cve-2023-38831/)
+- 和winRAR有关的漏洞：[CVE-2023-38831](https://www.mcafee.com/blogs/other-blogs/mcafee-labs/exploring-winrar-vulnerability-cve-2023-38831)
 259. [Lottery](https://odintheprotector.github.io/2024/02/17/bitsctf2024-dfir.html)
 - python的tempfile.TemporaryFile生成的临时文件一般在Temp文件夹下（windows），且名称中带有tmp
 260. [one by one](https://hackmd.io/@lamchcl/SJIdwQb3a#miscone-by-one)
@@ -2657,7 +2666,7 @@ for i in "${!data[@]}"; do modbus host:port $((i+19))=${data[$i]}; done
 265. [Fill the library](https://seall.dev/posts/gccctf2024)
 - 恶意`.rtf`文件分析。除了上传到一些在线恶意软件分析网站，也可以用[rtfobj](https://github.com/decalage2/oletools/wiki/rtfobj),[rtfdump](https://github.com/DidierStevens/DidierStevensSuite/blob/master/rtfdump.py)等工具
 - 其他wp： https://shaym.xyz/fill-the-library/ ， https://github.com/warlocksmurf/onlinectf-writeups/blob/main/GCCCTF24/forensics.md
-    - threat intelligence tool： https://abuse.ch/ ， https://urlhaus.abuse.ch/
+    - threat intelligence tool： https://abuse.ch ， https://urlhaus.abuse.ch
 266. [Bad Habit](https://seall.dev/posts/gccctf2024)
 - 信用卡（credit card）usb pcapng分析。参考 https://stackoverflow.com/questions/15059580/reading-emv-card-using-ppse-and-not-pse 和 https://emvlab.org/tlvutils/ ，可获取card number（Primary Account Number）和Application Expiration Date
 - 手动分析packet做法： https://jorianwoltjer.com/blog/p/ctf/gcc-ctf/bad-habit 及相关链接：[ISO 7816-4 spy using Wireshark](https://ludovicrousseau.blogspot.com/2019/08/iso-7816-4-spy-using-wireshark.html), https://mstcompany.net/blog/acquiring-emv-transaction-flow-part-4-pdol-and-contactless-cards-characteristic-features-of-qvsdc-and-quics , https://mstcompany.net/blog/acquiring-emv-transaction-flow-part-5-read-records
