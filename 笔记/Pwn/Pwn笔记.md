@@ -41,6 +41,10 @@
   - 堆喷：通过申请多个大型数组使v8分配地址固定的堆块。这块我的经验是，流程一般都挺稳定的。比如这题要求在某个地址x处为某个数组的elements，只要一次成功了，后续多次运行基本都能成功
   - rce手段是经典的“覆盖wasm函数的rwx区域“
   - 这个触发方式稍微好懂点：**literally 1985**
+- [DeadV8 Sandbox](https://github.com/autun12/CTF-Writeups/tree/master/DeadSecCTF2025/pwn/deadv8_COMPLETED)
+  - 这道题其实是这个[issue](https://issues.chromium.org/issues/421403261)：在原本只能用32-40位指针索引内容的沙盒中，由liftoff编译的WasmArray索引逻辑使用了64位值。patch文件注释掉的地方正是这个[review](https://chromium-review.googlesource.com/c/v8/v8/+/6611066)添加的内容。然而这道题只要求使沙盒崩溃，而且开了memory corruption api；可能根本就不需要上述patch？
+  - wp里还提到了这篇文章： https://retr0.zip/blog/abusing-Liftoff-assembly-and-efficiently-escaping-from-sbx.html 。liftoff在编译webassembly代码时会引用WasmInstance的指针，然后执行诸如`sub`语句的操作。注意WasmInstance指针位于沙盒内。于是用memory corruption api修改这个指针便可以使sub语句的参数为指定地址。再利用一些shellcode技巧可以修改wasm函数的代码
+    - 但是和这道题没有关系
 
 ## Kernel
 

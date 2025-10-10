@@ -1201,7 +1201,7 @@ finish()
 - 这篇[wp](https://gr007.tech/writeups/2023/backdoor/index.html#baby-ebpf)使用了[GameGuardian](https://gameguardian.net/forum/files/),可以查看内存。像是apk界的cheat engine
 138. [Baby-ebpf](https://gr007.tech/writeups/2023/backdoor/index.html#baby-ebpf)
 - ebpf文件逆向。ghidra似乎无法分析，直接`objdump -d`可以获取汇编
-- 一个用来trace ebpf文件执行的脚本： https://gist.github.com/C0nstellati0n/a066c450ed5d4c8ffbb0c1328283fe14#baby-ebpf
+- 一个用来trace ebpf文件执行的脚本： **Baby-ebpf**
 - IDA pro ebpf插件： https://github.com/zandi/eBPF_processor
 139. [CSS Password](https://seall.dev/posts/uoftctf2024#reverse-engineeringcss-password-148-solves)
 - 逆向CSS逻辑
