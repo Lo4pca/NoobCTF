@@ -1444,3 +1444,5 @@ mov     r8, qword [r13]
 - 使用JEB Pro反编译wasm
 219. [Useless VM](https://gist.github.com/TechnologicNick/278696fab8d26e94f0af0e736da1420d)
 - 使用chrome开发者工具调试node js环境
+220. [Car Watching](https://github.com/Warriii/CTF-Writeups/blob/main/deadsec25/re_carwatching.md)
+- 逆向[Nuitka](https://github.com/Nuitka/Nuitka)编译的python可执行文件

@@ -702,6 +702,10 @@ sympy也放这了
 - [Prelim](https://100gryphons.wordpress.com/htb-cyber-apocalypse-2025)
     - 题目明面上看是打乱明文，但通过分析代码的实际操作可以发现打乱信息的操作满足群的运算定律。[官方wp](https://github.com/hackthebox/cyber-apocalypse-2025/tree/main/crypto/Prelim)直接指出来了，这题其实还是rsa，需要在一个群里开e次根；但这个群不是模n，而是模对称群 $S_{4919}$
     - sagemath里有关对称群的操作： https://github.com/forensicskween/ctf-writeups/tree/main/ctfs/HackTheBox/2025/CyberApocalypse/Crypto/Prelim
+- [EBG](https://tsumiiiiiiii.github.io/ebg)
+    - 从多个坐标恢复Weierstrass椭圆曲线参数（a，b，p）
+    - sagemath `elimination_ideal`：从几个多变量多项式生成的理想中重新生成一个由不包含指定变量的多项式生成的理想
+    - truncated LCG:获取lcg的输出 $y_i\equiv s_i\mod p$ ，利用格恢复完整的 $s_i$ 。常见的设置是模2的n次方（截断二进制位），但模任意质数也是可解的
 - 记录个工具： https://github.com/Aeren1564/CTF ，里面的CTF_Library看起来很香
 
 ## Lattice(格)
