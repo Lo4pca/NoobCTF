@@ -2996,3 +2996,8 @@ assert crc32(a)^crc32(b)==crc32(c)^crc32(d)
 183. [yet-another-login](https://blog.tanglee.top/2025/07/20/DownUnderCTF-2025-Crypto-Writeup.html)
 - Paillier Decryption Oracle。利用检查解密是否成功的oracle恢复某个c对应的m。要求模数远大于m，且比对时使用的是截断比对
 - 简易版poc：**yet-another-login**
+184. [BPCasino](https://github.com/Warriii/CTF-Writeups/blob/main/deadsec25/crypto_bpcasino.md)
+- 位运算中，左移和右移与异或构成分配律：
+    - $((a\oplus b) \ll 1)\oplus(\text{0x1B} * ((a\oplus b) \gg 7))$
+    - $= (a \ll 1)\oplus(b \ll 1) \oplus (\text{0x1B} * ((a \gg 7) \oplus (b \gg 7)))$
+- 另外，有些位运算可以通过测试输入变量的所有可能值化简
