@@ -1028,3 +1028,48 @@ F为有限域
 4. 用`3`证明F有 $p^d$ 个元素， $d\geq 1$
 
 向量空间中的每个元素都是基的线性组合。那么既然标量域为具有p个元素的 $F_p$ ，可能的元素数量自然是 $p^d$ ，d为基的维数
+
+### Exercise 2.11
+
+群 $S_3$ 包含以下六个元素： $e,\sigma,\sigma^2,\tau,\sigma\tau,\sigma^2\tau$ 。其中e为单位元，乘法遵循以下规则：
+- $\sigma^3=e$
+- $\tau^2=e$
+- $\tau\sigma=\sigma^2\tau$
+
+1. 计算以下算式的值
+- $\tau\sigma^2=(\tau\sigma)\sigma=(\sigma^2\tau)\sigma=\sigma^2(\sigma^2\tau)=\sigma^4\tau=e(\sigma\tau)=\sigma\tau$
+- $\tau(\sigma\tau)=(\tau\sigma)\tau=(\sigma^2\tau)\tau=\sigma^2$
+- $(\sigma\tau)(\sigma\tau)=\sigma(\tau\sigma)\tau=\sigma(\sigma^2\tau)\tau=e$
+- $(\sigma\tau)(\sigma^2\tau)=(\sigma\tau)(\tau\sigma)=\sigma^2$
+
+2. $S_3$ 是交换群吗？
+
+不是，因为 $\tau(\sigma\tau)=\sigma^2$ ,但是 $(\sigma\tau)\tau=\sigma$
+
+### Exercise 2.12
+
+G为一个群，整数 $d\geq 1$ 。按如下定义一个G的子集：G[d]={ $g\in G:g^d=e$ }
+
+1. 证明如果g在G[d]里，则 $g^{-1}$ 也在g[d]里
+
+$g^d=e\Rightarrow g^{-d}=e\rightarrow (g^{-1})^d=e$
+
+2. 假设G是交换群。证明如果 $g_1$ 和 $g_2$ 在G[d]里，则它们的积 $g_1\times g_2$ 也在G[d]里
+
+因为G是交换群，所以 $g_2^{d}\times g_1^{d}=g_1^{d}\times g_2^{d}=e=(g_1\times g_2)^d$
+
+3. 如果G是交换群，推导G[d]也是一个群
+
+通过逐条证明G[d]满足群的四条公理来证明G[d]是一个群：
+- 封闭性：`2`说明了G[d]的封闭性
+- 结合律：G本身具有结合律，因此G的子集G[d]也满足结合律
+- 单位元： $e^d=e$ ，因此e在G[d]中
+- 逆元：`1`描述了G[d]中的任何元素均具有逆元
+
+4. 举例说明：如果G不是交换群，则G[d]不一定是群
+
+提示：利用`Exercise 2.11`
+
+`Exercise 2.11`里的 $S_3$ 不是交换群。于是我们取d=2， $S_3[2]$ 中的元素有: $e,\tau,\sigma\tau,\sigma^2\tau$
+
+注意到 $\tau(\sigma\tau)=(\sigma^2\tau)\tau=\sigma^2$ ，这个元素并不在 $S_3[2]$ 中。 $S_3[2]$ 不封闭，进而不是群
