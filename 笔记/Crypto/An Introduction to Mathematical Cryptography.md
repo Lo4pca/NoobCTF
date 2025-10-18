@@ -1073,3 +1073,78 @@ $g^d=e\Rightarrow g^{-d}=e\rightarrow (g^{-1})^d=e$
 `Exercise 2.11`里的 $S_3$ 不是交换群。于是我们取d=2， $S_3[2]$ 中的元素有: $e,\tau,\sigma\tau,\sigma^2\tau$
 
 注意到 $\tau(\sigma\tau)=(\sigma^2\tau)\tau=\sigma^2$ ，这个元素并不在 $S_3[2]$ 中。 $S_3[2]$ 不封闭，进而不是群
+
+### Exercise 2.13
+ 
+G和H均为群。一个函数 $\phi:G\rightarrow H$ 称为（群）同态，如果它满足 $\phi(g_1\times g_2)=\phi(g_1)\times\phi(g_2)$  
+ 
+注意 $g_1\times g_2$ 用的是G中的群定理； $\phi(g_1)\times\phi(g_2)$ 用的是H中的群定理  
+ 
+1. 假设 $e_G$ 是G的单位元， $e_H$ 是H的单位元， $g\in G$ 。证明 $\phi(e_G)=e_H$ 且 $\phi(g^{-1})=\phi(g)^{-1}$  
+ 
+$\phi(e_G(g_1\times g_2))=\phi(e_G)\times\phi(g_1\times g_2)=\phi(g_1)\times\phi(g_2)$ 。从等式的后半段可以看出 $\phi(e_G)=e_H$
+
+$\phi(g^{-1}g)=\phi(g^{-1})\times\phi(g)=e_H$ ，所以 $\phi(g^{-1})$ 是 $\phi(g)$ 的逆元，即 $\phi(g^{-1})=\phi(g)^{-1}$
+ 
+2. 假设G是交换群。证明由 $\phi(g)=g^2$ 定义的映射 $\phi:G\rightarrow G$ 是同态
+
+$\phi(g_1\times g_2)=(g_1g_2)^2=g_1^2g_2^2$ （由G是交换群推出）， $\phi(g_1)\times\phi(g_2)=g_1^2g_2^2$ ，因此 $\phi$ 是同态
+
+3. 与`2`一样，但 $\phi(g)=g^{-1}$
+
+$\phi(g_1\times g_2)=(g_1\times g_2)^{-1},\phi(g_1)\times\phi(g_2)=g_1^{-1}\times g_2^{-1}$ 。 $(g_1\times g_2)^{-1}(g_1\times g_2)=e$ 且 $g_1\times g_1^{-1}\times g_2\times g_2^{-1}=e$ ，利用交换律将 $g_1\times g_2$ 均移到一边，便可得出 $(g_1\times g_2)^{-1}=g_1^{-1}\times g_2^{-1}$
+
+### Exercise 2.14
+
+证明以下映射是群同态
+
+1. $\phi:Z\rightarrow Z/NZ$ ，将 $a\in Z$ 映射到Z/NZ中的 $a\mod N$
+
+这个好像直接用模运算的定理就行， $x\equiv a\times b\mod N\Rightarrow x\equiv (a\mod N\times b\mod N)\mod N$
+
+2. $\phi:R^{\*}\rightarrow GL_2(R)$ ，定义为：
+
+$$\phi(a)=
+\begin{pmatrix}
+a&0 \\
+0&a^{-1}
+\end{pmatrix}
+$$
+
+套定义：
+
+$$\phi(a\times b)=
+\begin{pmatrix}
+ab&0 \\
+0&a^{-1}b^{-1}
+\end{pmatrix}
+$$
+
+然后算矩阵乘法：
+
+$$\phi(a)\times\phi(b)=
+\begin{pmatrix}
+a&0 \\
+0&a^{-1}
+\end{pmatrix}\times
+\begin{pmatrix}
+b&0 \\
+0&b^{-1}
+\end{pmatrix}=
+\begin{pmatrix}
+ab&0 \\
+0&a^{-1}b^{-1}
+\end{pmatrix}
+$$
+
+相等，所以 $\phi$ 是同态
+
+3. 离散对数映射 $log_g:F^{\*}_p\rightarrow Z/(p-1)Z$ ，g是模p的原根
+
+假设任意两个数a和b分别等于 $g^x$ 和 $g^y$
+
+首先要定义两个群里取的运算符。这里让 $F^{\*}_p$ 里的运算符为乘法（ $\times$ ），Z/(p-1)Z里的运算符为加法(+)。因此有：
+
+$\phi(a\times b)=\phi(g^xg^y)=x+y$
+
+$\phi(a)+\phi(b)=\phi(g^x)+\phi(g^y)=x+y$
