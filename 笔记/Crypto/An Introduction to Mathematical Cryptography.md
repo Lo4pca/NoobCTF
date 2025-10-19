@@ -1148,3 +1148,39 @@ $$
 $\phi(a\times b)=\phi(g^xg^y)=x+y$
 
 $\phi(a)+\phi(b)=\phi(g^x)+\phi(g^y)=x+y$
+
+### Exercise 2.22
+
+让 $m_1,...,m_k$ 为整数，它们的乘积为 $m=m_1m_2...m_k$
+
+1. 证明以下映射 $\frac{Z}{mZ}\rightarrow\frac{Z}{m_1Z}\times\frac{Z}{m_2Z}\times...\times\frac{Z}{m_kZ}$ ( $a\mod m\rightarrow (a\mod m_1,a\mod m_2,...,a\mod m_k)$ ，将一个元素映射到它在模每个 $m_i$ 下的余数组成的k元组)
+
+是定义良好的环同态
+
+提示：首先定义一个从Z到上述映射的右边的映射，然后证明mZ在其kernel中
+
+首先看良定义。假设有两个数 $a\equiv b\mod m$ ，则它们模每一个 $m_i$ 的结果也是一样的，因为 $m|a-b,m_i|m\Rightarrow km=a-b,k'm_i=m,kk'm_i=a-b\Rightarrow m_i|a-b\Rightarrow a\equiv b\mod m_i$
+
+然后是同态：
+
+$\phi((xy)\mod m)=((xy)\mod m_1,...,(xy)\mod m_k)$
+
+两个k元组相乘是对应的分项相乘：
+
+$\phi(x\mod m)\times\phi(y\mod m)=(x\mod m_1\times y\mod m_1=(xy)\mod m_1,...,x\mod m_k\times y\mod m_k=(xy)\mod m_k)$
+
+deepseek说还要看有没有保持单位元，不过这个很明显是保持的（
+
+但是写完后才发现这和提示一点关系都没有啊？
+
+如果跟着提示的思路走的话，直接使用同态基本定理即可。 $\pi_i:Z\rightarrow Z/m_iZ$ 明显是环同态，所以原本的 $\phi$ 肯定也是
+
+mZ指的是所有m的倍数，因此mZ里的所有数模 $m_i$ 为0，即 $mZ\in ker(\phi)$
+
+根据同态基本定理：如果有环同态 $\phi:R\rightarrow S$ ，则存在唯一的环同构 $\overline{\phi}:R/ker(\phi)\rightarrow im(\phi)$ （ $im(\phi)$ 指的是像image）
+
+同构自然是同态，于是直接就完成了。不会像按定义证那样繁琐
+
+2. 假设 $m_1,...,m_k$ 两两互质。证明`1`中的映射是单射
+
+提示：kernel是什么？

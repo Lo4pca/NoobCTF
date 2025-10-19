@@ -2,6 +2,37 @@
 
 此篇笔记对应的gist： https://gist.github.com/Lo4pca/a066c450ed5d4c8ffbb0c1328283fe14 。题目对应的关键词将加粗
 
+## Tools
+
+平时见到的乱七八糟的工具
+
+- [Instruction Stomp](https://github.com/ChrisTheCoolHut/Instruction-Stomp)
+  - 侧信道逆向工具，支持不同架构的binary。原理是计算程序执行的指令数量来判断当前输入是否为正确输入
+- [edb-debugger](https://github.com/eteran/edb-debugger)
+  - 和x64dbg很像,但是适用于AArch32/x86/x86-64架构
+  - 使用案例见[Now This Will Run on My 486?](https://github.com/gimel-team/ctf-writeups/blob/master/2025/iris-ctf/now-this-will-run-on-my-486)。这题我做的时候用的是pwndbg，然而题目涉及JIT+signal handling，通过报错进设置好的signal handling函数来动态解码执行的代码。pwndbg直接把signal传到我手里来了，continue也动不了……
+- [ghidra-wasm-plugin](https://github.com/nneonneo/ghidra-wasm-plugin)：WASM逆向。chrome自带的开发者工具可以调试wasm，见 https://developer.chrome.com/docs/devtools/wasm 和 https://developer.chrome.com/docs/devtools/memory-inspector
+  - [????????](https://hackmd.io/@fsharp/Hk1cfCwIye)
+- [A child's dream](https://github.com/srdnlen/srdnlenctf-2025_public/blob/main/pwn_A_childs_dream)
+  - [Mesen2](https://github.com/SourMesen/Mesen2)
+    - Multi-system emulator (NES, SNES, GB, GBA, PCE, SMS/GG, WS) 
+    - 也是一个不错的调试工具。用法示例见[Snake I - Just One More Apple](https://nanimokangaeteinai.hateblo.jp/entry/2025/03/10/041721)
+  - ida pro也可以反编译SNES,参考 https://r3kapig-not1on.notion.site/Srdnlen-CTF-2025-Writeup-by-r4kapig-181ec1515fb98004b3e2c42e74ce5fc5
+  - 另一个snes调试器：[bsnes-plus](https://github.com/devinacker/bsnes-plus)
+- [diaphora](http://diaphora.re)
+  - IDA插件；program diffing tool
+- [net-msg](https://scuffed.online/x3ctf-2025)
+  - 逆向golang。题目的binary没有被去除符号（not stripped），然而gdb在这种情况下会找不到引用的源码文件，导致设置断点时可能出现segault。可以尝试用go原生调试器[Delve](https://github.com/go-delve/delve)。不过这个调试器有个缺点，就是没法自由地修改寄存器的值（见 https://github.com/go-delve/delve/blob/master/Documentation/cli/expr.md ）。这时只能去除binary的调试符号并换回gdb
+  - ghidra插件[GolangAnalyzer](https://github.com/mooncat-greenpy/Ghidra_GolangAnalyzerExtension)
+- [AssetRipper](https://github.com/AssetRipper/AssetRipper)
+  - 提取unity游戏的资源
+- [Analyzing ARCompact Firmware with Ghidra](https://www.sstic.org/media/SSTIC2021/SSTIC-actes/analyzing_arcompact_firmware_with_ghidra/SSTIC2021-Article-analyzing_arcompact_firmware_with_ghidra-iooss.pdf)
+  - 工具： https://github.com/JacksonDonaldson/arcompact_be_ghidra
+- [CoSA: CoreIR Symbolic Analyzer](https://github.com/cristian-mattarei/CoSA)
+  - SMT-based symbolic model checker for hardware design
+- [PyInjector](https://github.com/Stanislav-Povolotsky/PyInjector)
+  - 获取python程序的runtime并动态运行（注入）自定义代码
+
 ## Z3
 
 想了一下，还是把这部分提到更明显的地方较好
@@ -57,35 +88,6 @@
 - [Prospectors Claim](https://www.youtube.com/watch?v=6hsCQvzzHKM)
   - z3里有soft constraint和optimizer，用于在众多条件中找到满足条件最多/最少的一组值。部分题目给出的约束存在互斥的情况，这个时候用普通的solver一定找不出来解，得用`Optimize()`
 - 有些时候如果8-bit vector出不来结果，可以尝试用32-bit vector： https://github.com/opcode86/ctf_writeups/tree/main/wwCTF2024
-
-## Tools
-
-平时见到的乱七八糟的工具
-
-- [Instruction Stomp](https://github.com/ChrisTheCoolHut/Instruction-Stomp)
-  - 侧信道逆向工具，支持不同架构的binary。原理是计算程序执行的指令数量来判断当前输入是否为正确输入
-- [edb-debugger](https://github.com/eteran/edb-debugger)
-  - 和x64dbg很像,但是适用于AArch32/x86/x86-64架构
-  - 使用案例见[Now This Will Run on My 486?](https://github.com/gimel-team/ctf-writeups/blob/master/2025/iris-ctf/now-this-will-run-on-my-486)。这题我做的时候用的是pwndbg，然而题目涉及JIT+signal handling，通过报错进设置好的signal handling函数来动态解码执行的代码。pwndbg直接把signal传到我手里来了，continue也动不了……
-- [ghidra-wasm-plugin](https://github.com/nneonneo/ghidra-wasm-plugin)：WASM逆向。chrome自带的开发者工具可以调试wasm，见 https://developer.chrome.com/docs/devtools/wasm 和 https://developer.chrome.com/docs/devtools/memory-inspector
-  - [????????](https://hackmd.io/@fsharp/Hk1cfCwIye)
-- [A child's dream](https://github.com/srdnlen/srdnlenctf-2025_public/blob/main/pwn_A_childs_dream)
-  - [Mesen2](https://github.com/SourMesen/Mesen2)
-    - Multi-system emulator (NES, SNES, GB, GBA, PCE, SMS/GG, WS) 
-    - 也是一个不错的调试工具。用法示例见[Snake I - Just One More Apple](https://nanimokangaeteinai.hateblo.jp/entry/2025/03/10/041721)
-  - ida pro也可以反编译SNES,参考 https://r3kapig-not1on.notion.site/Srdnlen-CTF-2025-Writeup-by-r4kapig-181ec1515fb98004b3e2c42e74ce5fc5
-  - 另一个snes调试器：[bsnes-plus](https://github.com/devinacker/bsnes-plus)
-- [diaphora](http://diaphora.re)
-  - IDA插件；program diffing tool
-- [net-msg](https://scuffed.online/x3ctf-2025)
-  - 逆向golang。题目的binary没有被去除符号（not stripped），然而gdb在这种情况下会找不到引用的源码文件，导致设置断点时可能出现segault。可以尝试用go原生调试器[Delve](https://github.com/go-delve/delve)。不过这个调试器有个缺点，就是没法自由地修改寄存器的值（见 https://github.com/go-delve/delve/blob/master/Documentation/cli/expr.md ）。这时只能去除binary的调试符号并换回gdb
-  - ghidra插件[GolangAnalyzer](https://github.com/mooncat-greenpy/Ghidra_GolangAnalyzerExtension)
-- [AssetRipper](https://github.com/AssetRipper/AssetRipper)
-  - 提取unity游戏的资源
-- [Analyzing ARCompact Firmware with Ghidra](https://www.sstic.org/media/SSTIC2021/SSTIC-actes/analyzing_arcompact_firmware_with_ghidra/SSTIC2021-Article-analyzing_arcompact_firmware_with_ghidra-iooss.pdf)
-  - 工具： https://github.com/JacksonDonaldson/arcompact_be_ghidra
-- [CoSA: CoreIR Symbolic Analyzer](https://github.com/cristian-mattarei/CoSA)
-  - SMT-based symbolic model checker for hardware design
 
 ## Game
 

@@ -808,6 +808,9 @@ $$
     - 其他解法： **knutsacque** 。果然有人跟我类似思路，不过我没想到竟然有现成脚本： https://github.com/TheBlupper/linineq
 - [zk-Openings](https://github.com/srdnlen/srdnlenctf-2025_public/blob/main/crypto_zk-openings)
     - Zero-knowledge+Lattice。太难了，难到全场零解。只知道这和[Plonkup](https://eprint.iacr.org/2022/086.pdf)有关
+    - 另一道也是[plonk](https://eprint.iacr.org/2019/953)协议的题：[Polymao](https://github.com/Warriii/CTF-Writeups/blob/main/deadsec25/crypto_polymao.md)
+        - 预期解是[Frozen Heart](https://blog.trailofbits.com/2022/04/15/the-frozen-heart-vulnerability-in-bulletproofs)漏洞：协议在实现Fiat-Shamir transformation时没有hash所有公共值
+        - **Polymao**
 - [Mersenne Mayhem](https://github.com/L3AK-TEAM/L3akCTF-2025-public/blob/main/crypto/mersenne-mayhem)
     - [Improved Lattice-Based Attack on Mersenne Low Hamming Ratio Search Problem](https://eprint.iacr.org/2024/2080.pdf)
 
@@ -949,6 +952,10 @@ $$
     - 有 $c=as+\beta-kn$ 。如果让 $N=[n]G,B=[\beta]G$ ，则 $[c]G=[as+\beta-kn]G=[a]S+B-[k]N\Rightarrow [k]N=[a]S+B-[c]G$ 。通过选择 $a=2^{1024-256+l}$ (n位数为1024，s位数为256，l是可接受的离散对数大小)可以使k位于 $[0,2^{l+1}]$ 中（ $k=\frac{as+\beta-c}{n}$ ，因为 $\beta$ 和n不超过1024bit，`as`被刻意控制在 $2^{1024+l}$ bit，因此k最大不会大于 $2^{l+1}$ ）
     - k和s密切相关。这篇wp计算的上下界比较复杂，这里参考[官方wp](https://github.com/DownUnderCTF/Challenges_2025_Public/blob/main/crypto/good_game_spawn_point)的推导。因为 $0\leq\beta$ < n，所以kn的区间为 $as-c\leq kn$ < $as+n-c$ 。全部加上c，得到 $as\leq kn+c$ < $as+n$ 。从后半段可以推出 $kn-n+c$ < $as\leq kn+c$ 。全部除以a，得到 
     $\frac{kn-n+c}{a}$ < $s\leq\frac{kn+c}{a}$ 。不过官方脚本里的变量命名与这里不同，且用了近似： $\frac{(k-1)n}{a}$ < s $\leq\frac{(k+1)n}{a}$
+- [bullmad](https://github.com/Warriii/CTF-Writeups/blob/main/deadsec25/crypto_bullmad.md)
+    - 用[Pollard's kangaroo algorithm](https://en.wikipedia.org/wiki/Pollard%27s_kangaroo_algorithm)（也叫pollard-lambda）计算ecdlp
+        - 工具[Kangaroo](https://github.com/JeanLucPons/Kangaroo)，支持用gpu加速:[nvida cuda](https://developer.nvidia.com/cuda-toolkit)
+    - 相关论文：[Breaking ECDSA with Two Affinely Related Nonces](https://eprint.iacr.org/2025/705.pdf)
 
 ## AES/DES
 
