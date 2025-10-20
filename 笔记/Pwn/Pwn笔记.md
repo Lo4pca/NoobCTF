@@ -2,6 +2,12 @@
 
 此篇笔记对应的gist： https://gist.github.com/Lo4pca/c5657f0c8e6d2ef75c342369ee27a6b5 。题目对应的关键词将加粗
 
+## Resources
+
+- 关于为什么本地exp无法在远程服务器上成功： https://corgi.rip/posts/remote-vs-local
+- [house of blindness](https://hackmd.io/jmE0VvcTQaaJm6SEWiqUJA)
+  - 利用相对地址写修改link_map可以在无libc leak的情况下getshell
+
 ## Chrome V8
 
 这玩意我完全不懂，一切交给未来的我
