@@ -1201,3 +1201,37 @@ the assertion that (b) and (c) are true）
 CRT的设置也是 $m_i$ 两两互质，声称解一定存在且在模m下唯一
 - 解存在对应这题映射的满射
 - 解唯一对应这题映射的单射
+
+### Exercise 2.25
+
+假设n=pq，p和q为不同的奇质数
+
+1. 假设gcd(a,n)=1。证明如果方程 $x^2\equiv a\mod n$ 有解，那么它有四个解
+
+在`Exercise 1.36`中证过 $x^2\equiv a\mod p$ 有两个解。由于n=pq，直觉上猜测  $x^2\equiv a\mod n$ 解的数量就是分别模p和q的解数量相乘
+
+假设有x满足 $n|x^2-a$ 。`Exercise 2.21`的结论反过来也能成立，因此 $p|x^2-a$ 且 $q|x^2-a$ ，x同时是两个小方程的解。假设：
+- $m^2\equiv a\mod p$
+- $l^2\equiv a\mod q$
+
+用crt组合这两个方程，得到 $x\equiv mqy_q+lpy_p\mod n$ 。此处 $y_qq\equiv 1\mod p,y_pp\equiv 1\mod q$ 。因为每个小方程各有两个解(符号相反)，组合起来一共就有四种解
+
+2. 假设你有一个机器可以找到上述方程的四个解。如何利用这个机器分解n？
+
+假设有两个解的 $lpy_p$ 部分符号相同， $mqy_q$ 部分符号不同。两者相减得到 $mqy_q-m'qy_q=q(my_q-m'y_q)$ ，求n与这个数的gcd即可恢复q
+
+### Exercise 2.27  
+ 
+写出Pohlig–Hellman算法在阶为 $p-1=q_1\times q_2$ 情况下的证明  
+ 
+仿照原证明，构造出q阶的 $g_i$ : $g_i=g^{\frac{p-1}{q_i}}$ , $h_i=h^{\frac{p-1}{q_i}}$ 。求解两个小方程：  
+- $g_1^{y_1}\equiv h_1\mod q_1$  
+- $g_2^{y_2}\equiv h_2\mod q_2$  
+ 
+用CRT组合起来，得到 $y=y_1q_2x_1+y_2q_1x_2\mod p-1$ 。其中 $x_1,x_2$ 分别满足 $q_2x_1\equiv 1\mod q_1,q_1x_2\equiv 1\mod q_2$
+
+令 $z=g^{-y}h,e_i=\frac{p-1}{q_i}$ 。 $z^{e_i}=g^{-ye_i}h^{e_i}$ 。因为 $y\equiv y_i\mod q_i$ ，所以 $z^{e_i}=g^{-(y_i+k_iq_i)e_i}h^{e_i}=g^{-y_ie_i-k_iq_ie_i}h^{e_i}$ 。因为 $q_ie_i=p-1$ ，且p-1是阶（幂加上p-1不会改变结果），所以原式等于 $g^{-y_ie_i}h^{e_i}=g^{-y_ie_i}g^{y_ie_i}=1$
+
+可以看出z的阶整除 $gcd(e_1,e_2)=1$ ，因此z为1，进而y是满足 $g^y=h$ 的离散对数
+
+（大致思路书里讲过，看的时候倒是明白了；但是实际写起来的时候发现还是不懂，只能疯狂偷瞄+chatgpt，并被一堆符号砸晕）
