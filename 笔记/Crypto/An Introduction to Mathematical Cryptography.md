@@ -1220,7 +1220,7 @@ CRT的设置也是 $m_i$ 两两互质，声称解一定存在且在模m下唯一
 
 假设有两个解的 $lpy_p$ 部分符号相同， $mqy_q$ 部分符号不同。两者相减得到 $mqy_q-m'qy_q=q(my_q-m'y_q)$ ，求n与这个数的gcd即可恢复q
 
-### Exercise 2.27  
+### Exercise 2.27
  
 写出Pohlig–Hellman算法在阶为 $p-1=q_1\times q_2$ 情况下的证明  
  
@@ -1235,3 +1235,37 @@ CRT的设置也是 $m_i$ 两两互质，声称解一定存在且在模m下唯一
 可以看出z的阶整除 $gcd(e_1,e_2)=1$ ，因此z为1，进而y是满足 $g^y=h$ 的离散对数
 
 （大致思路书里讲过，看的时候倒是明白了；但是实际写起来的时候发现还是不懂，只能疯狂偷瞄+chatgpt，并被一堆符号砸晕）
+
+### Exercise 2.29
+
+有一个不存在零因子（zero divisor）的具有有限个元素的环R。证明R是域
+
+提示：让 $a\in R,a\not ={0}$ 。由 $b\mapsto a\times b$ 定义的映射 $\phi_a:R\rightarrow R$ 有什么性质？
+
+（如果a,b均不为0但两者的乘积为0，就称它们为零因子）
+
+因为这本书默认提到的环都是交换含幺环（乘法可交换且存在乘法单位元），所以R是一个有限整环（整环指无零因子的交换环）
+
+考虑提示中的映射：“没有零因子”告诉我们这个映射的核为0，因此 $\phi_a$ 是单射；再加上R是有限的， $\phi_a$ 一定也是满射（如果R是无限的就没法保证对于所有元素都存在一个映射可以映射到1）。单射+满射=双射，因此对于每个元素a，都存在一个元素b使得 $a\times b=1$ 。任何R中的非零元都是可逆的，故R为域
+
+### Exercise 2.31
+
+R和S均为环。如果函数 $\phi:R\rightarrow S$ 满足 $\phi(a+b)=\phi(a)+\phi(b)$ 且 $\phi(a\times b)=\phi(a)\times\phi(b),\forall a,b\in R$ ，则称 $\phi$ 为（环）同态
+
+2. 假设p为质数，环R中的元素满足 $\forall a\in R,pa=0$ （pa指a加上自身p次）。证明映射 $\phi:R\rightarrow R,\phi(a)=a^p$ 是环同态（称为 Frobenius 同态）
+
+- $\phi(a)+\phi(b)=a^p+b^p$
+- $\phi(a+b)=(a+b)^p=\sum_{k=0}^p\binom{p}{k}a^kb^{p-k}$
+
+套二项式系数的定义： $\binom{p}{k}=\frac{p!}{k!(p-k)!}=\frac{p\times(p-1)\times...\times(p-k+1)}{k!}$ 。注意到除了当k=0或k=p时结果是1外；其余结果一定是p的倍数(因为k < n且p是质数，分子的p无论如何都不会被除掉)。于是展开的二项式中间一长串都可以化简为0，留下结果 $a^p+b^p$
+
+- $\phi(a)\times\phi(b)=a^p\times b^p$
+- $\phi(a\times b)=(ab)^p=a^p\times b^p$
+
+不知道为什么，我看不出来为什么二项式系数一定可以整除……递归看看：
+- 对于任意x， $\binom{x}{0}=1$ ，是一个整数
+- 假设 $\binom{p-1}{k-1}$ 可以整除，逐步加一，查看 $\binom{p}{k}$ 的关系
+- $\frac{p\times(p-1)\times...\times(p-k+1)}{k!}=\frac{p}{k}\times\frac{(p-1)\times...\times(p-k+1)}{(k-1)!}=\frac{p}{k}\times\binom{p-1}{k-1}$
+- $k\binom{p}{k}=p\binom{p-1}{k-1}$
+- $p|k\binom{p}{k}$
+- p和k互质，因此 $p|\binom{p}{k}$ ，且 $\binom{p}{k}$ 是整数

@@ -1187,6 +1187,7 @@ flag.export("./flag.mp3", format="mp3")
     - `vol.py -f memdump.elf linux.pagecache.RecoverFs`:dump整个文件系统，包括内核加载的模块
     - [bulk_extractor](https://github.com/simsong/bulk_extractor)可以提取网络流量并生成pcap
 - [LovelyMem](https://github.com/Tokeii0/LovelyMem):一个图形界面取证工具
+- [ForensicsTool](https://github.com/WXjzcccc/ForensicsTool)
 102. [Huffman coding](https://en.wikipedia.org/wiki/Huffman_coding)，例题:[Tree of Secrets](https://medium.com/@vj35.cool/the-bytebandits-ctf-2023-449a2d64c7b4),例题是文件夹形式的Huffman coding。动图解释：https://zhuanlan.zhihu.com/p/63362804
 103. [private-bin](https://github.com/5t0n3/ctf-writeups/blob/main/2023-lactf/misc/private-bin/README.md)
 
