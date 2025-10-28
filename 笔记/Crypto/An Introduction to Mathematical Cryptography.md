@@ -1269,3 +1269,47 @@ R和S均为环。如果函数 $\phi:R\rightarrow S$ 满足 $\phi(a+b)=\phi(a)+\p
 - $k\binom{p}{k}=p\binom{p-1}{k-1}$
 - $p|k\binom{p}{k}$
 - p和k互质，因此 $p|\binom{p}{k}$ ，且 $\binom{p}{k}$ 是整数
+
+## Integer Factorization and RSA
+
+### Exercise 3.4
+
+3. 证明欧拉定理：对于任何满足gcd(a,N)=1的a，有 $a^{\phi(N)}\equiv 1\mod N$
+
+提示：模仿费马小定理的证明（`Theorem 1.24`），但无需像`1.8`那样枚举a的所有倍数，只取所有满足gcd(k,N)=1的ka即可
+
+既然提示都这么说了，开抄（
+
+首先我们假设 $N\nmid a$ ，接着摆出模N意义下a的所有倍数： $a,k_1a,k_2a,...,k_ja$ ，满足 $gcd(k_i,N)=1$ 。这里一共有 $\phi(N)$ 个数，且每个数都是不同的。假如有两个数xa和ya相同，这意味着 $xa\equiv ya\mod N\rightarrow (x-y)a\equiv 0\mod N$ 。 因为前提条件已经说了 $N\nmid a$ ，所以只能是 $N|x-y$ 。但是无论是x还是y都在1到N-1的范围内，因此x-y的差位于-(N-2)到N-2之间。然而这个区域内只有一个0可以被N整除，意味着x=y。我们也可以确定没有数为0，因为任何 $k_i$ 和a都无法被p整除
+
+既然上述 $\phi(N)$ 个数均不重复且模N意义下只能有 $\phi(N)$ 个与N互质的数，我们可以说上述数字就是所有与N互质的数，只是顺序有所不同
+
+现在让我们把这一堆数乘起来。 $k_1ak_2a...k_ja\equiv k_{1'}k_{2'}...k_{j'}\mod N$ 。因为任何 $k_i$ 都与N互质，所以我们可以把它们拿掉，得到 $a^{\phi(N)}\equiv 1\mod N$
+
+### Exercise 3.5
+
+2. 如果p是质数， $\phi(p^2)$ 的值是什么？ $\phi(p^j)$ 呢？证明你推导的计算 $\phi(p^j)$ 的公式是正确的
+
+提示：移除0到 $p^j-1$ 之间包含因子p的数，剩下的数就和p互质了
+
+因为p是质数，所以与p不互质的数只有那些p的倍数： $0,p,2p,...,(p-1)p$ ，正好有p个数。因此 $\phi(p^2)=p^2-p$
+
+ $\phi(p^j)$ 类似。在0到 $p^j-1$ 之间，有 $p^{j-1}$ 个p的倍数，所以 $\phi(p^j)=p^j-p^{j-1}$
+
+3. 让整数M和N满足gcd(M,N)=1。证明 $\phi(MN)=\phi(M)\phi(N)$
+
+第三章了，仍然只有模糊的思路……
+
+对于M,有 $\phi(M)$ 个数与之互质。那么MN中有N个M，自然有 $N\phi(M)$ 个数与M互质。但我们希望结果与N也互质，所以每个M只能提供 $\phi(N)$ 个数进行组合。因此一共有 $\phi(N)\phi(M)$ 个与MN互质的数
+
+找chatgpt要了个CRT相关的证明：
+
+构造同余映射 $f:Z/MNZ\rightarrow Z/MZ\times Z/NZ$ 。因为gcd(M,N)=1，所以CRT保证这是一个双射
+
+Z/MNZ中的可逆元有 $\phi(MN)$ 个，Z/MZ中的可逆元有 $\phi(M)$ 个，Z/NZ中的可逆元有 $\phi(N)$ 个。一个x在Z/MNZ中可逆明显需要x在Z/MZ，Z/NZ中均可逆。再结合f的双射性质，有 $\phi(MN)=|Z/MNZ^{\times}|=|Z/MZ^{\times}|\times|Z/NZ^{\times}|=\phi(M)\phi(N)$
+
+4. 假设 $p_1,p_2,...,p_r$ 为整除N的不同质数。利用`2`和`3`的结论证明:
+
+$$\phi(N)=N\prod_{i=1}^r(1-\frac{1}{p_i})$$
+
+利用唯一分解定理， $N=p_1^{x_1}p_2^{x_2}...p_r^{x_r}$ 。利用`3`的结论， $\phi(N)=\phi(p_1^{x_1})\phi(p_2^{x_2})...\phi(p_r^{x_r})$ 。再用`2`的结论， $\phi(N)=(p_1^{x_1}-p_1^{x_1-1})(p_2^{x_2}-p_2^{x_2-1})...(p_r^{x_r}-p_r^{x_r-1})$ 。变形，得到 $\phi(N)=p_1^{x_1}(1-\frac{1}{p_1})p_2^{x_2}(1-\frac{1}{p_2})...p_r^{x_r}(1-\frac{1}{p_r})=N\prod_{i=1}^r(1-\frac{1}{p_i})$

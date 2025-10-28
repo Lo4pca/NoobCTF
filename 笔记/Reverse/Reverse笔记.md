@@ -32,6 +32,8 @@
   - SMT-based symbolic model checker for hardware design
 - [PyInjector](https://github.com/Stanislav-Povolotsky/PyInjector)
   - 获取python程序的runtime并动态运行（注入）自定义代码
+- [gostringungarbler](https://github.com/mandiant/gostringungarbler)
+  - 反混淆由[garble](https://github.com/burrowers/garble)混淆的字符串
 
 ## Z3
 
@@ -1448,3 +1450,13 @@ mov     r8, qword [r13]
 - 使用chrome开发者工具调试node js环境
 220. [Car Watching](https://github.com/Warriii/CTF-Writeups/blob/main/deadsec25/re_carwatching.md)
 - 逆向[Nuitka](https://github.com/Nuitka/Nuitka)编译的python可执行文件
+221. [C0d3_Fu5](https://kos0ng.gitbook.io/ctfs/write-up/2025/securinets-quals/reverse-engineering)
+- 逆向混淆后的c# binary。包含：
+  - dnSpy动调
+  - 跟踪动态创建并运行函数的反射相关API（System.Reflection）
+  - 用[dncil](https://github.com/mandiant/dncil)反编译Common Intermediate Language (CIL)指令
+  - 用[Harmony](https://github.com/pardeike/Harmony)动态注入c#代码
+222. [BR34K_0F_STACK](https://blog.sdark.me/break-of-stack-writeup)
+- 逆向由[Delphi](https://en.wikipedia.org/wiki/Delphi_(software))开发的程序
+- ida pro插件:[DelphiHelper](https://github.com/eset/DelphiHelper)
+- 使用[pymem](https://github.com/srounet/Pymem)读取内存
