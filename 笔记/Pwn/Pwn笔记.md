@@ -51,6 +51,9 @@
   - 这道题其实是这个[issue](https://issues.chromium.org/issues/421403261)：在原本只能用32-40位指针索引内容的沙盒中，由liftoff编译的WasmArray索引逻辑使用了64位值。patch文件注释掉的地方正是这个[review](https://chromium-review.googlesource.com/c/v8/v8/+/6611066)添加的内容。然而这道题只要求使沙盒崩溃，而且开了memory corruption api；可能根本就不需要上述patch？
   - wp里还提到了这篇文章： https://retr0.zip/blog/abusing-Liftoff-assembly-and-efficiently-escaping-from-sbx.html 。liftoff在编译webassembly代码时会引用WasmInstance的指针，然后执行诸如`sub`语句的操作。注意WasmInstance指针位于沙盒内。于是用memory corruption api修改这个指针便可以使sub语句的参数为指定地址。再利用一些shellcode技巧可以修改wasm函数的代码
     - 但是和这道题没有关系
+- [Sukunahikona](https://nordrljos.dev/CTFs/2025/securinets)
+  - toctou漏洞导致数组oob；通过arraybuffer+dataview修改rwx段getshell
+  - 主要是为了记录这个非预期解: **Sukunahikona** ,利用 https://issues.chromium.org/issues/360533914
 
 ## Kernel
 
@@ -2124,3 +2127,7 @@ offset = the_mmap64_plus_23_itself
 - 其他wp：
   - https://github.com/DownUnderCTF/Challenges_2025_Public/blob/main/pwn/rw.py
   - https://vulnx.dev/blog/posts/DUCTF2025 （伪造`PyDict_Type`并覆盖`__str__`为one_gadget）
+250. [V-tables](https://buddurid.me/2025/10/04/securinets-quals-2025)
+- 仅覆盖stdout FILE结构体（无法覆盖vtable）下的fsop
+- 官方wp的思路是在`&stdout-8`处重叠一个假文件结构A；同时通过覆盖stdout的chain字段链入结构体A，然后利用A上的fsop调用gets（rdi固定指向`&stdout-8`，因此无法控制flags字段，不能直接传入`/bin/sh`）传入另外两个假文件结构B和C。此处由于A和原stdout重叠，无法随意控制其chain字段，故B的情况和A类似，结构体起始处为`&stdout-8`，无法控制flags。于是让B链接C，通过可以完全控制的文件结构C触发rce
+- 其他payload：**V-tables**

@@ -1313,3 +1313,21 @@ Z/MNZ中的可逆元有 $\phi(MN)$ 个，Z/MZ中的可逆元有 $\phi(M)$ 个，
 $$\phi(N)=N\prod_{i=1}^r(1-\frac{1}{p_i})$$
 
 利用唯一分解定理， $N=p_1^{x_1}p_2^{x_2}...p_r^{x_r}$ 。利用`3`的结论， $\phi(N)=\phi(p_1^{x_1})\phi(p_2^{x_2})...\phi(p_r^{x_r})$ 。再用`2`的结论， $\phi(N)=(p_1^{x_1}-p_1^{x_1-1})(p_2^{x_2}-p_2^{x_2-1})...(p_r^{x_r}-p_r^{x_r-1})$ 。变形，得到 $\phi(N)=p_1^{x_1}(1-\frac{1}{p_1})p_2^{x_2}(1-\frac{1}{p_2})...p_r^{x_r}(1-\frac{1}{p_r})=N\prod_{i=1}^r(1-\frac{1}{p_i})$
+
+### Exercise 3.2
+
+设p为质数, $e\geq 1$ , $c\not=0\mod p$ 。考虑下述同余方程：
+
+$$x^e\equiv c\mod p$$
+
+1. 证明如果该方程有解，则它正好有gcd(e,p-1)个不同的解
+
+提示：用原根定理（`Theorem 1.30`）配合扩展欧几里得算法(`Theorem 1.11`)或`Exercise 1.27`
+
+把x和c写成原根的幂次形式： $x\equiv g^a\mod p, c\equiv g^b\mod p$ 。那么 $(g^a)e\equiv g^b\mod p\Rightarrow ae\equiv b\mod p-1$
+
+没有想过怎么用`Theorem 1.11`，因为`Exercise 1.27`的结论就是“同余方程 $ax\equiv c\mod m$ 有gcd(a,m)个不同的解”
+
+2. 对于多少个非零的值 $c\mod p$ ，上述方程有解？
+
+还是`Exercise 1.27`的结论，`1`中的方程仅在gcd(e,p-1)|b时有解。那么一共有 $\frac{p-1}{gcd(e,p-1)}$ 个非零的c使方程有解
