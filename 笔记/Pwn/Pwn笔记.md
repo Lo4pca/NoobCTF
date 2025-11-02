@@ -2130,4 +2130,4 @@ offset = the_mmap64_plus_23_itself
 250. [V-tables](https://buddurid.me/2025/10/04/securinets-quals-2025)
 - 仅覆盖stdout FILE结构体（无法覆盖vtable）下的fsop
 - 官方wp的思路是在`&stdout-8`处重叠一个假文件结构A；同时通过覆盖stdout的chain字段链入结构体A，然后利用A上的fsop调用gets（rdi固定指向`&stdout-8`，因此无法控制flags字段，不能直接传入`/bin/sh`）传入另外两个假文件结构B和C。此处由于A和原stdout重叠，无法随意控制其chain字段，故B的情况和A类似，结构体起始处为`&stdout-8`，无法控制flags。于是让B链接C，通过可以完全控制的文件结构C触发rce
-- 其他payload：**V-tables**
+- 其他payload：**V-tables** ([House of Apple 3](https://www.roderickchan.cn/zh-cn/house-of-apple-%E4%B8%80%E7%A7%8D%E6%96%B0%E7%9A%84glibc%E4%B8%ADio%E6%94%BB%E5%87%BB%E6%96%B9%E6%B3%95-3))
