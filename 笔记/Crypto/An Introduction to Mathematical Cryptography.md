@@ -1331,3 +1331,58 @@ $$x^e\equiv c\mod p$$
 2. 对于多少个非零的值 $c\mod p$ ，上述方程有解？
 
 还是`Exercise 1.27`的结论，`1`中的方程仅在gcd(e,p-1)|b时有解。那么一共有 $\frac{p-1}{gcd(e,p-1)}$ 个非零的c使方程有解
+
+### Exercise 3.14
+
+1. 561=3\*11\*17。首先用费马小定理证明对于每个可能的a：
+- $a^{561}\equiv a\mod 3$
+- $a^{561}\equiv a\mod 11$
+- $a^{561}\equiv a\mod 17$
+
+然后解释为什么上述三个同余说明 $a^{561}\equiv a\mod 561$
+
+注意到2，10和16均整除560。根据费马小定理 $a^{p-1}\equiv 1\mod p$ ,对于每个模数，均有 $a^{560}\equiv 1\mod p$ ，即 $a^{561}\equiv a\mod p$
+
+第二步我以为是crt，但是用通用公式组合起来后发现规律不明显。卡在这条死路里很久，直到chatgpt告诉我直接用`Exercise 2.21`的结论就好……
+
+因为3,11和17均整除 $a^{561}-a$ ，且三者两两互素；因此三者的乘积也整除 $a^{561}-a$
+ 
+3. 证明任何卡迈克尔数（Carmichael number）都是奇数
+
+问chatgpt要提示的时候直接剧透了。它说根据Korselt’s criterion，合数n是卡迈克尔数当且仅当：
+- n没有平方因子
+- 对于每个素因子p|n,都有p-1|n-1
+
+n是偶数意味着n-1是奇数；排除2后所有的p-1都是偶数。偶数没办法整除奇数，因此偶数不可能是卡迈克尔数
+
+4. 证明卡迈克尔数一定是不同质数的乘积
+
+依然不会做，而且chatgpt给我的证明跳了一些步骤我就差点看不懂了……
+
+需要转换思路。不是直接证明命题，而是证明如果一个数含平方因子，一定存在一个a使其不满足卡迈克尔数的性质。这里我们假设n是卡迈克尔数且 $n=p^2m$ ，有 $a\equiv p+1\mod p^2,a\equiv 1\mod m$ 。根据crt可以确定一定有一个a满足上述需求
+
+卡迈克尔数应满足 $a^{n-1}\equiv 1\mod n$ ，又因为 $a\equiv p+1\mod p^2$ ，所以 $(p+1)^{n-1}\equiv 1\mod p^2$ 。用二项式定理展开后得到 $1+(n-1)p\equiv 1\mod p^2\Rightarrow p^2|(n-1)p\Rightarrow p|n-1$
+
+然而前提条件提到p|n。p不可能同时整除n和n-1。因此卡迈克尔数不能包含任何平方因子
+
+### Exercise 3.19
+
+此题的证明可以用`Theorem 3.21`
+
+1. 设N是一个（较大的）整数。Bob在特定范围内选择了一个n，满足 $\frac{1}{2}N\leq n\leq\frac{3}{2}N$ 。如果他多次重复这个过程，证明他选择的数中约有 $\frac{1}{ln(N)}$ 个数是质数。更准确地说，定义 $P(N)=\frac{\frac{1}{2}N和\frac{3}{2}N中的质数}{\frac{1}{2}N和\frac{3}{2}N中的整数}=[整数n在范围\frac{1}{2}N\leq n\leq\frac{3}{2}N内是质数的概率]$ ，然后证明 $lim_{N\rightarrow\infty}\frac{P(N)}{1/ln(N)}=1$
+
+`Theorem 3.21`长得已经和这里的命题很像了。说 $lim_{X\rightarrow\infty}=\frac{\pi(X)}{X/ln(X)}=1$ ， $\pi(X)$ 是 $2\leq p$ < X中质数p的数量。直接套， $\pi(\frac{1}{2}N)\sim\frac{\frac{1}{2}N}{ln(\frac{1}{2}N)},\pi(\frac{3}{2}N)\sim\frac{\frac{3}{2}N}{ln(\frac{3}{2}N)}$ (`~`是渐进等价)。题目中的P(N)约等于 $\frac{\pi(\frac{3}{2}N)-\pi(\frac{1}{2}N)}{N}$ 。目标变成证明 $lim_{N\rightarrow\infty}\frac{\pi(\frac{3}{2}N)-\pi(\frac{1}{2}N)}{N/ln(N)}=1$
+
+最后直接上科技Wolfram alpha（？），得到上述极限确实是1，完成证明
+
+（科技的力量就是伟大啊）
+
+2. 更一般地，固定两个数 $c_1,c_2$ 满足 $c_2$ > $c_1$ > 0。Bob在特定范围内选择的n满足 $c_1N\leq n\leq c_2N$ 。定义 $P(c_1,c_2;N)=[整数n在范围c_1N\leq n\leq c_2N内是质数的概率]$ 。用一个关于N的函数补全下方的式子，使得式子成立：
+
+$$lim_{N\rightarrow\infty}\frac{P(c_1,c_2;N)}{?}=1$$
+
+尝试直接拷贝上一题的思路：
+
+$\pi(c_2N)\sim\frac{c_2N}{ln(c_2N)};\pi(c_1N)\sim\frac{c_1N}{ln(c_1N)}$ 。两者相减得到 $\frac{c_2N}{ln(c_2N)}-\frac{c_1N}{ln(c_1N)}=\frac{c_2N}{ln(c_2)+ln(N)}-\frac{c_1N}{ln(c_1)+ln(N)}$
+
+emmm，假如N趋近于无穷的话，常数项 $ln(c_2)$ 和 $ln(c_1)$ 和零差不多。因此上述式子渐进等于 $\frac{(c_2-c_1)N}{ln(N)}$ ，这个式子也是问号处的答案

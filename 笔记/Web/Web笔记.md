@@ -4047,6 +4047,7 @@ Content-Type: text/plain
 474. [Sniffy](https://octo-kumo.me/c/ctf/2024-ductf/web/sniffy)
 - php的mime_content_type函数用于查看某个文件是什么类型。但是其内部原理只是用一个表格检查文件是否包含某些字节。所以只要在特定的位置处放上特征字节就能伪造文件的类型（估计这就是一些php木马上传的绕过方法原理）。至于到底是什么位置可以爆破或者看文件里记录的[偏移](https://sources.debian.org/src/dares/0.6.5-7/magic.mime/)
 - php将其session内容存储在`/tmp/sess_xxxx`。xxxx为cookie里可以看到的`PHPSESSID`的值
+    - `PHPSESSID`中无效的字符会触发warning。由于用户可以控制`PHPSESSID`，有时候可以利用这点做测信道oracle： [Date Logger](https://blog.whale-tw.com/2025/10/19/qnqsec-ctf-2025)
 - 更详细的wp： https://siunam321.github.io/ctf/DownUnderCTF-2024/web/sniffy/
 - 非预期解： https://github.com/4n86rakam1/writeup/tree/main/DownUnderCTF_2024 。这个非预期解比预期解还复杂，主要利用了一个php文件上传[技巧](https://blog.orange.tw/2018/10/)。假如在post data开头加上个PHP_SESSION_UPLOAD_PROGRESS，php会自动开启session，无视服务器端是否开启。session文件位于`/tmp/sess_[sessid]`，而sessid又可以在cookie里控制。唯一的问题是这样上传的cookie很快就会被自动删除，所以需要race condition。这个技巧适用于文件包含没有目标文件，需要自己创建文件和payload；以及无法以其他方式控制session的值的情况
 475. [i am confusion](https://siunam321.github.io/ctf/DownUnderCTF-2024/web/i-am-confusion/)
