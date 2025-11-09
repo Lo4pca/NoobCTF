@@ -151,4 +151,4 @@ srcdoc里还是个iframe套娃，但是由于sandbox，内容就很简单了,因
 
 此题相关issue： https://github.com/whatwg/html/issues/6809 。另外wp作者的另一篇文章也不错，iframe和open的一些奇怪特性： https://blog.huli.tw/2022/04/07/iframe-and-window-open
 
-这篇wp所介绍的payload其实是不完整的，最终payload为了关注核心概念iframe，刻意省略了原题exp的opener部分。完整exp和题目作者的tldr见 https://gist.github.com/C0nstellati0n/248ed49dea0accfef1527788494e2fa5#srcdoc-memos
+这篇wp所介绍的payload其实是不完整的，最终payload为了关注核心概念iframe，刻意省略了原题exp的opener部分。完整exp和题目作者的tldr见 **srcdoc-memos**

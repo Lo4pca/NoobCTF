@@ -316,8 +316,9 @@
 - [srcdoc-memos](../../CTF/idekCTF/srcdoc-memos.md)
     - 不对我怎么忘记记这篇了……总之这是一个极为复杂的xss题，不过关键在于`history.back()`引起的不统一性。执行`history.back()`后，iframe的src属性和srcdoc的csp都会遵循history里记录的上一次结果，但iframe的sandbox属性却遵循最新页面的实时结果
     - 如何绕过`window.opener !== null`的检查
-    - 类似题目见[Sand Notes](https://hackmd.io/@Solderet/rk2g-kwr1g)。官方wp和关键的`loader.html`见 https://gist.github.com/C0nstellati0n/248ed49dea0accfef1527788494e2fa5#sand-notes
+    - 类似题目见[Sand Notes](https://hackmd.io/@Solderet/rk2g-kwr1g)。官方wp和关键的`loader.html`见 **Sand Notes**
         - 这题有人尝试用css injection做，搭配ligature fonts和`span:nth-child(n)::-webkit-scrollbar`来泄漏flag（这个技巧见 https://github.com/cgvwzq/css-scrollbar-attack ）。这个方法对non-headless Puppeteer有用，然而headless就不行了。因为headless Puppeteer默认隐藏scrollbar，见 https://github.com/puppeteer/puppeteer/issues/4747
+    - 阅读[Secure Letter](https://github.com/emin-skrijelj/CTF-Writeups/blob/main/QnQSec%20CTF%202025/secure-letter-revenge-writeup.md)时发现之前的理解有偏差。利用`history.back()`引起不一致性的前提是浏览器不使用bfcache而是用disk cache，比如一个用`window.open`打开的网页；或者是headless browsers，自动禁用bfcache
 - [Cascade Chaos](https://seall.dev/posts/backdoorctf2024)
     - 比赛时找到了这题的dom clobbering，并且成功注入了xss payload。但是题目由两个机器组成，flag不在出现xss的机器上。试了很久发现无论如何都没法访问到另一个机器。以为是自己没搞懂docker间机器的通信问题（如何通信见 https://stackoverflow.com/questions/47648792/communicating-between-different-docker-services-in-docker-compose ），原来是被CORS挡住了
     - 这篇wp是非预期解。flag所在的机器在style处有个注入，闭合style标签后就能注入js payload了。预期解见 **cascade chaos** 。利用`nth-child`和xs leak技巧逐个字符爆破flag

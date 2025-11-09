@@ -34,6 +34,10 @@
   - 获取python程序的runtime并动态运行（注入）自定义代码
 - [gostringungarbler](https://github.com/mandiant/gostringungarbler)
   - 反混淆由[garble](https://github.com/burrowers/garble)混淆的字符串
+- [OneShotRevenge](https://hackmd.io/@fsharp/Syncx2_Agx)
+  - 逆向python bytecode assembly
+  - [pyinstxtractor-ng](https://github.com/pyinstxtractor/pyinstxtractor-ng)
+  - [Pyarmor-Static-Unpack-1shot](https://github.com/Lil-House/Pyarmor-Static-Unpack-1shot)
 
 ## Z3
 
@@ -1064,7 +1068,7 @@ main()
 - AutoIt脚本可能被隐藏在exe中（strings这样的exe会有AutoIt字样）。提取工具： https://github.com/nazywam/AutoIt-Ripper ,或 https://github.com/JacobPimental/exe2aut 反编译
 112. [Old Obfuscation](https://learn-cyber.net/writeup/Old-Obfuscation)
 - exe和python文件同时出现在一个文件夹下很有可能是pyinstaller打包程序。strings exe文件内有pyinstaller字样。可用[pyinstxtractor](https://github.com/extremecoders-re/pyinstxtractor)解压
-- PyArmor混淆。参考 https://github.com/Svenskithesource/PyArmor-Unpacker/tree/main 进行反混淆
+- PyArmor混淆。参考 https://github.com/Svenskithesource/PyArmor-Unpacker 进行反混淆
 113. [Hollywood](https://learn-cyber.net/writeup/Hollywood)
 - 当strings一个exe文件，发现里面有.NET字样时，说明这是个c#逆向题，可以用dnSpy反编译
 - dnSpy可以编辑代码然后继续编译，可以利用这点绕过反动调。有时候编辑后会报错，但是仍然可以正常应用修改
