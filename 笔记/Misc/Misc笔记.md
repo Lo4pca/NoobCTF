@@ -665,6 +665,13 @@ print(base64.b64encode(temp.encode()))
         - `Enpass` vault文件夹路径
         - key derivation function (KDF)轮数
         - `vault.enpassdb`是存储密码等敏感内容的主要文件。可以用`enpass2john`转成hash后（可能需要手动修改轮数）用`John the Ripper`爆破密码
+- [Shadow Cache](https://nolliv22.com/writeups/qnqsec%20ctf%202025/shadow-cache)
+    - 如何分析memory dump中的shellcode
+    - 一些工具和资源
+        - [VolWeb](https://github.com/k1nd0ne/VolWeb):利用Volatility进行分析的的网页平台
+        - 如何用ghidra分析shellcode： https://www.embeeresearch.io/ghidra-basics-shellcode-analysis
+        - [windows Function Name Hashing](https://www.bordergate.co.uk/function-name-hashing)
+        - [Speakeasy](https://github.com/mandiant/speakeasy):运行windows shellcode的模拟器
 
 ## Network Forensics
 

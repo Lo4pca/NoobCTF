@@ -12,6 +12,9 @@
     - Grafana Full read SSRF and Account Takeover
     - https://grafana.com/blog/2025/07/17/grafana-security-release-medium-and-high-severity-fixes-for-cve-2025-6197-and-cve-2025-6023
     - https://www.sonicwall.com/blog/high-severity-open-redirect-vulnerability-in-grafana-leads-to-account-takeover-cve-2025-4123
+- https://book.jorianwoltjer.com/web/client-side/cross-site-scripting-xss/html-injection
+    - 利用`UTF-16 iframe/stylesheet content`的例子：**Secure Letter** 。如果题目出现html注入且允许iframe带有`src=data:`属性，就可以利用UTF-16编码吞掉换行符，窃取原有html在引号之前的所有内容
+    - 这题还有一点，由于题目源码用`f.src='data:text/html'`往iframe里插入html，可以用double url encode绕过dompurify
 
 ## SQL注入
 
@@ -664,6 +667,10 @@ for i in range(300,1000):
         - ssti解法：**Request Handling** （在可获取req对象的情况下：`Handlebars.compile(req.query.x)({req})`）
         - 原理解析： https://enoch.host/archives/Handlebars-AST-syntax-tree-injection-issue
         - 模板引擎pug里的类似漏洞/如何利用原型链污染触发： https://po6ix.github.io/AST-Injection
+- [airspeed](https://k0w4lzk1.vercel.app/blog/QnQSec25-writeup)
+    - 绕过nginx proxy：在路径后加一些特殊字符可能会导致代理与后端服务器对路径的判断不一致，见 https://book.hacktricks.wiki/en/pentesting-web/proxy-waf-protections-bypass.html
+    - [velocity](https://velocity.apache.org/engine/1.7/user-guide.html)/[Airspeed](https://github.com/purcell/airspeed)模板注入
+    - 其他wp： https://github.com/S450R1/qnqsec-ctf-writeups/tree/main/web/airspeed
 - [更多模板注入payload](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Server%20Side%20Template%20Injection/Python.md)
     - `{% for x in ().__class__.__base__.__subclasses__() %}{% if "warning" in x.__name__ %}{{x()._module.__builtins__['__import__']('os').popen("cmd").read()}}{%endif%}{% endfor %}`
     - https://sanlokii.eu/writeups/downunderctf/parrot-the-emu

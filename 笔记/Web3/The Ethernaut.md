@@ -512,3 +512,11 @@ contract AttackScript is Script {
     }
 }
 ```
+
+## Motorbike
+
+见 https://github.com/Ching367436/ethernaut-motorbike-solution-after-decun-upgrade
+
+在Dencun upgrade后，selfdestruct字节码无法销毁合约（销毁后逻辑还在原处供其他合约调用），除非在创建合约的同一个转账中调用selfdestruct。这点其实可以解决，但这样解出题目的地址不是外部账号地址player，导致此题无解
+
+Pectra upgrade后这题又变得可解了，但是多了很多与预期解无关的复杂步骤。我没跑通仓库里的代码，在调试期间甚至似乎把我的foundry环境搞坏了……显示本地nonce与远程nonce不符。我不知道怎么重置，建新project也不行。难道要用重装大法了吗（
