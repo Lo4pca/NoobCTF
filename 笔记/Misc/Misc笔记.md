@@ -357,6 +357,10 @@ print(base64.b64encode(temp.encode()))
 - [RNJail](https://github.com/L3AK-TEAM/L3akCTF-2025-public/blob/main/misc/rnjail)
     - 利用海象运算符（walrus operator）为变量赋值
     - 利用特殊编码缩减payload的长度： https://gist.github.com/raster0x2a/6e5d81972d61793e74574d65287c7aab
+- [Pyjail 4-6](https://github.com/XDSEC/MoeCTF_2025/blob/main/official_writeups/Misc/Writeup.md)
+    - 利用栈帧（Stack Frame）逃逸： https://www.cnblogs.com/gaorenyusi/p/18242719
+    - 利用match-case绕过`ast.Attribute`获取属性： https://pid-blog.com/article/noval-pyjail-tricks
+    - 利用try-except和match-case在无内置object类的情况下绕过`ast.Attribute`获取属性
 - pyjail cheatsheet
     - https://shirajuki.js.org/blog/pyjail-cheatsheet
     - https://book.hacktricks.wiki/en/generic-methodologies-and-resources/python/bypass-python-sandboxes/index.html

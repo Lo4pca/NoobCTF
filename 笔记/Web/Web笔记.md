@@ -4380,3 +4380,5 @@ if (await remote.hasPasswordFor(id)) {
     - 这题反射漏洞出现在`config_hash["type"].constantize.new(config_hash["arg"])`，gadget为`Mysql2::Client`，可用于连接任何远程/本地的mysql/mariadb数据库
     - `Mysql2::Client.new`允许传入`local_infile`参数指定mysql是否可以用`LOAD DATA LOCAL INFILE`读取本地文件。利用这点可以向任意远程数据库传任意路径已知的本地文件，包括`/proc/self/`下的文件
 - 其他解法：**off_dah_rails_m8** ,`Bundler::GemHelper`是比预期解（盲注）更快的gadget
+557. [幻境迷心·皇陨星沉](https://github.com/XDSEC/MoeCTF_2025/blob/main/official_writeups/Web/Writeup.md)
+- java反序列化rce（可出网以及不可出网）

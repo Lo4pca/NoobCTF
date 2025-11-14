@@ -520,3 +520,48 @@ contract AttackScript is Script {
 在Dencun upgrade后，selfdestruct字节码无法销毁合约（销毁后逻辑还在原处供其他合约调用），除非在创建合约的同一个转账中调用selfdestruct。这点其实可以解决，但这样解出题目的地址不是外部账号地址player，导致此题无解
 
 Pectra upgrade后这题又变得可解了，但是多了很多与预期解无关的复杂步骤。我没跑通仓库里的代码，在调试期间甚至似乎把我的foundry环境搞坏了……显示本地nonce与远程nonce不符。我不知道怎么重置，建新project也不行。难道要用重装大法了吗（
+
+## DoubleEntryPoint
+
+现在看来上一道题的问题可能是代码逻辑导致的。今天没有遇见任何问题
+
+描述说CryptoVault的underlying token是DoubleEntryPoint，这个token不应被转走；但代码中出现了一个漏洞，导致token最终可以被转走
+
+漏洞在于CryptoVault没有过滤完全。sweepToken只保证了参数不能是DoubleEntryPointToken，但LegacyToken的transfer函数实际调用的是内部delegate的delegateTransfer，即DoubleEntryPoint的delegateTransfer，这就又绕回去了
+
+然而这题我们的目标是防止漏洞而不是利用漏洞。这也不难，delegateTransfer有个fortaNotify修饰符，这个修饰符内部会调用用户注册的bot的handleTransaction函数；我们只要在这个函数内根据情况raiseAlert即可
+
+区分有没有人在利用漏洞只需看origSender是否是CryptoVault
+```solidity
+contract AttackScript is Script {
+    function run() public {
+        vm.startBroadcast();
+        DetectionBot bot=new DetectionBot(); //await contract.cryptoVault()
+        Forta forta=Forta(address()); //await contract.forta()
+        forta.setDetectionBot(address(bot));
+        vm.stopBroadcast();
+    }
+}
+contract DetectionBot {
+    address immutable cryptoVault;
+    constructor(address _cryptoVault) {
+        cryptoVault = _cryptoVault;
+    }
+    function handleTransaction(address user, bytes calldata msgData) external {
+        if (msgData.length >= 100) {
+            address origSender = abi.decode(msgData[68:100], (address));
+            if (origSender == cryptoVault) {
+                Forta(msg.sender).raiseAlert(user);
+            }
+        }
+    }
+}
+```
+msgData的布局（相对于delegateTransfer函数）
+```
+[4字节]      [32字节]   [32字节]     [32字节]
+┌─────────┬─────────┬───────────┬───────────┐
+│selector │ to      │ value     │ origSender│
+└─────────┴─────────┴───────────┴───────────┘
+```
+这题叫DoubleEntryPoint是因为DoubleEntryPointToken既可以用自带的transfer进行转账，也可以通过LegacyToken委托调用转账

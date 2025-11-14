@@ -1877,7 +1877,8 @@ try {
 192. [buffer-overflow](https://unvariant.pages.dev/writeups/amateursctf-2024/pwn-buffer-overflow/)
 - rust里将部分unicode字符转换为大写时会导致一个字符被延长至多个字符，有栈溢出风险。unicode表： https://doc.rust-lang.org/src/core/unicode/unicode_data.rs.html#966
 193. [reflection](https://hackmd.io/@Zzzzek/HyUXVYQl0)
-- 64位[ret2dlresolve](https://syst3mfailure.io/ret2dl_resolve/)+栈迁移。顺便找到个不错的文章： https://blog.osiris.cyber.nyu.edu/pivoting-around-memory
+- 64位[ret2dlresolve](https://syst3mfailure.io/ret2dl_resolve)+栈迁移。顺便找到个不错的文章： https://blog.osiris.cyber.nyu.edu/pivoting-around-memory
+- 再补一点ret2dlresolve的资料：[No way to leak](https://github.com/XDSEC/MoeCTF_2025/blob/main/official_writeups/Pwn/MoeCTF%202025%20Pwn%20Writeup.md), https://www.cnblogs.com/xshhc/p/17335007.html
 194. [Echo Chamber](https://github.com/cr3mov/cr3ctf-2024/tree/main/challenges/pwn/echo-chamber)
 - 能用的格式化字符串被过滤时，可以用`%*`泄漏32-bit值。题目作者的解释：“tho u can not specify the index for this but to can pad some %c before it to leak value on any position. ex: `%c %c %c %*` will leak the 4th value”
 - `__run_exit_handlers`(`.fini_array`,`.dtors`)的利用。这个之前见过很多次了，覆盖成想要的函数就能在程序退出时调用那个函数。可能要用`readelf -d`查看`.fini_array`的偏移。顺便再复习一下，这玩意只能帮助重新调用函数一次，不能无限循环。不过还不确定是不是只能覆盖一次，因为wp后续就利用stack修改返回地址了，没有再用`.fini_array`
@@ -2131,3 +2132,5 @@ offset = the_mmap64_plus_23_itself
 - 仅覆盖stdout FILE结构体（无法覆盖vtable）下的fsop
 - 官方wp的思路是在`&stdout-8`处重叠一个假文件结构A；同时通过覆盖stdout的chain字段链入结构体A，然后利用A上的fsop调用gets（rdi固定指向`&stdout-8`，因此无法控制flags字段，不能直接传入`/bin/sh`）传入另外两个假文件结构B和C。此处由于A和原stdout重叠，无法随意控制其chain字段，故B的情况和A类似，结构体起始处为`&stdout-8`，无法控制flags。于是让B链接C，通过可以完全控制的文件结构C触发rce
 - 其他payload：**V-tables** ([House of Apple 3](https://www.roderickchan.cn/zh-cn/house-of-apple-%E4%B8%80%E7%A7%8D%E6%96%B0%E7%9A%84glibc%E4%B8%ADio%E6%94%BB%E5%87%BB%E6%96%B9%E6%B3%95-3))
+251. [call_it](https://github.com/XDSEC/MoeCTF_2025/blob/main/official_writeups/Pwn/MoeCTF%202025%20Pwn%20Writeup.md)
+- JOP（jump oriented programming）
