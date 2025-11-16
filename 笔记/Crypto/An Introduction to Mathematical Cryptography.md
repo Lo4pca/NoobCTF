@@ -1498,3 +1498,17 @@ $$lim_{x\rightarrow\infty}\frac{Li(X)}{X/ln(X)}$$
 最后Li(X)只剩下 $\frac{X}{ln(X)}$ 部分，毕竟不用管O(1)。可得出：
 
 $$lim_{x\rightarrow\infty}\frac{Li(X)}{X/ln(X)}=1$$
+
+3. 利用`2`说明公式`3.12`:
+
+$$\pi(X)=\int^X_2\frac{dt}{ln(t)}+O(\sqrt{X}ln(X))$$
+
+蕴含（implies）了素数定理（`Theorem 3.21`）：
+
+$$\lim_{X\rightarrow\infty}\frac{\pi(X)}{X/ln(X)}=1$$
+
+$O(\sqrt{X}ln(X))$ 表示存在某个大于0的常数C，以及某个足够大的 $X_0$ ，使得对所有X > $X_0$ 都有: 
+
+$$|\pi(X)-\int^X_2\frac{dt}{ln(t)}|\leq C\sqrt{X}ln(X)$$
+
+意思是无论误差如何变化，其最大增长速度都不会超过 $\sqrt{X}ln(X)$ 。一个关键的地方在于 $lim_{X\rightarrow\infty}\frac{\sqrt{X}ln(X)}{X/ln(X)}=\frac{ln^2(X)}{\sqrt{X}}=0$ ，所以整个 $\frac{\pi(X)}{X/ln(X)}$ 起作用的只有那个积分部分，已在`2`中已经证明过整体的极限是1

