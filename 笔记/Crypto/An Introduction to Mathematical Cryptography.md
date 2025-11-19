@@ -1512,3 +1512,38 @@ $O(\sqrt{X}ln(X))$ 表示存在某个大于0的常数C，以及某个足够大�
 $$|\pi(X)-\int^X_2\frac{dt}{ln(t)}|\leq C\sqrt{X}ln(X)$$
 
 意思是无论误差如何变化，其最大增长速度都不会超过 $\sqrt{X}ln(X)$ 。一个关键的地方在于 $lim_{X\rightarrow\infty}\frac{\sqrt{X}ln(X)}{X/ln(X)}=\frac{ln^2(X)}{\sqrt{X}}=0$ ，所以整个 $\frac{\pi(X)}{X/ln(X)}$ 起作用的只有那个积分部分，已在`2`中已经证明过整体的极限是1
+
+### Exercise 3.32
+
+此题要求证明`Corollary 3.45`的一个论断。让 $L(X)=e^{\sqrt{ln(X)ln(ln(X))}}$
+
+1. 证明存在一个大于0的 $\epsilon$ ，满足 $ln(X)^{\epsilon}$ < ln(L(X)) < $ln(X)^{1-\epsilon}$ , $\forall X$ > 10
+
+首先让 $y=ln(X)$
+
+$ln(L(X))=\sqrt{yln(y)}=(yln(y))^{\frac{1}{2}}$ 。问题变为 $y^{\epsilon}$ < $(yln(y))^{\frac{1}{2}}$ < $y^{1-\epsilon}$
+
+一个很明显的渐进行为是 $\frac{ln(ln(x))}{ln(x)}\rightarrow 0(x\rightarrow\infty)$ ，意味着 $ln(y)^{\frac{1}{2}}$ 相对于 $y^{\sigma}$ （ $\sigma$ 大于0）增长很慢。对于足够大的y， $y^{\frac{1}{2}}$ 可以“吸收” $ln(y)^{\frac{1}{2}}$
+
+所以只要让 $\epsilon$ < $\frac{1}{2}$ ，上述不等式的下界自然在y足够大的时候满足（还需要进一步证明“足够大的y”指的是X大于10）
+
+对于上界，可以写成 $ln(y)^{\frac{1}{2}}$ < $y^{\frac{1}{2}-\epsilon}$ 。两边取对数可以得到 $\frac{1}{2}ln(ln(y))$ < $(\frac{1}{2}-\epsilon)ln(y)$ 。明显只要 $\epsilon$ < $\frac{1}{2}$ 且y足够大时，不等式一定成立
+
+然后证对 X > 10均成立的部分
+
+继续变形原不等式的下界，从而找到X的临界值对应的 $\epsilon$ 。 $y^{\epsilon}$ < $(yln(y))^{\frac{1}{2}}$ $\Leftrightarrow y^{\frac{1}{2}-\epsilon}ln(y)^{\frac{1}{2}}$ > 1。让 $f(y)=y^{\frac{1}{2}-\epsilon}ln(y)^{\frac{1}{2}}$ 。只要 $\epsilon$ < $\frac{1}{2}$ ，函数就是单调递增的，最小值出现在y=ln(10)。用desmos画一下图（或者代入y=ln(10)算），可以得到 $\epsilon$ 的一个上界，为0.39左右
+
+接着变形原不等式的上界。 $\frac{1}{2}ln(ln(y))$ < $(\frac{1}{2}-\epsilon)ln(y)\Leftrightarrow\epsilon$ < $\frac{1}{2}-\frac{ln(ln(y))}{2ln(y)}$ 。为了对所有 $y\geq 10$ 成立，我们需要找出最大的下界，即 $\epsilon$ < $inf_{y\geq ln(10)}(\frac{1}{2}-\frac{ln(ln(y))}{2ln(y)})=\frac{1}{2}-\frac{1}{2}sup_{y\geq ln(10)}(\frac{ln(ln(y))}{ln(y)})$ (sup指最小的上界)
+
+（这块有个公式：
+
+- $inf_x(a-bf(x))=a-bsup_x(f(x))$
+- $sup_x(a-bf(x))=a-binf_x(f(x))$
+
+）
+
+利用导数分析可以得到 $q(y)=\frac{ln(ln(y))}{ln(y)}$ 的最大值是 $\frac{1}{e}$ ，位于 $y=e^e$ 处。因此 $sup_{y\geq ln(10)}q(y)\leq\frac{1}{e}$ 。于是对于所有 $y\geq ln(10)$ 都有 $\epsilon$ < $\frac{1}{2}-\frac{1}{2e}\approx 0.3164...$
+
+只要取 $\epsilon\approx 0.3164...$ ，它就能在 $y\geq ln(10)$ 时对原不等式的上下界成立。完成证明
+
+（又是chatgpt代打的一天）

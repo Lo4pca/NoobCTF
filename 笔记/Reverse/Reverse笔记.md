@@ -1464,3 +1464,6 @@ mov     r8, qword [r13]
 - 逆向由[Delphi](https://en.wikipedia.org/wiki/Delphi_(software))开发的程序
 - ida pro插件:[DelphiHelper](https://github.com/eset/DelphiHelper)
 - 使用[pymem](https://github.com/srounet/Pymem)读取内存
+223. [disthis](https://slight-smile.com/writeups/infobahn-ctf-25)
+- 利用python内置的[LLTRACE](https://groups.google.com/g/dev-python/c/LBAoguBxD6Y)调试pyc文件（执行的指令和栈上的内容）
+- 这题有个相对更简单的解法： **disthis** 。将python的内置函数换成其他函数，使函数返回特制的对象而不是实际的值，直接给出答案

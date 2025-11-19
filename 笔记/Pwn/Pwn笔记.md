@@ -54,6 +54,9 @@
 - [Sukunahikona](https://nordrljos.dev/CTFs/2025/securinets)
   - toctou漏洞导致数组oob；通过arraybuffer+dataview修改rwx段getshell
   - 主要是为了记录这个非预期解: **Sukunahikona** ,利用 https://issues.chromium.org/issues/360533914
+- [The Butterfly effect](https://deayzl.tistory.com/entry/Infobahn-CTF-2025PWNV8-The-Butterfly-effect)
+  - 通过修改`PACKED_DOUBLE_ELEMENTS`数组map地址的一个bit实现type confusion。v8题的运气成分很高，需要不断试验保证修改一个bit后原map变为已存在的`PACKED_ELEMENTS`数组的map
+  - 在ArrayBuffer的backing_store_pointer仅有32bit后，之前常用的“直接往rwx页写shellcode”就没法用了。但在没开沙盒的情况下，解决办法并不复杂：wasm_instance内部仍记录着到rwx页的32位偏移。可以在wasm module里提前写好shellcode，触发jit编译后覆盖wasm_instance记录的偏移为到shellcode的偏移
 
 ## Kernel
 

