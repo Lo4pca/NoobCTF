@@ -1547,3 +1547,21 @@ $ln(L(X))=\sqrt{yln(y)}=(yln(y))^{\frac{1}{2}}$ 。问题变为 $y^{\epsilon}$ <
 只要取 $\epsilon\approx 0.3164...$ ，它就能在 $y\geq ln(10)$ 时对原不等式的上下界成立。完成证明
 
 （又是chatgpt代打的一天）
+
+2. 假设c大于0， $Y=L(X)^c,u=\frac{ln(X)}{ln(Y)}$ 。证明：
+
+$$u^{-u}=L(X)^{-\frac{1}{2c}(1+o(1))}$$
+
+chatgpt说遇到这类题不要直接以幂乘方式比较（即不要硬拆），用对数将复杂问题变成加法和乘法后会简单一点。比如 $u^{-u}=exp(-uln(u))$ （exp(t)指 $e^t$ ）。此时原问题变为证明 $-uln(u)=-\frac{1}{2c}(1+o(1))ln(L(X))$
+
+接下来引入等式帮助计算。设 $A=ln(X),B=ln(A)=ln(ln(X))$ 。这样设A和B的话就能利用L(X)的定义得出 $ln(L(X))=\sqrt{AB}$
+
+题目说 $Y=L(X)^c$ ，所以 $ln(Y)=c\sqrt{AB}$ 。因此 $u=\frac{ln(X)}{ln(Y)}=\frac{A}{c\sqrt{AB}}=\frac{1}{c}\sqrt{\frac{A}{B}}$
+
+离uln(u)还差个ln(u)，那么下一步就是算 $ln(u)=ln(\frac{1}{c}\sqrt{\frac{A}{B}})=-ln(c)+\frac{1}{2}ln(A)-\frac{1}{2}ln(B)=-ln(c)+\frac{1}{2}B-\frac{1}{2}ln(B)$
+
+这下就能拼 $uln(u)=\frac{1}{c}\sqrt{\frac{A}{B}}(-ln(c)+\frac{1}{2}B-\frac{1}{2}ln(B))$ 了。根据每项增长速度的量级决定出主项 $(\frac{1}{c}\sqrt{\frac{A}{B}})(\frac{1}{2}B)=\frac{1}{2c}\sqrt{AB}=\frac{1}{2c}ln(L(X))$
+
+剩下的两项的增长速度完全比不上 $\sqrt{AB}$ 的增长速度（当X趋近于无穷时，次级项比主项的比值为0），因此剩下的两项可直接归为o(1)
+
+最后加个负号就有了 $-uln(u)=-\frac{1}{2c}(1+o(1))ln(L(X))$ ,完成证明

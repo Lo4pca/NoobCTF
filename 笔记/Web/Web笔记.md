@@ -15,6 +15,8 @@
 - https://book.jorianwoltjer.com/web/client-side/cross-site-scripting-xss/html-injection
     - 利用`UTF-16 iframe/stylesheet content`的例子：**Secure Letter** 。如果题目出现html注入且允许iframe带有`src=data:`属性，就可以利用UTF-16编码吞掉换行符，窃取原有html在引号之前的所有内容
     - 这题还有一点，由于题目源码用`f.src='data:text/html'`往iframe里插入html，可以用double url encode绕过dompurify
+- https://portswigger.net/web-security/cross-site-scripting/cheat-sheet
+- 新的php [drupal](https://www.drupal.org/project/php)反序列化rce链： https://github.com/anzuukino/phpggc/tree/master/gadgetchains/Drupal/RCE/2
 
 ## SQL注入
 
@@ -534,6 +536,8 @@
 - [file_upload](https://github.com/DownUnderCTF/Challenges_2025_Public/blob/main/web/file_upload)
     - 使用`navigator.serviceWorker.register`可以注册一个js文件，绕过可能的Cross-Origin-Opener-Policy(COOP)。service worker文件的mime type必须是`text/javascript`，且与注册service worker的html同源
     - 在旧版本的chrome可以直接open：**file_upload**
+- [Infopass](https://bhavya32.github.io/#/writeups/8d55a894-18c6-405a-a3f2-170474b479c7)
+    - 利用iframe的srcdoc属性可以创造出`window.origin`和`window.location`不一致的情况
 
 ## SSTI
 
@@ -4382,3 +4386,7 @@ if (await remote.hasPasswordFor(id)) {
 - 其他解法：**off_dah_rails_m8** ,`Bundler::GemHelper`是比预期解（盲注）更快的gadget
 557. [幻境迷心·皇陨星沉](https://github.com/XDSEC/MoeCTF_2025/blob/main/official_writeups/Web/Writeup.md)
 - java反序列化rce（可出网以及不可出网）
+558. [PatchNotes CMS](https://bhavya32.github.io/#/writeups/8d55a894-18c6-405a-a3f2-170474b479c7)
+- 可以用`x-prerender-revalidate`字段绕过nextjs middleware
+- [happy-dom RCE](https://github.com/advisories/GHSA-37j7-fg3j-429f)
+- **Patchnotes CMS**
