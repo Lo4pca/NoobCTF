@@ -720,3 +720,24 @@ contract Attack {
 cast send "" "StakeETH()" --value 0.0011ether --from ""
 cast send "" "Unstake(uint256)" 0.0011ether --from ""
 ```
+## Impersonator
+
+最密码学的一集
+
+代码我没怎么看懂，但反正是ecdsa（ecrecover）相关的内容。之前见过类似的题，ecrecover在遇见无效签名时会返回address(0)，所以如果把controller变量换成address(0)就能达成描述说的“任何人都能打开这把锁”
+
+第二个知识点在于，对于任意合法的ECDSA签名(m,r,s)，(m,r,n-s)也是一组m的合法签名（n为模数）。ecrecover使用的曲线是SECP256K1
+
+然后就会发现，怎么ecrecover的参数多了一个v？这是因为secp256k1存在对称性（这也是为什么反转符号可以得到另一组签名），一组签名对应两个可能的点，存在两个可能的公钥。v值用于决定签名者用的到底是哪个公钥。v只有两个值：27或者28（有些库用的是0和1），如果我们通过翻转s值得到另一组签名，v值也需要翻转
+
+Impersonator创建lock时触发了事件NewLock，里面记录了一组正确的signature。用etherscan可以看到具体内容。再根据assembly的代码可以发现数据存储的顺序是r,s,v
+
+```solidity
+contract Attack {
+    Impersonator imp=Impersonator(address());
+    function exploit() public {
+        ECLocker locker=ECLocker(imp.lockers(0));
+        locker.changeController(翻转后的v,r,n-s,address(0));
+    }
+}
+```

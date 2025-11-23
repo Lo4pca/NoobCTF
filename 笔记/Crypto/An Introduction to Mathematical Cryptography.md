@@ -1565,3 +1565,39 @@ chatgpt说遇到这类题不要直接以幂乘方式比较（即不要硬拆）�
 剩下的两项的增长速度完全比不上 $\sqrt{AB}$ 的增长速度（当X趋近于无穷时，次级项比主项的比值为0），因此剩下的两项可直接归为o(1)
 
 最后加个负号就有了 $-uln(u)=-\frac{1}{2c}(1+o(1))ln(L(X))$ ,完成证明
+
+### Exercise 3.30
+
+证明函数 $L(X)=e^{\sqrt{ln(X)ln(ln(X))}}$ 是次指数级（subexponential）；即，证明以下两条结论：
+
+1. 对于每个大于0的常数 $\alpha$ ，无论多大， $L(X)=\Omega(ln(X)^{\alpha})$
+
+这本书里的order notation均遵循计算机科学里的定义。 $f(X)=\Omega(g(X))$ 表示存在一个大于0的常数c和C，满足 $f(X)\geq cg(X),\forall X\geq C$
+
+设 $y=ln(ln(X))$
+
+取个对数，把问题化成 $\sqrt{\frac{ln(X)}{y}}\geq\alpha$ (省略常数项ln(c))，即 $\frac{ln(X)}{y}\geq\alpha^2$ 。当 $X\rightarrow\infty,\frac{ln(X)}{y}\rightarrow \infty$ ,所以自然存在某个 $X\geq C$ 使得不等式成立
+
+2. 对于每个大于0的常数 $\beta$ ，无论多小， $L(X)=O(X^{\beta})$
+
+$f(X)=O(g(X))$ 表示存在一个大于0的常数c和C，满足 $f(X)\leq cg(X),\forall X\geq C$
+
+仿照上一小题， $\sqrt{ln(X)y}\leq \beta ln(X)+ln(c)\Rightarrow\sqrt{\frac{y}{ln(X)}}\leq\beta+\frac{ln(c)}{ln(X)},\forall X\geq C$ 。因为 $\sqrt{\frac{y}{ln(X)}}$ 在X趋近于无穷时趋近于0，所以左边一定小于等于右边。如果留出一个余量，比如 $\frac{\beta}{2}$ ，我们还可以算出c的可能取值： $\frac{\beta}{2}\leq\beta+\frac{ln(c)}{ln(X)}$ ， $\frac{ln(c)}{ln(X)}$ 一定大于0，因此选c=1就够了
+
+### Exercise 3.33
+
+`Proposition 3.48`的结论假设我们随机选择整数 $a\mod N$ ，计算 $a^2\mod N$ 后检查结果是否为B光滑数。但更好的结论可以通过选 $a=\lfloor\sqrt{N}\rfloor+k,1\leq k\leq K$ 得到
+
+（可以将K视为与N无关的固定整数。更严格地说，需要取K等于L(N)的幂，但这对最终答案的影响很小）
+
+1. 证明 $a^2-N\leq 2K\sqrt{N}+K^2$ 。因此有 $a^2\mod N$ 小于 $\sqrt{N}$ 的倍数
+
+$(\sqrt{N}+k)^2=N+2k\sqrt{N}+k^2$ 。因为 $\lfloor\sqrt{N}\rfloor\leq\sqrt{N}$ ，所以 $a^2\leq N+2k\sqrt{N}+k^2$ 。又因为 $k\leq K$ ，所以 $a^2-N\leq 2K\sqrt{N}+K^2$
+
+2. 通过证明：
+
+$$lim_{N\rightarrow\infty}\frac{log(L(\sqrt{N}))}{log(L(N)^{\frac{1}{\sqrt{2}}})}=1$$
+
+说明 $L(\sqrt{N})\approx L(N)^{\frac{1}{\sqrt{2}}}$
+
+更一般地，用同样的方式证明对任意固定的正数r，有 $L(N^{\frac{1}{r}})\approx L(N)^{\frac{1}{\sqrt{r}}}$
