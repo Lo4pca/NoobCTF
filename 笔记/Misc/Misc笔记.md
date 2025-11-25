@@ -361,6 +361,11 @@ print(base64.b64encode(temp.encode()))
     - 利用栈帧（Stack Frame）逃逸： https://www.cnblogs.com/gaorenyusi/p/18242719
     - 利用match-case绕过`ast.Attribute`获取属性： https://pid-blog.com/article/noval-pyjail-tricks
     - 利用try-except和match-case在无内置object类的情况下绕过`ast.Attribute`获取属性
+- [exception-handler](https://github.com/infobahnctf/CTF-2025/blob/main/misc/exception-handler-baby-steps)
+    - python 3.11异常处理表（co_exceptiontable）劫持
+- [very-safe-pickle](https://github.com/infobahnctf/CTF-2025/tree/main/misc/very-safe-pickle)
+    - 在禁用pickle代码`REDUCE`,`INST`,`OBJ`,`NEWOBJ`,`NEWOBJ_EX`的情况下，仍然可以用`GLOBAL`导入模块并用`BUILD`覆盖模块`__dict__`中的`__getattr__`方法，实现函数劫持
+    - 其他解法：**very-safe-pickle**
 - pyjail cheatsheet
     - https://shirajuki.js.org/blog/pyjail-cheatsheet
     - https://book.hacktricks.wiki/en/generic-methodologies-and-resources/python/bypass-python-sandboxes/index.html
@@ -1793,8 +1798,9 @@ git pre-commit //运行触发hook
     List the contents of the flag file :)
     git show <hash>
     ```
-- 类似题目：[GitMeow](https://github.com/zAbuQasem/MyChallenges/tree/main/0xL4ugh-CTF-2024/git)
-    - 其他做法： https://gist.github.com/C0nstellati0n/78f5887b5bee235583a026840354ae54#gitmeow
+- 类似题目：
+    - [GitMeow](https://github.com/zAbuQasem/MyChallenges/tree/main/0xL4ugh-CTF-2024/git)， **GitMeow**
+    - [gitset](https://github.com/infobahnctf/CTF-2025/blob/main/misc/gitset),利用`pre-receive` hook rce
 - 本地运行一个host服务器，然后把payload传给题目：https://github.com/TJCSec/tjctf-2023-challenges/tree/main/misc/gish
 159. [New Website](https://github.com/daffainfo/ctf-writeup/tree/main/BxMCTF%202023/New%20Website)
 - 使用[dig](https://cloud.tencent.com/developer/article/1618605)命令解析dns记录.如`dig domain TXT`只输出TXT相关记录。当访问网站出现`DNS_PROBE_FINISHED_NXDOMAIN`时，可以用该命令收集网站运行时的信息。

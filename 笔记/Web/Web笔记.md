@@ -15,7 +15,8 @@
 - https://book.jorianwoltjer.com/web/client-side/cross-site-scripting-xss/html-injection
     - 利用`UTF-16 iframe/stylesheet content`的例子：**Secure Letter** 。如果题目出现html注入且允许iframe带有`src=data:`属性，就可以利用UTF-16编码吞掉换行符，窃取原有html在引号之前的所有内容
     - 这题还有一点，由于题目源码用`f.src='data:text/html'`往iframe里插入html，可以用double url encode绕过dompurify
-- https://portswigger.net/web-security/cross-site-scripting/cheat-sheet
+- [bitset](https://github.com/infobahnctf/CTF-2025/tree/main/beginner/bitset)
+    - https://portswigger.net/web-security/cross-site-scripting/cheat-sheet
 - 新的php [drupal](https://www.drupal.org/project/php)反序列化rce链： https://github.com/anzuukino/phpggc/tree/master/gadgetchains/Drupal/RCE/2
 
 ## SQL注入

@@ -1601,3 +1601,13 @@ $$lim_{N\rightarrow\infty}\frac{log(L(\sqrt{N}))}{log(L(N)^{\frac{1}{\sqrt{2}}})
 说明 $L(\sqrt{N})\approx L(N)^{\frac{1}{\sqrt{2}}}$
 
 更一般地，用同样的方式证明对任意固定的正数r，有 $L(N^{\frac{1}{r}})\approx L(N)^{\frac{1}{\sqrt{r}}}$
+
+让 $A=ln(N),B=ln(A)=ln(ln(N))$ 。套一下L(X)的定义：
+- $log(L(\sqrt{N}))=\sqrt{\frac{1}{2}A(ln(\frac{1}{2})+B)}log(e)$
+- $log(L(N)^{\frac{1}{\sqrt{2}}})=\frac{1}{\sqrt{2}}\sqrt{AB}log(e)$
+
+注意到两个log(e)可以互相抵消，第一个式子的 $\sqrt{\frac{1}{2}}$ 可以拆出来变成 $\frac{1}{\sqrt{2}}$ ，因此最后要比较的只有 $\sqrt{A(ln(\frac{1}{2})+B)}$ 和 $\sqrt{AB}$ 。 $ln(\frac{1}{2})$ 在N趋近于无穷时无足轻重，因此两者可以看作是同阶的
+
+换成任意的r也不会改变上述结论（但某种意义上可以说r越大两者越接近？），代数过程也差不多
+
+3. 用上述a的更优取值重新证明`Proposition 3.48`。设 $B=L(N)^c$ 并求出c的最优值。分解N大概需要多少组关系？

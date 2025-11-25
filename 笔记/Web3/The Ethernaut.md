@@ -741,3 +741,26 @@ contract Attack {
     }
 }
 ```
+## Magic Animal Carousel
+
+这题目描述是啥意思啊？
+
+我最开始以为描述指的是所有加入木马的动物都必须保留；如果在没有调用changeAnimal修改某个crateId对应的动物的前提下这个crateId对应的动物变了，就判定成功
+
+deepseek找到了这题的逻辑漏洞。setAnimalAndSpin里encodedAnimal先右移了16位再左移176位，意在清空encodedAnimal的低16位，保证encodedAnimal只有10个字节，剩下的两个字节用来放nextCrateId。然而changeAnimal中没有这样的逻辑。encodeAnimalName只能保证animalName小于等于12字节，意味着用changeAnimal修改某个crateId对应的animal时我们可以修改结构中的nextCrateId。不过由于修改结构的代码用的是按位或，我们只能往高了改
+
+那么我们可以把当前crate结构对应的的nextCrateId改成0xffff。调用setAnimalAndSpin两次后，由于模运算，第二次调用修改的是原来crateId为1的动物，完成我最开始以为的胜利条件
+
+然而我理解错了……根据其他人的[文章](https://medium.com/@ynyesto/ethernaut-33-magical-animal-carousel-3aff78fe67be)，题目的要求是“假设当前crateId为x，要求一个人在调用setAnimalAndSpin后立刻获取x对应的crate的animal名称且这个名称与他传入的名称不符”
+
+所以只需要我在攻击脚本里少调用一次函数就行了……
+```solidity
+contract Attack {
+    MagicAnimalCarousel target=MagicAnimalCarousel(address());
+    function exploit() public {
+        target.setAnimalAndSpin("cat");
+        target.changeAnimal(string(abi.encodePacked(hex"10000000000000000000FFFF")), 1);
+        target.setAnimalAndSpin("huh");
+    }
+}
+```
