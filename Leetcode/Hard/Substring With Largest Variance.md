@@ -73,6 +73,7 @@ Beats
 80%
 ```
 这题的算法叫[Kadane's algorithm](https://medium.com/@rsinghal757/kadanes-algorithm-dynamic-programming-how-and-why-does-it-work-3fd8849ed73d)，dp的一种，专门用来解决Maximum Subarray这类问题。简单总结一下这个算法。在不了解这个算法之前，我们想找到最好的subarray就只能爆破。然而，爆破肯定TLE。所以有没有什么办法提高爆破的效率？有！说有这么些数字：1,-3,4,-1,3,-5,请找出里面和最大的一个subarray。枚举爆破做法需要这么做：
+```
 1
 1,-3
 1,-3,4
@@ -83,7 +84,7 @@ Beats
 -3,4
 ...
 -3,4,-1,3,-5
-
+```
 能发现有好多重复的部分，当我知道1+(-3)后，计算1+(-3)+4就不用把三个数再加一遍，直接拿之前的结果加上4不就好了吗？现在我们有了cache的概念，但是还不够，就算记忆了，你这时间复杂度不还是个乘方，只是优化了计算的时间，subarray的爆破完全没优化。我们再转念一想，1+(-3)已经是负数了，为何还要保留起来加上4？为啥不直接从4开始加？当你意识到这一点后，Kadane's algorithm就出来了。个人感觉这是这个算法里最核心的思想。保留两个变量，一个localMax,表示当前subarray的最大值；一个globalMax，表示全部subarray的最大值。遍历array，将数字加上localMax，同时随时Math.Max更新globalMax。当localMax小于0，说明前面的数字没有保留下去的必要了，将localMax重新置为0，从下一个数开始考虑。具体怎么做在上面的链接有写。
 
 但是再等一等，这题好像不是原生的Kadane's algorithm，要做点改动。这题里的subarray必须要有两种不同的字母，若只有一种字母是不算的。所以我们需要一个hasMin变量，标志着当前subarray是否有效。

@@ -539,6 +539,14 @@
     - 在旧版本的chrome可以直接open：**file_upload**
 - [Infopass](https://bhavya32.github.io/#/writeups/8d55a894-18c6-405a-a3f2-170474b479c7)
     - 利用iframe的srcdoc属性可以创造出`window.origin`和`window.location`不一致的情况
+    - 官方wp： https://github.com/infobahnctf/CTF-2025/tree/main/web/infopass
+- [Sandbox Viewer](https://github.com/infobahnctf/CTF-2025/tree/main/web/sandbox-viewer)
+    - 若网站从cloudfare cdn加载脚本且出现html注入，可以通过设置注入元素（如img）的属性`referrerpolicy="unsafe-url"`使cloudflare返回403，污染disk cache使网站后续无法正常加载脚本
+- [XML translator](https://github.com/infobahnctf/CTF-2025/tree/main/web/xml-translator)
+    - php的xml_set_default_handler无法正确处理编码后的属性值： https://github.com/php/php-src/issues/20439
+- [1337 translator](https://github.com/infobahnctf/CTF-2025/tree/main/web/1337-translator)
+    - 部分字符大写后可用于绕过滤，如`<ſ`大写后是`<S`
+    - **1337-translator**
 
 ## SSTI
 
@@ -4387,7 +4395,7 @@ if (await remote.hasPasswordFor(id)) {
 - 其他解法：**off_dah_rails_m8** ,`Bundler::GemHelper`是比预期解（盲注）更快的gadget
 557. [幻境迷心·皇陨星沉](https://github.com/XDSEC/MoeCTF_2025/blob/main/official_writeups/Web/Writeup.md)
 - java反序列化rce（可出网以及不可出网）
-558. [PatchNotes CMS](https://bhavya32.github.io/#/writeups/8d55a894-18c6-405a-a3f2-170474b479c7)
+558. [PatchNotes CMS](https://github.com/infobahnctf/CTF-2025/tree/main/web/patchnotes)
 - 可以用`x-prerender-revalidate`字段绕过nextjs middleware
 - [happy-dom RCE](https://github.com/advisories/GHSA-37j7-fg3j-429f)
 - **Patchnotes CMS**

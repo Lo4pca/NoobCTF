@@ -1611,3 +1611,21 @@ $$lim_{N\rightarrow\infty}\frac{log(L(\sqrt{N}))}{log(L(N)^{\frac{1}{\sqrt{2}}})
 换成任意的r也不会改变上述结论（但某种意义上可以说r越大两者越接近？），代数过程也差不多
 
 3. 用上述a的更优取值重新证明`Proposition 3.48`。设 $B=L(N)^c$ 并求出c的最优值。分解N大概需要多少组关系？
+
+（看书时完全没看懂`Proposition 3.48`的证明。本来想糊弄过去的，没想到课后习题考了……）
+
+做之前得记录一下169页下方出现的一段我一时没反应过来的内容：
+
+In order to perform the linear equation elimination step, we need (at least) as many B-smooth numbers as there are primes less than B. We need this many because in the elimination step, the smooth numbers correspond to the variables, while the primes less than B correspond to the equations, and we need more variables than equations. 
+
+“变量比方程更多”？解线性方程不应该要求方程比变量多吗？往上翻到162页的示例，分解算法的内容大概如下：由于 $a^2-b^2=(a+b)(a-b)$ ,所以可以通过寻找满足 $c\equiv a_i^2\mod N$ 且c是B-光滑数的多个 $c_i$ ，然后假设每个 $c_i=p_1^{e_{r1}}p_2^{e_{r2}}...p_t^{e_{rt}}$ ，用linear equation elimination找到 $u_1,u_2,...,u_r$ 使 $c_1^{u_1}c_2^{u_2}...c_r^{u_r}$ 的结果是完全平方数，进而用gcd概率性地分解N
+
+结果是完全平方数意味着其质因数分解结果中的每个质因数对应的幂次都是2的倍数，即求解t个形如 $e_{1t}u_1+e_{2t}u_2+...+e_{rt}u_r\equiv 0\mod 2$ 的方程
+
+这里可以看出小于B的质数数量对应方程的数量；B光滑数的数量对应变量的数量，与上文吻合。然后就到了关键的地方：Ax=b和Au=0背后的数学意义完全不一样。我以为Au=0是Ax=b中b=0的特殊情况，然而Ax=b是在求“这个方程是否有解，以及是什么解”;Au=0是在求“这个矩阵是否有线性依赖”。矩阵只在两种情况下会出现线性依赖：
+- 向量数量超过矩阵维度
+- 矩阵自身包含线性相关向量
+
+放到这题的背景下，“向量数量”对应矩阵列向量的数量，即B光滑数的数量；维度则是行向量的数量，即小于B的质数数量
+
+（只需要弄清楚这里不是在解方程而是在找线性相关的非平凡组合就好了。线性代数全忘光的后果）

@@ -1467,3 +1467,6 @@ mov     r8, qword [r13]
 223. [disthis](https://slight-smile.com/writeups/infobahn-ctf-25)
 - 利用python内置的[LLTRACE](https://groups.google.com/g/dev-python/c/LBAoguBxD6Y)调试pyc文件（执行的指令和栈上的内容）
 - 这题有个相对更简单的解法： **disthis** 。将python的内置函数换成其他函数，使函数返回特制的对象而不是实际的值，直接给出答案
+224. [LUTsOfFun](https://github.com/infobahnctf/CTF-2025/tree/main/rev/LUTsOfFun)
+- 逆向Xilinx FPGA BIT data+Xilinx Design Constraints文件
+- 更详细的wp：**LUTsOfFun**
