@@ -1590,7 +1590,7 @@ $f(X)=O(g(X))$ 表示存在一个大于0的常数c和C，满足 $f(X)\leq cg(X),
 
 （可以将K视为与N无关的固定整数。更严格地说，需要取K等于L(N)的幂，但这对最终答案的影响很小）
 
-1. 证明 $a^2-N\leq 2K\sqrt{N}+K^2$ 。因此有 $a^2\mod N$ 小于 $\sqrt{N}$ 的倍数
+1. 证明 $a^2-N\leq 2K\sqrt{N}+K^2$ 。因此有 $a^2\mod N$ 小于 $\sqrt{N}$ 的倍数（so in particular, $a^2\mod N$ is smaller than a multiple of $\sqrt{N}$ ）
 
 $(\sqrt{N}+k)^2=N+2k\sqrt{N}+k^2$ 。因为 $\lfloor\sqrt{N}\rfloor\leq\sqrt{N}$ ，所以 $a^2\leq N+2k\sqrt{N}+k^2$ 。又因为 $k\leq K$ ，所以 $a^2-N\leq 2K\sqrt{N}+K^2$
 
@@ -1629,3 +1629,17 @@ In order to perform the linear equation elimination step, we need (at least) as 
 放到这题的背景下，“向量数量”对应矩阵列向量的数量，即B光滑数的数量；维度则是行向量的数量，即小于B的质数数量
 
 （只需要弄清楚这里不是在解方程而是在找线性相关的非平凡组合就好了。线性代数全忘光的后果）
+
+接下来开始抄原书的证明（
+
+从`1`中得知a的取值的最大量级大概是 $M\asymp K\sqrt{N}$ ( $f(x)\asymp g(x)$ 表示存在两个与x无关的正数 $C_1,C_2$ ，使得当 $x\rightarrow\infty$ 时， $C_1g(x)\leq f(x)\leq C_2g(x)$ )。这样的随机数是光滑数的概率为 $\frac{\psi(M,B)}{M}$ ( $\psi(X,B)$ 表示满足1 < n $\leq X$ 的B光滑数n的数量)。那么找到 $\pi(B)$ 个B光滑数需要检查大概 $\frac{\pi(B)}{\psi(M,B)/M}$ 个数
+
+`2`的结论是 $L(N^{\frac{1}{2}})\approx L(N)^{\frac{1}{\sqrt{2}}}$ ，那么将等号右边开 $\frac{1}{\sqrt{2}}$ 次根就得到了 $L(N)\approx L(N^{\frac{1}{2}})^{\sqrt{2}}$ 。再利用`Corollary 3.45`的结论可得到 $\psi(M,B)\approx\psi(\sqrt{N},L(N)^c)\approx\psi(\sqrt{N},L(\sqrt{N})^{c\sqrt{2}})=\sqrt{N}\*L(\sqrt{N})^{-(1/(2c\sqrt{2}))(1+o(1))}$ ，于是 $\psi(M,B)/M\approx L(\sqrt{N})^{-(1/(2c\sqrt{2}))}\approx L(N)^{-\frac{1}{4c}}$
+
+众所周知 $\pi(B)\approx\frac{B}{ln(B)}$ ，那么 $\frac{\pi(B)}{\psi(M,B)/M}\approx\frac{B/ln(B)}{L(N)^{-\frac{1}{4c}}}=\frac{L(N)^c}{cln(L(N))}\frac{1}{L(N)^{-\frac{1}{4c}}}=L(N)^{c+\frac{1}{4c}}\frac{1}{cln(L(N))}$
+
+第一个项占主导，因此目标是最小化 $c+\frac{1}{4c}$ 。这个函数的导数是 $1-\frac{1}{4c^2}$ ，在 $c=\frac{1}{2}$ 时等于0。这就是我们要找的最小值
+
+把这个值代回原式并只考虑主导项，得到 $\frac{\pi(B)}{\psi(M,B)/M}\approx L(N)$
+
+（感觉抄都没抄明白……总之一股脑全 $\approx$ 就莫名其妙地完事了）

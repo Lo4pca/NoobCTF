@@ -547,6 +547,8 @@
 - [1337 translator](https://github.com/infobahnctf/CTF-2025/tree/main/web/1337-translator)
     - 部分字符大写后可用于绕过滤，如`<ſ`大写后是`<S`
     - **1337-translator**
+- [Swift resume service](https://github.com/infobahnctf/CTF-2025/tree/main/web/swift-resume-service)
+    - swift内部使用[unicode extended grapheme cluster](http://www.unicode.org/reports/tr29/#Grapheme_Cluster_Boundaries)，但绝大多数其他软件用的都是unicode code points。比如swift替换`"`时不会替换掉`"́`（双引号后跟一个字符）；但在html中这个字符中的双引号仍会发挥原本的作用
 
 ## SSTI
 
@@ -3878,7 +3880,7 @@ window.recaptcha=true;
 - yaml中，NO可被看作是布尔值。yaml里还有很多奇怪的布尔值表示，参考 https://www.bram.us/2022/01/11/yaml-the-norway-problem/
 419. [empty execution](https://github.com/tahdjao/writeup/blob/main/braekerctf/empty_execution_en.md)
 - 不使用`/`和`..`的命令注入
-- 其他做法： https://gist.github.com/C0nstellati0n/248ed49dea0accfef1527788494e2fa5#empty-execution
+- 其他做法： **empty execution**
 420. [stuffy](https://github.com/tahdjao/writeup/blob/main/braekerctf/stuffy_en.md)
 - python `http.request`请求走私（request smuggling）。重点在于不要让用户控制`http.request`的header名和内容以及请求内容
 421. [Node Calculator](https://www.yuque.com/misery333/sz1apr/uql4i9gbouggz75d#gYuTS)
@@ -4399,3 +4401,12 @@ if (await remote.hasPasswordFor(id)) {
 - 可以用`x-prerender-revalidate`字段绕过nextjs middleware
 - [happy-dom RCE](https://github.com/advisories/GHSA-37j7-fg3j-429f)
 - **Patchnotes CMS**
+559. [logo](https://github.com/infobahnctf/CTF-2025/tree/main/web/logo)
+- `HTTP/1.1`的不安全性（如请求走私）详解： https://http1mustdie.com
+- https://github.com/vibe-d/vibe.d/security/advisories/GHSA-hm69-r6ch-92wx ：`vibe.d`处理http请求时优先处理`Content-Length`而不是`Transfer-Encoding`，导致请求走私
+- `vibe.http.proxy`会尽可能重用同一个后端连接，即使原始请求是由不同的客户端发出的。因此，对恶意请求的响应可能会被传递给不同的用户。这可能导致会话锁定、恶意重定向到钓鱼页面，或者将自XSS攻击升级为存储型XSS攻击
+- HEAD响应只会返回诸如`Content-Length`之类的字段，不包含实际的资源内容。假设这个GET请求为B，wp利用这点将下一个请求C的tcp流当作B的response返回
+    - 请求走私越看越神奇：前端服务器认为用户发送了一个请求，但由于解析的差异性导致这个请求发到后端后后端认为这是多个请求，进而给出多个response；然而前端只会拿一个response，剩下的两个留给幸运受害人（
+    - admin bot会在攻击者请求走私后向服务器发送GET请求。攻击者利用请求走私同时发送三个请求：GET-HEAD-某个tcp response包含xss payload的请求。后端服务器同时给出三个response，但只有第一个response被发送回攻击者。当bot发送GET请求时，前端首先返回之前HEAD请求的response；但HEAD请求不包含GET请求需要的具体内容，因此后续的全部tcp流都被当作是返回内容返回
+- Hypercorn默认支持`HTTP/2`，只需要默认发送一段特殊内容（见wp），后续的请求将被看作是`HTTP/2`语法（配合上文“重用同一个后端连接”的部分，针对`HTTP/2`的response可能被返回给发送`HTTP/1.1`请求的受害者）
+- `HTTP/2`的`PING frame`语法可以使攻击者控制返回的tcp流中连续的八字节（可以有多段内容）

