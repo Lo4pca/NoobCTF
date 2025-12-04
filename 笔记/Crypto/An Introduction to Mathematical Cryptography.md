@@ -1643,3 +1643,24 @@ In order to perform the linear equation elimination step, we need (at least) as 
 把这个值代回原式并只考虑主导项，得到 $\frac{\pi(B)}{\psi(M,B)/M}\approx L(N)$
 
 （感觉抄都没抄明白……总之一股脑全 $\approx$ 就莫名其妙地完事了）
+
+### Exercise 3.40
+
+假设p为奇质数， $g,h\in F_p^{\*}$ ,g为原根。将p-1写为 $2^sm$ ，其中m为奇数， $s\geq 1$ 。 $log_g(h)$ 的二进制展开式为：
+
+$$log_g(h)=\epsilon_0+2\epsilon_1+4\epsilon_2+8\epsilon_3+...$$
+
+其中 $\epsilon_0,\epsilon_1...\in$ {0,1}
+
+作为`Example 3.69`的推广，请给出一个高效计算 $\epsilon_0, \epsilon_1,...,\epsilon_{s-1}$ 的算法，从而证明离散对数的前s位是不安全的
+- 可以利用`Exercise 3.39`的结论：如果 $p\equiv 3\mod 4$ ,存在高效的算法计算 $F_p^{\*}$ 中的平方根
+- 提示：用`Example 3.69`计算第0个bit，然后求h或者 $g^{-1}h$ 的平方根；重复以上步骤
+
+假设已经用`Example 3.69`确定了 $\epsilon_0$ ，然后具体分析 $\epsilon_0$ 的两种情况：
+- 0，意味着 $log_g(h)$ 是偶数，即 $h=g^{2x}$ 。那么我们开一个平方根，对x做二进制展开。展开的结果正好等于原二进制展开式的“一半”，这个新展开式的 $\epsilon_0$ 是原展开式的 $\epsilon_1$ ，可以用`Example 3.69`确定
+- 1，意味着 $log_g(h)$ 是奇数，即 $h=g^{2x+1}=g^{2x}g$ 。把这个结果乘上一个 $g^{-1}$ 取消掉右边的g，接下来就和上一种情况一样了
+
+现在出现了几个问题：
+- 为什么上述过程正好能重复s次？
+- p不一定满足 $p\equiv 3\mod 4$ ，进而无法完成“开平方根”这一步
+- 以上两点是否有什么关系？

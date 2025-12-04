@@ -850,7 +850,7 @@ bug似乎是permit函数直接使用了`bytes32(amount)`而不是哈希值，导
 
 我要爆炸了！
 
-我打算跳过四星题，感觉它们都很难……而且我去网上搜了那些四星题目的答案，竟然一点信息都没有，更不敢做了
+我打算跳过四星题，感觉它们都很难……而且我去网上搜了那些四星题目的答案，竟然一点信息都没有，更不敢做了(不过查了后发现这是因为这些题是新出的)
 
 于是我跑来做这题。查看ERC721的相关源码，发现`_mintNFT`中调用的[checkOnERC721Received](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC721/utils/ERC721Utils.sol)尝试调用接收者的onERC721Received函数，而且mintNFTEOA没有nonReentrant修饰符，看起来又是一道重入攻击？
 

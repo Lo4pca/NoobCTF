@@ -1059,9 +1059,43 @@ $A' = r_1^{-1}A,B'=r_1B + r_1r_2\delta,C' = C + r_2A$
 
 ## [Hash Functions](https://cryptohack.org/challenges/hashes)
 
-ZKP里的`Mister Saplin's Preview`要求先把Merkle Trees做了
+### Jack's Birthday Hash
+
+看到题目的第一眼以为是[Birthday problem](https://en.wikipedia.org/wiki/Birthday_problem)，结果套完公式发现不是。生日问题要求的是“任意两个重复”，这题要求“和指定的secret重复“
+
+11 bit一共有 $2^{11}=2048$ 种可能，那么与secret重复的概率就是 $\frac{1}{2048}$ ；反过来与secret不重复的概率就是 $1-\frac{1}{2048}$ 。假设需要n个输入使某个hash有0.5的概率与secret重复，写成方程就是 $1-(1-\frac{1}{2048})^n=0.5$ (每个输入都不重复是相关事件，因此相乘)。解方程可得到 $n=\frac{ln(0.5)}{ln(1-\frac{1}{2048})}\approx 1420$
+
+### Jack's Birthday Confusion
+
+这回可以放心套公式了，直接写脚本手动爆破（
+```py
+num=76
+res=(1/2048)**num
+for i in range(num):
+    res*=2048-i
+print(1-res)
+```
+
+### Hash Stuffing
+
+pad函数不会给大小正好是BLOCK_SIZE的倍数的明文添加padding
+```py
+from pwn import *
+import json
+p=remote("socket.cryptohack.org","13405")
+BLOCK_SIZE = 32
+def pad(data):
+    padding_len = (BLOCK_SIZE - len(data)) % BLOCK_SIZE
+    return data + bytes([padding_len]*padding_len)
+m1=b'a'*31
+msg={"m1":m1.hex(),'m2':pad(m1).hex()}
+p.sendlineafter(": ",json.dumps(msg))
+p.interactive()
+```
 
 ### Merkle Trees
+
+ZKP里的`Mister Saplin's Preview`要求先把Merkle Trees做了
 
 默克尔树（Merkle tree，也称哈希树）常用于区块链和数字货币中，保证数据完整性和验证过程的效率。类似普通的树结构，但其叶子为数据块的哈希值
 
