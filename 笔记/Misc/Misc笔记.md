@@ -3082,3 +3082,6 @@ $ cd a/b
 - 用户可以上传zip，并选择用zip或7z命令提取zip，最后返回压缩全部内容的zip。目标是读取flag文件
 - 虽然存在symlink技巧，但与常见的zip题目不同的是，这题返回的是打包后的zip，且保留symlink本身而不读取指向的文件
 - unzip没有symlink保护且7z支持multidisk archive。预期解是用unzip解压出multidisk文件（`.z01`,`.z02`），并使`.z02`为指向flag的symlink。这样7z在解压这个multidisk archive时便会读取这个symlink代表的实际文件，从而引入flag
+405. [only-builtins](https://nikzu.dev/writeups/only-builtins)
+- 仅使用gcc [Built-in Functions](https://gcc.gnu.org/onlinedocs/gcc/Built-in-Functions.html)编写C程序并get shell
+- 甚至可以调用scanf把这题变成pwn：**only-builtins**

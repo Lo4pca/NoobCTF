@@ -1093,6 +1093,39 @@ p.sendlineafter(": ",json.dumps(msg))
 p.interactive()
 ```
 
+### PriMeD5
+
+大 力 出 奇 迹
+
+以前看wp时就见过[fastcoll](https://github.com/brimstone/fastcoll)这个工具，但是记错它的用途了……从[collisions](https://github.com/corkami/collisions)可以看到，目前“生成一个文件匹配已知hash”是不可能的，最符合本题要求的已知攻击是“生成两个相同hash的文件”
+
+这不等于说“纯碰运气”吗？这要多久啊？跑去社区看了一眼，有人提到存在非预期解，脚本只需要1秒左右的运行时间
+
+最后我没想到那个非预期解，反而是根据"一个随机选择的数N有 $\frac{1}{ln(N)}$ 的几率是质数"这个结论发现概率不是特别低，选择直接头铁硬算。没想到很快就找到答案了（然而并没有描述里提到的5分钟那么快）
+
+写完后跑去看了非预期解。这明显比预期解聪明多了，同样是爆破但是效率高了不少
+
+### Twin Keys
+
+更 大 的 力 出 更 大 的 奇 迹
+
+下方的异或是障眼法。只要循环次数是二的倍数且h1和h2相等，最后的结果就相等
+
+还是`collisions`这个项目，往下翻会发现[UniColl(hashclash)](https://github.com/cr-marcstevens/hashclash#create-you-own-identical-prefix-collision)这个项目：指定一个前缀，生成文件A和另一个前缀相差几个字符的文件B，两者md5值相同
+
+照着项目里的搭建方式搭好源码就能直接用。注意前缀的长度必须是4的倍数，因此需要额外加两个padding字符，比如：`echo -n "CryptoHack Secure Safeaa" > prefix.txt`
+
+我运行了接近一个小时才拿到结果；然而社区里其他人分享说，基本十分钟左右就能得到答案了。我的电脑太拉了（
+
+注意如果软件运行时输出卡在这一步：
+```
+Starting...
+20: Q5m5tunnel
+20: Q4m5tunnel
+...
+```
+即不断重复上述的输出（tunnel的名字可能有些不同），建议停止软件并更换使用的padding字符（这玩意额外坑了我两个小时）
+
 ### Merkle Trees
 
 ZKP里的`Mister Saplin's Preview`要求先把Merkle Trees做了

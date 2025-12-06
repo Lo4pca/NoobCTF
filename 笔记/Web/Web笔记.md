@@ -512,7 +512,7 @@
     - 以及，这题是react网站，因此上述逻辑需要去混淆后才能看到。直接拿AI就好： https://fireshellsecurity.team/umdctf2025-web-writeups
 - [Wembsoncket](https://github.com/BYU-CSA/BYUCTF-2025/tree/main/web/wembsoncket)
     - Cross-Site WebSocket Hijacking (CSWSH)。websocket没有同源策略，因此可以从任何origin发起连接，所谓“Cross-Site”。其实是可以用验证cookie等手段防止劫持的，但这题admin bot的cookie设置为samesite=none
-    - 一个使用cloudflared替代ngrok的方法： https://baozongwi.xyz/2025/05/17/BYUCTF2025 。`cloudflared tunnel --url http://localhost:8000`，不需要账号或者域名，可得到一个`xxx.trycloudflare.com`子域名
+    - 一个使用cloudflared替代ngrok的方法： https://baozongwi.xyz/p/byuctf2025 。`cloudflared tunnel --url http://localhost:8000`，不需要账号或者域名，可得到一个`xxx.trycloudflare.com`子域名
 - [XXS XSS](https://hackmd.io/VXBgjljNTKatGeOx1O8v7A)
     - `javascript:`协议的利用。可以控制`window.location.href`的值，但长度不能超过15：让url等于`javascript:name`(必须是name，协议只识别这个名称，随后原封不动地渲染其内容),然后get传name参数设置执行的html
 - [NOT XSS](https://hackmd.io/VXBgjljNTKatGeOx1O8v7A)
@@ -4360,7 +4360,7 @@ if (await remote.hasPasswordFor(id)) {
 - `Next.js`中，函数调用依赖action id。如果一个函数被编译进next.js自动生成的网站却没有被调用，攻击者仍然可以通过获取其函数id手动调用
 - **Framework Follies**
 545. [Do Not Cheat](https://1kuzus.github.io/25b/wp-1753ctf-2025)
-- pdf.js库[CVE-2024-4367](https://github.com/LOURC0D3/CVE-2024-4367-PoC)，任意js代码执行。比赛时找到了cve，但是ngrok的转发需要用户交互；后续找到了 https://serveo.net ，但flask忘记设置正确的header了，导致cors错误……
+- pdf.js库[CVE-2024-4367](https://github.com/LOURC0D3/CVE-2024-4367-PoC)，任意js代码执行。比赛时找到了cve，但是ngrok的转发需要用户交互；后续找到了 https://serveo.net (现在已经无法用了)，但flask忘记设置正确的header了，导致cors错误……
 546. [trouble at the spa](https://mushroom.cat/ctf/react-router-b01lersctf25)
 - single page application。这类应用通过重写当前页面（包括url，但不会向服务器发送对该url的请求）而不是加载新页面来实现用户交互。github网页可能无法正确处理此类网站的逻辑（向不存在的网页发送请求，导致404）。解决办法是自行在console输入`window.history.pushState`手动触发本地的页面变换功能。关键在于变换url时不刷新当前页面
 547. [musicplayer](https://ctf.gg/blog/b01lersctf-2025/musicplayer)
