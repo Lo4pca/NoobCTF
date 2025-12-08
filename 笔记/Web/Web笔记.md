@@ -18,6 +18,7 @@
 - [bitset](https://github.com/infobahnctf/CTF-2025/tree/main/beginner/bitset)
     - https://portswigger.net/web-security/cross-site-scripting/cheat-sheet
 - 新的php [drupal](https://www.drupal.org/project/php)反序列化rce链： https://github.com/anzuukino/phpggc/tree/master/gadgetchains/Drupal/RCE/2
+- https://aszx87410.github.io/beyond-xss
 
 ## SQL注入
 
@@ -549,6 +550,13 @@
     - **1337-translator**
 - [Swift resume service](https://github.com/infobahnctf/CTF-2025/tree/main/web/swift-resume-service)
     - swift内部使用[unicode extended grapheme cluster](http://www.unicode.org/reports/tr29/#Grapheme_Cluster_Boundaries)，但绝大多数其他软件用的都是unicode code points。比如swift替换`"`时不会替换掉`"́`（双引号后跟一个字符）；但在html中这个字符中的双引号仍会发挥原本的作用
+- [Ripples](https://github.com/trannghiach/ChapBaiSlayer-CTF-Writeups/blob/main/Amateurs%20CTF/Amateurs%20CTF%202025/web/Ripples.md)
+    - 当php的参数数量超过`max_input_vars`（默认1000）时，后续无法正常调用`header()`，导致无法发送诸如csp的重要header
+    - https://x.com/pilvar222/status/1784619224670797947 , https://blog.arkark.dev/2025/09/08/asisctf-quals
+- [cgi](https://blog.arkark.dev/2023/12/28/seccon-finals)
+    - header injection：攻击者可以控制服务器响应的内容
+    - 利用`Content-Security-Policy-Report-Only`进行xs leak。该header可以指定一个hash，当页面中的style的hash不符合指定的hash时对指定网站发出请求
+    - 类似题目：**devilnetv2**
 
 ## SSTI
 
