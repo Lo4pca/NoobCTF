@@ -38,6 +38,8 @@
   - 逆向python bytecode assembly
   - [pyinstxtractor-ng](https://github.com/pyinstxtractor/pyinstxtractor-ng)
   - [Pyarmor-Static-Unpack-1shot](https://github.com/Lil-House/Pyarmor-Static-Unpack-1shot)
+- [Krakatau](https://github.com/Storyyeller/Krakatau)
+  - Java decompiler, assembler, and disassembler
 
 ## Z3
 
