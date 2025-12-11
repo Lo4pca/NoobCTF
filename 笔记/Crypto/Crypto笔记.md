@@ -1043,6 +1043,9 @@ AES是很能出题的。DES则是放在这凑数的
     - 用z3预测v8的math.random
 - [shiro-hero](https://thebusfactor-writeups.vercel.app/posts/2025-07-14-Shiro-Hero-writeup)
     - z3预测Xoshiro256
+- [C.M.P.R.W](https://kore.one/glacierctf-2025-c-m-p-r-w-challenge-writeup)
+    - 依然是LFSR的z3实现。和rps-casino很像，都是只泄露state的部分bit
+    - z3的无符号模运算：URem
 
 ## Math
 
@@ -2262,7 +2265,7 @@ new_meta = sha.extend(b'content', b'known', length, hash)
     - https://www.youtube.com/watch?v=6QQ4kgDWQ9w
     - https://www.synopsys.com/blogs/software-security/forging-sha-1-mac-using-length-extension-attack-python/
     - [ForgeMe 1](https://github.com/mohnad-0b/programming/tree/main/CTF/NahamConCTF_2023%20Crypto/FrogeMe%201):使用工具[HashPump](https://github.com/bwall/HashPump)
-    - https://notateamserver.xyz/nahamcon-2023-crypto/#forgeme-1-and-2 :使用[hash_extender](https://github.com/iagox86/hash_extender)
+    - https://notateamserver.xyz/blog/nahamcon-2023-crypto :使用[hash_extender](https://github.com/iagox86/hash_extender)
 48. [Forcing a file’s CRC to any value](https://www.nayuki.io/page/forcing-a-files-crc-to-any-value):该脚本可以将一个文件的crc改为任意值，通过在指定偏移处插入构造的字节（这些字节不一定可见）。用法：`python3 forcecrc32.py FileName ByteOffset NewCrc32Value`,表示将FileName对应文件的内容改为NewCrc32Value，构造用的字节插入在ByteOffset偏移处。
 49. [Uniform](https://github.com/HeroCTF/HeroCTF_v5/tree/main/Crypto/Uniform)
 - Mersenne Twister随机数预测。题目给出来自`random.uniform(0, 2**32-1)`的624个数字，要求预测第625个数字。注意由于uniform的输出是float，不能直接套用接收int的预测器。改动的脚本使用z3，已经在wp里了。

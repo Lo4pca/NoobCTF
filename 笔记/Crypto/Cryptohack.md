@@ -1144,6 +1144,16 @@ Starting...
 
 用sagemath自带的`SBox.difference_distribution_table()`可以查看题目的S盒的差分分布表(DDT)。假设S盒有n位输入和m位输出，DDT的大小为 $2^n\times 2^m$ 。每行的索引表示所有可能的输入查分（ $\Delta X$ ），每列的索引表示所有可能的输出差分（ $\Delta Y$ ），每个单元格的值表示对于某个固定的输入差分 ΔX，在所有可能的输入 X（从 0 到 $2^n - 1$ ）中，有多少对 (X, X⊕ΔX) 经过S盒后，其输出差分为 ΔY。比如，如果(223,0)=256，这意味着`all(SBOX[x] ^ SBOX[x^223] == 0 for x in range(256))==True`，即对于所有输入组X和X'，如果两者相差223，则它们经过S盒的输出都是一样的
 
+然后我看了半天都看不明白two block collision里的“second block difference” `[0x28, 0, 0x28, 0x28]`是怎么来的。上一步的differential matrix如果我没看错的话，根据脚本的输出`00010000 --> 00101000`，意味着如果输入相差0b00010000，结果便相差0b00101000（differential matrix的lsb和msb是反过来的）。那问题来了，为什么second block difference的第二项是0？明明differential matrix的每一项都是0x28啊？
+
+（我想我又犯了看不明白转置和符号的老毛病，越看越糊涂。不管了）
+
+hellman的做法为直接爆破。hash函数中不可控制的部分只有state的前四个字节，所以求碰撞的复杂度只有 $2^16$ 。甚至可以直接像`ciphr`的做法一样硬碰撞
+
+### MD0
+
+hash函数的结果是out，然而这个out对于更长的msg来说是其“中间状态”。我们可以完全控制blk，那么对于一段完整的msg，只要找到其某一段前缀msg'对应的中间状态，便可以模拟剩下的msg的hash计算过程
+
 ### Merkle Trees
 
 ZKP里的`Mister Saplin's Preview`要求先把Merkle Trees做了
