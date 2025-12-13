@@ -486,6 +486,8 @@ print(base64.b64encode(temp.encode()))
         - `printf -v`设置PATH变量
         - read命令恢复PATH变量
         - `shopt -s lastpipe`修改管道行为
+- [Repo Viewer](https://kore.one/glacierctf-2025-repo-viewer-challenge-writeup)
+    - lessopen([lesspipe](https://commandlinux.com/man-page/man1/lesspipe.1.html))运行时会执行可能存在的`~/.lessfilter`文件
 
 ## Digital Forensics and Incident Response(DFIR)
 
@@ -3085,3 +3087,5 @@ $ cd a/b
 405. [only-builtins](https://nikzu.dev/writeups/only-builtins)
 - 仅使用gcc [Built-in Functions](https://gcc.gnu.org/onlinedocs/gcc/Built-in-Functions.html)编写C程序并get shell
 - 甚至可以调用scanf把这题变成pwn：**only-builtins**
+406. [Repo Viewer Revenge](https://kore.one/glacierctf-2025-repo-viewer-revenge-challenge-writeup)
+- [TARmageddon](https://github.com/edera-dev/cve-tarmageddon) (CVE-2025-62518)：rust内置的tar处理器（如tokio-tar）与其他处理器（如GNU tar）的差异
