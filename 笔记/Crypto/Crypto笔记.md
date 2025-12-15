@@ -3011,3 +3011,6 @@ assert crc32(a)^crc32(b)==crc32(c)^crc32(d)
     - $((a\oplus b) \ll 1)\oplus(\text{0x1B} * ((a\oplus b) \gg 7))$
     - $= (a \ll 1)\oplus(b \ll 1) \oplus (\text{0x1B} * ((a \gg 7) \oplus (b \gg 7)))$
 - 另外，有些位运算可以通过测试输入变量的所有可能值化简
+185. [Hypercube](https://github.com/LosFuzzys/GlacierCTF2025_writeups/blob/main/crypto/hypercube)
+- cube attack:每个密码都可以表示为某个有限域上具有特定代数次数的多项式，这个多项式的次数越高越安全。cube attack专门针对次数较低的密码，无论密码的结构看起来有多复杂
+- https://cr.yp.to/cubeattacks.html

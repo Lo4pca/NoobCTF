@@ -3088,4 +3088,7 @@ $ cd a/b
 - 仅使用gcc [Built-in Functions](https://gcc.gnu.org/onlinedocs/gcc/Built-in-Functions.html)编写C程序并get shell
 - 甚至可以调用scanf把这题变成pwn：**only-builtins**
 406. [Repo Viewer Revenge](https://kore.one/glacierctf-2025-repo-viewer-revenge-challenge-writeup)
-- [TARmageddon](https://github.com/edera-dev/cve-tarmageddon) (CVE-2025-62518)：rust内置的tar处理器（如tokio-tar）与其他处理器（如GNU tar）的差异
+- [TARmageddon](https://edera.dev/stories/tarmageddon) (CVE-2025-62518)：rust内置的tar处理器（如tokio-tar）与其他处理器（如GNU tar）的差异
+407. [typstmk](https://pwn-la-chapelle.eu/posts/glacierctf2025_typstmk)
+- [typst](https://github.com/typst/typst)编写
+- typst中不存在检查文件是否存在的函数，于是这篇wp的作者自行“发明”了相关代码片段。不过开发团队似乎准备加新功能： https://github.com/typst/typst/pull/7556
