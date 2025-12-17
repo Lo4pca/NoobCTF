@@ -4418,3 +4418,6 @@ if (await remote.hasPasswordFor(id)) {
     - admin bot会在攻击者请求走私后向服务器发送GET请求。攻击者利用请求走私同时发送三个请求：GET-HEAD-某个tcp response包含xss payload的请求。后端服务器同时给出三个response，但只有第一个response被发送回攻击者。当bot发送GET请求时，前端首先返回之前HEAD请求的response；但HEAD请求不包含GET请求需要的具体内容，因此后续的全部tcp流都被当作是返回内容返回
 - Hypercorn默认支持`HTTP/2`，只需要默认发送一段特殊内容（见wp），后续的请求将被看作是`HTTP/2`语法（配合上文“重用同一个后端连接”的部分，针对`HTTP/2`的response可能被返回给发送`HTTP/1.1`请求的受害者）
 - `HTTP/2`的`PING frame`语法可以使攻击者控制返回的tcp流中连续的八字节（可以有多段内容）
+560. [GlacierAIStore](https://saiger.dev/blog/ctf-glacier-ai-store)
+- PHP在检测到client断连时会停止运行当前的脚本。检测方式是使用`ob_flush()`和`flush()`函数： https://www.php.net/manual/en/function.connection-aborted.php#111167
+- 当调用`session_start`时，会话会自动锁定，直到脚本运行结束或用户手动解锁会话为止。这点可以防止单个会话内由于两个函数之间间隔太长导致的条件竞争;然而攻击者仍然可以利用多次登录同一个账号绕过：**GlacierAIStore**

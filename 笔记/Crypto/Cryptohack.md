@@ -1186,6 +1186,26 @@ padding的长度最短也要10个字节（第一步的0x80+第二步只追加一
 
 如果让`mixed_and`全由某个数（比如0）组成，就能使`very_mixed`同样只由某个字符构成。利用这点可以逐个爆破每个字符的每个bit
 
+### Invariant
+
+运气并不是实力的一部分，如果一个人只有运气的话（
+
+我一看到这类具有神秘结构的题就头疼，于是跑去问大佬。佬说试试输入完全一样的字符，看看会发生什么。我便写了一个脚本，用于爆破全部256个字节。最后发现有两个输出十分特别，随便组合它们后莫名其妙就成功了……
+
+但是为了让这个过程不那么莫名其妙，让我们看看`aloof`的解析
+
+加密过程分为四个部分：
+- AK:用异或添加round key（`__subkeys`）
+    - 查看`__subkeys`的构造可以发现这一步只会影响data的lsb
+- SR：和AES中的shift rows步骤一致
+- SB：使用sbox替换每个字节
+    - sbox的替换存在一个极短的循环`(6,7)`，即6变成7，7变成6
+- MC：用异或来mix columns
+    - 列出式子可以发现如果整个column只包含两个不同元素，则此步骤不会修改state
+    - 这点可以用chatgpt找到（但更关键的步骤是SB的分析，它没找到）
+
+前文提到的两个特殊值即为6和7。正好这两玩意只相差1，所以AK不会破坏已有的结构，其他的步骤也不会
+
 ### Merkle Trees
 
 ZKP里的`Mister Saplin's Preview`要求先把Merkle Trees做了
@@ -1217,3 +1237,10 @@ for i in content:
         flag+='1'
 print(long_to_bytes(int(flag,2)))
 ```
+### WOTS Up
+
+`WOTS Up???`的hash的第一个字节值等于BYTE_MAX，导致priv_key全部泄漏……
+
+### WOTS Up 2
+
+priv_key包含32个不同的项，但可以从已知消息的data_hash_bytes算出每个字节对应的hash_iters，进而确认每个sig_item是`priv_key[i]` hash多少次后得到的。有了这些数据就能精确算出当前sig_item距离目标sig_item的迭代次数
