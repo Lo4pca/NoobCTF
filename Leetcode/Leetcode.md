@@ -184,7 +184,6 @@
 - [Coin Change II](./Medium/Coin%20Change%20II.md). dp/Unbounded Knapsack
 - [Unique Paths II](./Medium/Unique%20Paths%20II.md). dp(space optimized)
 - [Check if There is a Valid Partition For The Array](./Medium/Check%20if%20There%20is%20a%20Valid%20Partition%20Fo.md). dp(space optimized)
-.
 - [Kth Largest Element in an Array](./Medium/Kth%20Largest%20Element%20in%20an%20Array.md). [quickSelect](https://en.wikipedia.org/wiki/Quickselect)(Hoare's selection algorithm)/Counting Sort
 - [Partition List](./Medium/Partition%20List.md). two pointers/linked list
 - [01 Matrix](./Medium/01%20Matrix.md). 多源bfs/dp
@@ -288,6 +287,7 @@
 - [Zero Array Transformation II](./Medium/Zero%20Array%20Transformation%20II.md). [Difference Array](https://www.geeksforgeeks.org/difference-array-range-update-query-o1)+line sweep
 - [Count Good Numbers](./Medium/Count%20Good%20Numbers.md). c++ modpow
 - [Fruits Into Baskets III](./Medium/Fruits%20Into%20Baskets%20III.md). segment tree
+- [Best Time to Buy and Sell Stock using Strategy](./Medium/Best%20Time%20to%20Buy%20and%20Sell%20Stock%20using%20.md). prefix sum+处理sliding window中需要将window从中间分成两半的edge case
 
 ## Hard
 - [Longest Cycle in a Graph](Hard/Longest%20Cycle%20in%20a%20Graph.md).You are given a directed graph of n nodes numbered from 0 to n - 1, where each node has at most one outgoing edge. The graph is represented with a given 0-indexed array edges of size n, indicating that there is a directed edge from node i to node edges[i]. If there is no outgoing edge from node i, then edges[i] == -1. Return the length of the longest cycle in the graph. If no cycle exists, return -1. 图表里的每个node最多只有一条向外的有向路径，返回图表内循环node的数量。dfs变种/Floyd Cycle Detection Algorithm+dp。

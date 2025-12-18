@@ -4421,3 +4421,7 @@ if (await remote.hasPasswordFor(id)) {
 560. [GlacierAIStore](https://saiger.dev/blog/ctf-glacier-ai-store)
 - PHP在检测到client断连时会停止运行当前的脚本。检测方式是使用`ob_flush()`和`flush()`函数： https://www.php.net/manual/en/function.connection-aborted.php#111167
 - 当调用`session_start`时，会话会自动锁定，直到脚本运行结束或用户手动解锁会话为止。这点可以防止单个会话内由于两个函数之间间隔太长导致的条件竞争;然而攻击者仍然可以利用多次登录同一个账号绕过：**GlacierAIStore**
+561. [Tomwhat](https://github.com/RootRunners/HeroCTF-v7-RootRunners-Official-Write-ups/tree/main/Web/Tomwhat)
+- Apache Tomcat session管理：若`context.xml`中存在`sessionCookiePath="/"`，意味着机器上运行的不同站点之间共享session
+562. [SAMLevinson](https://github.com/RootRunners/HeroCTF-v7-RootRunners-Official-Write-ups/tree/main/Web/SAMLevinson)
+- SAML中的XSW( [XML Signature wrapping](https://www.ibm.com/think/topics/xml-signature-wrapping) )攻击。SAML中的`<Assertion>`部分有签名保护，防止攻击者篡改；但攻击者仍然可以添加额外的`<Assertion>`，且由于XML解析的相关问题，签名验证的`<Assertion>`和实际读取到的`<Assertion>`可能不是同一个
