@@ -141,6 +141,7 @@
   - 有时jadx无法正常反编译函数，只能给出似乎是代码的注释。在设置里打开`Show inconsistent code`可以强行得到代码
 - [Apkocalypse](https://hackmd.io/@d3vnu11/rkYZiWmSge)
   - 使用frida hook apk和native lib里的函数
+  - 如何配置frida和adb环境见[Freeda Native Hook](https://github.com/a-tan-cyber/heroctf-v7-writeups/blob/main/heroctf-v7-freeda-native-hook.md)和[Freeda-Not-Root](https://github.com/S31ZUR3/HeroCTF-v7-2025/blob/main/Freeda-Not-Root.md)
 
 ## IDA使用
 

@@ -4425,3 +4425,7 @@ if (await remote.hasPasswordFor(id)) {
 - Apache Tomcat session管理：若`context.xml`中存在`sessionCookiePath="/"`，意味着机器上运行的不同站点之间共享session
 562. [SAMLevinson](https://github.com/RootRunners/HeroCTF-v7-RootRunners-Official-Write-ups/tree/main/Web/SAMLevinson)
 - SAML中的XSW( [XML Signature wrapping](https://www.ibm.com/think/topics/xml-signature-wrapping) )攻击。SAML中的`<Assertion>`部分有签名保护，防止攻击者篡改；但攻击者仍然可以添加额外的`<Assertion>`，且由于XML解析的相关问题，签名验证的`<Assertion>`和实际读取到的`<Assertion>`可能不是同一个
+563. [Spring Drive](https://cnf409.me/posts/2025/12/heroctf-2025-web/spring_drive)
+- Spring Boot框架
+- java字符串hashCode碰撞
+- 利用http ssrf+CRLF Injection向redis发送命令

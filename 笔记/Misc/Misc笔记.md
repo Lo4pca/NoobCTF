@@ -488,6 +488,8 @@ print(base64.b64encode(temp.encode()))
         - `shopt -s lastpipe`修改管道行为
 - [Repo Viewer](https://kore.one/glacierctf-2025-repo-viewer-challenge-writeup)
     - lessopen([lesspipe](https://commandlinux.com/man-page/man1/lesspipe.1.html))运行时会执行可能存在的`~/.lessfilter`文件
+- [Movie Night](https://rez0.gitbook.io/writeups/heroctf-v7/system)
+    - 通过挂载到正在运行的tmux session实现权限提升
 
 ## Digital Forensics and Incident Response(DFIR)
 

@@ -234,18 +234,11 @@ def smallEattack(c, e, n):
 - 获得d和n后可用Cryptodome库获取p和q。
 
 ```python
-from Crypto.Util.number import *
 from Crypto.PublicKey import RSA
-from pwn import xor
 n = 0
 e = 65537
 d = 0
-ciphertext =
 p = RSA.construct((n, e, d)).p
-q = n//p
-key = xor(long_to_bytes(p), long_to_bytes(q)) #pwn的xor函数无需两个字符串相同长度
-plaintext = xor(bytes.fromhex(ciphertext), key).decode()
-print(plaintext)
 ```
 
 - 根据d和e构造出n:[Calculating RSA Public Modulus from Private Exponent and Public Exponent](https://crypto.stackexchange.com/questions/81615/calculating-rsa-public-modulus-from-private-exponent-and-public-exponent)。更详细的方法：https://stackoverflow.com/questions/2921406/calculate-primes-p-and-q-from-private-exponent-d-public-exponent-e-and-the
