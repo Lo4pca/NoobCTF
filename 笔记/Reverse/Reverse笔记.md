@@ -1473,3 +1473,5 @@ mov     r8, qword [r13]
 224. [LUTsOfFun](https://github.com/infobahnctf/CTF-2025/tree/main/rev/LUTsOfFun)
 - 逆向Xilinx FPGA BIT data+Xilinx Design Constraints文件
 - 更详细的wp：**LUTsOfFun**
+225. [The Obsidian Optimizer](https://ibrahimadel.netlify.app/posts/the-obsidian-optimizer)
+- 分析LLVM IR和LLVM Optimization Pass

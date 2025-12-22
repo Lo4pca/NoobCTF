@@ -1244,3 +1244,26 @@ print(long_to_bytes(int(flag,2)))
 ### WOTS Up 2
 
 priv_key包含32个不同的项，但可以从已知消息的data_hash_bytes算出每个字节对应的hash_iters，进而确认每个sig_item是`priv_key[i]` hash多少次后得到的。有了这些数据就能精确算出当前sig_item距离目标sig_item的迭代次数
+
+## [RSA](https://cryptohack.org/challenges/rsa)
+
+### Fast Primes
+
+p和q的结构均为 $kM+(65537^{a}\mod M)$ 。不难看出如果把N模M，得到的结果为 $65537^{a'}\mod M$ ，其中 $a'=a_1+a_2$ 。而且由于M是多个小素数的乘积（光滑数），用Pohlig-Hellman很快就能求出a'
+
+（这里可以直接用saagemath的`Zmod(M)(N).log(65537)`求，不需要自己实现Pohlig-Hellman）
+
+……然后就没有然后了。想要确定p或者q需要同时确定对应的k和对应的a，拿到a'只等于划定了一个范围，到最后还是要爆破？可是这样的复杂度太高了
+
+最后我在factordb找到了神秘好心人上传的分解结果。可以看看如何解决上述问题了
+
+这题是[ROCA](https://bitsdeep.com/posts/analysis-of-the-roca-vulnerability) （Return of Coppersmith’s Attack），专门针对按照题目中的方式生成的RSA公钥。链接已经介绍得很清楚了（虽然我没完全看懂），这里记录几个关键点
+- 质数形如 $kM+(65537^{a}\mod M)$ 等于说有“M的位数”的信息泄漏。此题的质数有256bit，理论上entropy应为256bit。但M有219bit，说明k的entropy只有256-219=37bit；加上a的上限为62bit，总entropy只有37+62=99bit。entropy较小对应已知的信息多，是Coppersmith类型攻击的特征
+- 利用Coppersmith可以在 $a_1$ (下文用 $a_1$ 表示某个质数结构对应的 $a_i$ ，a'表示两个可能的 $a_0,a_1$ 的和)已知的情况下求解上述多项式在模p下的根k，进而分解N。此处确实需要爆破 $a_1$ 的值，但存在优化使得复杂度没那么高
+- 不需要在 $[0,a']$ 之间搜索 $a_1$ ，可以将搜索区域优化成 $[\frac{a'}{2},\frac{a'+|G|}{2}]$ (|G|为65537生成的子群的阶)。因为 $a_1=a_2=\frac{a'}{2}$ 是“两者相加等于a'“最小的可能， $a_1=a_2=\frac{a'+|G|}{2}$ 是最大的可能（此处猜测是因为结合|G|的大小和 $a_i$ 的大小，模运算最多取消掉一个|G|）
+- Coppersmith攻击内部使用格，算法中存在一个参数m，与生成的格的维度有关。格的维度越大算法的速度越慢，但维度太小也会导致LLL无法解出答案
+- |G|的大小与M有关
+- Coppersmith攻击在已知的信息位数大于 $\frac{log_2(N)}{4}$ 时能成功，然而题目的M的位数远远大于这个值
+- 结合以上三点可以得出如下的优化策略：
+    - 在LLL算法能成功的前提下使m越小越好
+    - 将M替换成M'，保证Coppersmith攻击能成功的前提下缩减爆破范围。这个M'将是M的因子，因为这样不会破坏原始多项式的结构

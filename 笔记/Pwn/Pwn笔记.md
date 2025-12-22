@@ -216,7 +216,12 @@ kernel pwn题合集。用于纪念我连堆都没搞明白就敢看内核的勇�
     - 利用任意读可以获取canary，然后用类似的操作写rop链：commit_creds+kpti_trampoline
   - 官方wp https://github.com/DownUnderCTF/Challenges_2025_Public/blob/main/pwn/rolling_around 使用了一套eBPF相关模板。漏洞利用过程更复杂，但通过修改`bpf_map`的字段实现了任意地址写
 - [Flip Flip Hooray!](https://ecomaikgolf.com/posts/0017-glacierctf2025---flipfliphooray)
-  - kernel `.data` entry（如modprobe_path和patch中定义的static变量）的地址是固定的，即使开启了KASLR： https://googleprojectzero.blogspot.com/2025/11/defeating-kaslr-by-doing-nothing-at-all.html
+  - kernel `.data` entry（如modprobe_path和patch中定义的static变量。更具体地说，是整个linear map区域）的地址是固定的，即使开启了KASLR： https://googleprojectzero.blogspot.com/2025/11/defeating-kaslr-by-doing-nothing-at-all.html
+- [Safe Device](https://writeups.fr/posts/Safe-Device)
+  - 64位arm架构kernel rop，漏洞是任意地址读和bof。相关资料：
+    - https://xuanxuanblingbling.github.io/ctf/pwn/2022/04/19/babyarm
+    - https://github.com/gdelugre/ida-arm-system-highlight
+  - 如果可以用ssh访问题目机器，利用`modprobe_path`技巧提权时可以用msleep使当前进程暂停，然后另外开启一个ssh连接触发。这样做不用考虑如何返回用户态
 
 ## Shellcode题合集
 
