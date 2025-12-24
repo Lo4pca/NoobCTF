@@ -4429,3 +4429,6 @@ if (await remote.hasPasswordFor(id)) {
 - Spring Boot框架
 - java字符串hashCode碰撞
 - 利用http ssrf+CRLF Injection向redis发送命令
+564. [Evil Cloner](https://thomasqm.com/post/evilcloner)
+- 可通过修改`Preferences`文件和对应的IndexedDB文件控制[File System API](https://developer.mozilla.org/en-US/docs/Web/API/File_System_API)可访问的文件
+- https://worty.fr/post/writeups/heroctfv7/evil_cloner ：如果启动chrome/puppeteer时不添加`--disable-component-update`标志，chrome内置的WidevineCdm组件每次启动时都会自动更新，提供一种任意文件写漏洞可利用的RCE方法

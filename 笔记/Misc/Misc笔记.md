@@ -490,10 +490,12 @@ print(base64.b64encode(temp.encode()))
     - lessopen([lesspipe](https://commandlinux.com/man-page/man1/lesspipe.1.html))运行时会执行可能存在的`~/.lessfilter`文件
 - [Movie Night](https://rez0.gitbook.io/writeups/heroctf-v7/system)
     - 通过挂载到正在运行的tmux session实现权限提升
+- [Middle Earth](https://anormalstick.github.io/CTF-Writeups/HeroCTF%20v7/Middle%20Earth)
+    - 配置iptables和proxy实现MITM攻击
 
 ## Digital Forensics and Incident Response(DFIR)
 
-开个新的分类，用于存储这个困扰我很久的题目类型:(。顺便把disk，mem类型的forensic题也放这
+开个新的分类，用于存储这个困扰我很久的题目类型:(。顺便把disk、mem和日志类型的forensic题也放这
 - 一些插件/工具（平时看到的零零散散的插件，没有例题）
     - https://www.tc4shell.com/en/7zip/forensic7z ：在7-Zip里玩disk forensics？
     - https://www.sans.org/tools/sift-workstation ：forensics工具集合
@@ -685,6 +687,9 @@ print(base64.b64encode(temp.encode()))
         - 如何用ghidra分析shellcode： https://www.embeeresearch.io/ghidra-basics-shellcode-analysis
         - [windows Function Name Hashing](https://www.bordergate.co.uk/function-name-hashing)
         - [Speakeasy](https://github.com/mandiant/speakeasy):运行windows shellcode的模拟器
+- [Operation Pensieve Breach – 1](https://anormalstick.github.io/CTF-Writeups/HeroCTF%20v7/Operation%20Pensieve%20Breach%20-%201)
+    - 使用[evtx](https://github.com/EricZimmerman/evtx)分析Principal Domain Controller（PDC，windows network中管理用户登录，安全内容和政策最主要的服务器）上的日志，追踪DCSync（攻击者通过控制某个高权限账户后将受害机器伪装成一个Domain Controller，向其他DC请求账户和密码的详细信息）攻击
+    - 官方wp： https://github.com/HeroCTF/HeroCTF_v7/tree/master/Forensics/op-pensieve-breach-1
 
 ## Network Forensics
 

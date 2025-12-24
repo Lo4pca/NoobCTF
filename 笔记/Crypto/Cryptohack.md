@@ -1267,3 +1267,19 @@ p和q的结构均为 $kM+(65537^{a}\mod M)$ 。不难看出如果把N模M，得�
 - 结合以上三点可以得出如下的优化策略：
     - 在LLL算法能成功的前提下使m越小越好
     - 将M替换成M'，保证Coppersmith攻击能成功的前提下缩减爆破范围。这个M'将是M的因子，因为这样不会破坏原始多项式的结构
+
+### RSA Backdoor Viability
+
+是论文题：
+- https://eprint.iacr.org/2017/403
+- https://crocs.fi.muni.cz/public/papers/Secrypt2019
+
+实现见[cm_factorization](https://github.com/crocs-muni/cm_factorization)
+
+solutions里aloof给了解析，但是我看不懂（
+
+### Bespoke Padding
+
+padding是完全线性的，符合Franklin-Reiter related-message attack的特征
+
+（差点以为是coppersmith）

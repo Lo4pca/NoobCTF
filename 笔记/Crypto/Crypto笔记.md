@@ -358,7 +358,7 @@ for i in range(30):
 - coppersmith's short-pad attack& Related Message Attack(Franklin-Reiter，相关信息攻击)
 ```python
 import binascii
-def attack(c1, c2 e):
+def attack(c1,c2,e):
     PR.<x>=PolynomialRing(Zmod(n))
     a=
     b=
