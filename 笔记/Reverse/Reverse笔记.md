@@ -1475,3 +1475,6 @@ mov     r8, qword [r13]
 - 更详细的wp：**LUTsOfFun**
 225. [The Obsidian Optimizer](https://ibrahimadel.netlify.app/posts/the-obsidian-optimizer)
 - 分析LLVM IR和LLVM Optimization Pass
+226. [Lapis De Chien](https://github.com/HeroCTF/HeroCTF_v7/tree/master/Reverse/LapisDeChien)
+- 动态分析OpenResty [lapis](https://github.com/leafo/lapis)框架编写的web程序
+- [LuaJIT Decompiler](https://gitlab.com/znixian/luajit-decompiler)

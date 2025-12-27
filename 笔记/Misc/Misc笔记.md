@@ -687,9 +687,11 @@ print(base64.b64encode(temp.encode()))
         - 如何用ghidra分析shellcode： https://www.embeeresearch.io/ghidra-basics-shellcode-analysis
         - [windows Function Name Hashing](https://www.bordergate.co.uk/function-name-hashing)
         - [Speakeasy](https://github.com/mandiant/speakeasy):运行windows shellcode的模拟器
-- [Operation Pensieve Breach – 1](https://anormalstick.github.io/CTF-Writeups/HeroCTF%20v7/Operation%20Pensieve%20Breach%20-%201)
+- [Operation Pensieve Breach](https://anormalstick.github.io/CTF-Writeups/HeroCTF%20v7/Operation%20Pensieve%20Breach%20-%201) ( https://github.com/HeroCTF/HeroCTF_v7/tree/master/Forensics )
     - 使用[evtx](https://github.com/EricZimmerman/evtx)分析Principal Domain Controller（PDC，windows network中管理用户登录，安全内容和政策最主要的服务器）上的日志，追踪DCSync（攻击者通过控制某个高权限账户后将受害机器伪装成一个Domain Controller，向其他DC请求账户和密码的详细信息）攻击
-    - 官方wp： https://github.com/HeroCTF/HeroCTF_v7/tree/master/Forensics/op-pensieve-breach-1
+        - https://blog.blacklanternsecurity.com/p/detecting-dcsync
+        - https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/plan/appendix-l--events-to-monitor
+    - 分析SQL XEL日志
 
 ## Network Forensics
 
