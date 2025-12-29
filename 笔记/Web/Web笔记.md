@@ -4435,3 +4435,6 @@ if (await remote.hasPasswordFor(id)) {
 - 非预期解：利用任意文件写，往node进程的fd中写rop链触发rce。相关资料：
     - https://www.sonarsource.com/blog/why-code-security-matters-even-in-hardened-environments
     - https://i0.rs/blog/engineering-a-rop-chain-against-node-js
+565. [Archivist’s Whisper](https://llordi-1.gitbook.io/write-ups/null-ctf-2025/web-archivists-whisper-0day)
+- [思源笔记](https://github.com/siyuan-note/siyuan)登录后的任意文件读漏洞
+- `/api/import/importZipMd`路径存在ZipSlip漏洞，允许攻击者进行任意文件写
