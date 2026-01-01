@@ -1283,3 +1283,23 @@ solutions里aloof给了解析，但是我看不懂（
 padding是完全线性的，符合Franklin-Reiter related-message attack的特征
 
 （差点以为是coppersmith）
+
+### Null or Never
+
+这下确实是coppersmith了（
+
+难点在于构造多项式。我也不知道花了多少小时在这玩意上，总是差临门一脚。最无奈的地方在于deepseek给了我一个“false positive”的构造方式，单独运行起来很像是对的，但实际在sagemath里跑的结果是错的。我百思不得其解，甚至换了很多套coppersmith的实现，全部都不行。最后的最后才发现是构造错了（结果正确的构造方式也是deepseek给的。“我们两个真是太厉害啦”）
+
+用的是这个脚本： https://github.com/mimoo/RSA-and-LLL-attacks/blob/master/coppersmith.sage ，虽然显示“可能找不到根”但最后仍然找到了
+
+（sagemath自带的small_roots也可以）
+
+### Let's Decrypt
+
+看了半天才发现不仅仅可以控制e，还能控制n……
+
+目标是让`pow(SIGNATURE, e)-kn=target`。为了方便，直接让e=k=1，这样就有n=SIGNATURE-target
+
+### Blinding Light
+
+RSA签名的malleability attack
