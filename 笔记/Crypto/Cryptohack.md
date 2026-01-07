@@ -1317,3 +1317,46 @@ RSA签名的malleability attack
 我讨厌读论文，幸好在chatgpt的帮助下，我注意到这题根本没有这么复杂。只用算法`5.2b`的步骤就好了
 
 那么`5.2b`的内容是什么呢？是模 $2^k$ 下开立方根。题目的代码相当于只看签名的后缀，等于 $((sig^e)\mod N)\mod 2^k$ 。只要 $sig^e$ 够小，模N根本没有作用
+
+### Let's Decrypt Again
+
+做这道题的过程实在是太曲折了……概括下来是：我好像有思路->对的对的->嗯……->不对不对！->对……对吗？->哦对的对的->对个鬼啊->诶好像真是对的->怎么实现啊？->为什么总是不对？->为什么突然对了？
+
+看到这题的第一眼我就觉得是离散对数，随即去翻我的笔记里有关pohlig-hellman的内容。虽然笔记里记录的实现是模p的，但我把p换成n，阶从p-1换成phi(n)就可以了吧？
+
+脚本报错，于是我去找chatgpt调试脚本。给它描述完题目和我的思路后，chatgpt竟然说我的思路完全是错的，因为离散对数“不是这么算的”。它推荐我先找 $e_i$ 然后求各个 $pow(SIG,e_i)-msg_i$ 之间的gcd。这不可能吧？告诉chatgpt我的想法后它的想法立刻转变，又说我是对的了……总之是拿到了能跑的脚本
+
+但是脚本能跑不代表它能出期望的结果。我仔细想了一下，猛然发现一个大问题：万一阶不是phi(n)呢？pohlig-hellman算法要求的阶到底是什么？我完全没搞明白……
+
+幸好我有数学书，最近在看的`An Introduction to Mathematical Cryptography`里就有pohlig-hellman算法的内容。书上说这个阶是底数在群G中的阶(multiplicative order)。转来转去又回到了起点，只要phi(n)是光滑数，由于群中元素的阶必须整除phi(n)，元素的阶必定也是光滑数
+
+但是不知道为什么，套别人的脚本仍然得不出答案，一直卡在discrete_log的地方。最终勉强拼出了这样一个玩意：
+```py
+def pohlig_hellman(g,h,n,order):
+    fac=factor(order)
+    exponents=[]
+    moduli=[]
+    Rn=IntegerModRing(n)
+    g=Rn(g) #不加这一步会导致下面计算指数和discrete_log时报错“指数太大”
+    h=Rn(h)
+    for pi,ei in fac:
+        gi=g^(order//(pi**ei))
+        hi=h^(order//(pi**ei))
+        try:
+            exponents.append(discrete_log(hi,gi,order)) #不加order这个参数出不来
+            moduli.append(pi**ei)
+        except ValueError:
+            continue
+    return crt(exponents, moduli)
+```
+然而还不够。实战发现大部分计算不成功，因为很多子离散对数不存在，导致crt无法恢复出完整的指数。到这里我真没招了，只是一遍一遍机械地运行脚本，期待它能成功。但是跑了几十次后我有点怀疑自己了，这是不是错误的实现方式啊？成功率出奇的低，偶尔能算出第一个消息的对数，但从来没有算出过第二个和第三个
+
+就在我准备放弃时它突然成功了。我没换参数但它就是非常巧合地连续三次成功了
+
+看了其他人的解法，我的实现确实有问题……这篇[论文](https://eprint.iacr.org/2011/343.pdf)的`2.2.2`详细描述过这个攻击（Duplicate Signature Key Selection (DSKS) attack）。关键不仅在于N需要是两个光滑质数的乘积，还需要保证底数和结果是 $F_p,F_q$ 的generator。参考`ciphr`的做法：“set the length of our primes p',q' longer than the bitlength of the original N”。而且直接这样就好：
+```py
+x = discrete_log(Zmod(p)(digest), Zmod(p)(SIG0))
+y = discrete_log(Zmod(q)(digest), Zmod(q)(SIG0))
+e = int(crt(x, y, p-1, q-1))
+```
+用 $p^e$ 做N也可以

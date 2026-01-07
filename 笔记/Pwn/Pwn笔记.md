@@ -7,6 +7,10 @@
 - 关于为什么本地exp无法在远程服务器上成功： https://corgi.rip/posts/remote-vs-local
 - [house of blindness](https://hackmd.io/jmE0VvcTQaaJm6SEWiqUJA)
   - 利用相对地址写修改link_map可以在无libc leak的情况下getshell
+- QEMU相关利用
+  - https://kqx.io/post/qemu-nday ：iret和call far的实现在`9.1`版本前都存在bug，允许攻击者实现任意地址写、绕过kaslr和kpti
+  - https://kqx.io/post/fw_cfg ：[IO相关](https://thekidofarcrania.gitlab.io/2020/07/19/kernel-blues)的漏洞
+  - 上述bug在`ubuntu 24.04`上配备的qemu中存在
 
 ## Chrome V8
 
