@@ -1360,3 +1360,19 @@ y = discrete_log(Zmod(q)(digest), Zmod(q)(SIG0))
 e = int(crt(x, y, p-1, q-1))
 ```
 用 $p^e$ 做N也可以
+
+### Static Client 1&2
+
+把我浪费的时间还回来！
+
+做`Static Client`时我马上想到的方法就是让p为光滑数（注意p要足够大，不然恢复出来的b是截断的），方便解离散对数。看了别人的解法后才发现可以让 $g'=g^A$ ，这样Bob算出来的B就是原本的shared secret
+
+`Static Client 2`的描述中有一句“insisting on using the p and g values provided by his partner”，加上之前生成的p值在这题里不知道为什么不能用，只能得到类似“p值有问题”的反馈，我就以为只能修改A的值
+
+但是只动A值能做什么？我百思不得其解。想了两个小时后便放弃了，去搜了答案： https://hackmd.io/@phgvee/S1vJe1Fvi
+
+只能说幸好我只想了两个小时就放弃了，因为标准答案就是我最开始想到但不知为何无法用的“构造光滑数”。wp里提到新生成的p'的位数需要大于原来的p，可我看了一眼我的脚本，1568位，大于原题使用的1536位啊？
+
+最后我新生成了一个光滑数。没有任何问题了
+
+我讨厌黑盒题……
