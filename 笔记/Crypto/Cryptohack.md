@@ -1361,6 +1361,8 @@ e = int(crt(x, y, p-1, q-1))
 ```
 用 $p^e$ 做N也可以
 
+## [Diffie-Hellman](https://cryptohack.org/challenges/diffie-hellman)
+
 ### Static Client 1&2
 
 把我浪费的时间还回来！
@@ -1376,3 +1378,25 @@ e = int(crt(x, y, p-1, q-1))
 最后我新生成了一个光滑数。没有任何问题了
 
 我讨厌黑盒题……
+
+### The Matrix
+
+RSA还在追我
+
+（以下总结来自`r4sti`）
+
+RSA里的 $d=e^{-1}\mod\phi(N)$ ，因为 $\phi(N)$ 是乘法群Z/nZ的阶。这题也存在乘法群，只不过是一般线性群G=GL(50,GF(2))（[General linear group](https://en.wikipedia.org/wiki/General_linear_group)），所以我们要找的 $d=e^{-1}\mod |G|$
+
+不过由于C是G中的元素，通过拉格朗日定理可知C的阶整除|G|，因此也可以让 $d=e^{-1}\mod |C|$
+
+### The Matrix Reloaded
+
+以前见过类似的题： https://cstheory.stackexchange.com/questions/12655/discrete-log-in-gl2-p
+
+题目中的generator矩阵的jordan_form正好是里面提到的“Repeated eigenvalues”情况。v和w向量没有造成信息丢失，因为可以利用变形得到如下的式子：
+- $G=PJP^{-1}$
+- $H=PJ^{SECRET}P^{-1}$
+- $w=PJ^{SECRET}P^{-1}v$
+- $z=P^{-1}w$
+- $u=P^{-1}v$
+- $z=J^{SECRET}u$
