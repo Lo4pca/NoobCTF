@@ -1400,3 +1400,31 @@ RSA里的 $d=e^{-1}\mod\phi(N)$ ，因为 $\phi(N)$ 是乘法群Z/nZ的阶。这
 - $z=P^{-1}w$
 - $u=P^{-1}v$
 - $z=J^{SECRET}u$
+
+### The Matrix Revolutions
+
+用错函数的后果是致命的
+
+我搜到了这个帖子： https://crypto.stackexchange.com/questions/95079/cdh-in-a-group-of-square-matrices 。`Daniel S`提到的“Freeman paper”应该指的是这篇论文： https://theory.stanford.edu/~dfreeman/papers/discretelogs.pdf 。论文里提到的有类似结论的`Menezes and Wu`论文应该是这篇： https://www.math.uwaterloo.ca/~ajmeneze/publications/glnq.pdf
+
+但是我不想看论文。看了也看不懂。于是我直接把论文扔给chatgpt让它给我一个能跑的算法（用的是`Menezes and Wu`的论文，因为Freeman的论文不知道为什么，复制下来是乱码，chatgpt看不了）。得到的算法卡在了计算discrete_log那一步。我查看元素的阶， $2^{61}-1$
+
+此时AI的弊端暴露出来了。在我告诉它元素的阶是 $2^{61}-1$ 后，它说了类似“这说明了原题目是安全的，因为分解下来的元素的阶仍然是一个大质数”之类的话。我只能自行检查算法，看看是不是前面的步骤做错了。但是我什么也看不出来
+
+然后我去问了大佬。大佬给了我solutions区`josephs`的分析。还是得看freeman的论文，关键在第三节`A Piecewise Approach`，结合`josephs`的分析可以提炼出以下内容：
+- 题目的矩阵G没法求jordan_form，因为某些特征值在 $F_2$ 下不存在
+- 提升到扩域（ $F_{2^{m}}$ ）有可能找到特征多项式的分裂域（Splitting Field），使得特征值存在进而找到jordan_form
+- 但是G的分裂域是 $F_{2^{5429}}$ ，无法在合理的时间内找到jordan_form
+- 特征多项式在 $F_2$ 下可分解成两个不可约多项式，假设是 $g_i(x)$
+- $K=F_2[x]/(g_i(x))$ 是 $g_i(x)$ 的分裂域，因此K中存在 $g_i(x)$ 的根 $\lambda$
+- 计算 $G-\lambda I$ 能得到对应 $\lambda$ 的特征向量w
+- 把w看作一个基向量，然后扩张基（Basis Extension），使得所有基向量张成 $K^N$ 。把这些基向量构成矩阵P的列
+- 因为基向量线性无关，所以P是可逆的。 $P^{-1}GP$ 的左上角将是 $\lambda$ , $P^{-1}AP$ 将是 $\lambda^a$
+- K中的离散对数很好解，恢复 $a_i\equiv a\mod |\lambda_i|$
+- 最后用crt组合出完整的a
+
+我看着AI写的算法。没错啊？为什么还是卡在离散对数这一步？我甚至自己写了一个，仍然求不出离散对数。对照着论文的`Algorithm 3.3`，我发现离散对数这步之前得到的结果都是符合预期的，比如" $a_i$ in its upper left and zeroes in the rest of the column"
+
+最后的最后我去查了sagemath的文档： https://doc.sagemath.org/html/en/reference/groups/sage/groups/generic.html#sage.groups.generic.discrete_log ，发现了一个warning：“如果x有log方法，log方法的速度要显著快于discrete_log“
+
+测试发现多项式有log方法。几秒不到就完成了
