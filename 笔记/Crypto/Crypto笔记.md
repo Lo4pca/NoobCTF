@@ -1044,7 +1044,7 @@ AES是很能出题的。DES则是放在这凑数的
 
 记录数学题。可以预测这个分类一年都积攒不了几道题……
 
-- [V for Vieta](https://berliangabriel.github.io/post/ductf-2024/)
+- [V for Vieta](https://berliangabriel.github.io/post/ductf-2024)
 	- 这题要求找到满足 $\frac{a^2 + ab + b^2}{2ab + 1}=k$ 的(a,b)对。结果wp就说了句[Vieta jumping](https://en.wikipedia.org/wiki/Vieta_jumping) （韦达跳跃）就没了……看了眼百科，在Constant descent Vieta jumping处看出了端倪，相关的[Vieta's formula](https://en.wikipedia.org/wiki/Vieta%27s_formulas) （韦达定理）似乎也有用。尝试把wp讲得更详细点：
 	1. 首先把式子写成a的方程： <br>
 	$\frac{a^2 + ab + b^2}{2ab + 1}=k$ <br>
@@ -1057,6 +1057,11 @@ AES是很能出题的。DES则是放在这凑数的
 	5. 为啥可以把a''换成b，b'换成a'？这里看原始式子就简单得多， $\frac{a^2 + ab + b^2}{2ab + 1}=k$ 里明显a和b的值交换不影响k
 - [Kleinvieh 2](https://mindcrafters.xyz/writeups/nullconctf-2025-crypto)
     - 好的其他部分我都明白，唯独卡在不知道怎么用数学表示同一条message重复n次。答案是，将长度为S的message重复一次等同于将message乘上 $10^S+1$
+- [MAT247](https://ctf.krauq.com/uoftctf-2026)
+    - 如果矩阵T拥有循环向量（cyclic vector，在循环向量v上多次作用T后， $v,T(v),T^2(v),...,T^{n-1}(v)$ 可以生成整个向量空间），则任何与其可交换的矩阵S（指TS=ST）都可以写成T的多项式S = p(T)
+    - 对于一个GF(p)上12乘12的矩阵A：
+        - A的中心化子（centralizer，这里是与A可交换的所有矩阵）构成一个与 $GF(p^12)$ 同构的域
+        - A的幂在该域的乘法群中构成一个循环子群
 
 ## 其他
 

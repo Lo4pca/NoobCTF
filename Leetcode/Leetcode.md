@@ -288,6 +288,7 @@
 - [Count Good Numbers](./Medium/Count%20Good%20Numbers.md). c++ modpow
 - [Fruits Into Baskets III](./Medium/Fruits%20Into%20Baskets%20III.md). segment tree
 - [Best Time to Buy and Sell Stock using Strategy](./Medium/Best%20Time%20to%20Buy%20and%20Sell%20Stock%20using%20.md). prefix sum+处理sliding window中需要将window从中间分成两半的edge case
+- [Maximum Side Length of a Square with Sum Less than or Equal to Threshold](./Medium/Maximum%20Side%20Length%20of%20a%20Square%20with%20Sum%20Less%20than%20or%20Equal%20to%20Threshold.md). 二维prefix sum(积分图,Summed-area table)
 
 ## Hard
 - [Longest Cycle in a Graph](Hard/Longest%20Cycle%20in%20a%20Graph.md).You are given a directed graph of n nodes numbered from 0 to n - 1, where each node has at most one outgoing edge. The graph is represented with a given 0-indexed array edges of size n, indicating that there is a directed edge from node i to node edges[i]. If there is no outgoing edge from node i, then edges[i] == -1. Return the length of the longest cycle in the graph. If no cycle exists, return -1. 图表里的每个node最多只有一条向外的有向路径，返回图表内循环node的数量。dfs变种/Floyd Cycle Detection Algorithm+dp。

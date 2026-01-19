@@ -3101,3 +3101,7 @@ $ cd a/b
 407. [typstmk](https://pwn-la-chapelle.eu/posts/glacierctf2025_typstmk)
 - [typst](https://github.com/typst/typst)编写
 - typst中不存在检查文件是否存在的函数，于是这篇wp的作者自行“发明”了相关代码片段。不过开发团队似乎准备加新功能： https://github.com/typst/typst/pull/7556
+408. [My Pokemon Card is Fake!](https://ctf.krauq.com/uoftctf-2026)
+- 解码Machine Identification Code (MIC)，也叫tracking dots或yellow dots
+409. [File Upload](https://ctf.krauq.com/uoftctf-2026)
+- 利用文件写漏洞覆盖python第三方库的`.so`文件实现rce

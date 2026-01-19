@@ -226,6 +226,13 @@ kernel pwn题合集。用于纪念我连堆都没搞明白就敢看内核的勇�
     - https://xuanxuanblingbling.github.io/ctf/pwn/2022/04/19/babyarm
     - https://github.com/gdelugre/ida-arm-system-highlight
   - 如果可以用ssh访问题目机器，利用`modprobe_path`技巧提权时可以用msleep使当前进程暂停，然后另外开启一个ssh连接触发。这样做不用考虑如何返回用户态
+- [extended eBPF](https://github.com/Iokete/writeups/tree/main/pwn/uoftctf2026/extended-ebpf)
+  - eBPF kernel pwn。有点像chrome v8，都是检查器（typer）的推断和实际运行时的值不一致导致的漏洞。题目移除了ALU Sanitation，并修改了`is_safe_to_compute_dst_reg_range`的移位运算的常数项检查，导致`scalar_min_max_lsh`函数计算出的移位结果与实际运行时不一致
+    - 利用上述漏洞可构造一个寄存器`VULN`，使得检查器认为它的值为0，但实际为1；用`VULN`乘上任意常数便可得到一个检查器仍然认为是0，实际是其他任意数的值。利用这个值便能得到oob，泄漏bpf_map结构的ops字段绕过KASLR
+    - 任意写的思路类似，仍然是用上述的方法得到oob，但这次修改ops字段的值。eBPF Map有多种类型，每种类型都有自己的ops，对应不同类型的map的功能。假设现在操作的是`BPF_MAP_TYPE_ARRAY`类型的A，如果用oob将其ops改为`BPF_MAP_TYPE_ARRAY_OF_MAPS`类型的ops，后续在A上调用`BPF_FUNC_map_lookup_elem`时运行的实际上是`BPF_MAP_TYPE_ARRAY_OF_MAPS`的相应函数。两个类型的函数的实现不同，前者返回的是`&map_array[0]`，后者返回的是`*map_array[0]`。这样就欺骗了检查器，让攻击者得以操控任意地址
+  - 其他资料
+    - https://stdnoerr.blog/blog/eBPF-exploitation-D3CTF-d3bpf ：另一道eBPF题目
+    - https://chomp.ie/Blog+Posts/Kernel+Pwning+with+eBPF+-+a+Love+Story ：eBPF pwn教学
 
 ## Shellcode题合集
 

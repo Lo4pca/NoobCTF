@@ -1428,3 +1428,23 @@ RSA里的 $d=e^{-1}\mod\phi(N)$ ，因为 $\phi(N)$ 是乘法群Z/nZ的阶。这
 最后的最后我去查了sagemath的文档： https://doc.sagemath.org/html/en/reference/groups/sage/groups/generic.html#sage.groups.generic.discrete_log ，发现了一个warning：“如果x有log方法，log方法的速度要显著快于discrete_log“
 
 测试发现多项式有log方法。几秒不到就完成了
+
+## [Mathematics](https://cryptohack.org/challenges/maths)
+
+### No Way Back Home
+
+脑子最抽的一集
+
+没有办法直接求vkakb的逆，因为vkakb包含因子p。但不难注意到如果把vka，vkb和vkakb都模q，就能求出v模q的值。接下来只要找个办法找到v模p的值就能crt了
+
+结果我竟然卡在这了……根本没有办法把式子换到模p上，因为全部都是0，得不到任何信息。然后我去问了deepseek。我是傻子
+
+有没有一种可能，v模p是0本身就是一个信息？
+
+### Ellipse Curve Cryptography
+
+deepseek直接把映射给我了： $\phi(x,y)=x+\sqrt{D}y\mod p$ 。在这个同构下，点加法等于模p下的乘法： $\phi(P+Q)=\phi(P)\phi(Q)\mod p$
+
+上述方法在 https://web.archive.org/web/20150930071844/https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.66.8688&rep=rep1&type=pdf 的第5页可以找到
+
+映射不是唯一的，可以看看solutions区的解法。有人映射到三角函数的角度(`ariana`)，有人映射到矩阵(`k3w1k0d3r`)，甚至可以写个pohlig_hellman硬解(`5unkn0wn`)
