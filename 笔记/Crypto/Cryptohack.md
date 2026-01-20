@@ -1448,3 +1448,13 @@ deepseek直接把映射给我了： $\phi(x,y)=x+\sqrt{D}y\mod p$ 。在这个�
 上述方法在 https://web.archive.org/web/20150930071844/https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.66.8688&rep=rep1&type=pdf 的第5页可以找到
 
 映射不是唯一的，可以看看solutions区的解法。有人映射到三角函数的角度(`ariana`)，有人映射到矩阵(`k3w1k0d3r`)，甚至可以写个pohlig_hellman硬解(`5unkn0wn`)
+
+### Unencryptable
+
+搜了一下，相关的术语叫fixed point或者unconcealable messages： https://crypto.stackexchange.com/questions/81128/fixed-point-in-rsa-encryption 。帖子下有评论提到了几篇论文，但根本用不着
+
+`g4l01s`的分析： $m^e\equiv m\mod N\Rightarrow m^{e-1}\equiv 1\mod N$ 。m的阶一定整除或等于e-1，实际操作下来可以发现阶为512。拆开得到 $(m^{256}+1)(m^{256}-1)\equiv 0\mod N$ 。因为 $m^{256}\not\equiv\pm 1\mod N$ ，所以求 $m^{256}\pm 1$ 与N的gcd很有可能得到p
+
+如果一次操作没得到p，可以参考`aschanna123`的做法，拆成 $m^{2^k}\pm 1$
+
+`SC4R`的解法指出这玩意和shor's algorithm有关系

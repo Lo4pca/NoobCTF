@@ -4438,3 +4438,5 @@ if (await remote.hasPasswordFor(id)) {
 565. [Archivist’s Whisper](https://llordi-1.gitbook.io/write-ups/null-ctf-2025/web-archivists-whisper-0day)
 - [思源笔记](https://github.com/siyuan-note/siyuan)登录后的任意文件读漏洞
 - `/api/import/importZipMd`路径存在ZipSlip漏洞，允许攻击者进行任意文件写
+566. [Vulnerability Research](https://hackmd.io/MvTbGVyZThmFD91DxevTzQ)
+- [web2py](https://github.com/web2py/web2py)中的pickle反序列化rce漏洞

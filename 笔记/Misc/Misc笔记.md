@@ -3105,3 +3105,7 @@ $ cd a/b
 - 解码Machine Identification Code (MIC)，也叫tracking dots或yellow dots
 409. [File Upload](https://ctf.krauq.com/uoftctf-2026)
 - 利用文件写漏洞覆盖python第三方库的`.so`文件实现rce
+410. [K&K Training Room](https://blog.ctrlgeek.studio/blog/uoft-ctf-misc)
+- discord中通过webhook发送的信息可以指定username
+- 如何使用`discord.js`创建一个按钮
+- 不使用第三方库的做法： https://ctf.krauq.com/uoftctf-2026
