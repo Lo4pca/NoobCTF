@@ -395,6 +395,9 @@ print(base64.b64encode(temp.encode()))
     - [DRAFT](https://github.com/vidalt/DRAFT)攻击。给定由一组数据训练出的决策树随机森林模型，尝试寻找训练用的数据
 - [Attack CCN?](https://azad1n.github.io/en/posts/no-hack-no-ctf-2025-writeup)
     - 对抗式机器学习（Adversarial ML）与黑盒对抗攻击（Adversarial Attack）：通过分析两个模型的混淆矩阵（Confusion Matrix），生成一张图片使得两个模型给出不一样的判断，且置信度（Confidence）之间存在较大差距
+- [ML Connoisseur](https://nguyentranthanhlam.notion.site/UofTCTF-2026-2e6e971444e480a294d5c6fece3203b1)
+    - 逆向模型，利用反向传播推出输入内容
+    - 题目作者[原本的设计](https://github.com/SteakEnthusiast/My-CTF-Challenges)是“逆向neural network VM”，然而可以用机器学习的方式优化输入，绕过混淆的逆向逻辑
 
 ## Hardware
 

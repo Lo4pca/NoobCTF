@@ -75,6 +75,10 @@
     - 漏洞的第二个关键点在于`PDO::ATTR_EMULATE_PREPARES`属性。该属性为True表示PDO会先处理sql语句（转义字符，将占位符换成实际值等），再将处理后的语句发送至数据库。然而PDO使用的处理器是自己实现的，对null、`?`等字符的处理有问题
     - mysql（默认开启`PDO::ATTR_EMULATE_PREPARES`）和Postgres（需手动开启`PDO::ATTR_EMULATE_PREPARES`）中存在这个漏洞；但sqlite中不存在，因为sqlite本身不支持null字符
     - `$pdo->quote`默认用反斜杠转义字符串，即使是那些不支持反斜杠转义的引擎，如Postgres。此处同样可能导致sql注入
+- [No Quotes 2](https://lance-kenji.gitbook.io/uoftctf-2026-writeups/web/uoftctf-2026-no-quotes-2)
+    - 用sql REPLACE函数构造quine查询语句（执行语句的结果等于语句本身）
+    - `No Quotes 3`为hash quine（执行语句的结果等于语句的sha2值）
+    - 或者从`INFORMATION_SCHEMA.PROCESSLIST`调出当前执行的sql语句，不需要构造复杂的quine： **No Quotes 2**
 
 ## XSS
 
@@ -557,6 +561,8 @@
     - header injection：攻击者可以控制服务器响应的内容
     - 利用`Content-Security-Policy-Report-Only`进行xs leak。该header可以指定一个hash，当页面中的style的hash不符合指定的hash时对指定网站发出请求
     - 类似题目：**devilnetv2**
+- [Pasteboard](https://estse.github.io/posts/uoftctf-2026-pasteboard)
+    - 利用Chromedriver将localhost origin上的xss提升至rce： https://book.jorianwoltjer.com/web/client-side/headless-browsers#chromedriver
 
 ## SSTI
 
@@ -694,6 +700,8 @@ for i in range(300,1000):
     - 绕过nginx proxy：在路径后加一些特殊字符可能会导致代理与后端服务器对路径的判断不一致，见 https://book.hacktricks.wiki/en/pentesting-web/proxy-waf-protections-bypass.html
     - [velocity](https://velocity.apache.org/engine/1.7/user-guide.html)/[Airspeed](https://github.com/purcell/airspeed)模板注入
     - 其他wp： https://github.com/S450R1/qnqsec-ctf-writeups/tree/main/web/airspeed
+- [No Quotes 3](https://lance-kenji.gitbook.io/uoftctf-2026-writeups/web/uoftctf-2026-no-quotes-3)
+    - flask无引号、句点(`.`)的payload
 - [更多模板注入payload](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Server%20Side%20Template%20Injection/Python.md)
     - `{% for x in ().__class__.__base__.__subclasses__() %}{% if "warning" in x.__name__ %}{{x()._module.__builtins__['__import__']('os').popen("cmd").read()}}{%endif%}{% endfor %}`
     - https://sanlokii.eu/writeups/downunderctf/parrot-the-emu

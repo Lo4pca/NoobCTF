@@ -1458,3 +1458,17 @@ deepseek直接把映射给我了： $\phi(x,y)=x+\sqrt{D}y\mod p$ 。在这个�
 如果一次操作没得到p，可以参考`aschanna123`的做法，拆成 $m^{2^k}\pm 1$
 
 `SC4R`的解法指出这玩意和shor's algorithm有关系
+
+### Roll your Own
+
+deepseek可太擅长这些小型的数学思维题了
+
+如果取 $n=q^2,g=q+1$ ，那么根据二项式定理,不仅有 $g^{q}=1\mod n$ ，还有 $g^x=1+xq\mod n$
+
+`layka_`的解法介绍了模质数幂的离散对数算法： https://math.stackexchange.com/questions/1863037/discrete-logarithm-modulo-powers-of-a-small-prime
+
+### Prime and Prejudice
+
+我以前见过相关的论文： https://www.ams.org/journals/mcom/1995-64-209/S0025-5718-1995-1260124-2/S0025-5718-1995-1260124-2.pdf ，但看着没啥头绪。继续搜
+
+然后直接搜到了答案： https://github.com/loluwot/StrongPseudoPrimeGeneratorMkII 。题目预期的论文应该是 https://eprint.iacr.org/2018/749.pdf 。任何固定测试的basis的Miller-Rabin test都有被绕过的风险
