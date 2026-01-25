@@ -2156,3 +2156,6 @@ offset = the_mmap64_plus_23_itself
 - 其他payload：**V-tables** ([House of Apple 3](https://www.roderickchan.cn/zh-cn/house-of-apple-%E4%B8%80%E7%A7%8D%E6%96%B0%E7%9A%84glibc%E4%B8%ADio%E6%94%BB%E5%87%BB%E6%96%B9%E6%B3%95-3))
 251. [call_it](https://github.com/XDSEC/MoeCTF_2025/blob/main/official_writeups/Pwn/MoeCTF%202025%20Pwn%20Writeup.md)
 - JOP（jump oriented programming）
+252. [uprobe](https://github.com/UofTCTF/uoftctf-2026-chals-public/blob/main/uprobe)
+- 题目允许用户以root身份在任意文件的任意偏移处插入题目固定的uprobe程序。巧妙的地方在于，uprobe程序本身只是一个幌子。插入uprobe时会在指定偏移处插入一个`0xcc`字节，使攻击者得以修改程序的行为
+- 更详细的wp：**uprobe**

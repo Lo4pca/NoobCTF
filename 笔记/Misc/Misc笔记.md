@@ -398,6 +398,10 @@ print(base64.b64encode(temp.encode()))
 - [ML Connoisseur](https://nguyentranthanhlam.notion.site/UofTCTF-2026-2e6e971444e480a294d5c6fece3203b1)
     - 逆向模型，利用反向传播推出输入内容
     - 题目作者[原本的设计](https://github.com/SteakEnthusiast/My-CTF-Challenges)是“逆向neural network VM”，然而可以用机器学习的方式优化输入，绕过混淆的逆向逻辑
+- [vibe-code](https://github.com/UofTCTF/uoftctf-2026-chals-public/blob/main/vibe-code)
+    - LLM jailbreak，使模型输出被禁止的内容
+        - https://arxiv.org/abs/2307.15043
+        - https://github.com/llm-attacks/llm-attacks/blob/main/llm_attacks/gcg/gcg_attack.py
 
 ## Hardware
 
@@ -3108,6 +3112,7 @@ $ cd a/b
 - 解码Machine Identification Code (MIC)，也叫tracking dots或yellow dots
 409. [File Upload](https://ctf.krauq.com/uoftctf-2026)
 - 利用文件写漏洞覆盖python第三方库的`.so`文件实现rce
+- 操作精确的情况下不会触发重启：**fileupload**
 410. [K&K Training Room](https://blog.ctrlgeek.studio/blog/uoft-ctf-misc)
 - discord中通过webhook发送的信息可以指定username
 - 如何使用`discord.js`创建一个按钮
