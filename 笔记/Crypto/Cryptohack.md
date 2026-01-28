@@ -1472,3 +1472,17 @@ deepseek可太擅长这些小型的数学思维题了
 我以前见过相关的论文： https://www.ams.org/journals/mcom/1995-64-209/S0025-5718-1995-1260124-2/S0025-5718-1995-1260124-2.pdf ，但看着没啥头绪。继续搜
 
 然后直接搜到了答案： https://github.com/loluwot/StrongPseudoPrimeGeneratorMkII 。题目预期的论文应该是 https://eprint.iacr.org/2018/749.pdf 。任何固定测试的basis的Miller-Rabin test都有被绕过的风险
+
+### Real Eisenstein
+
+$ciphertext=16^{64}\times\Sigma c_i\sqrt{p_i}\approx\Sigma c_i\sqrt{p_i}16^{64}$ 。 $\sqrt{p_i}16^{64}$ 是一个很大的数， $c_i$ 很小；因此前者构成的格里包含由 $c_i$ 构成的小向量
+
+然后就是快乐的lattice时间了。这题的格很好构造，注意不要用`round(RR(sqrt(PRIMES[i]))*16**64)`，因为`RR(sqrt(PRIMES[i]))`的结果和原题不一致。直接用`sqrt(PRIMES[i])`或者仿照原题用Decimal即可
+
+以及不需要给lattice加权重。我构造时加了权重，反而导致LLL解不出来（可能是因为误差项也被放大，导致目标向量不够短了）；最后通过实验发现误差在100以内，爆破得到了准确的ciphertext
+
+### Cofactor Cofantasy
+
+用phi可以分解n。查看g模每个 $p_i$ 的阶后，发现有部分阶不等于 $p_i-1$ 。 $g^r\mod N$ 在模 $p_i$ 下一定有 $(g^r)^{ord_{p_i}}\equiv 1\mod p_i$ ，而随机数不一定满足这个条件。利用这点可以区分出0和1
+
+还可以用测信道和二次剩余解这道题

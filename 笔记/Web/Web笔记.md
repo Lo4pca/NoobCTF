@@ -572,6 +572,12 @@
         - payload使用`window.open`打开`test.com/flag`。由于`x.x.x.x`已下线，这将访问`127.0.0.1/flag`，绕过题目设置的本地ip检查
         - 题目将flag放在了httponly cookie中，因此payload需要用`fetch("test.com:5005",{credentials: 'include'})`提取出flag。`5005`端口号是随机的，只要`127.0.0.1`在这个端口上没有服务即可。浏览器找不到`127.0.0.1:5005`便会解析成`test.com:5005`
         - 全程的host都是一样的，不会影响cookie的传递
+    - 其他解法：**unrealistic**
+        - 预期解是cached xss+Cookie delete + Cookie Sandwitch+ISO-2022-JP charset encoding+[Dangling Markup](https://portswigger.net/web-security/cross-site-scripting/dangling-markup)
+            - cached xss的原理与[framed-xss](https://m0z.ie/research/2025-12-19-Seccon-CTF-2025-Writeups-Web)这题一致。这类题目中存在一个带有xss漏洞的路径A，但需要用户发送某个header来触发。应用中还存在另一个路径B，帮助用户发送header获取payload，但B中不存在直接的xss。cached xss的原理是，先访问路径B，使浏览器缓存xss payload后再访问路径A，绕过路径A的判断逻辑，直接返回缓存的内容
+            - chrome和mozilla已经移除了ISO-2022-JP字符集的自动检测，但仍然可以用meta标签强制切换
+        - 创建两个dns记录，使得`a.x.com`指向攻击者服务器，`b.x.com`指向127.0.0.1。只要设置cookie的domain为`x.com`就不会影响后续cookie的设置（虽然不能跨subdomain读cookie，但可以在subdomain中设置cookie）
+        - https://www.intruder.io/research/split-second-dns-rebinding-in-chrome-and-safari 。利用A记录和AAAA记录实现dns rebinding
 
 ## SSTI
 
