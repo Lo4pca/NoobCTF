@@ -1486,3 +1486,13 @@ $ciphertext=16^{64}\times\Sigma c_i\sqrt{p_i}\approx\Sigma c_i\sqrt{p_i}16^{64}$
 用phi可以分解n。查看g模每个 $p_i$ 的阶后，发现有部分阶不等于 $p_i-1$ 。 $g^r\mod N$ 在模 $p_i$ 下一定有 $(g^r)^{ord_{p_i}}\equiv 1\mod p_i$ ，而随机数不一定满足这个条件。利用这点可以区分出0和1
 
 还可以用测信道和二次剩余解这道题
+
+## [Symmetric Ciphers](https://cryptohack.org/challenges/aes)
+
+### Lazy CBC
+
+我把这题做成爆破oracle了，我在干什么？
+
+题目把KEY用在了IV上，那么如果加密`\x00`，得到的就是KEY的密文。随后我开始发疯了，选择逐个爆破KEY的字节……拿16个相同字节拼在KEY的密文前面，如果第二块解密出的明文在指定索引处是`\x00`，说明猜测的结果是正确的
+
+这确实能搞到KEY，但只有神经病会这么做。都能完整控制第一块密文块了，为什么非要爆破？直接异或得到答案不好吗？

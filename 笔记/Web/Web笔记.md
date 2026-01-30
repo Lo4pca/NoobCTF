@@ -4463,3 +4463,5 @@ if (await remote.hasPasswordFor(id)) {
 - `/api/import/importZipMd`路径存在ZipSlip漏洞，允许攻击者进行任意文件写
 566. [Vulnerability Research](https://hackmd.io/MvTbGVyZThmFD91DxevTzQ)
 - [web2py](https://github.com/web2py/web2py)中的pickle反序列化rce漏洞
+567. [4llD4y](http://blog.kudaliar.id/blog/0xl4ugh-ctf-v5-4lld4y)
+- flatnest原型链污染漏洞： https://security.snyk.io/vuln/SNYK-JS-FLATNEST-3185149

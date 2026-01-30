@@ -971,7 +971,7 @@ AES是很能出题的。DES则是放在这凑数的
     - 知识点和上面两道题一样。补充一篇文章： https://frereit.de/aes_gcm 。nonce重用后，和ctr模式类似，整个gcm就成了many time pad。不过gcm对每条消息都提供了验证tag，导致针对gcm模式的密文伪造攻击比ctr多了一步：构造多项式方程恢复验证用的key
 - [Invisible Salamanders in AES-GCM-SIV](https://keymaterial.net/2020/09/07/invisible-salamanders-in-aes-gcm-siv/)
     - 构建一条`ciphertext+tag`使其用两个已知的不同密钥解密后得到两个不一样但有效的明文
-- [DODOLOUF](https://gist.github.com/C0nstellati0n/cf6ae2c5e0e9fe1ecb532d257a56e101#dodolouf)
+- **DODOLOUF**
     - AES-cbc字节反转攻击+python随机数预测（randcrack）。这题出现反转攻击的明文段属于python pickle序列化内容。有一点要注意，因为攻击后必定有几块解密出乱码，所以一般安排这些乱码出现在诸如username的等无伤大雅的字段。但是若原本存储username时用的是普通字符串（unicode类型）而不是bytestring，反序列化时就会出问题。所以要同时把pickle里记录字段类型的字节也改了
 - [Desfunctional](https://berliangabriel.github.io/post/google-ctf-2024/)
     - DES的Complement Property。 $E(P)=C\Leftrightarrow E(\overline{P})=\overline{C}$ 。 $\overline{P}$ 指的是P的补码，即P^0xff
@@ -3012,3 +3012,5 @@ assert crc32(a)^crc32(b)==crc32(c)^crc32(d)
 185. [Hypercube](https://github.com/LosFuzzys/GlacierCTF2025_writeups/blob/main/crypto/hypercube)
 - cube attack:每个密码都可以表示为某个有限域上具有特定代数次数的多项式，这个多项式的次数越高越安全。cube attack专门针对次数较低的密码，无论密码的结构看起来有多复杂
 - https://cr.yp.to/cubeattacks.html
+186. [SpiralFloat](http://blog.kudaliar.id/blog/0xl4ugh-ctf-v5-spiralfloat)
+- Interval Arithmetic:使用区间表达可能的取值范围。题目给出f(x)的值，要求反推x；但计算存在精度缺失且结果的部分数字位被隐藏了。使用Interval Arithmetic将被隐藏的数字位表达成[0,9]后进行逆向计算可以避免直接爆破导致的复杂度爆炸

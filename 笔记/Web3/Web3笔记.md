@@ -246,3 +246,7 @@ for(uint256 i = 0; i < _data.length; i++)
 12. [Golden-Bridge](https://eddwastaken.github.io/posts/dicectf-2025-quals-golden-bridge)
 - 再一次遇到这类用bridge合约串联Ethereum和Solana的资源的题。不过这次感觉对brdige的概念有了更好的认识。因为Ethereum和Solana之间无法通信，故在将a token转成b token（反之亦然）时双方都无法得知对面是否真的有请求数量这么多的token。所以需要在两个之间插入一个双方都信任的中介同时记录双边token的数量
 - 漏洞在于将sol token转成eth token时，没有确认solana方已完成转账就交付eth token了（solana转账速度较慢）。所以可以获取比实际数量多得多的eth token（某种意义上很像限时的重入攻击？）
+13. [House of Illusions](http://blog.kudaliar.id/blog/0xl4ugh-ctf-v5-house-of-illusions)
+- 自solidity `0.8.0`后，脚本默认使用v2 abi encoder，使用v1需要在脚本顶部加上`pragma abicoder v1;`
+- v2对calldata的编码检查更加严格，会拒绝诸如脏地址（地址的高12字节不为0）这类不规范的编码；而v1不会
+- 题目源码： https://github.com/pi-1337/Blockchain-CTF-Writeups/tree/master/script/0xL4ugh_CTF_2026/House_of_Illusions
