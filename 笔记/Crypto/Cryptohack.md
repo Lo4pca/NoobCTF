@@ -1496,3 +1496,11 @@ $ciphertext=16^{64}\times\Sigma c_i\sqrt{p_i}\approx\Sigma c_i\sqrt{p_i}16^{64}$
 题目把KEY用在了IV上，那么如果加密`\x00`，得到的就是KEY的密文。随后我开始发疯了，选择逐个爆破KEY的字节……拿16个相同字节拼在KEY的密文前面，如果第二块解密出的明文在指定索引处是`\x00`，说明猜测的结果是正确的
 
 这确实能搞到KEY，但只有神经病会这么做。都能完整控制第一块密文块了，为什么非要爆破？直接异或得到答案不好吗？
+
+### Triple DES
+
+你不是3des吗？怎么可以变成2des？
+
+没啥头绪，看了[wp](https://0awawa0.medium.com/cryptohack-triple-des-solution-56aa0466206b)后发现我缺失了最关键的切入点：[Weak key](https://en.wikipedia.org/wiki/Weak_key)。单轮des下存在某些弱密钥，满足`E_k(E_k(P)) = P`。然后需要精心构造密钥的顺序，使两次encrypt正好逆向得到flag
+
+结果看了solutions区后发现根本不需要这么复杂。如果输入的key只有16字节，程序就只会提取出2个subkey，只运行两次des；因此一次encrypt就能出flag了

@@ -699,6 +699,8 @@ print(base64.b64encode(temp.encode()))
         - https://blog.blacklanternsecurity.com/p/detecting-dcsync
         - https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/plan/appendix-l--events-to-monitor
     - 分析SQL XEL日志
+- [Zero Hour](https://github.com/t4mpr/ctf-writeups/tree/main/0xL4ughCTF%3D2026-Writeup)
+    - Windows Push Notification Database `wpndatabase.db`可能包含部分discord/telegram的消息
 
 ## Network Forensics
 
@@ -2821,12 +2823,12 @@ a=A()
 - 发现了一个只用stegsolve的解法： https://github.com/marcus-hao/CTF/tree/main/TJCTF%202024/forensics/pals 。原来stegsolve里的random color map是这个意思啊？
 308. [minisculest](https://github.com/TJCSec/tjctf-2024-challenges/tree/main/forensics/minisculest)
 - High Efficiency Image File Format(`.heif`)图片格式分析。这题主要是把png里的zlib IDAT数据提取出来，按照heif图片的格式装成个heif图片
-- 继续在discord拼wp： https://gist.github.com/C0nstellati0n/78f5887b5bee235583a026840354ae54#minisculest
+- 继续在discord拼wp：**minisculest**
 309. [golf-hard](https://github.com/TJCSec/tjctf-2024-challenges/tree/main/misc/golf-hard)
 - 正则挑战，给定字符串组A和B，要求写出匹配A组但不匹配B组且长度在要求内的正则
 - 这题也是：[golf-harder](https://github.com/TJCSec/tjctf-2024-challenges/tree/main/misc/golf-harder)
 310. [ml-project](https://github.com/TJCSec/tjctf-2024-challenges/tree/main/misc/ml-project)
-- 逆向机器学习（Machine learning，AI相关）model。可以用z3，也可以纯数学: https://gist.github.com/C0nstellati0n/78f5887b5bee235583a026840354ae54#ml-project
+- 逆向机器学习（Machine learning，AI相关）model。可以用z3，也可以纯数学: **ml-project**
 311. [QRRRRRRRR](https://twc1rcle.com/ctf/team/ctf_writeups/nahamcon_2024/warmup/QRRRRRRRR)
 - [rMQR code](https://www.qrcode.com/en/codes/rmqr.html)识别。长得有点像拉长的qr code，可用scandit扫描
 312. [Seventy Eight](https://gist.github.com/mlashley/6d960c7119e4f97d1dd2223d5d6d21fd)
@@ -2838,7 +2840,7 @@ a=A()
 - 更加手动的解法： https://github.com/itsabugnotafeature/writeups/tree/main/l3ak-2024/communication-gateway
 315. [Impostor](https://0xmr8anem.medium.com/l3akctf-2024-forensics-writeups-3b5575f07cba)
 - pcapng http+websocket流量分析+解密jenkins credentials
-- 这篇wp作者在试这个[脚本](https://github.com/tweksteen/jenkins-decrypt)时解密失败，但是discord里有其他人解密成功。放几个别的脚本： https://gist.github.com/C0nstellati0n/78f5887b5bee235583a026840354ae54#impostor
+- 这篇wp作者在试这个[脚本](https://github.com/tweksteen/jenkins-decrypt)时解密失败，但是discord里有其他人解密成功。放几个别的脚本：**impostor**
 316. [HoldOnTight](https://kashmir54.github.io/ctfs/L3akCTF2024)
 - linux persistence技巧。此题展示了部分技巧使用的文件
 - 更详细的wp： https://warlocksmurf.github.io/posts/l3akctf2024

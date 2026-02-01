@@ -2159,3 +2159,6 @@ offset = the_mmap64_plus_23_itself
 252. [uprobe](https://github.com/UofTCTF/uoftctf-2026-chals-public/blob/main/uprobe)
 - 题目允许用户以root身份在任意文件的任意偏移处插入题目固定的uprobe程序。巧妙的地方在于，uprobe程序本身只是一个幌子。插入uprobe时会在指定偏移处插入一个`0xcc`字节，使攻击者得以修改程序的行为
 - 更详细的wp：**uprobe**
+253. [House of Pain](https://medium.com/@0x11a/0xl4ugh-ctf-v5-house-of-pain-pwn-writeup-a8a5139c08eb)
+- c++ exception与unwind。程序抛出异常时会跳过当前函数栈帧的canary检查，并尝试用当前栈帧记录的数据恢复到上一个栈帧
+  - 题目出现了溢出漏洞，一般来说溢出漏洞不会抛出异常。但出题人设计[预期解](https://medium.com/@ThePainTester/0xl4ugh-2026-ctf-pwn-writeups-c0a8e684179f)时人为地抛出了异常，因此可以覆盖当前函数的rbp，再利用unwind修改上层函数的rbp

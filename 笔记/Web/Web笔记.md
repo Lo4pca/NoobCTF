@@ -4465,3 +4465,7 @@ if (await remote.hasPasswordFor(id)) {
 - [web2py](https://github.com/web2py/web2py)中的pickle反序列化rce漏洞
 567. [4llD4y](http://blog.kudaliar.id/blog/0xl4ugh-ctf-v5-4lld4y)
 - flatnest原型链污染漏洞： https://security.snyk.io/vuln/SNYK-JS-FLATNEST-3185149
+568. [pdf.exe](https://mushroom.cat/ctf/nextjs-ssrf-python-crlf-pdfkit-injection)
+- Next.js Image Optimizer ssrf。具体出现漏洞的函数是`fetchExternalImage`，攻击者可以用dns rebinding绕过对域名指向的IP的检查
+- python urllib CRLF注入：`DataHandler`类的`data_open`函数未对mediatype做过滤，导致攻击者可以通过注入CRLF字符添加http header
+- python Pdfkit库的from_string支持用meta标签设置内部调用的命令行工具`wkhtmltopdf`的参数，存在LFI的风险： https://csirt.sk/the-python-pdfkit-library-vulnerability.html
