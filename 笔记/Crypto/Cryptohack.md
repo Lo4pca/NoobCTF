@@ -1504,3 +1504,11 @@ $ciphertext=16^{64}\times\Sigma c_i\sqrt{p_i}\approx\Sigma c_i\sqrt{p_i}16^{64}$
 没啥头绪，看了[wp](https://0awawa0.medium.com/cryptohack-triple-des-solution-56aa0466206b)后发现我缺失了最关键的切入点：[Weak key](https://en.wikipedia.org/wiki/Weak_key)。单轮des下存在某些弱密钥，满足`E_k(E_k(P)) = P`。然后需要精心构造密钥的顺序，使两次encrypt正好逆向得到flag
 
 结果看了solutions区后发现根本不需要这么复杂。如果输入的key只有16字节，程序就只会提取出2个subkey，只运行两次des；因此一次encrypt就能出flag了
+
+### Stream of Consciousness
+
+AES CTR的nonce-key重用后等于many time pad。我竟然没记录过类似的脚本，这次做也是靠AI强行写出了一个概率脚本（甚至每次解密出的结果不一样），靠运气得到了flag。特此记录，供今后~~抄~~查询别人的脚本
+
+### Dancing Queen
+
+利用已知的明文和密文可以恢复出state，然后问chatgpt就可以知道chacha20的`_inner_block`结构本质上是可逆的置换，能直接逆向得到key

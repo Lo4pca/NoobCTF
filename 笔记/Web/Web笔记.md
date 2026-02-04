@@ -578,6 +578,8 @@
             - chrome和mozilla已经移除了ISO-2022-JP字符集的自动检测，但仍然可以用meta标签强制切换
         - 创建两个dns记录，使得`a.x.com`指向攻击者服务器，`b.x.com`指向127.0.0.1。只要设置cookie的domain为`x.com`就不会影响后续cookie的设置（虽然不能跨subdomain读cookie，但可以在subdomain中设置cookie）
         - https://www.intruder.io/research/split-second-dns-rebinding-in-chrome-and-safari 。利用A记录和AAAA记录实现dns rebinding
+- [Awesome Router](https://github.com/KarimTantawey/CTFs/blob/main/0xL4ugh-CTF-V5/Awesome%20Router)
+    - flask的session系统使用Tagged JSON serialization，用TagMarkup存储复杂类型的cookie值。jinja2渲染这些内容时不会转义字符，有html注入的风险
 
 ## SSTI
 
