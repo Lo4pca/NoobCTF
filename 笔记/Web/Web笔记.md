@@ -580,6 +580,11 @@
         - https://www.intruder.io/research/split-second-dns-rebinding-in-chrome-and-safari 。利用A记录和AAAA记录实现dns rebinding
 - [Awesome Router](https://github.com/KarimTantawey/CTFs/blob/main/0xL4ugh-CTF-V5/Awesome%20Router)
     - flask的session系统使用Tagged JSON serialization，用TagMarkup存储复杂类型的cookie值。jinja2渲染这些内容时不会转义字符，有html注入的风险
+- [1nfin1ty](https://github.com/ZeyadZonkorany/0xL4ugh-CTF-2025-Web)
+    - 题目要求窃取某个路径下的cookie，假设路径为`/a`。`/a`使用`res.socket.destroy`中断所有连接，但可以用过长的get参数使url长度超过限制，触发431错误。浏览器会将错误视作服务器的响应，随即下发cookie
+    - firefox/Chromium XSSI(Cross-Site Script Inclusion)本地文件读取
+    - **1nfin1ty**
+        - 可以先访问路径`/b`，然后用`history.pushState` API在不刷新页面的前提下将URL更换成`/a`。由于pushState不会更新其他状态，还要将location改成`javascript:"anything"`触发更新
 
 ## SSTI
 

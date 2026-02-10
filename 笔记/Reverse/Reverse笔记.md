@@ -108,6 +108,13 @@
     - 如何用[frida-il2cpp-bridge](https://github.com/vfsfitvnm/frida-il2cpp-bridge)调用任意函数
 - [Yep another smake game](https://hackmd.io/VXBgjljNTKatGeOx1O8v7A)
   - wasm游戏的Cheat Engine：[Cetus](https://github.com/Qwokka/Cetus)
+- [UCalculator](https://www.eljooker.tech/posts/My-0xL4ugh-2025-CTF-Challenges)
+  - 逆向Unreal Engine 5游戏的相关知识
+    - Unreal Engine游戏文件结构
+    - 内部原理以及提取工具[RE-UE4SS](https://github.com/UE4SS-RE/RE-UE4SS)
+    - GWorld, GObjects, GNames & SDK的相关教程： https://www.unknowncheats.me/forum/unreal-engine-4-a/672085-introduction-unreal-engine-game-hacking-1-gworld-gobjects-gnames-sdk.html （这个网站还有其他游戏逆向资源）
+    - 绕过碰撞检测
+    - 提取`.pak`后缀的游戏资源:[UE4-AES-Key-Extracting-Guide](https://github.com/Cracko298/UE4-AES-Key-Extracting-Guide),[UnrealPakViewer](https://github.com/jashking/UnrealPakViewer)
 
 ## APK
 

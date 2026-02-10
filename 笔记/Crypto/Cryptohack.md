@@ -1512,3 +1512,12 @@ AES CTR的nonce-key重用后等于many time pad。我竟然没记录过类似的
 ### Dancing Queen
 
 利用已知的明文和密文可以恢复出state，然后问chatgpt就可以知道chacha20的`_inner_block`结构本质上是可逆的置换，能直接逆向得到key
+
+### Oh SNAP
+
+之前见179条`rc4-prefix`见过FMS攻击，但是那道题没法控制解密的密文，这题可以，就想着去搜搜有没有优化版本的攻击。然后搜到[答案](https://hackmd.io/@nomorecaffeine/SkzPhT2R3)了（
+
+rc4的交换现在看着仍然头晕，关键是以下几点：
+- 假如构造密钥前缀`[A,255,X]`（A为要泄漏的密钥索引，X为任意值），经过rc4的KSA步骤后有高概率满足`S[1] + S[S[1]] == A`
+- 满足`S[1] + S[S[1]] == A`后，输出的随机数`z = S[S[1] + S[S[1]]] = S[A]`，而S[A]的值与key[A]的值有高概率满足`key[A] = (S_inv[z] - j - S[A]) mod 256`，其中S_inv[z]指z在S盒中的位置
+- 上述关系要求S[0]和S[1]的值未被交换，所以脚本中会有`original0 == box[0]`和`original1 != box[1]`的检查
