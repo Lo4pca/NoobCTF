@@ -1521,3 +1521,13 @@ rc4的交换现在看着仍然头晕，关键是以下几点：
 - 假如构造密钥前缀`[A,255,X]`（A为要泄漏的密钥索引，X为任意值），经过rc4的KSA步骤后有高概率满足`S[1] + S[S[1]] == A`
 - 满足`S[1] + S[S[1]] == A`后，输出的随机数`z = S[S[1] + S[S[1]]] = S[A]`，而S[A]的值与key[A]的值有高概率满足`key[A] = (S_inv[z] - j - S[A]) mod 256`，其中S_inv[z]指z在S盒中的位置
 - 上述关系要求S[0]和S[1]的值未被交换，所以脚本中会有`original0 == box[0]`和`original1 != box[1]`的检查
+
+### The Good, The Pad, The Ugly
+
+比经典aes cbc padding oracle attack（`Pad Thai`这题）多了两个改动点：
+- 限制只能query 12000次
+- 输出加了混淆：`good | (rng.random() > 0.4)`
+
+message一定由16进制字符组成，因此爆破时无需尝试全部256种可能。`Pad Thai`的solutions区中`IcingMoon`的解法有这个优化
+
+有0.6的概率得到false positive，但可以通过多次请求克服。`12000/32/16`约等于23，每个字节请求20次就足够了

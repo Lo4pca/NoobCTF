@@ -2162,3 +2162,4 @@ offset = the_mmap64_plus_23_itself
 253. [House of Pain](https://medium.com/@0x11a/0xl4ugh-ctf-v5-house-of-pain-pwn-writeup-a8a5139c08eb)
 - c++ exception与unwind。程序抛出异常时会跳过当前函数栈帧的canary检查，并尝试用当前栈帧记录的数据恢复到上一个栈帧
   - 题目出现了溢出漏洞，一般来说溢出漏洞不会抛出异常。但出题人设计[预期解](https://medium.com/@ThePainTester/0xl4ugh-2026-ctf-pwn-writeups-c0a8e684179f)时人为地抛出了异常，因此可以覆盖当前函数的rbp，再利用unwind修改上层函数的rbp
+  - 这种利用unwind绕过canary并修改栈布局的技巧叫[Catch Handler Oriented Programming (CHOP)](https://www.ndss-symposium.org/wp-content/uploads/2023/02/ndss2023_s295_paper.pdf)，适用范围为gcc 9及以下（更高的版本加了canary检查）

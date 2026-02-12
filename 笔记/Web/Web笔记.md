@@ -4476,3 +4476,9 @@ if (await remote.hasPasswordFor(id)) {
 - Next.js Image Optimizer ssrf。具体出现漏洞的函数是`fetchExternalImage`，攻击者可以用dns rebinding绕过对域名指向的IP的检查
 - python urllib CRLF注入：`DataHandler`类的`data_open`函数未对mediatype做过滤，导致攻击者可以通过注入CRLF字符添加http header
 - python Pdfkit库的from_string支持用meta标签设置内部调用的命令行工具`wkhtmltopdf`的参数，存在LFI的风险： https://csirt.sk/the-python-pdfkit-library-vulnerability.html
+569. [0xNote](https://hackmd.io/@winky/Sy8M59mI-l)
+- 绕过nginx php fpm配置访问页面： https://angelica.gitbook.io/hacktricks/pentesting-web/proxy-waf-protections-bypass#php-fpm
+- 利用php SPLFileObject类实现任意文件读取
+- php filters内部使用了glibc iconv函数，因此利用iconv的`CVE-2024-2961`漏洞可以将php应用中存在的任意文件读取漏洞提升为rce
+    - https://github.com/vulhub/vulhub/blob/master/php/CVE-2024-2961
+    - https://blog.lexfo.fr/iconv-cve-2024-2961-p1.html
