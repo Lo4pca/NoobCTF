@@ -1531,3 +1531,7 @@ rc4的交换现在看着仍然头晕，关键是以下几点：
 message一定由16进制字符组成，因此爆破时无需尝试全部256种可能。`Pad Thai`的solutions区中`IcingMoon`的解法有这个优化
 
 有0.6的概率得到false positive，但可以通过多次请求克服。`12000/32/16`约等于23，每个字节请求20次就足够了
+
+### Paper Plane
+
+和普通aes cbc padding oracle攻击一样，只是控制的不是iv而是c0。攻击第i块明文时要用 $c_{i-1}$ 和 $m_{i-1}$

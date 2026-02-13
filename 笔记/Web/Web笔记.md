@@ -4482,3 +4482,12 @@ if (await remote.hasPasswordFor(id)) {
 - php filters内部使用了glibc iconv函数，因此利用iconv的`CVE-2024-2961`漏洞可以将php应用中存在的任意文件读取漏洞提升为rce
     - https://github.com/vulhub/vulhub/blob/master/php/CVE-2024-2961
     - https://blog.lexfo.fr/iconv-cve-2024-2961-p1.html
+570. [0xClinic](https://github.com/0xkalawy/My-Challenges-WriteUps/blob/main/0xL4ugh%20CTF%20v5/0xClinic.md)
+- 若网站执行用户输入的任意正则表达式，则可以利用ReDoS进行时间侧信道爆破字符
+- FastAPI的依赖项Uvicorn对请求头的处理中存在CRLF注入
+- python的urllib中的urlsplit函数无法正确处理形如`<URL:scheme://host:port?/path?>`格式的url（解析出的scheme为空），但urlretrieve函数可以正常请求这类url
+    - 在url中加换行符也可以造成解析的不一致性，见 https://gist.github.com/aelmosalamy/70ce2ca59139b7eb0e2d06a3e73c5d0d
+- python web应用从任意文件上传到rce： https://siunam321.github.io/research/python-dirty-arbitrary-file-write-to-rce-via-writing-shared-object-files-or-overwriting-bytecode-files
+571. [Gap](https://mushroom.cat/ctf/json-js-rce-lodash)
+- ES6 js支持“默认参数”的语法，比如`function test(x = console.log("RCE")) { ... }`，允许在函数执行之前的参数初始化阶段执行代码
+- js的`new Function`的第一个参数可以是列表或者由`,`分割的字符串，比如`a,b`，将生成一个带有a和b两个参数的函数对象
