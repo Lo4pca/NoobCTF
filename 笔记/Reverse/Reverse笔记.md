@@ -1485,3 +1485,7 @@ mov     r8, qword [r13]
 226. [Lapis De Chien](https://github.com/HeroCTF/HeroCTF_v7/tree/master/Reverse/LapisDeChien)
 - 动态分析OpenResty [lapis](https://github.com/leafo/lapis)框架编写的web程序
 - [LuaJIT Decompiler](https://gitlab.com/znixian/luajit-decompiler)
+227. [Reflection](https://ma4the.github.io/en/posts/rev-reflection-lactf2026)
+- rust的`panic!()`会触发stack unwinding（除非明确设置`panic = "abort"`）。unwind过程会读取`.eh_frame`，其中可包含任意DWARF字节码
+  - 题目将flag检查逻辑藏在DWARF表达式中，并在`.text`段中调用`panic!()`触发检查逻辑
+  - 用gdb在`execute_stack_op`函数处下个断点可以提取出表达式，后续就是分析DWARF VM了
