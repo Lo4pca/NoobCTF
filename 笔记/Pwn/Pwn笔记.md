@@ -2163,3 +2163,7 @@ offset = the_mmap64_plus_23_itself
 - c++ exception与unwind。程序抛出异常时会跳过当前函数栈帧的canary检查，并尝试用当前栈帧记录的数据恢复到上一个栈帧
   - 题目出现了溢出漏洞，一般来说溢出漏洞不会抛出异常。但出题人设计[预期解](https://medium.com/@ThePainTester/0xl4ugh-2026-ctf-pwn-writeups-c0a8e684179f)时人为地抛出了异常，因此可以覆盖当前函数的rbp，再利用unwind修改上层函数的rbp
   - 这种利用unwind绕过canary并修改栈布局的技巧叫[Catch Handler Oriented Programming (CHOP)](https://www.ndss-symposium.org/wp-content/uploads/2023/02/ndss2023_s295_paper.pdf)，适用范围为gcc 9及以下（更高的版本加了canary检查）
+254. [Refraction](https://www.byteco.dev/posts/pwn-refraction-lactf2026)
+- 修改c++程序的`.eh_frame_hdr`，利用伪造的DWARF字节码和unwind流程得到rce
+  - 这要求程序中存在throw语句和try-catch块。伪造的DWARF Frame Description Entry只能控制rip到已存在的catch块中（这点我不确定，有人尝试直接跳转到system的plt，但失败了。推测只能跳转到已有的catch块中）且throw的参数类型和修改后的rdi要与catch块匹配
+  - https://ctf.krauq.com/lactf-2026

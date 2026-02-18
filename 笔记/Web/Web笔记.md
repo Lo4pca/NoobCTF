@@ -4491,3 +4491,7 @@ if (await remote.hasPasswordFor(id)) {
 571. [Gap](https://mushroom.cat/ctf/json-js-rce-lodash)
 - ES6 js支持“默认参数”的语法，比如`function test(x = console.log("RCE")) { ... }`，允许在函数执行之前的参数初始化阶段执行代码
 - js的`new Function`的第一个参数可以是列表或者由`,`分割的字符串，比如`a,b`，将生成一个带有a和b两个参数的函数对象
+572. [bobles-and-narnes](https://github.com/SenequeZ/WriteUps/blob/main/LACTF2026/boobles-and-narnes.md)
+- js Bun的SQL函数`db()`在处理`db([array of objects])`这种输入时，插入列的字段名取决于数组中的第一个对象。假设第一个对象不具有`x`属性，则后续插入的对象无论有没有设置`x`属性，值均为null
+573. [Blogler](https://frederik353.github.io/writeups/ctfs/lactf-26/blogler)
+- yaml支持anchors (`&name`) 和 aliases (`*name`)语法，用于创建对同一对象的共享引用。python中使用`yaml.safe_load`加载这类对象后，两者引用的是同一个字典对象，意味着改动其中一个会影响另一个
