@@ -699,6 +699,8 @@ sympy也放这了
     - 从多个坐标恢复Weierstrass椭圆曲线参数（a，b，p）
     - sagemath `elimination_ideal`：从几个多变量多项式生成的理想中重新生成一个由不包含指定变量的多项式生成的理想
     - truncated LCG:获取lcg的输出 $y_i\equiv s_i\mod p$ ，利用格恢复完整的 $s_i$ 。常见的设置是模2的n次方（截断二进制位），但模任意质数也是可解的
+- [spreading-secrets](https://github.com/uclaacm/lactf-archive/blob/main/2026/crypto/spreading-secrets)
+    - 想要求高阶多项式的单个根时，使用`any_root`而不是roots可以加快运行速度
 - 记录个工具： https://github.com/Aeren1564/CTF ，里面的CTF_Library看起来很香
 
 ## Lattice(格)
