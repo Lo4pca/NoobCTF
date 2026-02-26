@@ -1603,3 +1603,19 @@ https://hackmd.io/@vishiswoz/r10P7knwj
 题目作者写过一篇介绍上述方法的文章： http://web.archive.org/web/20240907071414/https://www.nccgroup.com/us/research-blog/exploiting-noisy-oracles-with-bayesian-inference 。这种策略叫Probability-guided Strategy
 
 `sceleri`用UCB算法（常用于求解multi-armed bandit问题）使每次猜测有86%的概率正确。那么一共32个字符就是 $0.86^32≈0.008$
+
+## [Crypto on the Web](https://cryptohack.org/challenges/web)
+
+### Megalomaniac 1
+
+从题目给的资料 https://mega-awry.io 中可以找到 https://github.com/MEGA-Awry/attacks-poc
+
+`login_step2`中`RSA_CRT_decrypt`使用的p，q，d和u来自`unpad(self.cipher_master.decrypt(share_key_enc), 16)`，而我们可以控制share_key_enc。上述攻击修改u为u'，通过比较解密出来的SID是否等于原来的SID来判断q的取值范围。观察`RSA_CRT_decrypt`的流程：
+```py
+t = (mq - mp) % q
+h = (t * u) % q
+m = h * p + mp
+```
+如果原始的m本身小于q，则mp=mq=m，t=0。即使计算h时使用的是u'而不是原来的u，在t=0的情况下也不会影响m的解密，因为hp+mp=0+mp=m。然而如果m本身大于q，则由于u'与原本CRT用来组合结果的值u不同，算出的m'=hp+mp不等于原来的m
+
+利用上述oracle可以逐步泄漏q的高位。等泄漏的位数足够后，用coppersmith即可解出完整的q

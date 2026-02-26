@@ -366,6 +366,11 @@ print(base64.b64encode(temp.encode()))
 - [very-safe-pickle](https://github.com/infobahnctf/CTF-2025/tree/main/misc/very-safe-pickle)
     - 在禁用pickle代码`REDUCE`,`INST`,`OBJ`,`NEWOBJ`,`NEWOBJ_EX`的情况下，仍然可以用`GLOBAL`导入模块并用`BUILD`覆盖模块`__dict__`中的`__getattr__`方法，实现函数劫持
     - 其他解法：**very-safe-pickle**
+- [literally-1984](https://ctf.krauq.com/lactf-2026)
+    - `concurrent.interpreters.Interpreter.call()`会将subinterpreter执行代码所得到的结果以pickle形式返回到主Interpreter中，而主Interpreter unpickle返回的对象时会逐个调用对象上定义的`__reduce__`或`__reduce_ex__`
+        - 因此如果子interpreter中存在严格的过滤而主Interpreter中没有，用type创建带有`__reduce_ex__`的对象或用setattr修改已有对象的`__reduce_ex__`是一种逃逸手段
+    - 定义lambda函数时可以用`lambda*a`，空格不是必需的
+    - 更详细的wp： **litterally-1984**
 - pyjail cheatsheet
     - https://shirajuki.js.org/blog/pyjail-cheatsheet
     - https://book.hacktricks.wiki/en/generic-methodologies-and-resources/python/bypass-python-sandboxes/index.html

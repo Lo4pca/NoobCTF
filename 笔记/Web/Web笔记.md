@@ -585,6 +585,9 @@
     - firefox/Chromium XSSI(Cross-Site Script Inclusion)本地文件读取
     - **1nfin1ty**
         - 可以先访问路径`/b`，然后用`history.pushState` API在不刷新页面的前提下将URL更换成`/a`。由于pushState不会更新其他状态，还要将location改成`javascript:"anything"`触发更新
+- [extend-note](https://ctf.krauq.com/lactf-2026)
+    - 在`X-Content-Type-Options: nosniff` header下，仍然可以用`<link rel="prefetch">`区分text/html的http状态码200/404，实现xs leak
+    - ntfy.sh 可以用作leak的接收方
 
 ## SSTI
 
@@ -4495,3 +4498,5 @@ if (await remote.hasPasswordFor(id)) {
 - js Bun的SQL函数`db()`在处理`db([array of objects])`这种输入时，插入列的字段名取决于数组中的第一个对象。假设第一个对象不具有`x`属性，则后续插入的对象无论有没有设置`x`属性，值均为null
 573. [Blogler](https://frederik353.github.io/writeups/ctfs/lactf-26/blogler)
 - yaml支持anchors (`&name`) 和 aliases (`*name`)语法，用于创建对同一对象的共享引用。python中使用`yaml.safe_load`加载这类对象后，两者引用的是同一个字典对象，意味着改动其中一个会影响另一个
+574. [single-trust](https://ctf.krauq.com/lactf-2026)
+- Nodejs (Ubuntu 20.04, v10.19.0)接受截断的aes GCM标签(`cipher.setAuthTag`)，因此攻击者可以爆破单个字节的tag
