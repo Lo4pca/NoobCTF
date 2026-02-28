@@ -2167,6 +2167,7 @@ offset = the_mmap64_plus_23_itself
 - 修改c++程序的`.eh_frame_hdr`，利用伪造的DWARF字节码和unwind流程得到rce
   - 这要求程序中存在throw语句和try-catch块。伪造的DWARF Frame Description Entry只能控制rip到已存在的catch块中（这点我不确定，有人尝试直接跳转到system的plt，但失败了。推测只能跳转到已有的catch块中）且throw的参数类型和修改后的rdi要与catch块匹配
   - https://ctf.krauq.com/lactf-2026
+- https://dwarfstd.org
 255. [Tcademy](https://frederik353.github.io/writeups/ctfs/lactf-26/tcademy)
 - glibc 2.35 堆溢出->伪造unsorted bin chunk泄漏libc和堆地址->tcache poisoning->House of Apple 2 FSOP RCE/覆盖libc strlen GOT RCE
   - 都是见过的技巧，但是这篇wp把它们串联在一起的同时讲得还挺详细，例如“如何处理假unsorted bin堆块在free时位于top chunk中间“。`nextchunk == av->top`时`_int_free`会跳过大部分检查，不满足时就需要额外伪造两个堆块，用于满足`Next chunk’s PREV_INUSE bit is set`,`Next chunk’s size must be reasonable`和`Next-next chunk’s PREV_INUSE bit is set`三个条件

@@ -390,7 +390,7 @@
         - [Scroll to Text Fragment (STTF)](https://developer.mozilla.org/en-US/docs/Web/URI/Reference/Fragment/Text_fragments)：可以用STTF检测浏览器何时进入viewport（浏览器窗口中当前可见的网页部分）。要求攻击目标可以被嵌入iframe中，且内部存在html注入。对于这道题，没有一个条件满足
         - [Navigations](https://xsleaks.dev/docs/attacks/navigations):通过读`history.length`的值区分成功与失败的查询。首先把bot引向攻击者的网站，使其访问目标网站后执行查询。理论上查询成功的重定向会使`history.length`的值会比查询失败时多出1。最后将bot导会攻击者网站来访问`history.length`的值（只有同源才能读取这个值）。结果实测发现fetch向`/search`发的post请求没有被记入到`history.length`中
         - [Max redirects](https://xsleaks.dev/docs/attacks/navigations/#max-redirects):浏览器限制3XX重定向链的最大次数为20。所以可以在攻击者的网站上重定向20-n次，n为目标网站搜索失败时重定向的次数，n+1为成功时的次数。于是搜索成功会实施21次重定向，触发network error。重点在于“重定向链”。实测里访问目标网站得到的是http code 200而不是3XX，链子断了就没用了。而且题目作者还检查了referer
-        - [CSS :visited selector](https://xsleaks.dev/docs/attacks/css-tricks/):根据 https://jorianwoltjer.com/blog/p/hacking/xs-leaking-flags-with-css-a-ctfd-0day 和 https://varun.ch/posts/history ，可以用css的`:visited` selector来泄漏访问过的网站url。失败的原因和之前一样，fetch发起的post请求不在history里
+        - [CSS :visited selector](https://xsleaks.dev/docs/attacks/css-tricks):根据 https://jorianwoltjer.com/blog/p/hacking/xs-leaking-flags-with-css-a-ctfd-0day 和 https://varun.ch/posts/history ，可以用css的`:visited` selector来泄漏访问过的网站url。失败的原因和之前一样，fetch发起的post请求不在history里。`:visited`已被修复： https://developer.chrome.com/blog/visited-links
         - [Cross-window Timing Attacks](https://xsleaks.dev/docs/attacks/timing-attacks/network-timing/#cross-window-timing-attacks):攻击者可以测量某个页面打开的时间。问题是这题要测量的是重定向的时间而不是页面打开的时间
     - 官方wp和payload
         - https://hackmd.io/@r2dev2/S1P0RYHYke
@@ -588,6 +588,24 @@
 - [extend-note](https://ctf.krauq.com/lactf-2026)
     - 在`X-Content-Type-Options: nosniff` header下，仍然可以用`<link rel="prefetch">`区分text/html的http状态码200/404，实现xs leak
     - ntfy.sh 可以用作leak的接收方
+    - python的urlparse解析`http://a.com\@localhost`得到的hostname是localhost，但浏览器实际访问的地点是`a.com`
+    - [预期解](https://github.com/uclaacm/lactf-archive/blob/main/2026/web/extend-note)利用bfcache的配额限制进行xs leak。chrome限制bfcache最多缓存6个页面。假如提前打开6个页面然后访问目标页面，那么在目标页面执行`window.history.go(-7);`时，根据第一个页面是否需要重新加载就能判断目标页面返回的是200还是404
+        - 可以用`window.onpageshow`的事件`event.persisted`或`NotRestoredReasons`API判断
+        - 类似思路但更加简单的解法：**extend-note**
+- [ad-note](https://github.com/uclaacm/lactf-archive/blob/main/2026/web/ad-note)
+    - 题目是一个note app，提供了根据note内容搜索note的功能。admin bot将一个nonce存在了自己的note里，目标是获取这个nonce
+        - 搜索note的页面存在广告，以iframe形式嵌入；搜索结果（如果有）则是以sandbox srcdoc iframe嵌入
+        - 总iframe数量（广告+可能的搜索结果）在一个范围内随机波动
+    - [fetchLater API与Deferred Fetch](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Deferred_Fetch):`fetchLater()` API可以请求deferred fetch，在一段时间甚至是tab关闭后发送。由于用户无法取消它们，chrome限制了网络数据的配额（quota）。top-level document和其内部的subframe一共有512KiB
+    - 攻击手段是xs leak：
+        - 利用同站的另一道xss题目放置solver，使得admin cookie得到传递并使其能够创建 delegated deferred-fetch iframe
+        - solver中创建一个Permission Policy为[deferred-fetch](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy/deferred-fetch)的iframe，允许每个sub-frame得到64KiB的quota。用这个iframe搜索note
+        - 由于跨域限制，无法查看这个iframe的内容。但仍然可以访问页面中存在的iframe数量
+        - 如果没有搜索出任何东西，则页面中全部的iframe都是广告iframe；否则存在一个非广告iframe。关键区别在于，chrome会给每个广告iframe分配64KiB quota，而不会给结果iframe分配，因为sandbox srcdoc iframe 没有 allow-same-origin，具有 opaque origin
+        - solver通过在top origin document中不断调用 fetchLater 填充 quota，观察何时失败，从而推测当前剩余 quota,反推有多少个广告iframe使用了quota。如果数量与先前获取的iframe数量不符，说明有一个iframe是结果iframe；否则说明全部是广告iframe
+    - 非预期解：**ad-note**
+        - 解法1:利用题目提供的API可以给全部ad iframe设置name属性。如果设置为NAME，则后续调用`window.NAME`可以得到页面中第一个ad iframe。假如w也是这个页面的window，用w[i]同样可以获取全部iframe。在结果iframe存在的情况下，有小概率出现w[0]不等于`window.NAME`的情况
+        - 解法2:用`iframe.contentWindow[i]`可以访问全部iframe，但无法直接拿到里面的内容。可以用`iframe.contentWindow[i].location`修改iframe的location。此举会触发navigation，用`history.length`可以观察到变化，除非修改后和修改前的location均为`about:srcdoc`。所以如果我们将所有iframe的location改成`about:srcdoc`，若结果iframe存在，则`w.history.length`的值会与iframe数量不符
 
 ## SSTI
 
