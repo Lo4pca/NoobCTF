@@ -2072,8 +2072,8 @@ r.interactive()
 ```
 - 类似题目：
     - [LCG](https://github.com/google/google-ctf/tree/master/2023/quals/crypto-lcg).这题只用了6个。详细解析文章： http://www.reteam.org/papers/e59.pdf
-    - [Thermopolium](https://meashiri.github.io/ctf-writeups/posts/202307-odysseyctf/#thermopolium),脚本来自 https://tailcall.net/posts/cracking-rngs-lcgs/ 。发现5个竟然也可以（有人说理论上4个就够了）
-    - [LCG](https://flocto.github.io/writeups/2023/deadsecctf/lcg-writeup/).无法求逆元时的特殊情况。如果想求 $x=a*b^{-1}\mod n$ 且 g=gcd(a,gcd(b,n)), can divide a,b,n by g and then take the inverse
+    - [Thermopolium](https://meashiri.github.io/ctf-writeups/posts/202307-odysseyctf/#thermopolium),脚本来自 https://tailcall.net/posts/cracking-rngs-lcgs 。发现5个竟然也可以（有人说理论上4个就够了）
+    - [LCG](https://flocto.github.io/writeups/2023/deadsecctf/lcg-writeup).无法求逆元时的特殊情况。如果想求 $x=a*b^{-1}\mod n$ 且 g=gcd(a,gcd(b,n)), can divide a,b,n by g and then take the inverse
 42. 多种密码的python攻击脚本：https://github.com/jameslyons/python_cryptanalysis 。其中一个脚本可用于攻击变种维吉尼亚密码。
 ```python
 from chall_patched import Vigenot as Vigenere

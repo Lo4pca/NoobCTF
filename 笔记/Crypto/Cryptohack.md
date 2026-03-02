@@ -1619,3 +1619,34 @@ m = h * p + mp
 如果原始的m本身小于q，则mp=mq=m，t=0。即使计算h时使用的是u'而不是原来的u，在t=0的情况下也不会影响m的解密，因为hp+mp=0+mp=m。然而如果m本身大于q，则由于u'与原本CRT用来组合结果的值u不同，算出的m'=hp+mp不等于原来的m
 
 利用上述oracle可以逐步泄漏q的高位。等泄漏的位数足够后，用coppersmith即可解出完整的q
+
+### Megalomaniac 3
+
+（本来在做`Megalomaniac 2`的，结果做了三天后发现方向完全错了）
+
+这题和`Megalomaniac 1`一样，论文作者已经给了poc。假设攻击者已经恢复了rsa私钥，利用如下方法可以恢复用AES ecb（密钥为master_key）加密的明文：
+- 构造一个m使得m_p=1,m_q=0。其ct为发送给oracle解密的sid_enc
+- 将要解密的aes密文块x插入到share_key_enc的u中间，使得u'=u0 || x || u2
+- RSA-CRT解密返回m' = (u' mod p) * q
+- 由于u' < p，所以u'=m'/q，可以直接做整数除法
+- 虽然得到的SID被截断了后面的字节，但要解密的x位于高位，不受影响
+
+注意题目的RSA_CRT_decrypt的`t = (mq - mp) % q`，套用poc时注意调换p和q和u的定义
+
+### Megalomaniac 2
+
+换了个思路后不到一个小时就做出来了。盲目跟论文不可取啊
+
+在先前提到的链接中找到了另一篇[论文](https://eprint.iacr.org/2022/914.pdf)，可以大幅减少query的次数。我不知道我的脑子又犯了什么病，明明人家标题写了“Six Queries”而这道题限制在4次query内，总之我跑去复现[作者的poc](https://github.com/keeganryan/attacks-poc)了
+
+论文的思路是，如果只修改u参数的一块密文块，假设分别修改了两次，aes解密后得到u'和u''。两者相减的结果可以用一个多项式表示（见`4.3 Expressing Leakage Algebraically`）。这个多项式整理后符合论文先前提到的`HNP with Small Unknown Multipliers`(HNP-SUM)模式，LLL求解出来的结果是两个被修改的密文块的明文之间的差
+
+上述方法可以求得任意两块明文之间的差，但只有完整获取到其中一块明文后才有意义。这点可以利用d的特殊代数结构猜测d的高位字节解决，见`4.7 Recovering Plaintexts`。由此我们可以恢复任意多块由master_key（aes ecb）加密的明文。恢复足够多块的q明文后就能用coppersmith解出完整的q了
+
+在这道题中，我们可以跳过`4.4 Obtaining Most Significant Bytes`和`4.5 Refining Approximations`，因为这两节的内容全部都是处理oracle返回的sid不带第一个字节的问题。还有一点不同在poc代码的`get_possible_pts`函数中，这题的`pt_0_cand_bytes`的开头两个字节应该是`\x00\x80`
+
+实测用7次query（`self.blocks_of_q = 6`）有高概率恢复p和q。还是太多了。这题返回的SID泄漏的bit数似乎比论文中的设置多，所以是不是要我们一次泄漏两个block？我试着改动脚本，不行。虽然可能是因为我的算式或者格的设置错了，但检查一遍实在是太耗费心神了。于是我决定在改之前问问大佬我的思路对不对
+
+佬说他根本没看过那篇论文，还说大部分人用两次就做出来了，甚至还有只用一次的。很明显我的方向完全错了，用论文的思路无论如何都不可能用一次做出来
+
+观察`RSA_CRT_decrypt`函数的结构，注意到如果能知道mp的值，通过返回值`h * p + mp`能得到h \* p，进而直接gcd得到答案。或者query两次，使得两个式子的mp相同。理论上很难构造出两个相同的mp，用一样的明文的话`h * p`的值又是一样的；但是这题我们能改u。截断部分用coppersmith就好
