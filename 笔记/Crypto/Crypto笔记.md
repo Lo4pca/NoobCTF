@@ -2769,7 +2769,7 @@ print(hex(random.getrandbits(256)))
 - tree isomorphism, which defines a one-to-one relation between the nodes of two trees. python的etworkx模块提供了tree_isomorphism函数来找到同构
 - 这篇wp里还有cryptoGRAPHy 1和2更详细的解释
 107. [RandSubWare](https://imp.ress.me/blog/2023-08-28/sekaictf-2023#randsubware)
-- 针对[代换-置换网络(Substitution–permutation network)](https://en.wikipedia.org/wiki/Substitution%E2%80%93permutation_network)的[差分攻击(differential attack)](https://ioactive.com/differential-cryptanalysis-for-dummies/)。差分攻击简述就是分析明文与密文之间的差距（差距的定义不同密码，不同，可以是异或的值，也可以是别的东西），然后爆破密钥，哪个密钥最符合之前得到的差距，哪个就可能是最可能的密钥。选择明文+爆破攻击
+- 针对[代换-置换网络(Substitution–permutation network)](https://en.wikipedia.org/wiki/Substitution%E2%80%93permutation_network)的[差分攻击(differential attack)](https://ioactive.com/differential-cryptanalysis-for-dummies)。差分攻击简述就是分析明文与密文之间的差距（差距的定义不同密码，不同，可以是异或的值，也可以是别的东西），然后爆破密钥，哪个密钥最符合之前得到的差距，哪个就可能是最可能的密钥。选择明文+爆破攻击
 - 可用差分攻击的特征：
     - SPN密码轮数较少（例如5轮）。small number of rounds means that differences in ciphertext are poorly diffused
     - 对于好的SPN密码，明文中1 bit的更改应导致输出中一半的bit更改。如果这个值较低（如0.4），大概率有问题
@@ -3016,3 +3016,7 @@ assert crc32(a)^crc32(b)==crc32(c)^crc32(d)
 - https://cr.yp.to/cubeattacks.html
 186. [SpiralFloat](http://blog.kudaliar.id/blog/0xl4ugh-ctf-v5-spiralfloat)
 - Interval Arithmetic:使用区间表达可能的取值范围。题目给出f(x)的值，要求反推x；但计算存在精度缺失且结果的部分数字位被隐藏了。使用Interval Arithmetic将被隐藏的数字位表达成[0,9]后进行逆向计算可以避免直接爆破导致的复杂度爆炸
+187. [FHAES](https://lrnzsir.github.io/posts/srdnlen-2026)
+- 泄漏AES混淆电路(garbled circuit)使用的key。相关论文：[Breaking and Fixing Garbled Circuits when a Gate has Duplicate Input Wires](https://eprint.iacr.org/2023/530.pdf)
+    - 题目的电路实现使用了Half Gates+Free XOR两种优化技巧，而Half Gates在输入wire的索引相同时（比如计算AND(a,a)）有50%的概率泄漏Free XOR使用的全局偏移D，导致全部wire label对应的实际bit值泄漏
+    - AES转换成电路后，其安全性依赖于AND门（AND门在GF(2)下不是线性方程）。在label对应的bit未知的情况下，攻击者需要将所有label视为未知值，求解一个巨大的多变量多项式。在这些label对应的bit已知后，剩下的门全部都是线性方程，求解便不困难了
