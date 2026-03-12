@@ -3020,3 +3020,10 @@ assert crc32(a)^crc32(b)==crc32(c)^crc32(d)
 - 泄漏AES混淆电路(garbled circuit)使用的key。相关论文：[Breaking and Fixing Garbled Circuits when a Gate has Duplicate Input Wires](https://eprint.iacr.org/2023/530.pdf)
     - 题目的电路实现使用了Half Gates+Free XOR两种优化技巧，而Half Gates在输入wire的索引相同时（比如计算AND(a,a)）有50%的概率泄漏Free XOR使用的全局偏移D，导致全部wire label对应的实际bit值泄漏
     - AES转换成电路后，其安全性依赖于AND门（AND门在GF(2)下不是线性方程）。在label对应的bit未知的情况下，攻击者需要将所有label视为未知值，求解一个巨大的多变量多项式。在这些label对应的bit已知后，剩下的门全部都是线性方程，求解便不困难了
+188. [Lightweight](https://lrnzsir.github.io/posts/srdnlen-2026)
+- 在可以控制nonce的差值 $\Delta$ 的情况下，使用差分线性攻击（Differential-linear attack）恢复4轮的Ascon AEAD密码的key。差分线性攻击的大致思路如下：
+    - 将密码分成三个部分，称为“上( $E_u$ )、中( $E_m$ )和下( $E_l$ )”。对于 $E_m$ ，找到输入差分 $\Delta_m$ 和输出mask $\lambda_m$ ，使得其bias $|Pr_S[\lambda_m E_m(S)=\lambda_m E_m(S\oplus\Delta_m)]-\frac{1}{2}|$ 最大
+    - 对于 $E_u$ ，同样找到一组输入差分，使其传播成 $\Delta_m$ 的概率最大；对于 $E_l$ ，考虑 $E_l^{-1}$ 的线性近似，找到输入mask $\lambda_o$ ，使其传播成 $\lambda_m$ 的概率最大
+    - 以上内容旨在找到DL distinguisher，即输入差分 $\Delta_i$ 和输出mask $\lambda_o$ ，使得密码整体的bias $|Pr_S[\lambda_o E(S)=\lambda_o E_m(S\oplus\Delta_i)]-\frac{1}{2}|$ 最大
+    - 上述步骤可以在工具[DL](https://github.com/hadipourh/DL)中完成
+    - 找到差分后，需要根据密码的性质统计目标key bit与指定bias的出现的对应情况；最后反过来根据收集到的明文-密文对的bias推测出key

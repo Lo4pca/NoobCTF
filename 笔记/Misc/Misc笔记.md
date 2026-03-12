@@ -706,6 +706,9 @@ print(base64.b64encode(temp.encode()))
     - 分析SQL XEL日志
 - [Zero Hour](https://github.com/t4mpr/ctf-writeups/tree/main/0xL4ughCTF%3D2026-Writeup)
     - Windows Push Notification Database `wpndatabase.db`可能包含部分discord/telegram的消息
+- [The Legendary Armory](https://0xasta.me/writeups/srdnlen26-thetrilogyofdeathvolumeii)
+    - 分析[86Box](https://86box.net)产生的windows minidump文件。工具：[minidump](https://github.com/skelsec/minidump)
+    - 这篇wp是AI写的，`Step 2`似乎出现了问题。正确的复现结果见 **The Legendary Armory**
 
 ## Network Forensics
 
