@@ -2930,7 +2930,7 @@ assert crc32(a)^crc32(b)==crc32(c)^crc32(d)
 - 更简单的做法： https://github.com/rerrorctf/writeups/tree/main/2024_07_19_Imaginary24/crypto/tango ，拿已知明文求出部分keystream然后加密自己的内容再拼接原本的密文即可
 - [官方wp](https://github.com/ImaginaryCTF/ImaginaryCTF-2024-Challenges-Public/tree/main/Crypto/tango)又用了crc32的另一个性质：`crc32(x ^ y ^ z) = crc32(x) ^ crc32(y) ^ crc32(z)`
 157. [lcasm](https://github.com/ImaginaryCTF/ImaginaryCTF-2024-Challenges-Public/blob/main/Crypto/lcasm)
-- 输入linear congruential generator（lcg）的参数，使其连续输出三个已知的目标值。使用专门解线性模方程的脚本： https://github.com/nneonneo/pwn-stuff/blob/master/math%2Fsolvelinmod.py
+- 输入linear congruential generator（lcg）的参数，使其连续输出三个已知的目标值。使用专门解线性模方程的脚本： https://github.com/nneonneo/pwn-stuff/blob/main/math/solvelinmod.py
 - 其他做法：**lcasm**
 158. [Not an active field for a reason](https://yun.ng/c/ctf/2024-deadsec-ctf/crypto/not-an-active-field-for-a-reason)
 - Neural cryptography中的[Tree parity machine](https://en.wikipedia.org/wiki/Neural_cryptography#Tree_parity_machine)。怎么也没想到有一天密码学和人工智能能扯上关系……

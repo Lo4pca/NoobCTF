@@ -1691,3 +1691,27 @@ https://blog.bi0s.in/2024/03/28/Crypto/Predictable-bi0sCTF2024
 https://hackmd.io/@lamchcl/S1mHGpDY1l#cryptoquickprime
 
 这篇文章使用的方法是数论中的初级结论（类似`7Rocky`的做法）。查看`maple3142`和`ConnorM`的做法可以发现还有2-adic和hensel lifting可以用来求解模 $2^k$ 的二次方程
+
+### Trust Games
+
+套用 https://github.com/Thehackerscrew/CrewCTF-2024-Public/tree/main/challenges/crypto/Boring%20LCG 的思路直接就成了（与格打交道最顺利的一次）
+
+那篇wp的思路是CVP，而SVP也能做,solutions区的大部分人都是这么做的；不过要更复杂一点
+
+`lorenz`介绍了一种完全不用格，主要思路是MEET IN THE MIDDLE的爆破做法。个人认为是全场最天才的
+
+`ConnorM`用[solvelinmod](https://github.com/nneonneo/pwn-stuff/blob/main/math/solvelinmod.py)直接秒了
+
+### Jeff's LFSR
+
+问了deepseek，它找到了这个： https://hackmd.io/@t510599/2023-swsec-lab1 。这种由三个lfsr拼在一起的结构叫Geffe generator，可以用Correlation attack破解
+
+查看三个lfsr的输出 $x_1,x_2,x_3$ 和最终的output组成的真值表可以发现，output与 $x_2,x_3$ 均有75%的概率相同。所以如果某个state是正确的，它的输出与最终的output约有75%的bit是一致的
+
+`Robin_Jadoul`的解法完全使用z3
+
+`kropotkin69`介绍了另一种爆破思路：直接爆破lfsr1的seed可以得知output的第i个bit来自lfsr2还是lfsr3，即每个lfsr的partial state；然后通过检查partial state是否满足lfsr的不变量（某些bit的xor值应永远为0）可剔除错误的seed并补全partial state。最后得到的完整state即为lfsr2和lfsr3的seed（`thrypuro`好像也是这个思路）
+
+`adbforlife`稍微优化了爆破的逻辑，但还是爆破
+
+`josephs`和`7Rocky`爆破了某个lfsr的key，然后利用lfsr的性质建立线性方程
