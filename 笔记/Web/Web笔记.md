@@ -109,16 +109,16 @@
     - 如果express服务器有这行代码：`app.use(express.static('public'));`，表明在用户访问路径`/`时默认使用当前app根目录下的`index.html`。攻击者可在服务器运行的时候修改或覆盖`index.html`，进而改变默认网页内容
     - CSP `httpOnly`还可以用chrome的[bfcache](https://web.dev/articles/bfcache)绕过。较真来看不能算一种专门针对`httpOnly`的绕过手段，而是有的时候cookie（或相关内容）会被映射到网页上，利用缓存后退一步网页直接获取到内容而已
     - 这题的完整步骤参考 https://gist.github.com/lebr0nli/843662f4d1f255cbe2e0f6252faf5589
-- [Image gallery 2](https://blog.bi0s.in/2024/03/06/Web/ImageGallery1-bi0sCTF2024/)
+- [Image gallery 2](https://blog.bi0s.in/2024/03/06/Web/ImageGallery1-bi0sCTF2024)
     - 可在svg图片里插入html实现xss/重定向
     - nginx byte range caching机制利用。若配置nginx服务器时有`proxy_set_header   Range $slice_range;`一行，表示启用了byte range caching。这个机制的实现有点问题，可以利用这个机制将一个文件切割。比如一个文件的内容是`abcdefgh`,先cache前面一部分，例如`abcd`，在cache第二部分，如`gh`，最后访问这个文件。nginx会拼接前面两段cache内容，导致response为`abcdgh`
     - Subresource Integrity（SRI）利用。导入script的时候可以加上`integrity`属性，若脚本内容不符合Integrity的sha256，则脚本不会被加载
-    - dom cloberring和[cache probing](https://xsleaks.dev/docs/attacks/cache-probing/)（仅限headless chrome）。cache probing简述就是，假如用户加载了某个网页，那么那个网页会被浏览器缓存，下次再访问时的速度就会比之前没访问过的网页快很多。利用这点可以泄漏出用户到底有没有访问过某个网页，或是有没有加载过某个资源
-- [Variety Notes](https://blog.bi0s.in/2024/02/26/Web/VarietyNotes-bi0sCTF2024/)
+    - dom cloberring和[cache probing](https://xsleaks.dev/docs/attacks/cache-probing)（仅限headless chrome）。cache probing简述就是，假如用户加载了某个网页，那么那个网页会被浏览器缓存，下次再访问时的速度就会比之前没访问过的网页快很多。利用这点可以泄漏出用户到底有没有访问过某个网页，或是有没有加载过某个资源
+- [Variety Notes](https://blog.bi0s.in/2024/02/26/Web/VarietyNotes-bi0sCTF2024)
     - CSP的特例：如果某个允许的路径有服务器端的重定向至一个不被允许的路径，只要CSP允许当前domain，就不会违反CSP
     - js里的try-catch-finally中finally里的代码无论如何都会运行，即使函数已经在try或者catch中return
     - reDOS攻击
-- [കുട്ടി Notes](https://blog.bi0s.in/2024/02/29/Web/KuttyNotes-bi0sCTF2024/)
+- [കുട്ടി Notes](https://blog.bi0s.in/2024/02/29/Web/KuttyNotes-bi0sCTF2024)
     - dom clobbering+XS-Leak
     - 若违反了CSP `script-src`,当前页面的script标签就会被禁用
     - 给CSS标签加上`blocking=render`属性会阻止页面资源的加载，直到当前资源已加载完毕
@@ -127,7 +127,7 @@
     - 另一种做法是使用`loading="lazy"`属性。这个属性可以让一个图片在用户划到可能会看到图片的位置后才加载。xs-leak时控制oracle返回的内容量，使命中目标时图片会被挤到页面下方；没命中时则相反
 - [The Genie pwn's adventures](https://github.com/GCC-ENSIBS/GCC-CTF-2024/tree/main/Web/TheGeniePwnAdventuresRevenge)
     - [Cookie jar overflow](https://medium.com/@ibm_ptc_security/cookie-jar-overflow-attack-ae5135b6100)+xss。这个有关cookie的漏洞不难理解，浏览器里能设置的cookie数量有限，达到限制后，旧的cookie会被新添加的挤掉。这种办法甚至可以移除掉HttpOnly的cookie（简单的js xss攻击移不掉）。所以如果可以控制admin bot设置很多cookie挤掉自己的session，然后再添加上自己的session并logout，就可成为admin
-- [Elements](https://www.justinsteven.com/posts/2024/04/02/picoctf-2024-elements-csp-bypass/)
+- [Elements](https://www.justinsteven.com/posts/2024/04/02/picoctf-2024-elements-csp-bypass)
     - 一个非常爆炸的xss挑战。虽然可通过一系列操作获取js eval，但题目修改了Chromium本身，加了一堆CSP的同时还禁用了WebRTC，并增加了Chrome Policy，network_prediction_options等选项。[hacktricks](https://book.hacktricks.xyz/pentesting-web/content-security-policy-csp-bypass)里提到的绕过CSP的方法一个也不能用。最后还是用类似DOS的做法，flood server，使server在被flood的情况下响应延迟
     - 列举wp里提到的尝试绕过CSP带出flag的方法。虽然在本题不可用，但是记下来也是不错的参考表
         - `<img>`标签：被CSP default-src阻挡
@@ -606,6 +606,10 @@
     - 非预期解：**ad-note**
         - 解法1:利用题目提供的API可以给全部ad iframe设置name属性。如果设置为NAME，则后续调用`window.NAME`可以得到页面中第一个ad iframe。假如w也是这个页面的window，用w[i]同样可以获取全部iframe。在结果iframe存在的情况下，有小概率出现w[0]不等于`window.NAME`的情况
         - 解法2:用`iframe.contentWindow[i]`可以访问全部iframe，但无法直接拿到里面的内容。可以用`iframe.contentWindow[i].location`修改iframe的location。此举会触发navigation，用`history.length`可以观察到变化，除非修改后和修改前的location均为`about:srcdoc`。所以如果我们将所有iframe的location改成`about:srcdoc`，若结果iframe存在，则`w.history.length`的值会与iframe数量不符
+- [DiceWallet](https://github.com/bhavya32/web-writeups/blob/main/dicectf.md)
+    - 分析firefox插件中的xss
+    - `chrome.tabs.sendMessage`通过tabId决定向哪个tab发送消息，但同一个id可能对应不同的tab origin，有toctou的风险
+    - 利用STTF进行xs leak。STTF允许页面滚动到指定词语处。如果攻击者在当前页面下可以注入html，便能检测到页面是否滚动，从而判断猜测的词语是否正确
 
 ## SSTI
 
@@ -3505,7 +3509,7 @@ wp里还有将要泄露的内容转换为符合域名规范的16进制的进阶p
 302. [Breaking Grad](https://d4rkstat1c.medium.com/breaking-grad-hackthebox-write-up-9e780ff2b68b)
 - js原型链污染。递归merge（clone）时，除了直接用键名`__proto__`污染，也可以间接使用`constructor`：`{'constructor':{'prototype':{'target_property':'value'}}`
 - 原型链污染可以污染`child_process.fork`的options。可以污染NODE_OPTIONS让其读取environ文件，然后污染env为要执行的node js脚本。或者参考 https://y3a.github.io/2021/06/15/htb-breaking-grad/ ，污染execPath和execArgv
-303. [Static File Server](https://xhacka.github.io/posts/writeup/2023/09/03/static-file-server/)
+303. [Static File Server](https://xhacka.github.io/posts/writeup/2023/09/03/static-file-server)
 - 有时候浏览器会标准化url，让路径穿越的payload`../`无法使用。此时可以用curl加上`--path-as-is`选项访问
 - Python的aiohttp asynchronous HTTP Client/Server中`web.static('/files', './files', follow_symlinks=True)`无法防止/files处的路径穿越
 304. `*`
@@ -3518,15 +3522,15 @@ wp里还有将要泄露的内容转换为符合域名规范的16进制的进阶p
 - nginx 1.17.6请求走私
 309. [rainbow-notes](https://github.com/osirislab/CSAW-CTF-2023-Quals/tree/main/web/rainbow-notes)
 - 利用dom clobbering使`node.parentElement.removeChild()`报错
-- 利用[STTF fragments](https://xsleaks.dev/docs/attacks/experiments/scroll-to-text-fragment/)和CSS的`:target` selector泄露页面上的内容。参考 https://book.hacktricks.xyz/pentesting-web/xs-search/css-injection#styling-scroll-to-text-fragment 。此题的其他参考解法：
+- 利用[STTF fragments](https://xsleaks.dev/docs/attacks/experiments/scroll-to-text-fragment)和CSS的`:target` selector泄露页面上的内容。参考 https://book.hacktricks.xyz/pentesting-web/xs-search/css-injection#styling-scroll-to-text-fragment 。此题的其他参考解法：
     - `<form id="f"><input name="insertBefore">X<style>:target{background:url("")}</style></form>#:~:text=flag{`
     - https://github.com/SuperStormer/writeups/tree/master/csawctf_2023/web/rainbow-notes
-310. [SculptAI](https://blog.aravindha.in/winja-ctf-nullcon-goa-2023/)
+310. [SculptAI](https://blog.aravindha.in/winja-ctf-nullcon-goa-2023)
 - websocket下的sqlite注入。漏洞点和利用方法都一样，只不过连接方式不同。sqlmap默认不支持websocket，需要借助于工具： https://github.com/BKreisel/sqlmap-websocket-proxy
 311. [reCAPTCHA v39](https://github.com/sahuang/my-ctf-challenges/tree/main/vsctf-2023/misc_recaptcha-v39)
 - python建立websocket连接+计算图片阴影部分面积。websocket连接的网页用requests是连不上的
 - 不知道为啥，在做[kaboot](https://github.com/TJCSec/tjctf-2024-challenges/tree/main/web/kaboot)时websocket库出问题了，没法send（奇了怪了，明明官方也是用这个库的）。于是这里是nodejs做法：**kaboot**
-- 好好好，今天又遇见一道websocket题，python和nodejs都不行，疯狂断连。但为啥别人的nodejs就行啊？[Spinner](https://vaktibabat.github.io/posts/vsCTF_Writeups/),以及个人的无脑console解法（用js代码触发题目自带的event从而发送socket信息）和其他python解法： **spinner**
+- 好好好，今天又遇见一道websocket题，python和nodejs都不行，疯狂断连。但为啥别人的nodejs就行啊？[Spinner](https://vaktibabat.github.io/posts/vsCTF_Writeups),以及个人的无脑console解法（用js代码触发题目自带的event从而发送socket信息）和其他python解法： **spinner**
 312. `*`
 313. [Optimized Admin Bot](https://www.youtube.com/watch?v=BRnMRdQJVeo)
 - JSDOM在服务器的node context下执行代码，所以获取xss时可以利用spawn等函数直接RCE。当`runScripts`设置为`dangerously`时，有一个小小的沙盒用于执行代码，可以参考wp的做法逃逸： https://gist.github.com/c0nrad/b919aa1c659a4d0f9596f5c6e1aad47f

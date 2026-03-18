@@ -3027,3 +3027,5 @@ assert crc32(a)^crc32(b)==crc32(c)^crc32(d)
     - 以上内容旨在找到DL distinguisher，即输入差分 $\Delta_i$ 和输出mask $\lambda_o$ ，使得密码整体的bias $|Pr_S[\lambda_o E(S)=\lambda_o E_m(S\oplus\Delta_i)]-\frac{1}{2}|$ 最大
     - 上述步骤可以在工具[DL](https://github.com/hadipourh/DL)中完成
     - 找到差分后，需要根据密码的性质统计目标key bit与指定bias的出现的对应情况；最后反过来根据收集到的明文-密文对的bias推测出key
+189. [Plane-or-Exchange](https://test.mard.kr/blog/dicegang)
+- Grid Homology的基础知识
