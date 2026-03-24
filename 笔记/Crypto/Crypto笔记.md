@@ -3029,3 +3029,6 @@ assert crc32(a)^crc32(b)==crc32(c)^crc32(d)
     - 找到差分后，需要根据密码的性质统计目标key bit与指定bias的出现的对应情况；最后反过来根据收集到的明文-密文对的bias推测出key
 189. [Plane-or-Exchange](https://test.mard.kr/blog/dicegang)
 - Grid Homology的基础知识
+190. [dot](https://blog.whale-tw.com/2026/03/11/2026-dice-qual)
+- ZKP/SNARG [Dot-Product Proofs(DPP)](https://eprint.iacr.org/2024/1138.pdf)
+- 题目的漏洞似乎不是DPP自身的问题，而是SNARG实现中定义的BOUND1过小。由于DPP的特殊结构，攻击者翻转一个lsb后只需爆破一个 $\lambda$ 即可从正确proof中生成一个伪造proof；而BOUND1过小导致爆破空间只有 $2^{18}$ 。**Dot**

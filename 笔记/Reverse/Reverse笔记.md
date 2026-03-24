@@ -2,9 +2,9 @@
 
 此篇笔记对应的gist： https://gist.github.com/Lo4pca/a066c450ed5d4c8ffbb0c1328283fe14 。题目对应的关键词将加粗
 
-## Tools
+## Tools/Resources
 
-平时见到的乱七八糟的工具
+平时见到的乱七八糟的工具和资源
 
 - [Instruction Stomp](https://github.com/ChrisTheCoolHut/Instruction-Stomp)
   - 侧信道逆向工具，支持不同架构的binary。原理是计算程序执行的指令数量来判断当前输入是否为正确输入
@@ -40,6 +40,8 @@
   - [Pyarmor-Static-Unpack-1shot](https://github.com/Lil-House/Pyarmor-Static-Unpack-1shot)
 - [Krakatau](https://github.com/Storyyeller/Krakatau)
   - Java decompiler, assembler, and disassembler
+- https://stdrs.dev/nightly/x86_64-unknown-linux-gnu/std/index.html
+  - rust逆向时可用的文档，记录了内部属性和结构体布局
 
 ## Z3
 
