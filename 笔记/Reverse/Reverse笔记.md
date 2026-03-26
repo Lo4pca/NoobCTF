@@ -1491,3 +1491,5 @@ mov     r8, qword [r13]
 - rust的`panic!()`会触发stack unwinding（除非明确设置`panic = "abort"`）。unwind过程会读取`.eh_frame`，其中可包含任意DWARF字节码
   - 题目将flag检查逻辑藏在DWARF表达式中，并在`.text`段中调用`panic!()`触发检查逻辑
   - 用gdb在`execute_stack_op`函数处下个断点可以提取出表达式，后续就是分析DWARF VM了
+228. [another-onion](https://github.com/hax1ng/dicectf2026-writeups/tree/main/rev/another-onion)
+- 对于输入空间小但逻辑复杂的C binary，做爆破时可以直接将binary映射到solver的内存中，并映射`.text`和`.bss`段为共享内存。这样子进程只需极低开销的 MAP_PRIVATE 重映射即可获得独立副本，比python的subprocess或多次ptrace要快得多

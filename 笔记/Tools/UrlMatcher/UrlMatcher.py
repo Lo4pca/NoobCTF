@@ -47,7 +47,7 @@ def main():
         "dcode.fr", "nmap.org", "gmail.com", ".py", "shellcraft.amd64.linux.sh", ".gov", "picoctf.net",
         "picoctf.org", "gchq.github.io/CyberChef", "imgur.com", "encrypted-tbn0.gstatic.com",
         "pbs.twimg.com", "github.com/bata24/gef", "pwnable.kr", "pwnable.tw", "letmegooglethat.com",
-        "ibb.co", ".tar.gz", "webhook.site", ".gif"
+        "ibb.co", ".tar.gz", "webhook.site", ".gif","giphy.com","klipy.com"
     ]
     bookmark_template = """<DT><H3>Writeups</H3>
 {}"""

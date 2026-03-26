@@ -3127,3 +3127,7 @@ $ cd a/b
 - discord中通过webhook发送的信息可以指定username
 - 如何使用`discord.js`创建一个按钮
 - 不使用第三方库的做法： https://ctf.krauq.com/uoftctf-2026
+411. [Phantom](https://github.com/milondas0002/TAMU-CTF-Solution-2026/tree/main/Forensics/Phantom)
+- 对于一个公开的仓库，被删除或私有的fork可以通过仓库访问；反过来也成立：被删除的仓库可以通过存在的fork访问
+- https://trufflesecurity.com/blog/anyone-can-access-deleted-and-private-repo-data-github
+- https://github.com/SorceryIE/cfor_exploit

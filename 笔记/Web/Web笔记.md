@@ -4522,3 +4522,5 @@ if (await remote.hasPasswordFor(id)) {
 - yaml支持anchors (`&name`) 和 aliases (`*name`)语法，用于创建对同一对象的共享引用。python中使用`yaml.safe_load`加载这类对象后，两者引用的是同一个字典对象，意味着改动其中一个会影响另一个
 574. [single-trust](https://ctf.krauq.com/lactf-2026)
 - Nodejs (Ubuntu 20.04, v10.19.0)接受截断的aes GCM标签(`cipher.setAuthTag`)，因此攻击者可以爆破单个字节的tag
+575. [broken_website](https://git.hamburg.ccc.de/ctf/writeups2026tamu/src/branch/main/broken_website.md)
+- 使用curl请求http3-only网站。这类网站正常请求只能得到`Could not connect to server`错误
