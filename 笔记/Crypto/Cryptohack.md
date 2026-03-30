@@ -1737,3 +1737,25 @@ deepseek说可以将群结构分解成 $(-1)^{\epsilon}5^t\mod 2^{63},\epsilon\i
 - `rkm0959`用cvp求解不等式： https://github.com/rkm0959/Inequality_Solving_with_CVP
 - `ndh`用了三次LLL
 - `2x2y2`的解法涉及到chatgpt心心念念的2-adic
+
+### LFSR Destroyer
+
+倒在黎明来临之前
+
+最开始搜到了这篇论文： https://www.sciencedirect.com/science/article/pii/S0885064X15001338 ，但是阅读后发现这个攻击方法对于n=128来说复杂度太高了。不过这篇论文引用了另一篇论文： https://link.springer.com/chapter/10.1007/978-3-540-45146-4_11 。这次我吸取教训，让AI先读一遍；结果两个AI都说不适用于我的情况
+
+然后我尝试加上关键词“ctf”进行搜索，得到 https://sasdf.github.io/ctf/writeup/2018/Hack.lu/crypto/lfsr 和 https://pdfs.semanticscholar.org/a787/7b314149d4c70f9c53f60967c20683f6625a.pdf 。这篇wp就和这题的情况很像了，都是lfsr+non-linear filter（假设为f）。wp提到了annihilator，即满足f(x)g(x)=0的函数g(x)；如果g的次数较低，就能对g建立与key相关的线性方程组。接着筛选出keystream bit为1的索引，从f(x)g(x)=0,f(x)=1可以推断出g(x)=0，求g的right_kernel即可解出key bit
+
+问题是，上述wp的non-linear filter的annihilator的次数为1，而这道题的annihilator次数为2，没法直接建立线性方程组。我倒是想到了用新的未知项代替二次项，但也仅仅是想到而已：我完全不知道新加入的未知项怎么融入原来的128维矩阵做lfsr的状态转移，甚至连AI的回答我也看不懂。我需要另一道类似的题
+
+最后我去社区服务器搜题目名，还真给我找到了一道类似的题： https://rkm0959.tistory.com/229 。依然是lfsr+non-linear filter，甚至连annihilator的次数也是2。然而原作者的脚本效率过低，处理128位的lfsr耗时过长。我便叫chatgpt改了一版逻辑，大致内容是用bit manipulations替代原脚本的嵌套循环，快了不少。现在只需要读取计算好的矩阵并求解系统就能终结我一周的梦魇了
+
+我的电脑在构建读取的矩阵时过热，我不得不终止脚本的运行。我百思不得其解，难道是chatgpt给的逻辑错了？但卡住的地方是矩阵构造，就算chatgpt错了，也不应该卡在这种地方啊？考虑到上述思路确实需要大型矩阵，我开始怀疑我是不是又找错方向了。问问大佬
+
+向佬描述我的思路和卡住的地方后，佬给了我他的矩阵读取和构造逻辑。原来是我保存预计算的矩阵时用的是txt而不是sagemath自带的sobj。load函数10秒内就完成了矩阵的读取
+
+没想到chatgpt改的逻辑是对的，还是一次过。不过它的逻辑非常复杂，看完`josephs`的构造方法后我甚至在想“这俩代码干的是一件事”？另外对于我的疑问“新加入的未知项怎么融入原来的128维矩阵做lfsr的状态转移”，目前看来，答案是“不要融入”。构造过程中维持两个矩阵A和B，A代表lfsr的state，是正常的128维；B加入所有二次项，组成由 $128+\binom{128}{2}=8256$ 维向量构成的矩阵。A该怎么做状态转移就怎么做，关键是在调用non-linear filter后，用一个map将产生的一次与二次项映射到B上的坐标。最后求解的是B的right_kernel，为key bits $(k_1,...,k_{128},k_1k_2,...,k_ik_j)$ 。相当于利用annihilator线性化了non-linear filter
+
+- AI说“不适用于这题”的论文其实就是预期解。AI怎么一会靠谱一会不靠谱的（
+- z3可以快速解决这题
+- `user202729`的解法“注意力惊人”

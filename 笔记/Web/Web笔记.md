@@ -4524,3 +4524,5 @@ if (await remote.hasPasswordFor(id)) {
 - Nodejs (Ubuntu 20.04, v10.19.0)接受截断的aes GCM标签(`cipher.setAuthTag`)，因此攻击者可以爆破单个字节的tag
 575. [broken_website](https://git.hamburg.ccc.de/ctf/writeups2026tamu/src/branch/main/broken_website.md)
 - 使用curl请求http3-only网站。这类网站正常请求只能得到`Could not connect to server`错误
+576. [Vault](https://kore.one/tamuctf-2026-vault-challenge-writeup)
+- Laravel 12 (PHP 8.2-FPM)反序列化利用
