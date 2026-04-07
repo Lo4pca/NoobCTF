@@ -792,6 +792,18 @@ dual函数的作用是计算某个同源 $\phi$ 的“对偶同源”（dual iso
 
 `AZ`的思路好像稍微复杂了些。他似乎也算出了与 $\phi$ 同构的 $\phi^{\sim}$ ,但是没有把P映射过去，而是找 $\phi^{\sim}$ 的核，类似原脚本中的R；随后用weil_pairing从R的已知结构中分离出n，完全在原曲线E上做
 
+### Meet me in the Claw
+
+isogeny claw attack，主要思想是mitm： https://github.com/LearningToSQI/SQISign-SageMath/blob/main/mitm.py 。脚本中claw_finding_attack的参数E1为起始曲线，E2为目标曲线；返回 $l^e$ 度同源 $\phi:E_0\rightarrow E_1$
+
+需要修改mitm.py中Fp2与Fp2_inv_2的定义，直接换成题目给出的定义就好
+
+### A True Genus
+
+仍然是跟着佬的记录，这是一个decisional Diffie-Hellman问题，见 https://eprint.iacr.org/2020/151.pdf 。论文提供了magma实现 https://github.com/KULeuven-COSIC/group_action_DDH/blob/main/elliptic_DDH.m ，重点在ComputeSuperingularDelta函数。这个函数会返回一个特征值 $\chi$ ，满足 $\chi(E_0,E_A)=\chi(E_B,E_C)$ 。虽然论文说代码不适用于 $F_{p^2}$ 上的曲线，但题目使用的点的x坐标全部在 $F_p$ 上，因此我们可以假设曲线在 $F_p$ 上
+
+`Neobeo`说 $\chi$ 是系数的quadratic character
+
 ## [ZKPs](https://cryptohack.org/challenges/zkp)
 
 ### ZKP Introduction
