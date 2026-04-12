@@ -2253,6 +2253,7 @@ for i in "${!data[@]}"; do modbus host:port $((i+19))=${data[$i]}; done
 - [diceon](https://cyber-man.pl/DiceCTF-Quals-2025-diceon-misc)
     - 我愿称之为llm prompt injection的巅峰之作，真的从来没见过这么有创意的题目
 - https://fen1x1a.github.io/posts/one-prompt-to-rule-them-all
+- 结合AI agent与web应用的llm题： https://adragos.ro/snyk-ctf-2026
 - [LLM Attacks](https://doublespeak.chat/#/handbook)
 134. [Lost Evidence](https://github.com/daffainfo/ctf-writeup/tree/main/Tenable%20CTF%202023/Lost%20Evidence),[wp2](https://ctf.edwinczd.com/2023/tenable-ctf-2023/lost-evidence)
 - linux [LUKS](https://zhuanlan.zhihu.com/p/36870751)磁盘加密。可尝试用[testdisk/photorec](https://github.com/cgsecurity/testdisk)恢复masterKey

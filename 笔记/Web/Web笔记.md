@@ -19,6 +19,7 @@
     - https://portswigger.net/web-security/cross-site-scripting/cheat-sheet
 - 新的php [drupal](https://www.drupal.org/project/php)反序列化rce链： https://github.com/anzuukino/phpggc/tree/master/gadgetchains/Drupal/RCE/2
 - https://aszx87410.github.io/beyond-xss
+- 一些iframe与window的知识和利用： https://blog.huli.tw/2022/04/07/iframe-and-window-open
 
 ## SQL注入
 
