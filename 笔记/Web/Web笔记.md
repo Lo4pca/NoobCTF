@@ -4527,3 +4527,15 @@ if (await remote.hasPasswordFor(id)) {
 - 使用curl请求http3-only网站。这类网站正常请求只能得到`Could not connect to server`错误
 576. [Vault](https://kore.one/tamuctf-2026-vault-challenge-writeup)
 - Laravel 12 (PHP 8.2-FPM)反序列化利用
+577. [Captivating Canvas Contraption](https://blog.badat.dev/blog/captivating-canvas-contraption)
+- 前置阅读： https://phrack.org/issues/72/10_md 。wasm模块只能调用指定的外部函数，因此是一个天然的沙箱环境。但文章注意到wasm可以引用传入的`importObject`继承自Object的属性，于是攻击者可以引用定义好的函数之外的内容
+    - 上述操作只能获取函数的externref，无法直接调用。这点可以用`Object.groupBy`克服
+    - js在调用对象的函数（`foo.bar()`）时会隐式地设置`this`的值。因此将一个方法提取出来并调用时（`x=foo.bar;x()`），由于缺失`this`，程序会报错。于是即使有`Object.groupBy`，利用初始仍只能使用Object的静态方法，且后续只能用各种类的静态方法
+    - 因为可以通过Function构造器+字符串的形式创建一个函数，所以问题变成“如何构造字符串”
+    - 具体构造步骤见`5.2`到`5.5`。简略的总结如下：从`importObject.constructor.prototype`拿到一个空对象->`Object.values`从空对象身上取出空列表->`Object.getOwnPropertyNames`取出用列表包住的空列表属性名->`Object.groupBy`调用函数取出属性列表中的字符串->`Object.getOwnPropertyDescriptors`获取全部属性的descriptors的列表->取出`String.fromCharCode`的descriptor并用相同的`Object.values`技巧取出`fromCharCode`->`Object.groupBy`+`fromCharCode`构建单个字符->`Object.assign`构造类似`{'1': [ 'H' ],'2': [ 'e' ]}`的对象->`Object.values`取出`[[ 'H' ], [ 'e' ]]`->`String.raw`函数构造从列表构造出完整字符串
+- wp是更进一步的利用。题目设置了csp，并要求获取cookie；这导致无法直接使用上述脚本，且需要拿到window对象。wp提到的额外知识点如下：
+    - 构造包含指定对象x的列表`[x]`：获取`__proto__`属性的descriptor并将enumerable设置为true。然后设置空对象的某个属性（假设是A）的值为先前修改过的descriptor，并将空对象的原型设为x。这样在调用`Object.values`时，js通过A的descriptor中定义的get属性访问到其原型x，返回`[x]`
+    - 设置某个对象的任意属性
+    - 在控制`this`的情况下调用函数：调用访问器时，js将设置访问器所属对象的`this`；因此在get/set里调用函数没有`this`缺失的问题
+    - 另一种构造字符串的方式：`Array.from`可以设置`thisArg`，而`reduce`函数会传入索引作为`thisArg`。于是`Object.setPrototypeOf(Number.prototype, ["p","r","e"]);Array.from([""], Array.prototype.join, 1)`可以得到`[ 'pre' ]`
+    - v8 api的`Error.prepareStackTrace`回调函数传入的`callSites`上有getThis函数，返回window对象；不过触发报错的环境需要是javascript而不是wasm，或者用wasm的unreachable语句

@@ -3032,3 +3032,7 @@ assert crc32(a)^crc32(b)==crc32(c)^crc32(d)
 190. [dot](https://blog.whale-tw.com/2026/03/11/2026-dice-qual)
 - ZKP/SNARG [Dot-Product Proofs(DPP)](https://eprint.iacr.org/2024/1138.pdf)
 - 题目的漏洞似乎不是DPP自身的问题，而是SNARG实现中定义的BOUND1过小。由于DPP的特殊结构，攻击者翻转一个lsb后只需爆破一个 $\lambda$ 即可从正确proof中生成一个伪造proof；而BOUND1过小导致爆破空间只有 $2^{18}$ 。**Dot**
+191. [MissingNo.3](https://github.com/soon-haari/my-ctf-challenges/tree/main/2026-kalmar/missingno3)
+- 从多个python randrange的输出中恢复mersenne twister状态。获取MT的连续输出或已知间隔的间隔输出可以恢复MT的状态，但randrange使用rejection sampling，导致获得的输出不是MT的连续输出，且中间的间隔未知。突破点是位于`(1, 397, 624)`的三个输出满足的固定关系，找到满足这个关系的三个数字后有高概率它们的位置就是`(1, 397, 624)`。 https://sasdf.github.io/ctf/tasks/2019/BalsnCTF/crypto/unpredictable
+- 这题的背景是sagemath有限域中的随机元素。因sagemath的实现，我们只能获取randrange在偶数位上的输出，故不能用上述关系；使用的新关系为`+0, +792, +1246`
+- sagemath `random_matrix(GF(p), n)`生成方式的补充说明：**MissingNo.3** 。在新版本sagemath中同样的问题会更简单，因有限域中随机元素的生成做了改动： https://github.com/sagemath/sage/commit/12afbff1651a2d91ef5d911b22da15ab525e89d9
