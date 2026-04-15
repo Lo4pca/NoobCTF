@@ -4539,3 +4539,5 @@ if (await remote.hasPasswordFor(id)) {
     - 在控制`this`的情况下调用函数：调用访问器时，js将设置访问器所属对象的`this`；因此在get/set里调用函数没有`this`缺失的问题
     - 另一种构造字符串的方式：`Array.from`可以设置`thisArg`，而`reduce`函数会传入索引作为`thisArg`。于是`Object.setPrototypeOf(Number.prototype, ["p","r","e"]);Array.from([""], Array.prototype.join, 1)`可以得到`[ 'pre' ]`
     - v8 api的`Error.prepareStackTrace`回调函数传入的`callSites`上有getThis函数，返回window对象；不过触发报错的环境需要是javascript而不是wasm，或者用wasm的unreachable语句
+578. **BabyKalmarCTF**
+- 利用[ctfd zipslip](https://github.com/CTFd/CTFd/commit/488517db67f66072937416d7f2524ca6f2e2193d)获取rce
