@@ -934,7 +934,8 @@ $$
     - CM-curve的相关知识。虽然是入门题，但背景知识仍然相当复杂。然而这题可以通过自己运行脚本观察出一些规律，进而绕过CM-curve的学习
     - 我的解法（deepseek给我的思路竟然能用，虽然不是预期解且更复杂）：**Not-so-complex**
 - [MonoDOOM](https://jonathke.github.io/monoDOOM)
-    - [monodromy leak](https://eprint.iacr.org/2024/517)
+    - [monodromy leak](https://eprint.iacr.org/2024/517)：给定用montgomery ladder计算的[m]G的射影坐标，该攻击可以将 $E/F_p$ 上的ecdlp转换成 $F_p^{\times}$ 上的多个dlp
+    - [MonoDOOM ETERNAL](https://jonathke.github.io/monoDOOM-ETERNAL):系列的第二道题；monodromy leak+hnp lll
 - [lance-hard?](https://adib.au/2025/lance-hard)
     - 这题的设置是，给定一个隐藏的椭圆曲线上的点K和 $Z_p$ 里的一个随机数r，输出1000组 $(a_i\cdot K)_x+r$ 和 $a_i(a_i\in Z_p)$ 的值。要求恢复K点的x坐标和r的值
     - wp里很重要的一步是将上述问题转换为“Find sparse linear relation”。需要在 $Z_n$ 中找到一个稀疏向量 $V=(v_1,v_2,...,v_n)$ ，使其满足 $\Sigma_{i=1}^nv_ia_i\equiv 0\mod q$ (q为曲线阶数)。这样的话就有 $\Sigma_{i=1}^nv_i\cdot(a_i\cdot K)=(\Sigma_{i=1}^nv_ia_i)\cdot K=0\cdot K=0$ 。意味着多个点 $a_i\cdot K$ 乘上系数 $v_i$ 对应一组和为0的曲线的点。这个关系有自己的名称，为[Semaev’s summation polynomials](https://eprint.iacr.org/2004/031.pdf)。不过我们其实没有完整的x值，只有偏移了r的x值。构造多项式时需要减去r，于是整个多项式变成了关于r的单变量多项式

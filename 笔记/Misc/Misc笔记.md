@@ -407,6 +407,9 @@ print(base64.b64encode(temp.encode()))
     - LLM jailbreak，使模型输出被禁止的内容
         - https://arxiv.org/abs/2307.15043
         - https://github.com/llm-attacks/llm-attacks/blob/main/llm_attacks/gcg/gcg_attack.py
+- **ReLuess Your Inihbitions**
+    - 通过访问神经网络的黑盒实现，提取其所有参数：[Polynomial Time Cryptanalytic Extraction of Neural Network Models](https://eprint.iacr.org/2023/1526)
+    - https://github.com/google-research/cryptanalytic-model-extraction
 
 ## Hardware
 
