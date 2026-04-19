@@ -46,3 +46,15 @@ AI分析的一个弊端是，它总会在犄角旮旯的地方给你塞个坑，
 此刻我开始头脑风暴。难道程序里有其他漏洞？难道我一直没看懂的handle_4里可以修改已输入的字节？我得去社区看一眼
 
 有人说win函数虽然看起来像某段代码的多次循环，但有部分地方修改了rbp。原来是找不同啊。叫ds用pwntools+capstone找到这些地方就行了
+
+### Wily Webserver
+
+路径穿越+bof。不过由于我们用socket连接服务器而不是直接与binary交互，简单的sh shellcode弹的shell用不了。或许可以dup fd吧，但orw shellcode简单又好用，注意文件的fd就好
+
+### The Watering Hole
+
+“watering hole attack”是一种攻击策略，攻击者通过攻击一个服务器间接攻击访问这个服务器的用户
+
+server中的bof仍然存在，但程序做了降权，即使劫持控制流也不能读flag。不过victim读了flag文件，把flag放在发往server的请求里。于是我们可以编写shellcode接受victim的fd，然后读取victim的request发到自己的fd里
+
+运行服务器时记得用pwntools的process，方便将env设为空

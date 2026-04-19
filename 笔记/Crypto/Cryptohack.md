@@ -1839,3 +1839,21 @@ deepseek说可以将群结构分解成 $(-1)^{\epsilon}5^t\mod 2^{63},\epsilon\i
 - `user202729`的解法“注意力惊人”
 - `DanW`用的是fast correlation attack
 - `2x2y2`利用non-linear filter的linear approximation
+
+## [CTF Archive](https://cryptohack.org/challenges/ctf-archive)
+
+这里应该就能给完整代码了，因为这些题都是过去的CTF里的，本来就有wp
+
+各题脚本的gist： https://gist.github.com/Lo4pca/e8b99b1231fbed10a09e54b7f9406863
+
+### Sign in Please
+
+我或许是残血版的deepseek。我懂的没有它多，但我们都有严重的记忆问题
+
+看到这题的第一眼我就想到了hash length extension attack（之前的`MDFlag`）。但我没有找到如何控制padding，所以放弃了这个想法，并把脚本扔给deepseek找新思路
+
+deepseek思考了1018秒，期间不断提出想法又否定自己的想法然后又回去想之前被它否定的想法。但是在读它的思考时我确实发现了新思路：题目没有限制pbox不可以包含负数。加上负索引，我们可以把password+salt的复杂度降为10个字符。其中4个字符为salt是已知的，所以每次只需爆破6个字符。好像还是太多了
+
+deepseek继续想。这次想了很久，直接被系统终止了。在它想的过程中，我发现了另一个“盲点”：`assert len(set(pbox)) == 20`只限制了pbox中不重复的元素长度为20，并没有限制pbox的长度。但是这能怎么利用呢？此刻我已完全忘记最开始想到的length extension，自然也没能想出别的东西
+
+这是wp： https://hackmd.io/@amyriad/hkcert-signin 。利用“pbox长度可以不为20”构造hash length extension attack

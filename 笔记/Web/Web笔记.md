@@ -611,6 +611,12 @@
     - 分析firefox插件中的xss
     - `chrome.tabs.sendMessage`通过tabId决定向哪个tab发送消息，但同一个id可能对应不同的tab origin，有toctou的风险
     - 利用STTF进行xs leak。STTF允许页面滚动到指定词语处。如果攻击者在当前页面下可以注入html，便能检测到页面是否滚动，从而判断猜测的词语是否正确
+- **varmarunionen**
+    - 浏览器可以接收32位数字作为ip地址
+    - `window.name`技巧：在页面A设置`window.name`并跳转至页面B后，页面B的`window.name`仍然是之前的。利用这点可以绕过xss payload的长度限制：在A的name放置payload后跳转至B，在B执行`location=name`（仅限chrome，firefox可以用`<a href=... target="javascript:xss">`然后点击标签触发）
+    - 通过设置[document.domain](https://developer.mozilla.org/en-US/docs/Web/API/Document/domain)放宽子域名间的SOP。如果`a.example.com`和`b.example.com`均用`document.domain = "example.com"`设置domain，则两者变为同源，可以互相访问彼此的dom
+        - `document.domain = document.domain`或`document.domain += ""`虽然没有把domain修改成别的字符串，但对于任何其他通常属于同源、但未执行相同操作的页面而言，该页面变为跨源
+    - 在Amazon S3中，对于公共的object，任何人都可以获取该object的presigned_url来更改服务器提供文件时的content-type。完整的可修改response header列表见 https://docs.aws.amazon.com/boto3/latest/reference/services/s3/client/get_object.html
 
 ## SSTI
 
@@ -2024,8 +2030,7 @@ pool.join()
 ```
 192. [[BSidesCF 2019]Mixer](https://blog.csdn.net/weixin_44037296/article/details/112370510)
 - AES ECB加密内容识别：修改密文的开头几个字节不影响末尾密文的解密（反之也成立，修改密文末尾的字节不影响开头明文的解密）。与CBC模式不同，CBC中修改前段密文解密出来的明文全部都会是乱码。
-- ECB加密是16位一组，每组相互独立，加密后每组为32位。
-- 在json中1.00 == 1（小数点后几个0都没问题）。
+- 在json中1.00 == 1（小数点后几个0都没问题）
 193. [[红明谷CTF 2021]JavaWeb](https://blog.csdn.net/Mrs_H/article/details/124035038)
 - Apache [shiro](https://zhuanlan.zhihu.com/p/54176956)框架[判断](https://blog.csdn.net/qq_38154820/article/details/106726691)：可在 cookie 追加一个`rememberMe=xx`的字段，这个字段是rememberMeManager默认的。然后看响应头部可以看看是否有`Set-Cookie:rememberMe=deleteMe; `的字段。若有则是shiro框架。
 - CVE-2020-11989,[Apache Shiro权限绕过](https://www.anquanke.com/post/id/222489)：当遇到无法访问的url（直接访问会重定向），可以考虑（假设要访问的url为/json）：
@@ -2698,8 +2703,8 @@ def req(path):
 - thinkphp3.2.3反序列化pop链(sql注入&文件读取)：https://f5.pm/go-53579.html 。wp内包含报错注入，[开堆叠写shell](https://www.zhaoj.in/read-6859.html#WEB3_easytp)以及利用[rogue-mysql-server](https://github.com/allyshka/Rogue-MySql-Server):https://www.crisprx.top/archives/412#CTF_2021EasyTP 三种解法。注意事项：
   - 需要已知sql数据库的名称及密码
   - 最后一种解法需要公网ip
-  - 报错注入解法使用的updatexml最多只能显示32位，需要搭配substr，reverse或mid（跟substr感觉差不多）获取完整flag。
-  - 蚁剑版本不同，开堆叠写shell后连接sql数据库的结果也不同。蚁剑要是不行就用冰蝎的导出功能。
+  - 报错注入解法使用的updatexml最多只能显示32位，需要搭配substr，reverse或mid（跟substr感觉差不多）获取完整flag
+  - 蚁剑版本不同，开堆叠写shell后连接sql数据库的结果也不同。蚁剑要是不行就用冰蝎的导出功能
 - thinkphp可通过输入不存在的控制器获取版本。`http://xxx.com/index.php/aaa`
 227. [wzsc_文件上传](https://blog.csdn.net/qq_45608153/article/details/126312379)
 - 文件上传条件竞争。服务器检测上传文件的后缀时，使用白名单会比黑名单过滤效果更好。但业务逻辑不能是“上传文件->服务器保存文件->保存后检测刚刚保存文件的后缀，如果不在百名单就删除“。这样容易出现条件竞争。在服务器保存和删除的间隙中，文件是可访问的。

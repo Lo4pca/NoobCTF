@@ -375,7 +375,7 @@ def attack(c1,c2,e):
 c1 =
 c2 =
 e =
-m1 = attack(c1, c2 e)
+m1 = attack(c1,c2,e)
 print(binascii.unhexlify("%x" % int(m1)))
 ```
 相关信息攻击的关键点在于找出两条信息具有线性关系的方程。通常方程形如 $((a\*m)+b)^e\mod n$ 和 $((c\*m)+d)^e\mod n$ ，也是脚本中需要自己填写的a，b，c和d值的由来。[unusualrsa2](https://4xwi11.github.io/posts/80806ae5/#unusualrsa2)。另外今天又发现个不错的例题+解析：[Twin](https://github.com/Warriii/CTF-Writeups/blob/main/akasec24/crypto_twin.md)
