@@ -4546,3 +4546,5 @@ if (await remote.hasPasswordFor(id)) {
     - v8 api的`Error.prepareStackTrace`回调函数传入的`callSites`上有getThis函数，返回window对象；不过触发报错的环境需要是javascript而不是wasm，或者用wasm的unreachable语句
 578. **BabyKalmarCTF**
 - 利用[ctfd zipslip](https://github.com/CTFd/CTFd/commit/488517db67f66072937416d7f2524ca6f2e2193d)获取rce
+579. **Aperi et Inveni**
+- binwalk WinCE extractor任意文件写漏洞。利用这个洞将文件写入binwalk的插件目录下，再次触发binwalk就能获取rce

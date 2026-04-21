@@ -371,6 +371,11 @@ print(base64.b64encode(temp.encode()))
         - 因此如果子interpreter中存在严格的过滤而主Interpreter中没有，用type创建带有`__reduce_ex__`的对象或用setattr修改已有对象的`__reduce_ex__`是一种逃逸手段
     - 定义lambda函数时可以用`lambda*a`，空格不是必需的
     - 更详细的wp： **litterally-1984**
+- https://news.ycombinator.com/item?id=47502448
+    - 无`__`,locals,`__builtins__`为None。可以用unicode或栈帧绕过
+    - **pyjail**
+        - 一些golf可用的特殊语法
+        - 调用help弹出repl后可以用`IPython.__main__`调出python repl，或者利用`modules`中的模块。比如sagemath模块可以帮助调用`breakpoint`
 - pyjail cheatsheet
     - https://shirajuki.js.org/blog/pyjail-cheatsheet
     - https://book.hacktricks.wiki/en/generic-methodologies-and-resources/python/bypass-python-sandboxes/index.html
@@ -3135,3 +3140,7 @@ $ cd a/b
 - 对于一个公开的仓库，被删除或私有的fork可以通过仓库访问；反过来也成立：被删除的仓库可以通过存在的fork访问
 - https://trufflesecurity.com/blog/anyone-can-access-deleted-and-private-repo-data-github
 - https://github.com/SorceryIE/cfor_exploit
+412. **nix-revenge**
+- nix FOD(Fixed-Output Derivation)沙盒绕过: https://hackmd.io/03UGerewRcy3db44JQoWvw
+    - 利用Abstract unix domain sockets可以让被沙盒的FOD往外传构建的文件的fd。虽然在外部宿主机上nix store是只读的，但这个fd来自拥有读写权限的沙盒里，所以拿到这个fd的外部进程可以往里写内容
+    - nix在存储文件时会计算两次hash。一次校验文件内容是否符合期望值，第二次是为打包后的NAR归档计算哈希，用于内容寻址或存入二进制缓存。这个新哈希不会回头与预设的outputHash做比对。两次计算之间存在窗口，允许攻击者在校验完成之后将文件内容换成恶意内容
