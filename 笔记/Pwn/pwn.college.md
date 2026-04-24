@@ -58,3 +58,13 @@ AI分析的一个弊端是，它总会在犄角旮旯的地方给你塞个坑，
 server中的bof仍然存在，但程序做了降权，即使劫持控制流也不能读flag。不过victim读了flag文件，把flag放在发往server的请求里。于是我们可以编写shellcode接受victim的fd，然后读取victim的request发到自己的fd里
 
 运行服务器时记得用pwntools的process，方便将env设为空
+
+### Secure Chat 1
+
+漏洞是sql注入和mitm。题目的情景大概是这样：sharon（完整用户名未知，因此无法用sql注入登录其账号直接看到flag）给bob发送了flag，mallory通知alice flag已泄漏（需要我们用sql注入登录成mallory来触发剧情），于是alice和bob决定用DHE-AES沟通flag事宜。这里我们用mitm即可获取DHE-AES的key，解密bob沟通时提到的flag
+
+随后我就在mitm卡了很久，于是我中途跑去把`Intercepting Communication`做完了，发现mitm成功的关键点如下：
+- ARP欺骗包要不断地发送，直接发往受害者而不是广播
+- 需要用`ip addr add`添加要伪装的目标ip。否则即使ARP欺骗成功，发往本机的包也会因为ip不符而被自动丢弃（可以用tcpdump诊断这个问题）
+- 添加目标ip X后，本机无法再与真正的X沟通。我的做法是不断添加又删除这个虚拟ip：与X建立连接和沟通时，删除虚拟ip；与受害者建立连接和沟通时，添加虚拟ip。socket不会因为中途ip不通而断开连接
+- 不知为什么，这题如果用flask server绑定，受害者就无法连接；而用raw socket绑定就可以。最后是用raw socket+手动构造http response解决的
