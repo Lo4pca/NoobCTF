@@ -6,6 +6,8 @@
 
 作业要求的阅读资料都可以在`Resources`中找到，除了Visual Group Theory；提供的链接似乎失效了。可以拿 https://web.osu.cz/~Zusmanovich/teach/books/visual-group-theory.pdf 替代
 
+youtube太卡的话可以用 https://www.bilibili.com/video/BV1ka411378X 替代
+
 ## HW 1
 
 ### Exercise 1.1
@@ -98,9 +100,7 @@
 
 这两个操作构成的情境只有“每个操作都是可确定的”不满足
 
-<hr>
-
-(分割线表示下面的题来自homework pdf而不是书里)
+### Homework Exercises
 
 2. 给定一个正 n 边形，设 r 是将其旋转 $\frac{2\pi}{n}$ 弧度的操作。这次，假设我们不允许翻转该正 n 边形。这 n 个操作构成一个群，记作 $C_n$ = < r > = { $e, r, r^2, \ldots, r^{n-1}$ }
 
@@ -112,7 +112,7 @@ n = 4
 G = CyclicPermutationGroup(n)
 r = G.gen()
 C = G.cayley_graph()
-vertex_labels = {g: 'e' if i==0 else f'r^{i}' if i==1 else f'r^{i}' for i, g in enumerate(G)}
+vertex_labels = {g: 'e' if i == 0 else f'r^{i}' for i, g in enumerate(G)}
 P = C.plot(
     vertex_labels = vertex_labels,  # 使用自定义标签
     color_by_label = True,          # 边着色区分生成元
@@ -134,3 +134,60 @@ P.save('cayley_cn.png')
 (c) 对于一个给定的固定整数n，试推测满足 $C_n = < r^k > $ 的整数k的条件
 
 条件是与n互素
+
+3. 正如我们在课堂上所见，等边三角形的六种对称构成一个群，记作 $D_3$ = { $e, r, r^2, f, rf, r^2f $ },其中 r 是顺时针旋转 120°，f是关于垂直轴（固定顶角）的翻转。由于r和f足以生成所有这六种对称，我们记作 $D_3 = < r, f > $
+
+(a) 设g是固定三角形左下角的反射。 $D_3$ 的六个操作里，g等于哪一个？fg又是哪一个操作？  
+
+g相当于交换顶角和右下角，等于 $r^2f$ ; fg=r
+
+(b) 仅用f和g写出 $D_3$ 的六个操作。以f和g为生成元画一个凯莱图
+
+{e,fg,gf,f,fgf,g}
+
+```py
+D3 = DihedralGroup(3)
+f = D3("(2,3)")
+g = D3("(1,2)")
+#(2,3)表示2->3,3->2，1不变
+C = D3.cayley_graph(generators=[f, g])
+vertex_labels = {}
+for v in C.vertices():
+    cs = v.cycle_string()
+    if cs == "()":
+        vertex_labels[v] = 'e'
+    elif cs == "(1,2,3)":
+        vertex_labels[v] = 'fg'
+    elif cs == "(1,3,2)":
+        vertex_labels[v] = 'gf'
+    elif cs == "(2,3)":
+        vertex_labels[v] = 'f'
+    elif cs == "(1,2)":
+        vertex_labels[v] = 'g'
+    elif cs == "(1,3)":
+        vertex_labels[v] = 'fgf'
+C.relabel(vertex_labels)
+P = C.plot(color_by_label=True, edge_labels=True, vertex_size=800)
+P.save('cayley.png')
+```
+如果不指定生成器直接绘制的话，sagemath默认生成器为r和g(不过好像固定的是右下角)，画出的结构与这个不一样
+
+5. 任意选取一个整数，并考虑如下操作集合：将任意整数加到你选取的那个整数上。这是一个无限的操作集合；我们可以将它们命名为“加 1”、“加 −4120”等等。这是一个群
+
+(a) 找出所有大小为 1 的生成集
+
+{-1}和{1}。注意某个生成元g生成的群会包含它的所有n次幂运算，比如 $g^2,...,g^n$ ；但是n可以为负数，于是便有了负数次幂 $g^{-1},...,g^{-n}$ 。有些时候因为有限群的性质，这些负数次幂会等于某个正数次幂，看起来就像是没有负数次幂一样，比如前面的例子
+
+或者这么理解：g生成的群是允许使用群运算和取逆操作，任意有限次得到的所有元素。重点是“取逆操作”，所以1自动生成-1，不需要把-1放到生成集里
+
+(b) 找出一个大小为 2 的极小生成集
+
+{2,3}
+
+(c) 找出一个大小为 3 的极小生成集
+
+{6,10,15}。首先任意两个数的gcd都不能为1，因为这样的话可以用拓展欧几里得算法找到u和v满足ux+vy=1，进而生成整个群。但是三个数的gcd得是1，这样就可以用多个数的拓展欧几里得算法生成1，然后生成整个群
+
+(d) 解释如何构造一个大小为n的极小生成集，其中 $n \in \mathbb{N}$
+
+找到n个质数，称它们的积为P。那么每个极小生成集中的元素 $a_i=\frac{P}{p_i}$
