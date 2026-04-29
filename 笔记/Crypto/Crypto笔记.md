@@ -548,7 +548,7 @@ for i in range(1,e):
     - 分解互为emirp（反素数）的两个质数的乘积。注意数字的进制不重要。无论在二进制，十进制，还是十六进制下互为反素数都能尝试分解
 - [kRSA](https://github.com/rerrorctf/writeups/blob/main/2024_11_15_1337UP24/crypto/krsa)
     - 假如用rsa加密一个数字k，攻击者可以尝试找满足ij=k的i和j，然后利用rsa的同态特性进行meet in the middle攻击
-- [small eqs](https://gist.github.com/lo4pca/cf6ae2c5e0e9fe1ecb532d257a56e101#small-eqs)
+- **small eqs**
     - [Williams's p + 1 algorithm](https://en.wikipedia.org/wiki/Williams%27s_p_%2B_1_algorithm)分解n。概率算法，不是百分之百成功。而且这题的p的构造有漏洞，构成p的多项式中包含一个很小的质数
 - [fastcrypto](https://blog.whale-tw.com/2025/01/27/x3ctf-2025)
     - NTT算法+CRT加速RSA计算。NTT其实不负责整数乘法，而是模某个数下的多项式乘法。因此题目需要将整数转为多项式，拿到NTT结果后再从多项式转回整数。问题在于题目选择模的“某个数”太小了，而题目编写的多项式转换公式都基于系数不超过模数的前提。NTT返回的结果完全有可能超过这个限制，故出现计算错误。计算错误又会导致RSA中的fault attack，导致攻击者可以用gcd恢复p和q中的一个
@@ -2851,8 +2851,8 @@ c2=encrypt(k2,c1)
 136. [adapt](https://mystiz.hk/posts/2024/2024-02-03-tetctf-adapt/)
 - immutable AVL tree：[cosmos/iavl](https://github.com/cosmos/iavl) （v0.19.7）下的proof伪造。可通过构造特殊node获取一个假的proof，用于证明某个特定的node在tree中不存在（但实际存在）
 137. [winter](https://7rocky.github.io/en/ctf/other/dicectf/winter/)
-- Winternitz One-Time Signature (WOTS)签名伪造。这是一个单次签名算法，一个私钥只能签名一条信息。若同时签两条，攻击者可以通过第一条消息的签名伪造第二条消息的签名。只需构造一个字符串，使该字符串的sha256输出的每一个字节都大于等于第一条消息的sha256输出的相应字节即可。相似考点在59条winterfactory时就已见过，实际做题时也想到了这个做法，但是没找到符合要求的两条消息……wp作者的做法更聪明，与其随机生成两条消息并比对它们的hash，不如设定一个阈值，让第一条消息的hash值的每个字节都大于这个阈值，而第二条消息的hash值的每个字节都小于这个阈值。或者使用c++爆破hash脚本： https://gist.github.com/C0nstellati0n/cf6ae2c5e0e9fe1ecb532d257a56e101#winter
-- 其他wp： https://sylvainpelissier.gitlab.io/posts/2024-02-04-dicectf-winter/ 。利用已知的bitcoin hash加快爆破。这类有特殊性质的hash还可以在 https://beneri.se/hashgame/ 找到
+- Winternitz One-Time Signature (WOTS)签名伪造。这是一个单次签名算法，一个私钥只能签名一条信息。若同时签两条，攻击者可以通过第一条消息的签名伪造第二条消息的签名。只需构造一个字符串，使该字符串的sha256输出的每一个字节都大于等于第一条消息的sha256输出的相应字节即可。相似考点在59条winterfactory时就已见过，实际做题时也想到了这个做法，但是没找到符合要求的两条消息……wp作者的做法更聪明，与其随机生成两条消息并比对它们的hash，不如设定一个阈值，让第一条消息的hash值的每个字节都大于这个阈值，而第二条消息的hash值的每个字节都小于这个阈值。或者使用c++爆破hash脚本： **winter**
+- 其他wp： https://sylvainpelissier.gitlab.io/posts/2024-02-04-dicectf-winter 。利用已知的bitcoin hash加快爆破。这类有特殊性质的hash还可以在 https://beneri.se/hashgame/ 找到
 138. [RSA-GCD](https://nolliv22.com/writeups/0xl4ugh%20ctf%202024/rsagcd)
 - [modular binomial](https://www.ctfrecipes.com/cryptography/general-knowledge/maths/modular-arithmetic/modular-binomial)的运用
 134. [Combinatorial Conundrum](https://github.com/Pamdi8888/My_CTF_Chals/tree/main/Combinatorial%20Conundrum)
@@ -2879,10 +2879,10 @@ c2=encrypt(k2,c1)
 - [Paillier cryptosystem](https://en.wikipedia.org/wiki/Paillier_cryptosystem)的加密与解密
 143. [Power Over All](https://github.com/Warriii/CTF-Writeups/blob/main/akasec/crypto_power_over_all.md)
 - 寻找modular square roots。模某个质数的平方根用sagemath很好找，问题是这题要连续找55个。我就卡在了这点，因为每次可能的平方根都有两个，把这`2*55`个组合起来不知道要多久。我能想到用quadratic residue（二次剩余）淘汰一些根，但是脚本不知道咋写。leetcode白写了，看wp发现某种意义上这是个多源bfs问题
-144. [Salad](https://gist.github.com/C0nstellati0n/cf6ae2c5e0e9fe1ecb532d257a56e101#salad)
+144. **salad**
 - [Unbalanced oil and vinegar scheme](https://en.wikipedia.org/wiki/Unbalanced_oil_and_vinegar_scheme)。个人感觉是个有点繁琐+诡异（对于数学废物）的公钥签名系统。wikipedia不是特别详细，更详细的介绍见这篇[论文](http://www.goubin.fr/papers/OILLONG.PDF)
 - 此题的漏洞见论文第7节（pdf第8页）： solve a system of n randomly chosen quadratic equations in n + v variables, when $v ≥ n^2$
-145. [dream-revenge](https://gist.github.com/C0nstellati0n/cf6ae2c5e0e9fe1ecb532d257a56e101#dream-revenge)
+145. **dream-revenge**
 - 现在只需要8个输出就能破解python random库的seed了……见 https://stackered.com/blog/python-random-prediction/ 。MT19937你不行啊（doge）
 - 用的时候差点没搜到，添加关键词：mersenne twister，python随机数预测
 - 如果已知种子是一个32位整数，则只需要6个输出就能破解。见[import rAnDoM](https://github.com/Cryptonite-MIT/niteCTF-2024/tree/main/crypto/import%20rAnDoM)
@@ -2954,7 +2954,7 @@ assert crc32(a)^crc32(b)==crc32(c)^crc32(d)
 - 官方wp： https://github.com/HeroCTF/HeroCTF_v6/tree/main/Crypto/State
 163. [Halloween](https://github.com/rerrorctf/writeups/blob/main/2024_10_25_HeroCTF24/crypto/halloween)
 - [gostcrypto](https://github.com/drobotun/gostcrypto)库ctr模式实现漏洞。gostcrypto中的gostcipher本身没有什么漏洞，但这个库的实现导致ctr模式异或时用的nonce每0xff轮就会重复
-164. [sha-home](https://gist.github.com/C0nstellati0n/cf6ae2c5e0e9fe1ecb532d257a56e101#sha-home)
+164. **sha-home**
 - sha0 hash collision。相关论文： https://iacr.org/archive/fse2008/50860017/50860017.pdf
 165. [Just Lattice](https://yun.ng/c/ctf/2024-wwctf/crypto/just-lattice)
 - 结果这题和lattice没有关系……题目是个Learning with Errors (LWE)加密方案，本身是安全的加密方案。但这题设置的参数导致可能的私钥空间太小，直接爆破就能得到结果
