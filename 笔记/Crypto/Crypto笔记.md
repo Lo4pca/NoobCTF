@@ -2883,7 +2883,7 @@ c2=encrypt(k2,c1)
 - [Unbalanced oil and vinegar scheme](https://en.wikipedia.org/wiki/Unbalanced_oil_and_vinegar_scheme)。个人感觉是个有点繁琐+诡异（对于数学废物）的公钥签名系统。wikipedia不是特别详细，更详细的介绍见这篇[论文](http://www.goubin.fr/papers/OILLONG.PDF)
 - 此题的漏洞见论文第7节（pdf第8页）： solve a system of n randomly chosen quadratic equations in n + v variables, when $v ≥ n^2$
 145. **dream-revenge**
-- 现在只需要8个输出就能破解python random库的seed了……见 https://stackered.com/blog/python-random-prediction/ 。MT19937你不行啊（doge）
+- 现在只需要8个输出就能破解python random库的seed了……见 https://stackered.com/blog/python-random-prediction 。MT19937你不行啊（doge）
 - 用的时候差点没搜到，添加关键词：mersenne twister，python随机数预测
 - 如果已知种子是一个32位整数，则只需要6个输出就能破解。见[import rAnDoM](https://github.com/Cryptonite-MIT/niteCTF-2024/tree/main/crypto/import%20rAnDoM)
 146. [Many Xor Shift](https://thr34dr1pp3r.gitbook.io/ctf/wanictf-2024/crypto-many-xor-shift)

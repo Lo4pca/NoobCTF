@@ -1871,3 +1871,13 @@ https://jsur.in/posts/2020-09-20-downunderctf-2020-writeups
 测试wp的脚本时发现以下内容：
 - `epsilon=1/32`不是必要的。这个参数用于控制格维度，epsilon越小，理论上界越宽松（能求解的 X 上限越大），但构造的格维度越高，运行时间越长
 - ds写了个测试脚本，实测X在`2^588`到`2^590`之间
+
+### 2020
+
+没啥头绪，感觉又是我没见过的mt19937技巧，于是直接找了[wp](https://nbviewer.org/github/nguyenduyhieukma/CTF-Writeups/blob/master/TetCTF/2020/tetctf.ipynb)
+
+Mersenne twister更新state和从state输出随机数的过程可抽象为两个函数：f和g。f的内容见 https://stackered.com/blog/python-random-prediction 的`2.2`节`Updating the internal state`；g是temper函数，完全可逆
+
+更新state `i+624`等于计算 $s_{i+624}=f(s_i,s_{i+1},s_{i+397})$ 。由于计算f只需 $s_i$ 的msb，我们可以向服务器请求 $r_{i+1},r_{i+397}$ ，再用untemper得到 $s_{i+1},s_{i+397}$ ，最后猜测 $s_i$ 的msb。有50%的概率猜对
+
+第2020个输出对应i=2019
