@@ -6,6 +6,28 @@ rules要求不能给出完整解答，因此这里依旧是我的思路与提示
 
 # [Intro to Cybersecurity](https://pwn.college/intro-to-cybersecurity)
 
+## [Reverse Engineering](https://pwn.college/intro-to-cybersecurity/reverse-engineering)
+
+整个类别的主题都是自定义图片程序cIMG，就是我做`CIMG Screenshots`时痛苦逆向了很久的玩意。早知道就先做这个了
+
+### The Patch Directive
+
+`handle_34358`是直接读屏，必须输入整个屏幕所需的全部字节，因此不可能通过main函数末尾的total_data检查
+
+`handle_43058`则允许指定`base_x`,`base_y`,width和height，以(`base_x`,`base_y`)为矩形的左上角坐标，绘制`width*height`大小的矩形。由于initialize_framebuffer已经给屏幕填充了空格，利用这个directive可以跳过对`desired_output`中空格的绘制
+
+然后我叫ds编写了个爆破脚本，得到`desired_output`的维度应该是`60*17`；再叫它写了个找最大矩形的算法，擦着1340字节的边过了
+
+借着这题第一次用上了ghidra的创建结构类型功能。从`cimg.c`中可以提取出结构体定义，将这些定义保存成`.h`头文件后，点击菜单栏的File->Parse C Source中`Source files to parse`板块右侧的绿色加号，选中保存的头文件，最后点击`Parse to Program`，后续弹出的`Use Open Archives?`弹窗选`Use Open Archives`（不过我不确定有啥用）就好了。如果导入成功，可以在左下角的Data Type Manager找到导入的类型，后续右键变量就可以将变量的类型改成刚刚导入的类型了
+
+### Optimizing for Space
+
+目标图片似乎一定有一个由短横线和竖线构成的外框，利用这点可以快速推断出图片的维度
+
+上一题我叫ds编写的策略“寻找由同字符构成的最大矩形”放到这题超限制了。自然，新策略应忽略同字符的要求，单个矩形可以由多种字符组成。我就说了这么多，ds自己补全了剩下的逻辑：先用贪心算法找到所有同字符的小矩形，再两两遍历所有矩形并尝试合并。注意到每个指令固定6字节开销（指令码2字节+指定坐标和尺寸4字节），每个像素为4字节。那么两个小矩形A和B的开销为`2*6+(area(A)+area(B))*4`，合并成C（可能包含空白背景）后开销为`6+area(C)*4`。只要后者开销小于前者，合并就是有价值的
+
+ds的算法依旧是一次过。我依稀记得leetcode上有类似的题，不知道ds表现这么好是否和这点有关
+
 ## [Integrated Security](https://pwn.college/intro-to-cybersecurity/integrated-security)
 
 ### ECB-to-Shellcode(hard)
