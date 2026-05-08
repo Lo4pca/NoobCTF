@@ -3037,3 +3037,6 @@ assert crc32(a)^crc32(b)==crc32(c)^crc32(d)
 - 从多个python randrange的输出中恢复mersenne twister状态。获取MT的连续输出或已知间隔的间隔输出可以恢复MT的状态，但randrange使用rejection sampling，导致获得的输出不是MT的连续输出，且中间的间隔未知。突破点是位于`(1, 397, 624)`的三个输出满足的固定关系，找到满足这个关系的三个数字后有高概率它们的位置就是`(1, 397, 624)`。 https://sasdf.github.io/ctf/tasks/2019/BalsnCTF/crypto/unpredictable
 - 这题的背景是sagemath有限域中的随机元素。因sagemath的实现，我们只能获取randrange在偶数位上的输出，故不能用上述关系；使用的新关系为`+0, +792, +1246`
 - sagemath `random_matrix(GF(p), n)`生成方式的补充说明：**MissingNo.3** 。在新版本sagemath中同样的问题会更简单，因有限域中随机元素的生成做了改动： https://github.com/sagemath/sage/commit/12afbff1651a2d91ef5d911b22da15ab525e89d9
+192. [many-tags](https://hackmd.io/@Arnav-Vora/Skseb-VTWg)
+- 如何将`GF(2^128)`上的线性方程转到向量空间
+- 在python中，从初始的Mersenne Twister状态恢复seed。MT相关的线性操作可用 https://github.com/obafgkmdh/randcrack-linear 模拟
