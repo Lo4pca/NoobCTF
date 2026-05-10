@@ -535,7 +535,7 @@ for i in range(1,e):
     - 在分解n后，还需要利用binomial_dlog在合数n上求离散对数（实现参考同wp里的rr题）
     - 和这题与上一题相关的论文:[Some Applications of Lattice Based Root Finding Techniques](https://eprint.iacr.org/2010/146),[New Results for Partial Key Exposure on RSA with Exponent Blinding](https://www.scitepress.org/papers/2015/55717/55717.pdf)
 - [rsa_oracle](https://github.com/PetePriority/picoctf-2024/tree/main/cryptography/rsa_oracle)
-    - chosen plaintext/ciphertext attack。这题是个rsa oracle，允许加密和解密除flag外的明文/密文。wp作者参考了 https://crypto.stackexchange.com/questions/2323/how-does-a-chosen-plaintext-attack-on-rsa-work/2331#2331 ，个人写的时候参考了 https://ctf-wiki.mahaloz.re/crypto/asymmetric/rsa/rsa_chosen_plain_cipher/
+    - chosen plaintext/ciphertext attack。这题是个rsa oracle，允许加密和解密除flag外的明文/密文。wp作者参考了 https://crypto.stackexchange.com/questions/2323/how-does-a-chosen-plaintext-attack-on-rsa-work/2331#2331 ，个人写的时候参考了 https://ctf-wiki.mahaloz.re/crypto/asymmetric/rsa/rsa_chosen_plain_cipher
     - 脚本：**rsa_oracle**
 - [ComplexProblem](https://github.com/acmucsd/sdctf-2024/tree/main/crypto/complex-problem)
     - 复数上的RSA。比赛时搜了好久"RSA over complex numbers"或者各种RSA+complex numbers的组合，但搜不出来。换个说法"rsa with gaussian primes"就出来了。 https://digitalcommons.njit.edu/cgi/viewcontent.cgi?article=1332&context=dissertations 135页（论文118页）。部分简单的复数可以在sagemath里分解。个人解法和官方解法稍微有点不一样，故记录一下（虽然本质是一样的）: **complexproblem**

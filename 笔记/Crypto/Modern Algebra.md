@@ -308,3 +308,20 @@ bH := { bh= $ah_ah=ah'$ | h ∈ H }=aH
 （我想了半天怎么证明，直到问了ds才意识到正规子群没有传递性）
 
 (b) 证明或举反例：若 K ⊴ G，则 K ⊴ H
+
+因为 $\forall g\in G,gKg^{-1}=K$ ，而H是G的子群，自然对于任意 $h\in H$ ，有 $h\in G$ ，所以 $\forall h\in H,hKh^{-1}=K$
+
+5. 设 H 是 G 的子群。给定两个固定元素 a, b ∈ G，定义集合aHbH = { ah₁bh₂ | h₁, h₂ ∈ H } 与 abH = { abh | h ∈ H }。证明：若 H ⊴ G，则 aHbH = abH
+
+因为H ⊴ G，所以 $h_1b=bh_1\Rightarrow ah₁bh₂=abh_1h_2=abh$ ，即aHbH = abH
+
+6. 证明 A × { $e_B$ } 是 A × B 的正规子群，其中 $e_B$ 是 B 的单位元。即，先证明它是子群，再证明它是正规的
+
+- 群中存在单位元 $(e_A,e_B)$
+- $e_B$ 是B的子群，A本身是群，因此A × { $e_B$ }同样存在逆元且满足封闭性
+
+$\forall g\in A\times B,h\in A\times $ { $e_B$ },考虑两个分量：
+- 第一个分量在A中进行运算，A是群，因此运算结果也在A里
+- 第二个分量 $be_Bb^{-1}=e_B$
+
+因此A × { $e_B$ }是正规子群
