@@ -3144,3 +3144,5 @@ $ cd a/b
 - nix FOD(Fixed-Output Derivation)沙盒绕过: https://hackmd.io/03UGerewRcy3db44JQoWvw
     - 利用Abstract unix domain sockets可以让被沙盒的FOD往外传构建的文件的fd。虽然在外部宿主机上nix store是只读的，但这个fd来自拥有读写权限的沙盒里，所以拿到这个fd的外部进程可以往里写内容
     - nix在存储文件时会计算两次hash。一次校验文件内容是否符合期望值，第二次是为打包后的NAR归档计算哈希，用于内容寻址或存入二进制缓存。这个新哈希不会回头与预设的outputHash做比对。两次计算之间存在窗口，允许攻击者在校验完成之后将文件内容换成恶意内容
+413. [Polyglot](https://blog.7chn.me/posts/20260420-polyglot)
+- 编写代码，使同一份代码可用多种语言执行
