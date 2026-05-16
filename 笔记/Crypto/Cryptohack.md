@@ -1881,3 +1881,13 @@ Mersenne twister更新state和从state输出随机数的过程可抽象为两个
 更新state `i+624`等于计算 $s_{i+624}=f(s_i,s_{i+1},s_{i+397})$ 。由于计算f只需 $s_i$ 的msb，我们可以向服务器请求 $r_{i+1},r_{i+397}$ ，再用untemper得到 $s_{i+1},s_{i+397}$ ，最后猜测 $s_i$ 的msb。有50%的概率猜对
 
 第2020个输出对应i=2019
+
+### Calm Down
+
+我从过往见过的[wp](https://pr1m3dctf.github.io/blog/CTF/writeups/2025/Cyber-Apocalypse-2025/crypto/twin-oracle)和询问ds都得到了同一个结论：这题可能与lsb oracle有关系。但是寻常的lsb oracle至少会返回lsb，这题只能判断最后一个字节是不是`.`。我的思路卡在如何模仿普通lsb oracle做binary search，ds则认为这题是格（明显不靠谱，因此我没有在AI上浪费太多时间）
+
+苦思无果后我就放弃了lsb oracle的想法，转而去看代数结构有没有什么猫腻。因为字符串的结构等于 $a_0+256a_1+256^2a_2...$ ，就想着乘个 $256^{-n}$ 会不会有什么搞头？答案是否定的，此处浪费了我接近三小时
+
+wp见 https://hackmd.io/@hoifanrd/SyeYX-HFP 。确实是lsb oracle，但关键的思路在于，在原消息m的末尾已经是`.`的前提下，只要某个乘数s的末尾是`0x81`且sm不超过n，oracle一直会返回nice（0x81\*0x2e=0x2e mod 256），否则只要sm超过n，oracle一定会返回nope。如果能找到一个s，使得sm不超过n但(s+1)m超过n，就能用n/s恢复m
+
+原wp恢复s的过程较慢，`ispo`提供了一种更快的方法

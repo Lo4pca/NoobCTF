@@ -356,3 +356,26 @@ $\forall g\in A\times B,h\in A\times $ { $e_B$ },考虑两个分量：
 $N_G(A)$ 是G的子群的证明类似`(a)`。很明显 $N_G(A)$ 要比 $C_G(A)$ 大，因为前者只要求gA=Ag，而后者明确要求对于A中的每个a，ga=ag，故 $C_G(A)$ 是 $N_G(A)$ 的子群
 
 至于正规性，任取 $n\in N_G(A),c\in C_G(A)$ ， $(ncn^{-1})a=(ncn^{-1})ann^{-1}$ 。由于n来自A的正规化子， $(ncn^{-1})ann^{-1}=nc(n^{-1}an)n^{-1}=n(n^{-1}an)cn^{-1}=a(ncn^{-1})$
+
+## HW 7
+
+2. 证明 $A\times B\cong B\times A$
+
+定义一个映射 $\phi:A\times B\rightarrow B\times A,\phi:(a,b)\rightarrow (b,a)$ 。显然这个映射是双射，接下来只需证明 $\phi$ 是同态。 $\phi((a_1,b_1)(a_2b_2))=\phi((a_1a_2,b_1b_2))=(b_1b_2,a_1a_2)=\phi((a_1,b_1))\phi((a_2,b_2))$
+
+4. 证明不存在嵌入 φ: Zₙ → Z
+
+嵌入的像和原像中的元素数量相等，而Z除了{e}外没有其他的有限子群，因此题目所述嵌入不可能存在
+
+5. 设 H ≤ G，并固定 x ∈ G。我们在课上已证明 xHx⁻¹ 总是 G 的子群
+
+(a) 进一步证明 xHx⁻¹ ≅ H [提示：定义一个从 H 到 xHx⁻¹ 的映射，并证明它是同态、单射且满射]
+
+定义 $\phi:h\rightarrow xhx^{-1}$ 。 $\phi(h_1h_2)=xh_1h_2x^{-1}=(xh_1x^{-1})(xh_2x^{-1})=\phi(h_1)\phi(h_2)$ , $\phi$ 是同态
+
+单射： $\phi(h_1)=\phi(h_2)\Rightarrow xh_1x^{-1}=xh_2x^{-1}\Rightarrow h_1=h_2$
+
+满射性质显然
+
+(b) 利用 (a) 证明：对任意 x, y ∈ G，有 |xy| = |yx|
+
