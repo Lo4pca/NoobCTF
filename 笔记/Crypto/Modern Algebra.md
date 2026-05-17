@@ -379,3 +379,18 @@ $N_G(A)$ 是G的子群的证明类似`(a)`。很明显 $N_G(A)$ 要比 $C_G(A)$ 
 
 (b) 利用 (a) 证明：对任意 x, y ∈ G，有 |xy| = |yx|
 
+假设y生成的子群是Y，那么根据(a)， $xYx^{-1}\cong x^{-1}Yx\cong Y$ ，两个群的阶相等。设 $H=xYx^{-1},H'=x^{-1}Yx$ ，Hx的阶等于xH'等于|xy|等于|yx|
+
+（这块绕远路了。 $xy=x(yx)x^{-1}$ ，直接就能推出两者阶相等）
+
+6. 设 φ: G → H 是同态，且 N ⊴ H
+
+(i) 证明集合 φ⁻¹(N) := { g ∈ G | φ(g) ∈ N } 是 G 的子群
+
+- 同态保持单位元,因此 $e\in φ⁻¹(N)$
+- 因为N是子群， $\forall\phi(g)\in N,\phi(g)^{-1}\in N\Rightarrow \phi(g^{-1})\in N\Rightarrow g^{-1}\in φ⁻¹(N)$
+- 同样因为N是子群， $\forall g_1,g_2\in φ⁻¹(N),\phi(g_1g_2)=\phi(g_1)\phi(g_2)\in N$ ，群运算封闭
+
+(ii) 证明 φ⁻¹(N) 是 G 的正规子群
+
+$g_1\in G,g_2\in φ⁻¹(N). \phi(g_1g_2g_1^{-1})=\phi(g_1)\phi(g_2)\phi(g_1)^{-1}$ 。由于N是正规子群， $\phi(g_1)\phi(g_2)\phi(g_1)^{-1}\in N$ ，因此 $g_1g_2g_1^{-1}\in φ⁻¹(N)$
