@@ -1891,3 +1891,13 @@ Mersenne twister更新state和从state输出随机数的过程可抽象为两个
 wp见 https://hackmd.io/@hoifanrd/SyeYX-HFP 。确实是lsb oracle，但关键的思路在于，在原消息m的末尾已经是`.`的前提下，只要某个乘数s的末尾是`0x81`且sm不超过n，oracle一直会返回nice（0x81\*0x2e=0x2e mod 256），否则只要sm超过n，oracle一定会返回nope。如果能找到一个s，使得sm不超过n但(s+1)m超过n，就能用n/s恢复m
 
 原wp恢复s的过程较慢，`ispo`提供了一种更快的方法
+
+### Hide and seek
+
+E的阶由小质数组成，dlog不成问题
+
+a * P + b * Q=akG+b\*FLAG\*kG=(ak+b\*FLAG\*k)G。拿到两组dlog值就能算出FLAG(全部方程都在模E的阶n下成立)：
+- $d_1=k(a_1+b_1\cdot FLAG)$
+- $d_2=k(a_2+b_2\cdot FLAG)$
+- $\frac{d_1}{d_2}=\frac{a_1+b_1\cdot FLAG}{a_2+b_2\cdot FLAG}\Rightarrow d_1(a_2+b_2\cdot FLAG)=d_2(a_1+b_1\cdot FLAG)$
+- $FLAG=(d_1a_2-d_2a_1)\cdot(d_2b_1-d_1b_2)^{-1}$

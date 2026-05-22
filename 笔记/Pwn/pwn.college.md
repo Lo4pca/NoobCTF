@@ -196,3 +196,17 @@ checksec显示栈可执行，于是第一反应是利用bof泄漏栈地址，最
 ### Make It FizzBuzz
 
 mprotect_stack函数可以将rbp所在的内存页的权限修改成rwx，正好泄漏的栈地址也在同一个内存页。利用上一题的任意地址写，提前在那块内存页里写好shellcode，然后修改返回地址为mprotect_stack+shellcode内存页地址
+
+## [Reverse Engineering](https://pwn.college/program-security/reverse-engineering)
+
+### The Yanalyzer(hard)
+
+自己写yan85反编译脚本太费力了，不如直接站在巨人的肩膀上： https://github.com/robalb/custom-vm-emulator 。脚本额外提供的自定义选项能很好地用于这题
+
+对比easy版本的代码，需要改动的内容如下：
+- opcode的定义
+- register的定义（参考`FUN_00101415`，寄存器的顺序固定为a,b,c,d,s,i,f）
+- syscall的定义
+- 指令解析顺序的定义（每个指令固定为3个字节，包含opcode,param1和param2。需决定三个字节与这三个值的对应关系）
+
+我把反编译结果扔给了ds，直接出答案
