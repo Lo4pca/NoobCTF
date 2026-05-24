@@ -455,3 +455,37 @@ $\forall g,h\in AB,\phi(gh)=(ghA,ghB)=(gAhA,gBhB)=(gA,gB)(hA,hB)=\phi(g)\phi(h)$
 (G/A) × (G/B)的单位元是(eA,eB)。 $g=ab,a\in A,b\in B;\phi(g)=(bA,aB)$ 。只有当a=b=e或 $b\in A,a\in B$ 时上述等式才能成立，说明ker(φ)=A ∩ B
 
 应用同态基本定理即可完成证明
+
+## HW 9
+
+1. 群 G 的换位子群(commutator subgroup)是子群 G' = ⟨aba⁻¹b⁻¹ | a, b ∈ G⟩
+
+(a) 证明 G 是阿贝尔群当且仅当 G' = {e}
+
+若G是阿贝尔群， $aba^{-1}b^{-1}=aa^{-1}bb^{-1}=e\Rightarrow$ G'={e}
+
+若G'={e}，说明任意aba⁻¹b⁻¹的结果都是e。 $aba^{-1}b^{-1}=e\Rightarrow ab=ba$
+
+(b) 证明 G' ⊴ G
+
+共轭存在恒等式 $gxyg^{-1}=(gxg^{-1})(gyg^{-1})$
+
+$\forall g\in G,gaba^{-1}b^{-1}g^{-1}=(gag^{-1})(gbg^{-1})(ga^{-1}g^{-1})(gb^{-1}g^{-1})=(gag^{-1})(gbg^{-1})(gag^{-1})^{-1}(gbg^{-1})^{-1}$ 。让 $a'=gag^{-1},b'=gbg^{-1}$ ，上述式子等于 $a'b'(a')^{-1}(b')^{-1}\in G'$
+
+(c) 证明 G' 是 G 的所有包含集合 C := {aba⁻¹b⁻¹ | a, b ∈ G} 的正规子群的交集: $G' = \cap_{C ⊆ N ⊴ G} N$
+
+如果一个正规子群包含C，它自然也包含所有C中的元素运算的结果，这点对任何包含C的正规子群都成立。所以 $\cap_{C ⊆ N ⊴ G} N$ 至少包含G'
+
+但G'自身也是一个正规子群，所以多个正规子群的交集一定不会大于G', $\cap_{C ⊆ N ⊴ G} N\in G'$
+
+G'与 $\cap_{C ⊆ N ⊴ G} N$ 互相包含，说明 $G' = \cap_{C ⊆ N ⊴ G} N$
+
+(d) 若将 G 模掉 G' 取商群，本质上是从凯莱图中“消除”所有非阿贝尔部分。用代数方法证明 G/G' 确实是阿贝尔群
+
+任取 $a',b'\in G/G',a'=aG',b'=bG'$ ，计算两者的换位子： $(aba^{-1}b^{-1})G'$ 。由于 $aba^{-1}b^{-1}\in G',(aba^{-1}b^{-1})G'=G'$ ，即商群中的单位元。这说明a'与b'交换，G/G'是阿贝尔群
+
+5. 设群 G 作用在集合 S 上。证明对每个 s ∈ S，稳定化子（stabilizer） Stab(s) 是 G 的子群
+
+- $e\in Stab(s)$
+- 假设 $a,b\in Stab(s)$ 。根据群作用的定义，ab等于先作用a再作用b，因此 $ab\in Stab(s)$
+- 假设 $a\in Stab(s)$ 。 $as=s\Rightarrow a^{-1}(as)=a^{-1}s\Rightarrow es=a^{-1}s\Rightarrow a^{-1}\in Stab(s)$

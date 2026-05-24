@@ -61,6 +61,9 @@
 - [The Butterfly effect](https://deayzl.tistory.com/entry/Infobahn-CTF-2025PWNV8-The-Butterfly-effect)
   - 通过修改`PACKED_DOUBLE_ELEMENTS`数组map地址的一个bit实现type confusion。v8题的运气成分很高，需要不断试验保证修改一个bit后原map变为已存在的`PACKED_ELEMENTS`数组的map
   - 在ArrayBuffer的backing_store_pointer仅有32bit后，之前常用的“直接往rwx页写shellcode”就没法用了。但在没开沙盒的情况下，解决办法并不复杂：wasm_instance内部仍记录着到rwx页的32位偏移。可以在wasm module里提前写好shellcode，触发jit编译后覆盖wasm_instance记录的偏移为到shellcode的偏移
+- [triforce](https://blog.rawpayload.com/blog/trx-ctf-2026-triforce-writeup)
+  - [Maglev](https://v8.dev/blog/maglev)忽略堆对象检查（`CheckType::kOmitHeapObjectCheck`）导致的类型混淆
+    - 2023年末开始，v8的结构变成Ignition (解释器)-Sparkplug (基线编译器)-Maglev (中层优化编译器)-TurboFan / Turboshaft (顶层优化编译器)
 
 ## Kernel
 
