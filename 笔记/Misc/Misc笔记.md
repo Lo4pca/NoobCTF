@@ -371,6 +371,10 @@ print(base64.b64encode(temp.encode()))
         - 因此如果子interpreter中存在严格的过滤而主Interpreter中没有，用type创建带有`__reduce_ex__`的对象或用setattr修改已有对象的`__reduce_ex__`是一种逃逸手段
     - 定义lambda函数时可以用`lambda*a`，空格不是必需的
     - 更详细的wp： **litterally-1984**
+- [Babel](https://blog.rawpayload.com/blog/trx-ctf-2026-babel-writeup)
+    - 仅利用类声明语句（`class XXX`），for语句，全局变量声明语句(`global x`)，属性访问(`a.b.c`)和元组(`a,b`,单元组`a,`也算)编写getshell代码
+        - 当某个类的特殊方法（比如`__getattr__`）被赋值为非描述符可调用对象（non-descriptor callable，比如内置函数），调用这个特殊方法时不会前置`self`。比如`class C: __getattr__ = os.system; C().sh`调用的是`os.system('sh')`而不是`os.system(self,'sh')`
+    - 类声明语句不是必要的，反而利用类的payload会更加繁琐： **Babel**
 - https://news.ycombinator.com/item?id=47502448
     - 无`__`,locals,`__builtins__`为None。可以用unicode或栈帧绕过
     - **pyjail**

@@ -489,3 +489,29 @@ G'与 $\cap_{C ⊆ N ⊴ G} N$ 互相包含，说明 $G' = \cap_{C ⊆ N ⊴ G} 
 - $e\in Stab(s)$
 - 假设 $a,b\in Stab(s)$ 。根据群作用的定义，ab等于先作用a再作用b，因此 $ab\in Stab(s)$
 - 假设 $a\in Stab(s)$ 。 $as=s\Rightarrow a^{-1}(as)=a^{-1}s\Rightarrow es=a^{-1}s\Rightarrow a^{-1}\in Stab(s)$
+
+## HW 10
+
+1. 让S为7个二进制方块的集合
+
+(c) 设 15 阶群 G 作用在集合 S 上。证明必然存在不动点
+
+Orbit-Stabilizer定理（213页`Theorem 9.4`）保证|Orb(s)|\*|Stab(s)|=|G|，任意元素s的轨道长度只能是1，3，5，15。由于所有轨道长度之和等于|S|，若没有不动点，只用3和5不可能得到7；因此必然存在长度为1的轨道，即不动点必然存在
+
+3. p-群是指阶为 pᵏ（k 为某整数）的群。回顾群 G 的中心是所有与一切元素都可交换的元素组成的集合：Z(G) = { z ∈ G | gz = zg, ∀g ∈ G } = { z ∈ G | g⁻¹zg = z, ∀g ∈ G }。此外，若群 G 仅有的正规子群为 G 和 ⟨e⟩，则称 G 为单群(simple)
+
+(a) 令 G 通过同态 φ: G → Perm(S)，φ(g) = "将每个 x 映为 g⁻¹xg "的置换，以共轭作用在自身上。证明 Fix(φ) = Z(G)
+
+Fix(φ)={ $x\in G｜g^{-1}xg=x,\forall g\in G$ }，等同于Z(G)的定义
+
+(b) 证明若 G 是 p-群，则 |Z(G)| > 1 [提示：回顾类方程]
+
+类方程（Class Equation）的内容为 $|G| = |Z(G)| + \sum_{i=1}^{k} [G : C_G(x_i)]$ ,其中：
+- $x_1, x_2, \dots, x_k$ 是非中心共轭类的代表元（每个共轭类选一个代表）
+- $C_G(x_i) = \{g \in G \mid gx_i = x_ig\}$ 是 $x_i$ 的中心化子
+
+221页的`Theorem 9.8`：如果p-群G作用于集合S，则S的阶与S中不动点的数量在模p下相等。这题p-群G作用于自身，因此|Fix(φ)| $\equiv p^k\equiv 0\mod p$ 。`(a)`已证明Fix(φ) = Z(G)，而Z(G)中至少存在一个元素e，因此|Z(G)| > 1
+
+（似乎和类方程没有关系）
+
+(c) 利用前一部分的结果分类所有单 p-群

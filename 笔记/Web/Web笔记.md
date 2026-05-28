@@ -4548,3 +4548,7 @@ if (await remote.hasPasswordFor(id)) {
 - 利用[ctfd zipslip](https://github.com/CTFd/CTFd/commit/488517db67f66072937416d7f2524ca6f2e2193d)获取rce
 579. **Aperi et Inveni**
 - binwalk WinCE extractor任意文件写漏洞。利用这个洞将文件写入binwalk的插件目录下，再次触发binwalk就能获取rce
+580. [Pixel Perfect](https://blog.rawpayload.com/blog/trx-ctf-2026-pixel-perfect-writeup)
+- python格式化字符串rce（依赖第三方库SQLAlchemy）
+- RFC quoted display-name address允许如下格式的邮箱：`"name" <a@a.com>`
+- ELF+Kodak PhotoCD（PCD）polyglot：Pillow的PCD检测插件只要求偏移2048处存在`PCD_`，没有文件头的要求

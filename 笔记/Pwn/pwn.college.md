@@ -214,3 +214,36 @@ mprotect_stack函数可以将rbp所在的内存页的权限修改成rwx，正好
 ### Yancraft(easy)
 
 上述脚本同样提供了编译shellcode的功能。yan85调用系统调用时，寄存器A、B和C为系统调用的参数；`SYS`指令的第二个参数指定存储返回值的寄存器
+
+### Yansanity(hard)
+
+easy版本只需要随意组合可能的字节，看程序给出的反编译内容就能得出各个指令与字节的对应关系
+
+hard版本可从exit syscall入手：
+- 爆破SYS opcode和exit的syscall编号，若程序以exit code 0退出，说明猜测正确（所有寄存器的初始值都是0）
+- 爆破IMM opcode和寄存器A的编号，并调用exit。A寄存器控制exit code，所以如果程序以指定exit code退出，说明猜测正确
+- 爆破read_memory的syscall编号和寄存器C的编号。将read_memory的返回值存到A中，然后调用exit。如果程序能够接收输入且以输入的字符数作为exit code退出，说明猜测正确
+- 爆破open的syscall编号，并将返回值存在A中，然后调用exit。如果程序以exit code 4退出，说明猜测正确（不知道为什么第一个打开的文件的fd是4而不是3）
+- 爆破write的syscall编号
+
+不知道为什么，相同的脚本在privileged环境下没法拿到flag
+
+### When the Cow Says Moo
+
+`gamefile.bin`的格式如下：
+- 16字节文件头：uint32缓冲区大小（+8），uint32条目数量（+12）
+- 缓冲区：每个条目固定16字节
+    - 4字节ID
+    - 2字节尝试次数
+    - 2字节数字位数
+    - 8字节秘密数字
+
+每次猜测时程序打印的Bulls为数字正确且位置正确的个数；Cows为数字正确但位置错误的个数。输入不能包含重复数字，要求正好在最后一次机会猜中数字，猜错或提前猜对都不行
+
+程序使用当前时间作为rand的种子，所以直接预测程序选择的entry就好
+
+### Predictable Migration
+
+`gamefile.bin`的每个条目多了attempts\*6个字节，用于记录猜测历史，格式`XXCYYB`，表示此次猜测需要有XX个Cows，YY个Bulls
+
+在前一题的获胜条件下，此题额外要求每次猜测的Cows和Bulls数量等同于选中的条目里记录的历史。由于数字无重复且数量不多，可以直接爆破出符合要求的数字

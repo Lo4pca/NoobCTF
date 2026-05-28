@@ -968,11 +968,11 @@ AES是很能出题的。DES则是放在这凑数的
 	- AES GCM,已知两条明文及其对应密文+可控制加密用的IV（IV重用，不过更多时候叫nonce），要求伪造指定明文的密文
 - [Lazy STEK](https://blog.soreatu.com/posts/writeup-for-lazy-stek-in-line-ctf-2022/)
     - AES GCM forbidden attack（nonce reused攻击）
-    - 还是在这个[脚本](https://rbtree.blog/posts/2022-03-27-sage-script-for-aes-gcm/)里知道这题的。脚本内容为“在sagemath里如何将字节块转换为 $F_2^{128}$ 里的元素”
+    - 还是在这个[脚本](https://rbtree.blog/posts/2022-03-27-sage-script-for-aes-gcm)里知道这题的。脚本内容为“在sagemath里如何将字节块转换为 $F_2^{128}$ 里的元素”
 - [Conversationalist](https://github.com/JorianWoltjer/challenges/blob/main/1337up-live-2024/conversationalist)
     - AES GCM nonce reused攻击的实际案例。出问题的库是rust的[cocoon](https://crates.io/crates/cocoon)
     - 知识点和上面两道题一样。补充一篇文章： https://frereit.de/aes_gcm 。nonce重用后，和ctr模式类似，整个gcm就成了many time pad。不过gcm对每条消息都提供了验证tag，导致针对gcm模式的密文伪造攻击比ctr多了一步：构造多项式方程恢复验证用的key
-- [Invisible Salamanders in AES-GCM-SIV](https://keymaterial.net/2020/09/07/invisible-salamanders-in-aes-gcm-siv/)
+- [Invisible Salamanders in AES-GCM-SIV](https://keymaterial.net/2020/09/07/invisible-salamanders-in-aes-gcm-siv)
     - 构建一条`ciphertext+tag`使其用两个已知的不同密钥解密后得到两个不一样但有效的明文
 - **DODOLOUF**
     - AES-cbc字节反转攻击+python随机数预测（randcrack）。这题出现反转攻击的明文段属于python pickle序列化内容。有一点要注意，因为攻击后必定有几块解密出乱码，所以一般安排这些乱码出现在诸如username的等无伤大雅的字段。但是若原本存储username时用的是普通字符串（unicode类型）而不是bytestring，反序列化时就会出问题。所以要同时把pickle里记录字段类型的字节也改了
