@@ -247,3 +247,21 @@ hard版本可从exit syscall入手：
 `gamefile.bin`的每个条目多了attempts\*6个字节，用于记录猜测历史，格式`XXCYYB`，表示此次猜测需要有XX个Cows，YY个Bulls
 
 在前一题的获胜条件下，此题额外要求每次猜测的Cows和Bulls数量等同于选中的条目里记录的历史。由于数字无重复且数量不多，可以直接爆破出符合要求的数字
+
+### Hashing Heifers
+
+记录的猜测历史不再是明文，而是sha256值。仍然可以用爆破解决：爆破全部可能的猜测值，提取出Cows和Bulls状态后将其sha256值存到字典里，后面就能反查了
+
+### Salty Stampede
+
+每个条目额外记录了key1和key2，在计算猜测历史的sha256值时作为前缀。和上一题的解法一模一样，因为key1和key2都是已知的固定值
+
+## [Return Oriented Programming](https://pwn.college/program-security/return-oriented-programming)
+
+### Guarded Gadgets(Easy)
+
+任意地址读只能读canary，不然没有办法施展rop
+
+main的返回地址是`__libc_start_main`，partial overwrite只能覆盖其周边的区域。看了一会没有发现什么好的gadget，随后在翻阅笔记时想起了一个技巧：vsyscall的地址固定为`0xffffffffff600000`。只需要填4个vsyscall地址就能碰到main的地址
+
+然而直接返回到main会报错，因为此时rax为0，程序中存在解引用rax的操作。我选择partial overwrite到scanf上方（此处需要爆破，注意控制rbp为合理值），再来一次任意地址读。这次读取libc的地址，然后rop setuid+system（两个函数都要求栈对齐）
