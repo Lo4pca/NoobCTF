@@ -1901,3 +1901,9 @@ a * P + b * Q=akG+b\*FLAG\*kG=(ak+b\*FLAG\*k)G。拿到两组dlog值就能算出
 - $d_2=k(a_2+b_2\cdot FLAG)$
 - $\frac{d_1}{d_2}=\frac{a_1+b_1\cdot FLAG}{a_2+b_2\cdot FLAG}\Rightarrow d_1(a_2+b_2\cdot FLAG)=d_2(a_1+b_1\cdot FLAG)$
 - $FLAG=(d_1a_2-d_2a_1)\cdot(d_2b_1-d_1b_2)^{-1}$
+
+### Authentification 1
+
+GCM没有验证tag且token的明文已知，完全等于many time pad
+
+不知道为什么token的值有点奇怪，分割tag的`;`被替换成了`\073`，且必须有双引号包住token的hex值

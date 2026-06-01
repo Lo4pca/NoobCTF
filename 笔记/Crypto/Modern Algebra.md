@@ -557,3 +557,42 @@ $|G|=p^k$ ，讨论k的不同情况：
 由同态基本定理： $G/ker(\phi)\cong im(\phi)\leq S_p$ ，得 $[G:ker(\phi)]=|im(\phi)|$ 。因为 $ker(\phi)\subseteq H$ ，所以 $|G:H||H:ker(\phi)|=|im(\phi)|=[G:ker(\phi)]\Rightarrow p|H:ker(\phi)|=[G:ker(\phi)]$ 。 $im(\phi)\leq S_p$ ，因此 $|im(\phi)|$ 整除 $|S_p|=p!$ 。结合两式可得 $p|H:ker(\phi)|$ 整除p! ，即 $|H:ker(\phi)|$ 整除(p-1)!
 
 $|H:ker(\phi)|$ 整除|H|，而|H|的所有素因子都大于等于p（因p 是整除 |G| 的最小素数）。然而(p-1)! 的所有素因子都小于p。因此只能有 $|H:ker(\phi)|=1$ ，即 $ker(\phi)=H$ 。H是G的正规子群，从而 G 不可能是单群
+
+## HW 11
+
+称域 Q(⁴√3, i) 为多项式 f(x) = x⁴ − 3 在 Q 上的分裂域，因为它是包含 f(x) 所有根的 Q 的最小扩域
+
+(a) 在复平面上画出 f(x) = x⁴ − 3 的根。将每个根写成 a + bi 的形式，其中 a, b ∈ R。此外，将每个根写成极坐标形式： $z = Re^{iθ}$
+
+拿出sagemath：
+
+```py
+x = polygen(CC)
+f = x**4 - 3
+roots = f.roots(multiplicities=False)
+for i, z in enumerate(roots, 1):
+    R = abs(z)
+    theta = atan2(imag(z), real(z))
+    print(f"根 {i}: {z}")
+    print(f"  → R = {R}")
+    print(f"  → θ = {theta} rad = {theta * 180/pi.n()}°")
+    print(f"  → {R}·e^(i·{theta})")
+    print()
+points_to_plot = [(root.real(), root.imag()) for root in roots]
+p = point(points_to_plot, axes=True, size=30, color='blue', 
+          title="Roots of $f(x) = x^4 - 3$ on the Complex Plane")
+p.save("roots.png")
+```
+极坐标中的R是模长，为复数到原点的距离，非负实数 (R≥0)；θ是辐角，为复数与正实轴的夹角（弧度或度数），可用atan2求
+
+(b) 求Q的扩域 Q(⁴√3) 的一组基，并计算其作为Q-向量空间的维数。即找出一组极小的 $v_1, …, v_k ∈ Q(\sqrt[4]{3})$ ，使得每个 x ∈ Q(⁴√3) 都可以唯一地写成这些 $v_i$ 的线性组合
+
+{ $1,\sqrt[4]{3},(\sqrt[4]{3})^2,(\sqrt[4]{3})^3$ }，维数为4
+
+(c) Q(⁴√3) 是否是某个多项式 g(x) 在 Q 上的分裂域？若是，找出 g(x)；若否，说明理由
+
+x⁴ − 3在Q上是不可约多项式，但x⁴ − 3存在不在Q(⁴√3)的根（根带有i），因此Q(⁴√3)不是分裂域
+
+(d) 求 Q(⁴√3, i) := Q(⁴√3)(i) = Q(i)(⁴√3) 分别在域 Q(⁴√3)、Q(i) 和 Q 上的基。它在这些域上的向量空间维数各是多少？
+
+(e) Q(⁴√3, i) 是 Q(⁴√3) 上哪个多项式的分裂域？又是 Q(i) 上哪个多项式的分裂域？

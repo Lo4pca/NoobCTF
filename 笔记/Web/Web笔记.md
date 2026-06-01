@@ -4552,3 +4552,10 @@ if (await remote.hasPasswordFor(id)) {
 - python格式化字符串rce（依赖第三方库SQLAlchemy）
 - RFC quoted display-name address允许如下格式的邮箱：`"name" <a@a.com>`
 - ELF+Kodak PhotoCD（PCD）polyglot：Pillow的PCD检测插件只要求偏移2048处存在`PCD_`，没有文件头的要求
+581. [GeckoDRCE](https://hackmd.io/@frevadiscor/SyNI0pna-x)
+- 题目用Selenium+geckodriver运行一个无头firefox浏览器，允许用户执行任意浏览器插件。目标是rce
+    - firefox自身使用Marionette协议做自动化，而geckodriver是Selenium的翻译器，将WebDriver的http请求翻译成Marionette命令
+- wp描述了三条路线。三条路线拥有同样的触发点：geckodriver拒绝带有非期望`Origin`值的请求，但插件可以删去`Origin`，从而自由地与geckodriver沟通。然而想要进一步获取rce需要得知geckodriver当前session的id。在只能有一个活跃session且没有任何办法泄漏id或爆破id的情况下，需要利用race condition注册一个新session：用插件API关闭所有的浏览器窗口，使Marionette认为firefox已退出。然而geckodriver直到下一次与Marionette交互失败才会删除session。在删除session后，geckodriver完全关闭前，存在一个窗口允许创建新session。攻击者可操控启动参数，开启一个全新的firefox实例。创建新session后：
+    - 第一条路线：用`--remote-allow-system-access`和`webSocketUrl:true`参数开启一个新firefox。接下来只需爆破websocket的端口号，与Firefox Remote Agent交互，发送`script.evaluate`即可rce
+    - 第二条路线：post `/session/{sid}/moz/context`和`/session/{sid}/execute/sync`执行代码。这条路线利用了geckodriver chrome context，但由于题目会关闭Selenium与geckodriver，这条路线没有上一条稳定
+    - 第三条路线：在`moz:firefoxOptions.profile`上传一个base64编码的zip。firefox对profile的提取逻辑存在zipslip，允许任意文件写。在运行firefox的用户的家目录下写入一个native messaging manifest，然后插件触发native app，拿到rce

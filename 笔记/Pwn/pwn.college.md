@@ -265,3 +265,9 @@ hard版本可从exit syscall入手：
 main的返回地址是`__libc_start_main`，partial overwrite只能覆盖其周边的区域。看了一会没有发现什么好的gadget，随后在翻阅笔记时想起了一个技巧：vsyscall的地址固定为`0xffffffffff600000`。只需要填4个vsyscall地址就能碰到main的地址
 
 然而直接返回到main会报错，因为此时rax为0，程序中存在解引用rax的操作。我选择partial overwrite到scanf上方（此处需要爆破，注意控制rbp为合理值），再来一次任意地址读。这次读取libc的地址，然后rop setuid+system（两个函数都要求栈对齐）
+
+### Guarded Gadgets(Hard)
+
+我尝试直接复用上一题的exp，然而每次运行到IO函数就报错，无论我跳转到哪里。调试发现由于这题移除了很多辅助函数，执行vsyscall时rdi指向stdout中的一个字段，导致vsyscall破坏了stdout。那就用ropper寻找别的gadget吧，比如一个可以pop三个值进寄存器的gadget。可惜在返回到main后栈没有对齐，导致printf报错。难道`__libc_start_main`里有gadget？但我上一题不是没找到吗？
+
+事实证明我的眼神也不好。在不覆盖栈上数据的情况下调试即可发现，调用main的语句是`__libc_start_main`中的`call rax`。往上看几行，直接跳转到函数内布置rax的地方即可顺利调用main，也没有栈不对齐的问题
