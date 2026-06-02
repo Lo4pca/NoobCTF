@@ -391,7 +391,7 @@
         - [Scroll to Text Fragment (STTF)](https://developer.mozilla.org/en-US/docs/Web/URI/Reference/Fragment/Text_fragments)：可以用STTF检测浏览器何时进入viewport（浏览器窗口中当前可见的网页部分）。要求攻击目标可以被嵌入iframe中，且内部存在html注入。对于这道题，没有一个条件满足
         - [Navigations](https://xsleaks.dev/docs/attacks/navigations):通过读`history.length`的值区分成功与失败的查询。首先把bot引向攻击者的网站，使其访问目标网站后执行查询。理论上查询成功的重定向会使`history.length`的值会比查询失败时多出1。最后将bot导会攻击者网站来访问`history.length`的值（只有同源才能读取这个值）。结果实测发现fetch向`/search`发的post请求没有被记入到`history.length`中
         - [Max redirects](https://xsleaks.dev/docs/attacks/navigations/#max-redirects):浏览器限制3XX重定向链的最大次数为20。所以可以在攻击者的网站上重定向20-n次，n为目标网站搜索失败时重定向的次数，n+1为成功时的次数。于是搜索成功会实施21次重定向，触发network error。重点在于“重定向链”。实测里访问目标网站得到的是http code 200而不是3XX，链子断了就没用了。而且题目作者还检查了referer
-        - [CSS :visited selector](https://xsleaks.dev/docs/attacks/css-tricks):根据 https://jorianwoltjer.com/blog/p/hacking/xs-leaking-flags-with-css-a-ctfd-0day 和 https://varun.ch/posts/history ，可以用css的`:visited` selector来泄漏访问过的网站url。失败的原因和之前一样，fetch发起的post请求不在history里。`:visited`已被修复： https://developer.chrome.com/blog/visited-links
+        - [CSS :visited selector](https://xsleaks.dev/docs/attacks/css-tricks):根据 https://jorianwoltjer.com/blog/p/hacking/xs-leaking-flags-with-css-a-ctfd-0day 和 https://varun.ch/posts/history ，可以用css的`:visited` selector来泄漏访问过的网站url。失败的原因和之前一样，fetch发起的post请求不在history里。`:visited`已被修复： https://chromium.googlesource.com/chromium/src/+/2c42f2b695bea8a358b8eb7435c87669029325f1
         - [Cross-window Timing Attacks](https://xsleaks.dev/docs/attacks/timing-attacks/network-timing/#cross-window-timing-attacks):攻击者可以测量某个页面打开的时间。问题是这题要测量的是重定向的时间而不是页面打开的时间
     - 官方wp和payload
         - https://hackmd.io/@r2dev2/S1P0RYHYke
@@ -617,6 +617,12 @@
     - 通过设置[document.domain](https://developer.mozilla.org/en-US/docs/Web/API/Document/domain)放宽子域名间的SOP。如果`a.example.com`和`b.example.com`均用`document.domain = "example.com"`设置domain，则两者变为同源，可以互相访问彼此的dom
         - `document.domain = document.domain`或`document.domain += ""`虽然没有把domain修改成别的字符串，但对于任何其他通常属于同源、但未执行相同操作的页面而言，该页面变为跨源
     - 在Amazon S3中，对于公共的object，任何人都可以获取该object的presigned_url来更改服务器提供文件时的content-type。完整的可修改response header列表见 https://docs.aws.amazon.com/boto3/latest/reference/services/s3/client/get_object.html
+- **are xsleaks dead?**
+    - 两种通用的跨站状态码泄漏技巧，唯一的要求是`SameSite != strict`
+    - 第一种技巧利用chrome disk cache： https://gist.github.com/parrot409/e3b546d3b76e9f9044d22456e4cc8622 。假设要泄漏的页面在不同状态码下返回的内容长度不同。fetch多个控制好大小的页面消耗cache，使得目标页面返回200时，最开始被cache的页面因cache超额被移除，在`cache: 'only-if-cached'`模式下无法访问；而目标页面返回404时不会超过cache配额，fetch可正常获取最开始的页面
+        - puppeteer和chrome incognito tab用RAM存储disk cache，所以配额要比正常disk cache小得多
+        - 无论是RAM disk cache还是disk cache，cache的大小都是可预测的
+    - 第二种技巧利用chrome处理200和404的不同处。假如连续打开很多个200页面和404页面，平均下来404页面要比200页面快1ms
 
 ## SSTI
 
@@ -4559,3 +4565,12 @@ if (await remote.hasPasswordFor(id)) {
     - 第一条路线：用`--remote-allow-system-access`和`webSocketUrl:true`参数开启一个新firefox。接下来只需爆破websocket的端口号，与Firefox Remote Agent交互，发送`script.evaluate`即可rce
     - 第二条路线：post `/session/{sid}/moz/context`和`/session/{sid}/execute/sync`执行代码。这条路线利用了geckodriver chrome context，但由于题目会关闭Selenium与geckodriver，这条路线没有上一条稳定
     - 第三条路线：在`moz:firefoxOptions.profile`上传一个base64编码的zip。firefox对profile的提取逻辑存在zipslip，允许任意文件写。在运行firefox的用户的家目录下写入一个native messaging manifest，然后插件触发native app，拿到rce
+582. [RicingStar](https://simonedimaria.xyz/posts/ctrl+space-ctf-finals-2025/ricingstar)
+- 题目背景是一个运行着插件的Selenium+geckodriver firefox bot，网站可以用js发送MessageEvent使插件应用任何css样式。目标是获取bot在某个tab里打开的url
+- stylesheet的origin（对应插件的insertCSS api的参数`origin`）有两个可能值，`AUTHOR`和`USER`。`USER` stylesheet的优先级比`AUTHOR` stylesheet更高，且可以访问一些已启用的功能，如`@-moz-document`。该规则允许根据文档的URL应用样式，支持正则匹配（仅在firefox浏览器`USER`样式表中可用）
+- Firefox [Xray Vision](https://firefox-source-docs.mozilla.org/dom/scriptSecurity/xray_vision.html):向调用者显示对象的原生版本，帮助在特权上下文中运行的js安全地访问由权限较低的代码创建的对象。具体来说，在具有特权上下文运行的js叫`chrome code`，在普通浏览器页面运行的js叫`content code`。`chrome code`可以访问`content code`传入的对象，但由于`content code`可以随意为对象添加属性，直接依赖这个对象可能会导致非预期行为。于是Xray Vision负责包装用户传入的对象，让`chrome code`直接访问对象底层的c++实现，不受js定义的属性影响
+    - `chrome code`可以访问对象的`wrappedJSObject`属性获取未被包装的js对象（unwrap）。这个操作具有传递性，如果unwrap某个对象，则一并unwrap该对象所有的属性
+- `document.all`属性非常特殊，它是Object类型，返回HTMLAllCollection，但在布尔判断中为false。它弱等于undefined和null，类型(`typeof`)是undefined，但可调用（callable）且可索引（indexable）
+    - 可以通过不断移除`document.firstChild`的操作获取一个空的HTMLAllCollection，然后自行添加任意属性
+    - 所有主流浏览器均支持该属性
+- 当多个CSS规则匹配同一个HTML元素且设置同一个属性时，浏览器只会应用优先级最高的样式表。可以给每个样式都加一个自定义属性避免这种冲突
