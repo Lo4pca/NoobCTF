@@ -721,6 +721,14 @@ print(base64.b64encode(temp.encode()))
 - [The Legendary Armory](https://0xasta.me/writeups/srdnlen26-thetrilogyofdeathvolumeii)
     - 分析[86Box](https://86box.net)产生的windows minidump文件。工具：[minidump](https://github.com/skelsec/minidump)
     - 这篇wp是AI写的，`Step 2`似乎出现了问题。正确的复现结果见 **The Legendary Armory**
+- https://infosecwriteups.com/decrypting-zoom-team-chat-forensic-analysis-of-encrypted-chat-databases-394d5c471e60
+    - 分析Zoom Team Chat Artifact
+        - 应用数据存储路径:`C:\Users\xxx\AppData\Roaming\Zoom\data`
+        - `zoomus.enc.db`存储Zoom账号与session信息（main db）
+        - `zoomus.async.enksdb`（位于`C:\Users\xxx\AppData\Roaming\Zoom\data\<XMPP JID>\`下）存储Zoom Team Chat内容（user db）
+            - 两个db均由SQLCipher加密，使用的key不同。user db的key从main db的key（main key）与kwk(Key Wrapping Key)推导而来
+            - kwk存储在zoom的服务器上，在登录或已有的session刷新时下放。可用[apimonitor](http://www.rohitab.com/apimonitor)监听出kwk
+        - `zoom.us.ini`包含被DPAPI加密后的main key。参考`Breadcrumbs`解密密钥；可用dpapimk2john爆破出登录密码
 
 ## Network Forensics
 

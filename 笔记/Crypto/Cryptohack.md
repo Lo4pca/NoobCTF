@@ -1907,3 +1907,11 @@ a * P + b * Q=akG+b\*FLAG\*kG=(ak+b\*FLAG\*k)G。拿到两组dlog值就能算出
 GCM没有验证tag且token的明文已知，完全等于many time pad
 
 不知道为什么token的值有点奇怪，分割tag的`;`被替换成了`\073`，且必须有双引号包住token的hex值
+
+### A Joke Cipher
+
+叫ds看了一眼附件给出的文章链接，似乎和什么部分和难题有关系。附件的实现和论文描述的一致，ds也没有分析出或是搜出什么漏洞，于是我决定自己看一眼
+
+encrypt和decrypt逻辑异常的简单，完全依赖于shared_key的乘法和除法。然而在看完shared_key的计算过程后我直接懵了：这个式子里有任何未知项吗？`S_A % self.p`不是作为公钥给出去了吗？
+
+疑似最简单的论文题
