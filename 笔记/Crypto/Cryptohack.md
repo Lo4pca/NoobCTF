@@ -1915,3 +1915,15 @@ GCM没有验证tag且token的明文已知，完全等于many time pad
 encrypt和decrypt逻辑异常的简单，完全依赖于shared_key的乘法和除法。然而在看完shared_key的计算过程后我直接懵了：这个式子里有任何未知项吗？`S_A % self.p`不是作为公钥给出去了吗？
 
 疑似最简单的论文题
+
+### Unimplemented
+
+ds直接秒了：
+
+在环 $ \mathbb{Z}[i]/(n) $ 中，一个元素m = a+bi可逆的充要条件是 $ \gcd(a^2+b^2, n) = 1 $ 。可逆元构成乘法群G，其阶为 $|G| = |(\mathbb{Z}[i]/(p^2))^{*}| \times |(\mathbb{Z}[i]/(q^2))^{*}|$
+
+对于奇素数p：
+- 若 $ p \equiv 3 \pmod{4} $ ，p是高斯素数，则 $ |(\mathbb{Z}[i]/(p^2))^*| = p^4 - p^2 = p^2(p^2-1) $
+- 若 $ p \equiv 1 \pmod{4} $ ，$ p = \pi\bar{\pi} $ ，则 $ |(\mathbb{Z}[i]/(p^2))^*| = p^2(p-1)^2 $
+
+因此，已知p,q就可以算出群阶L，并求 $ d \equiv 65537^{-1} \pmod{L} $ ，然后解密： $m = c^d \bmod n$
