@@ -2,6 +2,15 @@
 
 不要再乱分类了……
 
+## Resources
+
+一些没有例题的文章
+
+- [Transient Storage Clearing Helper Collision Bug](https://www.soliditylang.org/blog/2026/02/18/transient-storage-clearing-helper-collision-bug)
+    - 在Solidity Compiler `0.8.28`到`0.8.33`版本中，使用`--via-ir`编译的合约用`delete`关键字删除一个Transient变量时，编译器可能会使用错误的opcode——在该用tstore的地方使用sstore；或在应该使用sstore的地方使用tstore
+        - 调用`delete`时，编译器底层需要构建清理变量的helper函数。构建出来的函数按`函数名+变量类型`缓存，注意此处并没有区分Transient变量和storage变量。这导致一旦代码`delete`某个类型的Transient/storage变量后，后续（当前合约或子/父合约中）`delete`相同类型的storage/Transient变量时便会出现opcode错误的情况
+    - 更详细的分析： https://hexens.io/research/solidity-compiler-bug-tstore-poison
+
 ## Legacy
 
 把web笔记里所有和solidity、blockchain相关的迁移过来。这里放分散的条目

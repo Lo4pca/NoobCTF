@@ -378,6 +378,7 @@
 - [Find Minimum Diameter After Merging Two Trees](./Hard/Find%20Minimum%20Diameter%20After%20Merging%20Two%20Trees.md). 寻找树（tree）的直径（diameter）
 - [Recover a Tree From Preorder Traversal](./Hard/Recover%20a%20Tree%20From%20Preorder%20Traversal.md). binary tree
 - [Count Good Triplets in an Array](./Hard/Count%20Good%20Triplets%20in%20an%20Array.md). binary indexed tree（Fenwick Tree）
+- [Maximum Total Subarray Value II](./Hard/Maximum%20Total%20Subarray%20Value%20II.md). SparseTable
 
 ## Others
 

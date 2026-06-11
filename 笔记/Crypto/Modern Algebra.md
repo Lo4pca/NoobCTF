@@ -665,3 +665,7 @@ r = f % g
 print(f"商: {q}")
 print(f"余式: {r}")
 ```
+
+## HW 13
+
+VGT看完了，作业里提到的AATA是[Abstract Algebra: Theory and Applications](https://judsonbooks.org/abstract-algebra-theory-and-applications)。作业要求阅读第15章，但在2025版中这章是Sylow定理。结合课程与作业的内容，个人认为要读的应该是第16章
