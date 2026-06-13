@@ -315,3 +315,19 @@ malloc取出tcache堆块时会清空key值。因此虽然我们无法分配到se
 我甚至想过覆盖libc got，但scanf用`malloc_usable_size`决定读取的数据长度，而目标libc got周围没合法的size。难道这道题介绍了一种我不知道的泄漏栈地址的方法？
 
 并没有。再多看一行echo函数的伪代码就能发现，它分配的chunk里有一个栈指针
+
+### Ephemeral Echo(Hard)
+
+主要的改动在于free清空了堆块指针；增加的read函数提供了堆溢出。虽然无法直接修改fd，但只要不破坏chunk的size字段，通过溢出覆盖过去效果一样
+
+echo没有限制offset，所以可以利用oob read泄漏地址
+
+### Seeking Safe Secrets(Hard)
+
+做`Seeking Secrets`时，我的策略是分配到`secret`和`secret-8`，完全清空secret。但这题的libc版本为`2.35`，除了safe linking，更致命的问题是链入的chunk的地址必须按16字节对齐，意味着我们没有办法清空前8个字节
+
+我没有任何思路，只能去社区逛逛。结果看完所有提到这道题的对话后，我还是不懂。大家给的提示都是“fd是什么”，“有办法分配到secret”，“libc对fd做了什么”，我实在没法从中读出什么。最后我锁定了一句话，内容大致是“虽然elf丢弃了chunk的指针，但它仍然被malloc出来了。你要是继续malloc会发生什么？”
+
+我仍然不明白，但试一下不就知道佬说的是什么了吗？在malloc到secret后，tcachebin的head变成了secret的前8个字节。这个我知道，我还知道如果把这玩意malloc出来的话，程序一定会崩溃的。不过我执行tcache poisoning时只free了两个chunk，继续malloc的话libc会从top chunk割下一块返回。让我试试free这个chunk？
+
+然后这个chunk里便出现了secret的前8个字节。我猛然明白过来：”这是把tcache head遗留的内容当成下一个chunk放进fd里了啊“。调用puts将其泄漏出来，demangle获取实际值，提交——仍然不对。调试发现前几个字节和实际secret不符。问了ds，看来在libc把secret中的内容放入tcache head时也做了一次mangle。mangle操作等于`(&存储的fd值的地址 >> 12) XOR 存储的fd值`，所以需要用secret的地址的高位再做一次demangle

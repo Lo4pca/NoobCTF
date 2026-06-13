@@ -20,6 +20,9 @@
 - 新的php [drupal](https://www.drupal.org/project/php)反序列化rce链： https://github.com/anzuukino/phpggc/tree/master/gadgetchains/Drupal/RCE/2
 - https://aszx87410.github.io/beyond-xss
 - 一些iframe与window的知识和利用： https://blog.huli.tw/2022/04/07/iframe-and-window-open
+- https://gist.github.com/icesfont/487d2838af9ade8a94da5ec8e3072273
+    - 请求一个304页面时，新设置的csp header应覆盖缓存的csp header；但firefox会继续使用缓存的csp
+    - chrome也有类似的行为： **Secure Notes**
 
 ## SQL注入
 

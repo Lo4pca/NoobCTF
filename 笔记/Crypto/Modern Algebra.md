@@ -669,3 +669,45 @@ print(f"余式: {r}")
 ## HW 13
 
 VGT看完了，作业里提到的AATA是[Abstract Algebra: Theory and Applications](https://judsonbooks.org/abstract-algebra-theory-and-applications)。作业要求阅读第15章，但在2025版中这章是Sylow定理。结合课程与作业的内容，个人认为要读的应该是第16章
+
+2. 证明：若环 R 的左理想 I 包含一个单位（unit），则 I = R
+
+根据单位的定义，对于 $a\in I$ ，存在 $a^{-1}\in R$ 使得 $a^{-1}a=1$ ，说明 $1\in I$ 。那么对于任意 $r\in R,r1=r\in I$ ，因此I=R
+
+3. 设 I 和 J 是环 R 的理想
+
+(a) 证明 I + J、I ∩ J 和 IJ 都是 R 的理想
+
+证明某个子集是理想需要先证明子集是子环，然后验证理想的吸收性。参考289页对环的定义，似乎要证明的公理有很多；但吸收性和子集可以推出大部分公理，实际上只需要证明加法封闭和吸收性
+
+对于I + J：
+- $(i_1+j_1)+(i_2+j_2)=(i_1+i_2)+(j_1+j_2)\in I+J$
+- $\forall r\in R,r(i+j)=ri+rj$ 。由于I和J自身是理想， $ri\in I,rj\in J,ri+rj\in I+J$ 。另一个方向同理
+
+对于I ∩ J：
+- 取 $a,b\in I\cap J.a,b\in I\Rightarrow a+b\in I;a,b\in J\Rightarrow a+b\in J$ 。因此 $a+b\in I\cap J$
+- 取 $r\in R,a\in I\cap j$ 。因I是理想， $ra\in I$ ;因J是理想， $ra\in J$ 。因此 $ra\in I\cap J$ 。另一个方向同理
+
+对于IJ：
+- IJ的定义是{ $\sum_{k=1}^ni_kj_k|i_k\in I,j_k\in J,n\in N$ }
+- $a,b\in IJ,a=\sum_{k=1}^mi_kj_k,b=\sum_{k=1}^ni'_kj'_k.a+b$ 仍然是有限和，因此加法封闭
+- 取 $r\in R,a\in IJ,a=\sum_{k=1}^mi_kj_k$ 。则 $ra=\sum_{k=1}^mri_kj_k$ 。由于I是理想， $ri_k\in I$ ，因此 $ra\in IJ$ 。另一个方向同理
+
+(b) 若 R 是交换环，则集合 (I : J) = { r ∈ R | rJ ⊆ I } 称为 I 和 J 的理想商或冒号理想（colon ideal）。证明 (I : J) 是 R 的理想
+
+- 取 $r_1,r_2\in (I:J)$ ,需证 $(r_1+r_2)J\subseteq I$ 。任取 $j\in J,(r_1+r_2)j=r_1j+r_2j$ 。因为 $r_1\in (I:J),r_1j\in I$ ;同理 $r_2j\in I$ 。因I是理想， $r_1j+r_2j\in I$ ，即 $(r_1+r_2)J\subseteq I$
+- 取 $r\in (I:J),r'\in R$ 。 $(r'r)J=r'(rJ)$ 。由于 $rJ\subseteq I$ 且I是理想, $r'(rJ)\subseteq I$
+
+4. 由 X ⊆ R 生成的左理想定义为 (X) := ∩{ I : I 是左理想且满足 X ⊆ I ⊆ R }。
+
+(a) 证明由 X 生成的左理想为 (X) = { r₁x₁ + … + rₙxₙ : n ∈ ℕ, $r_i ∈ R, x_i ∈ X$ }
+
+题目似乎默认R是含幺环（包含单位元1），不然第一个定义里包含X本身，而第二个定义里并不包含
+
+首先两个定义生成的确实都是理想。前者因为多个理想的交仍然是理想，后者则是因为其有限和形式很容易看出满足加法封闭性和乘法吸收性
+
+称第一个定义生成的理想为(X)，第二个定义生成的理想为(X)'。(X)包含(X)'，因为(X)'中的元素是有限个 $r_i$ 倍 $x_i$ 之和，而X本身在(X)中。利用(X)的封闭性和吸收性， $(X)'\in(X)$
+
+根据(X)的定义，(X)'自身就是参与合并的多个理想中的一个，结果只会小于等于(X)'。因此 $(X)\in (X)'$
+
+综上所述，(X)=(X)'

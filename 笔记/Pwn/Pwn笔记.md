@@ -1012,8 +1012,7 @@ def demangle(val, is_heap_base=False):
             mask >>= 12
         return val
     return val << 12
-
-def mangle(heap_addr, val):
+def mangle(heap_addr, val): #val是想要mangle的目标
     #如果直接获得了aslr的部分就不用>>12了，右移就是为了从heap基址中取出aslr的部分
     return (heap_addr >> 12) ^ val
 ```
