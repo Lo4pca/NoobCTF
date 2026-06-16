@@ -529,7 +529,7 @@ for i in range(1,e):
 - [Baby RSA](https://writeup.gldanoob.dev/bitsctf/)
     - 矩阵上的RSA。参考 https://www.gcsu.edu/sites/files/page-assets/node-808/attachments/pangia.pdf 第9页的3.3案例
 - [daisy_bell](https://tanglee.top/2024/02/27/bi0sCTF-2024-Crypto-Writeups/)
-    - coppersmith for RSA partial key leakag。不过这题有点不一样，泄露了部分p的高位（但是不够直接恢复p）；又泄露了 $q^{-1}\mod p$ 的部分低位。可能一个关键点在于，可以通过p的高位和n提取出q的部分高位。然后就能变形方程扔给[coppersmith脚本](https://github.com/kionactf/coppersmith)解了(这里还有个点，就是最后构造出来的方程居然有两个变量。我一直以为只能有一个变量，其实multivariate-coppersmith脚本可以处理两个变量的情况)
+    - coppersmith for RSA partial key leakage。不过这题有点不一样，泄露了部分p的高位（但是不够直接恢复p）；又泄露了 $q^{-1}\mod p$ 的部分低位。可能一个关键点在于，可以通过p的高位和n提取出q的部分高位。然后就能变形方程扔给[coppersmith脚本](https://github.com/kionactf/coppersmith)解了(这里还有个点，就是最后构造出来的方程居然有两个变量。我一直以为只能有一个变量，其实multivariate-coppersmith脚本可以处理两个变量的情况)
 - [Katyusha’s Campervan](https://tanglee.top/2024/02/27/bi0sCTF-2024-Crypto-Writeups/)
     - 也是一道RSA partial key leak+multivariate-coppersmith的题目。不过这题泄露的是dp的低位（ $dp\mod 2^{892}$ ，比赛的时候压根没看出来是泄露低位……看见题还没分析就觉得太难，直接跑了）
     - 在分解n后，还需要利用binomial_dlog在合数n上求离散对数（实现参考同wp里的rr题）

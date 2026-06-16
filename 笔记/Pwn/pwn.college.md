@@ -331,3 +331,13 @@ echo没有限制offset，所以可以利用oob read泄漏地址
 我仍然不明白，但试一下不就知道佬说的是什么了吗？在malloc到secret后，tcachebin的head变成了secret的前8个字节。这个我知道，我还知道如果把这玩意malloc出来的话，程序一定会崩溃的。不过我执行tcache poisoning时只free了两个chunk，继续malloc的话libc会从top chunk割下一块返回。让我试试free这个chunk？
 
 然后这个chunk里便出现了secret的前8个字节。我猛然明白过来：”这是把tcache head遗留的内容当成下一个chunk放进fd里了啊“。调用puts将其泄漏出来，demangle获取实际值，提交——仍然不对。调试发现前几个字节和实际secret不符。问了ds，看来在libc把secret中的内容放入tcache head时也做了一次mangle。mangle操作等于`(&存储的fd值的地址 >> 12) XOR 存储的fd值`，所以需要用secret的地址的高位再做一次demangle
+
+### Sus Sequence Safety(Hard)
+
+我的脑子出现了严重的过拟合现象
+
+依旧因为分配的地址必须按照16字节对齐，无法直接分配到返回地址`ret`。分配到`ret-8`倒是没问题，但是scanf功能中调用的`malloc_usable_size`会把canary看作是size值，导致程序崩溃。能不能分配到`ret-0x18`，然后输入字符，接着puts读取canary？也不行，因为scanf读取字符串后会在末尾加上`\x00`
+
+我下意识认为这题除了对safe linking的处理之外，解题思路应该和`Sus Sequence`是一样的；于是我又没招了。看一下社区，其实跳出这个思维惯性，好好审查一遍main就能发现，记录heap指针的数组也在栈上
+
+另外，scanf的`%0s`属于undefined behavior，最后的效果和`%s`差不多

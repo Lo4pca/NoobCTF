@@ -711,3 +711,33 @@ VGT看完了，作业里提到的AATA是[Abstract Algebra: Theory and Applicatio
 根据(X)的定义，(X)'自身就是参与合并的多个理想中的一个，结果只会小于等于(X)'。因此 $(X)\in (X)'$
 
 综上所述，(X)=(X)'
+
+6. 证明环的同态基本定理：若 φ: R → S 是环同态，则 Ker φ 是 R 的双边理想，且 R/Ker φ ≅ Im φ。可以假设群同态基本定理成立
+
+Ker φ是R的正规子群，只需要额外证明吸收性便能证明它是双边理想。取 $r\in R,a\in Ker(φ).\phi(ra)=\phi(r)\phi(a)=0$ ，即 $ra\in Ker(\phi)$
+
+通过群同态基本定理，R/Ker φ与Im φ两个加法阿贝尔群之间已存在同构，只需证明乘法部分。称Ker φ为K，定义 $\psi:R/K\rightarrow Im(\phi),r+K\rightarrow \phi(r)$ 。则 $\psi((r_1+K)(r_2+K))=\psi(r_1r_2+K)=\phi(r_1r_2)=\phi(r_1)\phi(r_2)=\psi(r_1+K)\psi(r_2+K)$
+
+## HW 14
+
+1. 设 p ∈ ℕ 为固定素数。对环 R = Z[x] 中的三个理想 I = (p)、(x) 和 (x, p)，分别完成以下步骤：
+
+(i) 形式化描述该理想的元素，即 I = { : }
+
+(p)={ $f(x)\cdot p|f(x)\in Z[x]$ }
+
+(x)={ $f(x)\cdot x|f(x)\in Z[x]$ }
+
+(x,p)={ $f(x)\cdot x+g(x)\cdot p|f(x),g(x)\in Z[x]$ }
+
+(ii) 用通俗语言刻画 I 中的多项式
+
+(p)为系数可被p整除的多项式；(x)为常数项是0的多项式；(x,p)为常数项可被p整除的多项式
+
+(iii) 判断 I 是否为极大理想和/或素理想
+
+参考AATA 297页的`Theorem 16.4.1`，I是极大理想当且仅当R/I是域
+
+(iv) 描述商环 R/I
+
+然后，在环 Q[x] 中对这些理想重复上述步骤
