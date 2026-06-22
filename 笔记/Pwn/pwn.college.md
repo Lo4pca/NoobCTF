@@ -341,3 +341,9 @@ echo没有限制offset，所以可以利用oob read泄漏地址
 我下意识认为这题除了对safe linking的处理之外，解题思路应该和`Sus Sequence`是一样的；于是我又没招了。看一下社区，其实跳出这个思维惯性，好好审查一遍main就能发现，记录heap指针的数组也在栈上
 
 另外，scanf的`%0s`属于undefined behavior，最后的效果和`%s`差不多
+
+### Tcache Terror(Hard)
+
+主要思路是利用chunk overlapping读取地址并做tcache poisoning。首先读libc地址，然后读堆地址，接着tcache poisoning分配到`__environ`读栈地址，最后覆盖栈指针列表中的一个指针为返回地址，写rop链get shell
+
+我想关键是实施chunk overlapping时用不同的size，这样在重复利用漏洞时不用清理堆布局

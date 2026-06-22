@@ -360,7 +360,7 @@ ret
   - 其他做法：
     - **syscalls** ：使用openat+mmap+pwritev2读取文件内容，并用pwntools编写shellcode。之前没注意，今天发现mmap有个参数fd，用open或openat等函数得到文件fd后，用mmap就能得到文件的内容，不是非得read系函数
     - https://github.com/rerrorctf/writeups/tree/main/2024_06_29_UIUCTFCTF24/pwn/syscalls ：seccomp rule规定只要writev的fd大于0x3e9就能使用writev。于是用openat+preadv2读文件后用dup2复制文件fd再用writev写（所以为什么不用第一个wp的pwritev2）
-- [syscalls-2](https://gist.github.com/C0nstellati0n/c5657f0c8e6d2ef75c342369ee27a6b5#syscalls-2)
+- **syscalls-2**
   - 使用io_uring raw syscall读取文件（一种很复杂的open+read，绕seccomp可用）
 - [VisibleInput](../../CTF/moectf/2024/Pwn/VisibleInput.md)
   - alphanumeric shellcode encoder [ae64](https://github.com/veritas501/ae64)使用
