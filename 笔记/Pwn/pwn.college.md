@@ -347,3 +347,23 @@ echo没有限制offset，所以可以利用oob read泄漏地址
 主要思路是利用chunk overlapping读取地址并做tcache poisoning。首先读libc地址，然后读堆地址，接着tcache poisoning分配到`__environ`读栈地址，最后覆盖栈指针列表中的一个指针为返回地址，写rop链get shell
 
 我想关键是实施chunk overlapping时用不同的size，这样在重复利用漏洞时不用清理堆布局
+
+## [Program Exploitation](https://pwn.college/program-security/program-exploitation)
+
+### Constant Corruption(Hard)
+
+可以覆盖栈上存储的syscall num来让seccomp允许任意syscall。但由于程序随即调用了`puts("Goodbye!")`，其中一个syscall必须是write；且for循环的计数变量位于输入buffer的上方，导致只剩下一个可控的syscall
+
+我在这里卡了很久。即使用execve调用`/bin/sh`，新进程仍然会继承已有的沙盒。重新rop回challenge设置沙盒的地方增加更多可用的syscall？不行，因为seccomp只看最严格的一份策略，取的是所有规则的交集
+
+然后我又想到了open+write。往`/etc/passwd`里写个root用户如何？这样倒是成功了，但su无密码切换用户时会报错。那就利用两次漏洞，分别调用chmod和chown，借用suid提权？成功了一半，家目录下的文件显示为root所有且存在suid bit，但执行时的Effective UID还是1000
+
+最后运行`cat /proc/mounts | grep nosuid`发现家目录挂载了nosuid，所以把文件移到`/tmp`目录就行了
+
+### Return to YanLand(Hard)
+
+我以为我不用再管烦人的yancode了，结果这个分区剩下的题目全是yan85……
+
+漏洞在程序处理read_memory syscall的地方。程序没有限制读取的数据长度，因此存在bof，可以覆盖main的返回地址。我本来想rop调用open或泄漏libc地址，然后跳回main再利用一次漏洞；但easy版本的题目存在大量日志，这些日志需要精确的栈布局，所以调了一段时间还是不通
+
+最后我用checksec发现nx没开，所以直接ret2shellcode就好了……
