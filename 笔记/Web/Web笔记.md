@@ -4577,3 +4577,8 @@ if (await remote.hasPasswordFor(id)) {
     - 可以通过不断移除`document.firstChild`的操作获取一个空的HTMLAllCollection，然后自行添加任意属性
     - 所有主流浏览器均支持该属性
 - 当多个CSS规则匹配同一个HTML元素且设置同一个属性时，浏览器只会应用优先级最高的样式表。可以给每个样式都加一个自定义属性避免这种冲突
+583. [Fancy food notifications](https://kore.one/gpn-ctf-2026-fancy-food-notifications-challenge-writeup)
+- python requests和urllib库的url解析差异。对于`http://USER@127.0.0.1\\@x.com/a`，`urlparse(url).hostname`返回`x.com`，`pr = PreparedRequest(); pr.prepare_url(url, None);urlparse(pr.url).hostname)`返回`127.0.0.1`。后者是requests库发送请求前内部的解析操作
+584. [restaurant-builder](https://kore.one/gpn-ctf-2026-restaurant-builder-challenge-writeup)
+- Pydantic v2 `create_model`前向引用导致的rce。当调用`create_model("ModelName", field_name="some_string")`时，如果`"some_string"`不是一个`(类型, 默认值)`这样的二元元组,Pydantic就会直接将这个字符串值当作该字段的类型注解来处理。接下来，为了解析这个字符串类型（即前向引用），Pydantic 就会去调用 Python 的 eval()，控制`"some_string"`等于控制了执行的代码内容
+    - 要求python>=3.13。旧版处理前向引用的逻辑有些不同，可能无法触发漏洞
