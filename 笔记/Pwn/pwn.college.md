@@ -367,3 +367,15 @@ echo没有限制offset，所以可以利用oob read泄漏地址
 漏洞在程序处理read_memory syscall的地方。程序没有限制读取的数据长度，因此存在bof，可以覆盖main的返回地址。我本来想rop调用open或泄漏libc地址，然后跳回main再利用一次漏洞；但easy版本的题目存在大量日志，这些日志需要精确的栈布局，所以调了一段时间还是不通
 
 最后我用checksec发现nx没开，所以直接ret2shellcode就好了……
+
+### The Great YanFilter(Easy)
+
+程序输出了提示“this challenge does not have any memory errors”，然而我没有看到。直到发现之前的bof漏洞已修复后我才感觉事情不对。找了半天没找到新的漏洞（仍然没有看到提示），遂去社区看了一眼：人们在讨论继承fd，且默认可以调用多个syscall
+
+我百思不得其解，他们是用什么方法绕过过滤的？我决定把反编译结果dump出来给ds看。事实再一次证明我的眼睛是摆设，`interpret_sys`处理syscall时用的是多个if语句，所以完全可以用单个SYS指令执行多个syscall
+
+open的返回值是打开的flag文件的fd，因此让返回值存在寄存器A后可直接调用read_memory将flag读到内存里。但是紧接着读取的flag的长度X也被存在了寄存器A中，导致write向不存在的fd X写入flag。解决办法是在脚本中打开多个fd，使子进程继承父进程打开的fd。注意打开文件时要用`os.open`和`os.set_inheritable`标记fd为“可继承”，并在调用process函数时传入`close_fds=False`
+
+### Yan85 Reborn(Hard)
+
+将STM和LDM转换为x64汇编时指定的偏移是相对于vm的内存起始地址的，即接收输入的buffer+0x1800。但这个版本的yan85的操作码和操作数都是64位的，因此存在oob read/write。将一个libc地址读到寄存器后利用各个gadget之间的相对地址差即可构造出完整的rop链
