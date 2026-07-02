@@ -379,3 +379,29 @@ open的返回值是打开的flag文件的fd，因此让返回值存在寄存器A
 ### Yan85 Reborn(Hard)
 
 将STM和LDM转换为x64汇编时指定的偏移是相对于vm的内存起始地址的，即接收输入的buffer+0x1800。但这个版本的yan85的操作码和操作数都是64位的，因此存在oob read/write。将一个libc地址读到寄存器后利用各个gadget之间的相对地址差即可构造出完整的rop链
+
+# [System Security](https://pwn.college/system-security)
+
+## [Sandboxing](https://pwn.college/system-security/sandboxing)
+
+### mount-cleanup
+
+Linux命名空间是内核提供的一种隔离机制,允许将全局系统资源（如进程、网络、文件系统等）封装成独立的实例，使得不同进程组看到不同的资源视图。一共有八种命名空间，题目只用了一种：CLONE_NEWNS，只隔离了挂载点（文件系统），导致jail与宿主机共享进程信息proc；且程序没有限制mount系统调用，jail可以用mount挂载proc虚拟文件系统，然后访问`/proc/1/root`即可逃逸到宿主机的根目录：
+```sh
+mount -t proc proc /proc
+```
+- `-t`表示挂载的文件系统类型为`proc`
+- 第二个proc指定挂载的源为虚拟设备proc
+- `/proc`是挂载点
+
+### mount-shellcode
+
+open可以打开目录，于是传入`/`便能获取宿主机的根目录的fd；shellcode调用openat即可读取真正的根目录下的flag
+
+### mount-bindmount
+
+在源码内搜索`CLONE`能发现，题目还是只用了一种命名空间且没有禁mount，于是用shellcode重复`mount-cleanup`的技巧即可
+
+这应该是非预期解，因为完全没用到题目给的“mount指定目录“ primitive
+
+（理论上所有题都可以用这个技巧解，因为根本就没修复过这个漏洞）
