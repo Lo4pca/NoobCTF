@@ -405,3 +405,19 @@ open可以打开目录，于是传入`/`便能获取宿主机的根目录的fd�
 这应该是非预期解，因为完全没用到题目给的“mount指定目录“ primitive
 
 （理论上所有题都可以用这个技巧解，因为根本就没修复过这个漏洞）
+
+## [Race Conditions](https://pwn.college/system-security/race-conditions)
+
+### level5.1
+
+一共用了三次指定的文件名：
+- `lstat`检查文件不是symlink
+- `stat`检查文件的上级目录属于root且其他用户无法往这个目录里写文件
+- `open`打开文件
+
+因此文件（假设为`/A/B`）需要在三个状态中快速切换：
+- 在A下创建普通文件B
+- 删除A和B，创建指向`/etc`的符号链接A
+- 删除A，创建指向`/flag`的符号链接`/A/B`
+
+我用了后台单线程C racer+pwntools循环调用程序的方法，跑了很多次才成功。可能把pwntools去掉或者用更高速的racer成功率会高点？
