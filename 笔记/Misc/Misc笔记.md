@@ -3158,3 +3158,5 @@ $ cd a/b
     - nix在存储文件时会计算两次hash。一次校验文件内容是否符合期望值，第二次是为打包后的NAR归档计算哈希，用于内容寻址或存入二进制缓存。这个新哈希不会回头与预设的outputHash做比对。两次计算之间存在窗口，允许攻击者在校验完成之后将文件内容换成恶意内容
 413. [Polyglot](https://blog.7chn.me/posts/20260420-polyglot)
 - 编写代码，使同一份代码可用多种语言执行
+414. [Food poisoning](https://www.pizzasteve.me/posts/gpn-ctf-26-misc-challenges-writeups)
+- [github actions cache poisoning](https://cloud.hacktricks.wiki/en/pentesting-ci-cd/github-security/abusing-github-actions/gh-actions-cache-poisoning.html)：GitHub Actions的缓存是按仓库和分支进行作用域限定的。从某个分支写入的缓存可被源自同一父分支的其他工作流读取。因此若攻击者在某个低权限工作流拿到了rce，便可以针对某个高权限的工作流使用的缓存键写入恶意内容，从而修改高权限工作流的行为

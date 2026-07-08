@@ -421,3 +421,23 @@ open可以打开目录，于是传入`/`便能获取宿主机的根目录的fd�
 - 删除A，创建指向`/flag`的符号链接`/A/B`
 
 我用了后台单线程C racer+pwntools循环调用程序的方法，跑了很多次才成功。可能把pwntools去掉或者用更高速的racer成功率会高点？
+
+### level6.1
+
+题目说lstat "does not follow symlinks"，我就以为整个路径的symlink都无法解析；但不用symlink根本不可能啊？
+
+事实上lstat所谓的“不解析symlink”指的是不解析最后一个路径。假设传入的路径为`/A/B/C`且C是symlink，lstat确实不会跟随C，但仍会跟随A和B的symlink。所以若传入`/home/hacker/solve/legal/etc`且`/home/hacker/solve/legal`是指向根目录的symlink，结果就是`/etc`
+
+额外注意这三点可以让成功率更高：
+- 让单线程racer在循环中做的事尽量少。我传入的路径是`/home/hacker/solve/legal/etc/passwd`，racer只在两种状态中切换：`/home/hacker/solve/legal`是指向根目录的symlink，和`/home/hacker/solve/legal/etc/passwd`是指向`/flag`的symlink
+- 记录process的输出。程序在不同检查阶段下的报错不同，确保竞争时程序可以进入不同阶段
+- 适当使用usleep。我发现匀速切换两个状态时可以得到所有可能的输出，唯独没有flag。于是听从ds的建议，在第二个状态末尾加了个usleep，很快就拿到flag了
+
+### level7.1
+
+假设开启了一个process X，用python创建两个线程：
+- 线程A：不断对X发送SIGALRM
+    - 用`time.sleep`适当减缓发送信号的速度可提高成功率
+- 线程B：不断重复login/logout/win_authed
+
+运气极好的情况下timeout_handler会在logout的if检查之后，`privilege_level = privilege_level - 1`之前执行，使privilege_level为-1

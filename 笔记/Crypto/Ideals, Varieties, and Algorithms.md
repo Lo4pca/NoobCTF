@@ -222,3 +222,26 @@ f. 注意 $(^{x(\frac{1}{2})}_{y(\frac{1}{2})})$ 将该线段分成两段，设�
 其次，题目提到的论证应该在47页。我以为关键是除法（我看到r就觉得它是remainder），其实关键是把多项式拆成“指定结构+零多项式”。假设 $f\in I(V)$ ,则f(t,t)=0。考虑g(t)=f(t,t),则g(t)为零多项式（单变量多项式若有无穷个根，则为零多项式；多变量多项式可以有无穷个根，仅在整个无限域上取值为零时为零多项式）。现在将 $f(x,y)\in K[x,y]$ 改写为f(x,y)-f(x,x)+f(x,x)；已知在I(V)中的多项式均有f(x,x)=0，若能证明(x-y)可整除f(x,y)-f(x,x)便能完成证明
 
 $f(x,y)-f(x,x)=\sum c_{ij}x^iy^j-\sum c_{ij}x^{i+j}=\sum c_{ij}(x^iy^j-x^{i+j})$ 。对任意单项式，都有 $x^iy^j-x^{i+j}=x^i(y^j-x^j)$ ，而 $y^j-x^j$ 可被y-x=-(x-y)整除；因此任意单项式都可被x-y整除，从而任意 $f(x,y)\in K[x,y]$ 也可被x-y整除， $I(V)\subseteq ⟨x − y⟩$
+
+### Polynomials of One Variable
+
+2. 考虑由域 k 中的元素 a₁, …, aₙ 所确定的 n × n 范德蒙德行列式:
+
+$$det\begin{pmatrix}
+1&a_1&a_1^2&...&a_1^{n-1} \\
+1&a_2&a_2^2&...&a_2^{n-1} \\
+\vdots&\vdots&\vdots&&\vdots \\
+1&a_n&a_n^2&...&a_n^{n-1}
+\end{pmatrix}$$
+
+证明当各 $a_i$ 互不相同时，该行列式非零。提示：若行列式为零，则列向量线性相关。证明该线性关系的系数确定了一个次数 ≤ n−1 的多项式，且该多项式有 n 个根。然后使用`Corollary 3`
+
+若行列式为0，则存在n个 $c_i$ ，使得：
+
+$$c_0 \begin{pmatrix} 1 \\ 1 \\ \vdots \\ 1 \end{pmatrix} + c_1 \begin{pmatrix} a_1 \\ a_2 \\ \vdots \\ a_n \end{pmatrix} + c_2 \begin{pmatrix} a_1^2 \\ a_2^2 \\ \vdots \\ a_n^2 \end{pmatrix} + \cdots + c_{n-1} \begin{pmatrix} a_1^{n-1} \\ a_2^{n-1} \\ \vdots \\ a_n^{n-1} \end{pmatrix} = \begin{pmatrix} 0 \\ 0 \\ \vdots \\ 0 \end{pmatrix}$$
+
+第i行对应的多项式是 $c_0+c_1a_i+...+c_{n-1}a_i^{n-1}=0$ ，对每个i=1..n都成立。但`Corollary 3`说明n-1次多项式最多只能有n-1个根，矛盾。因此行列式不可能是0
+
+3. 考虑理想 I = ⟨x, y⟩ ⊂ k[x, y]。证明 I 不是主理想。提示：若 x = fg，其中 f, g ∈ k[x, y]，证明 f 或 g 必为常数
+
+如果I是主理想，则I = ⟨x, y⟩=⟨g⟩，存在f使得x=fg。因为deg(x)=deg(f)+deg(g)而deg(x)=1，f和g中必有一个常数。同样的论证可用在y上，这说明g只能是常数（若g不是常数，g就必须同时是x的常数倍和y的常数倍；而这不可能，因为x和y不是彼此的常数倍）。然而若g是常数，它生成的理想将是整个k[x, y]，不等于⟨x, y⟩（不包含常数项非零的多项式）。因此I不是主理想
