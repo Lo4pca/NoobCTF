@@ -808,6 +808,17 @@ $$
         - **Polymao**
 - [Mersenne Mayhem](https://github.com/L3AK-TEAM/L3akCTF-2025-public/blob/main/crypto/mersenne-mayhem)
     - [Improved Lattice-Based Attack on Mersenne Low Hamming Ratio Search Problem](https://eprint.iacr.org/2024/2080.pdf)
+- [orbital-strike](https://shuizhuimiaoman.github.io/#/sekaictf-2026-author-writeup)
+    - Stern's Attack on truncated LCG。之前在`EBG`见过，此处记录一下原理
+        - 标准lcg： $s_{i+1}=As_i+C\mod p$
+        - 连续差值: $x_{i}=s_{i+1}-s_i$
+        - 代入递推式： $x_{i+1} = s_{i+2} - s_{i+1} = A(s_{i+1} - s_i) = A x_i \mod p$ 。因此 $x_i$ 构成等比数列，r=A为公比
+        - 截断后的lcg值： $s = 2^ny + z$ ，y是已知的高位，z是很小的未知低位
+        - 因为x是几何级数，必然满足某些线性关系（即存在非零向量 v，使得 $\sum v_ix_i ≡ 0 \mod p$
+        - 但我们不知道完整的x，只知道y。那么尝试找与y正交的向量，有 $\sum v_i x_i = 2^n \sum v_i y_i + \sum v_i z_i$ 。因为 $z_i$ 很小，整个结果也不会大
+        - 将 $x_i = r^ix_0$ 代入 $\sum v_i x_i$ ，得 $\sum v_i * (r^i x_0) = x_0 (v_0 + v_1 r + v_2 r^2 + ... + v_k r^k) \approx 0 \mod p$
+        - 向量 v 的系数 $(v_0, v_1, ..., v_k)$ 正好构成了一个整系数多项式 $P(t) = v_0 + v_1 t + ... + v_k t^k$ ，而 LCG 的乘数 r 是这个多项式在模 p 下的一个根
+    - 这题要更复杂些，存在两个lcg。lcg A的ax+b中的b系数是另一个lcg B
 
 ## Elliptic Curves(ECC,椭圆曲线)
 

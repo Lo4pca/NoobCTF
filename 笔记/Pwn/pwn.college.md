@@ -441,3 +441,21 @@ open可以打开目录，于是传入`/`便能获取宿主机的根目录的fd�
 - 线程B：不断重复login/logout/win_authed
 
 运气极好的情况下timeout_handler会在logout的if检查之后，`privilege_level = privilege_level - 1`之前执行，使privilege_level为-1
+
+### level8.1
+
+所有连接共享privilege_level，于是创建多个线程（连接），用`threading.Barrier`使所有线程同时发送logout指令，希望有多个线程可以同时执行`privilege_level = privilege_level - 1`
+
+### level9.1
+
+`send_redacted_flag`写入的消息是`REDACTED: \x00`+flag，导致`receive_message`无法打印出null后面的flag。但如果在线程A的`broadcast_message`写完null字符，准备写入flag之前，另一个线程B写入新的message覆盖null字符，然后A继续写入flag的话，最终的`global_message`中将不存在截断flag的null，此时便可以顺利打印出flag
+
+可以分三组线程，一组调用`send_message`，一组调用`send_redacted_flag`，最后一组调用`receive_message`；用`threading.Barrier`使三组尽量同时发送命令
+
+(`Barrier`似乎只起到安慰作用。后续两道`x.0`由于pause_buffer阻塞，我去掉了`Barrier`，仍然可以顺利拿到flag。另外，如果在`x.0`遇见进程卡在发送消息的那一步，可能是之前的进程没有输入pause_buffer导致阻塞，重启binary就好)
+
+### level11.1
+
+竞争窗口进一步缩小，导致`level9.1`的脚本只能拿到部分flag。我的做法是用`time.sleep`适当延长`send_message`发送消息的时间，然后祈祷可以拿到足够多的flag字符
+
+（到最后我也没拿到完整flag，缺了末尾的几个字符。但我发现末尾的字符基本没变过，就这样蒙到了flag）
