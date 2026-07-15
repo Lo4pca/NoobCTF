@@ -4583,3 +4583,7 @@ if (await remote.hasPasswordFor(id)) {
 584. [restaurant-builder](https://kore.one/gpn-ctf-2026-restaurant-builder-challenge-writeup)
 - Pydantic v2 `create_model`前向引用导致的rce。当调用`create_model("ModelName", field_name="some_string")`时，如果`"some_string"`不是一个`(类型, 默认值)`这样的二元元组,Pydantic就会直接将这个字符串值当作该字段的类型注解来处理。接下来，为了解析这个字符串类型（即前向引用），Pydantic 就会去调用 Python 的 eval()，控制`"some_string"`等于控制了执行的代码内容
     - 要求python>=3.13。旧版处理前向引用的逻辑有些不同，可能无法触发漏洞
+585. [&lt;\w+](https://writeups.claustra01.net/sekaictf-2026)
+- 若写入文件时没有加文件锁，两个并发的写操作可能使最终的结果为两次写入内容的交错
+- `O_TRUNC`会在每次open后重置文件指针
+    - go语言的`os.Open()`和`os.OpenFile()`内部使用该标志
