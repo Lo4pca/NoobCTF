@@ -480,3 +480,11 @@ cpu中有一个分支预测器，它会根据某个分支的历史跳转情况�
 - 运行攻击多次
 - 攻击测量出的最短耗时`min_time`应小于平均耗时的一半
 - 计数`valid_attempts`,即攻击测量出的字符不为0的数量（不知为何，页面0的耗时很多时候都是最短的）；候选字符被测出的数量应大于总测量次数`valid_attempts`乘上0.3
+
+### Prefetch Peek
+
+之前在[perfect-sandbox](https://amateurs.team/writeups/AmateursCTF-2023/perfect-sandbox)见过：访问虚拟内存时，cpu必须遍历页表来决定实际的物理地址，而这个操作需要时间。为提高性能，cpu用translation lookaside buffer (TLB)缓存虚拟地址与物理地址的对应关系，因此访问被TLB缓存的地址的所需时间要短于没有被缓存的地址
+
+问题在于我们不知道flag的具体地址，而访问没有被映射的地址会触发SEGFAULT。幸好这点可以用两类指令解决：vmaskmov和prefetch。wp用的是vmaskmov，然而题目环境并不支持这个指令。那就用prefetch：首先用prefetchnta尝试缓存某个地址，然后用mfence+rdtsc+PREFETCHT2再次测量访问该地址的所需时间。如果结果小于某个阈值，说明我们找到了flag的地址，用exit的status code即可带出一个字符（虽然exit的参数支持32位整数，但父进程只能接收到末尾的1个字节）
+
+我的脚本非常简陋，导致过程十分折磨。我使用的阈值是`0x53`，超过这个数的话容易出现false positive（实际访问flag时触发SEGFAULT），小于等于这个数的话又容易出现SIGSYS（没找到目标，主程序调用puts时触发bad system call）。综合下来还是后者的成功率要稍微高一点
