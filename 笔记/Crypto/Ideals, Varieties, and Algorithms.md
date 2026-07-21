@@ -328,3 +328,23 @@ a. 用`Theorem 5`证明中给出的方法，求 I 的一个理想基
 b. 你的基是否已尽可能小？或者能否从中删去某些 β，得到一个更小的仍生成相同理想的集合？
 
 目前的基是极小基，因此没法删去某个元素并保证生成相同理想
+
+11. 本练习将研究权重序的一个特例。设 u = (u₁, …, uₙ) 为 ℝⁿ 中的向量，满足 u₁, …, uₙ 均为正数且在 ℚ 上线性无关。我们称 u 为独立权重向量。对 $α, β ∈ ℤⁿ_{≥0}$ ，定义 $α >_u β ⇔ u·α > u·β$ ，点为通常的向量点乘。我们称 $>_u$ 为由 u 确定的权重序
+
+a. 利用`Corollary 6`证明 $>_u$ 是单项式序（monomial ordering）。提示：你的论证在何处用到了 u₁, …, uₙ 的线性无关性？
+
+86页的`Corollary 6`给出的三条要求中，后两条均不证自明，剩下第一条： $>_u$ 在 $ℤⁿ_{≥0}$ 上是全序（total ordering）。设 $\alpha\neq\beta\in\mathbb{Z}^n_{\ge 0}$ ，则 $u\cdot\alpha$ 和 $u\cdot\beta$ 是实数。若 $u\cdot\alpha = u\cdot\beta$ ，则 $u\cdot(\alpha-\beta)=0$ 。由于 $u_i$ 在 $\mathbb{Q}$ 上线性无关，且 $\alpha-\beta$ 是有理数（整数）向量，只能有 $\alpha-\beta=0$ ，即 $\alpha=\beta$ ，矛盾。因此 $u\cdot\alpha \neq u\cdot\beta$ ，从而要么 $u\cdot\alpha > u\cdot\beta$ 要么 $u\cdot\beta > u\cdot\alpha$ ，全序性成立
+
+（看69页对全序的定义时，我以为一个关系是全序只需要满足“ $x^a$ < $x^b$ , $x^a=x^b$ , $x^a$ > $x^b$ 中有且只有一个说法为真”，但似乎还要保证 $x^a=x^b$ 时，在 $ℤⁿ_{≥0}$ 上a=b）
+
+### The Hilbert Basis Theorem and Groebner Bases
+
+3. 设 I = ⟨f₁, …, fₛ⟩ 是一个理想，满足 ⟨LT(f₁), …, LT(fₛ)⟩ 严格小于 ⟨LT(I)⟩
+
+a. 证明存在某个 f ∈ I，它除以 f₁, …, fₛ 的余式非零。提示：先证存在某个 f ∈ I 使得 LT(f) ∉ ⟨LT(f₁), …, LT(fₛ)⟩，再利用84页的`Lemma 2`
+
+设存在某个f ∈ I，其 $LT(f)\not\in⟨LT(f₁), …, LT(fₛ)⟩$ 。由于⟨LT(f₁), …, LT(fₛ)⟩是单项式理想，这说明LT(f)不被任何LT(f₁), …, LT(fₛ)整除，LT(f)是余式的一部分，故余式非零
+
+12. 证明：若假设 k[x₁, …, xₙ] 中每条理想升链都稳定，则希尔伯特基定理(Hilbert Basis Theorem)的结论可作为推论得出。提示：用反证法，假设某理想 I ⊂ k[x₁, …, xₙ] 没有有限生成集。你的论证不应特别用到多项式的任何性质
+
+如果某个 I ⊂ k[x₁, …, xₙ] 没有有限生成集，则取非零的 $f_1\in I$ ,得 $I_1=<f_1>$ 。由于I不是有限生成的， $I_1\subsetneq I$ 。再取 $f_2\in I/I_1$ ，令 $I_2=<f_1,f_2>$ ……这样继续下去便可得到严格升链 $I_1\subsetneq I_2\subsetneq...$ 。但题目假设每条理想升链都稳定，矛盾。因此I必然是有限生成的

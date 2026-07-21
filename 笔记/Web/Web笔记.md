@@ -626,6 +626,18 @@
         - puppeteer和chrome incognito tab用RAM存储disk cache，所以配额要比正常disk cache小得多
         - 无论是RAM disk cache还是disk cache，cache的大小都是可预测的
     - 第二种技巧利用chrome处理200和404的不同处。假如连续打开很多个200页面和404页面，平均下来404页面要比200页面快1ms
+- [EnD](https://mushroom.cat/ctf/http-desync-xs-leak-range-oracle)
+    - Chromium socket重用:Chromium最多同时维护6个socket，因此接下来发生的第7个连接会重用之前的socket。假如被重用的socket里有未处理的response，那么Chromium会先处理完socket中残留的response后再发送request
+        - 题目描述了一种该机制下可能发生的response splitting：proxy检查请求的`sec-fetch-dest`，将script类型的response的`content-length`设为0，却仍将完整的response写入socket。Chromium发现`content-length`为0后确实不会再处理接下来的body，但残留的response将直接发送给重用该socket的连接
+        - 若response header包含`Expect: 100-continue`，node.js将立刻发送header，即使没有body
+    - Chromium Range请求xs leak：对普通的不支持Range的请求，返回`206 Partial Content`将导致fetch报错network error，然而返回`416 Range Not Satisfiable`不会有任何问题。利用这点与ServiceWorker可以跨源泄漏Range请求的opaque response：
+        - 假设未命中flag时返回内容的长度小于N
+        - 创建一个指向目标（支持Range请求）的`<audio>`元素
+        - 注册Service Worker，SW将拦截对目标的请求并返回虚假的206
+        - Chromium遇见206后将继续发送下一轮`Range: bytes=<N>-`请求（这样便绕过了CORS）
+        - SW再次拦截第二个请求，但这次将请求转发到目标，并保存response
+        - SW拦截对任意资源的普通需求，并返回上一步保存的response
+        - 若上述普通需求正常返回，说明目标返回了206（命中flag）；否则目标返回了416（返回内容过短导致`Range: bytes=<N>-`无效）
 
 ## SSTI
 

@@ -259,3 +259,5 @@ for(uint256 i = 0; i < _data.length; i++)
 - 自solidity `0.8.0`后，脚本默认使用v2 abi encoder，使用v1需要在脚本顶部加上`pragma abicoder v1;`
 - v2对calldata的编码检查更加严格，会拒绝诸如脏地址（地址的高12字节不为0）这类不规范的编码；而v1不会
 - 题目源码： https://github.com/pi-1337/Blockchain-CTF-Writeups/tree/master/script/0xL4ugh_CTF_2026/House_of_Illusions
+14. [Open World](https://pnasis.gitlab.io/posts/sekaictf-2026-blockchain-writeups-part-3-open-world)
+- TON网络例题
