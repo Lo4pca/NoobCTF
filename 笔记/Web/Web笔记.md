@@ -4054,7 +4054,7 @@ for _, bi := range ba {
 - 漏洞很好理解，一些实现上的细节见wp。个人的做法稍微有点不一样：**ToppleContainer** 。关键在于如何生成jwks.json
 453. [WP Elevator](https://siunam321.github.io/ctf/NahamCon-CTF-2024/Sponsorship/WP-Elevator/)
 - wordpress插件php代码分析
-- 在这题也稍微了解了下wordpress的一些构造。比如：[REST API endpoint](https://developer.wordpress.org/rest-api/),[AJAX actions](https://developer.wordpress.org/plugins/javascript/ajax/)，重置密码（reset password）的过程即逻辑等
+- 在这题也稍微了解了下wordpress的一些构造。比如：[REST API endpoint](https://developer.wordpress.org/rest-api),[AJAX actions](https://developer.wordpress.org/plugins/javascript/ajax)，重置密码（reset password）的过程即逻辑等
 - 另一道例题：[My Shop Disaster](https://twc1rcle.com/ctf/team/ctf_writeups/nahamcon_2024/web/MyShopDisaster)
     - 看另一篇[wp](https://sec.stealthcopter.com/nahamcon-ctf-2024-my-shop-disaster/)时发现了个奇怪的事：wordpress内部的`is_admin`函数检查的是“当前request是否来自于admin页面”，而不是当前用户是不是admin。又因为wordpress要求ajax action只能从`/wp-admin/admin-ajax.php`调用，所以从ajax action调用`is_admin`一定返回true
     - 这篇[wp](https://medium.com/@rphang/wp-elevator-nahamcon-ctf-24-e55bef0b6f81)的思路比较清晰（按照做题时的步骤分析）
@@ -4599,3 +4599,6 @@ if (await remote.hasPasswordFor(id)) {
 - 若写入文件时没有加文件锁，两个并发的写操作可能使最终的结果为两次写入内容的交错
 - `O_TRUNC`会在每次open后重置文件指针
     - go语言的`os.Open()`和`os.OpenFile()`内部使用该标志
+586. [Filtered Reality](https://vhxuu.xyz/blog/sekai26/filtered-reality)
+- apache `mod_php`与WordPress regex差异：请求`/wp-admin/index.php/anything%0A/wp-admin/x.php`可正常访问`index.php`，但`get_current_screen()->id`将得到`x`。成因在于`mod_php`将用户路由到`index.php`后仍传递了完整的url给wordpress，导致regex取最后一个匹配项时取到了`x.php`
+- 对于没有设置`navigate-to`的csp，可以利用Signed HTTP Exchanges (SXGs)的`fallbackUrl`字段将受害者重定向至指定url

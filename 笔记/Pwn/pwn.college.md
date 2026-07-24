@@ -488,3 +488,23 @@ cpu中有一个分支预测器，它会根据某个分支的历史跳转情况�
 问题在于我们不知道flag的具体地址，而访问没有被映射的地址会触发SEGFAULT。幸好这点可以用两类指令解决：vmaskmov和prefetch。wp用的是vmaskmov，然而题目环境并不支持这个指令。那就用prefetch：首先用prefetchnta尝试缓存某个地址，然后用mfence+rdtsc+PREFETCHT2再次测量访问该地址的所需时间。如果结果小于某个阈值，说明我们找到了flag的地址，用exit的status code即可带出一个字符（虽然exit的参数支持32位整数，但父进程只能接收到末尾的1个字节）
 
 我的脚本非常简陋，导致过程十分折磨。我使用的阈值是`0x53`，超过这个数的话容易出现false positive（实际访问flag时触发SEGFAULT），小于等于这个数的话又容易出现SIGSYS（没找到目标，主程序调用puts时触发bad system call）。综合下来还是后者的成功率要稍微高一点
+
+### Spooky Spectre 1
+
+这题和之前的`Baby Spectre 5`没啥区别，不过是触发方式换成了ioctl。那直接改动已有脚本的交互逻辑就好了……吗？
+
+在没有指定cpu的情况下，代码可能被不同cpu执行。由于每个cpu都有自己的cache，这将极大影响测量的稳定性。所以别忘了用`sched_setaffinity`将代码固定到某个cpu上。这下就没问题了……吗？
+
+不知为什么，我之前用的第二条策略在这失效了，命中cache后的用时没有短于平均耗时的一半。没关系，换成阈值策略：只要测量出的用时小于某个阈值，就将其判定为命中。虽然效率低了点，但总算出flag字符了……然后脚本在泄漏出十几个字符后就不再动了，无论我如何调整阈值，重启脚本甚至是重启vm
+
+有那么一刻我感觉我又回到了做chrome v8的日子：我明明是懂原理的，但我与flag之间就是挡着某种玄学。后来实在没招，我去看了一遍课程视频，把老师用于demo的exp抄下来了。结果还是不行
+
+兜兜转转又回到discord社区，发现有不少人反映类似的问题。老师说由于环境问题，相同的脚本可能得到不同的结果，但找人少的时候运行总能拿到flag的。那为什么我的脚本除了第一次，后续持续找不到任何flag字符？我有些绝望，直到看到某个人说运行结果还取决于使用的cpu。我目前用的是cpu 0，那试一下cpu 7？
+
+相同的脚本，只是我不到5分钟就拿到了flag。另外提一嘴，训练分支时不需要太多循环，几十次完全足够了。spectre攻击其实有一点点race condition的成分，没有进入分支不一定是训练次数不够，更可能是没有在恰当的时间执行到分支代码
+
+### Spooky Spectre 2
+
+ioctl接收一块shared_memory `shmem`。`shmem[0]`指定idx，`shmem[1]`指定训练的次数。这题是spectre v2，ds说叫“分支目标注入（Branch Target Injection, BTI）”。关键特征是victim函数的间接调用`CALL qword ptr [RBX]`：cpu每次执行到这里时都需要读取rbx的值，因此为了保证高效运行，cpu会使用分支目标预测器（Branch Target Predictor, BTP）来预测间接调用的目标地址，以便提前读取和执行指令。往上看几行汇编，发现rbx为参数target。在训练的while循环中，target为触发内存访问的`gadget`，循环之外则是无害的`safe`。很明显我们的目标是训练cpu采用`gadget`路径，以便诱导cpu在真正的flag上执行`gadget`
+
+因为训练和触发都在同一个ioctl里，这题比上一题稳定多了。在神一般的cpu 7的帮助下，不到一分钟就能拿到flag
