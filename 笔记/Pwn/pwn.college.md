@@ -508,3 +508,17 @@ cpu中有一个分支预测器，它会根据某个分支的历史跳转情况�
 ioctl接收一块shared_memory `shmem`。`shmem[0]`指定idx，`shmem[1]`指定训练的次数。这题是spectre v2，ds说叫“分支目标注入（Branch Target Injection, BTI）”。关键特征是victim函数的间接调用`CALL qword ptr [RBX]`：cpu每次执行到这里时都需要读取rbx的值，因此为了保证高效运行，cpu会使用分支目标预测器（Branch Target Predictor, BTP）来预测间接调用的目标地址，以便提前读取和执行指令。往上看几行汇编，发现rbx为参数target。在训练的while循环中，target为触发内存访问的`gadget`，循环之外则是无害的`safe`。很明显我们的目标是训练cpu采用`gadget`路径，以便诱导cpu在真正的flag上执行`gadget`
 
 因为训练和触发都在同一个ioctl里，这题比上一题稳定多了。在神一般的cpu 7的帮助下，不到一分钟就能拿到flag
+
+### Yan85 Reloaded
+
+interpret_sys中删去了sys_write，导致open+read打开flag后无法输出。不过题目描述提到了“cache side channel”，想必有办法将flag字符转为cache中的地址。注意到interpret_sys计算地址时用到了ds寄存器。确认IMM可以设置ds后，一个思路即刻形成：将flag读取到内存后用LDM将字符读取到ds寄存器，然后在`state->memory`上实施cache side channel。好的，那么该怎么在用户态访问`state->memory`呢？
+
+答案是不行。查看device_open，`state->memory`是`kvmalloc_node`分配的1MB内核内存，没有任何代码将其暴露给用户。而且如果用户能读内存的话，直接读flag不就好了，为啥还要侧信道？继续分析代码，我注意到了更奇怪的地方：在读取文件时，文件内容必须存储在偏移大于`state->memlimit`（0x80）的地方，而其余的内存交互指令都限制偏移小于0x80。所以程序根本访问不到flag字符。啊？
+
+此时我严重怀疑我哪里看错了。再次去社区看了一眼，有人说这题和spectre攻击没有任何关系。我又漏看了什么地方？
+
+我突然意识到虚拟内存是连续的。我可以把flag读到0x80，然后在0x7f写个字符，这样`open(0x7f)`时就能尝试将flag作为文件名打开了。如果open成功打开，返回值将是文件的fd；否则是0xff。那么我可以将返回值存入寄存器i，如果打不开，程序将直接退出（因为i最大只能是0xff）；如果打开了，就在i=1处（因为这是第二个打开的文件）写一个无限循环的指令，导致模块卡死
+
+由于vm的本质是ssh连接，我便问ds该怎么用python与其交互。ds说`pexpect`模块，完美符合我的需求。写一个C程序负责执行参数给出的shellcode，然后用`expect`判断模块是否卡死即可（注意timeout要给大点，给太小会出现false positive和false negative）
+
+我严重怀疑这是非预期解，完全跟题目描述不搭边

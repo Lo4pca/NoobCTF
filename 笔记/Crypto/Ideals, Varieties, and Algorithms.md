@@ -352,3 +352,5 @@ a. 证明存在某个 f ∈ I，它除以 f₁, …, fₛ 的余式非零。提�
 ### Properties of Groebner Bases
 
 11. 设 f, g ∈ k[x₁, …, xₙ]， $x^α, x^β$ 为单项式。验证 $S(x^α f, x^β g) = x^γ S(f, g)$ ，其中 $x^γ = \frac{LCM(x^α LM(f), x^β LM(g))}{LCM(LM(f), LM(g))}$ 。务必证明 $x^γ$ 是单项式
+
+S多项式的定义在第97页。" $x^γ$ 是单项式"这点挺明显的，毕竟 $x^α, x^β$ 都是单项式，LM(f),LM(g)也是。假设 $x^{\gamma'}=LCM(x^αLM(f),x^βLM(g))$ ,则 $S(x^α f, x^β g)=\frac{x^{\gamma'}}{LT(f)}f-\frac{x^{\gamma'}}{LT(g)}g$ 。接着让 $x^{\gamma''}=LCM(LM(f),LM(g))$ ，有 $S(f, g)=\frac{x^{\gamma''}}{LT(f)}f-\frac{x^{\gamma''}}{LT(g)}g$ 。注意到 $x^γ = \frac{x^{\gamma'}}{x^{\gamma''}}$ ，因此 $x^γ S(f, g)=S(x^α f, x^β g)$

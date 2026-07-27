@@ -117,6 +117,8 @@
     - GWorld, GObjects, GNames & SDK的相关教程： https://www.unknowncheats.me/forum/unreal-engine-4-a/672085-introduction-unreal-engine-game-hacking-1-gworld-gobjects-gnames-sdk.html （这个网站还有其他游戏逆向资源）
     - 绕过碰撞检测
     - 提取`.pak`后缀的游戏资源:[UE4-AES-Key-Extracting-Guide](https://github.com/Cracko298/UE4-AES-Key-Extracting-Guide),[UnrealPakViewer](https://github.com/jashking/UnrealPakViewer)
+- [Minions in 16k](https://mrfuzzypants.writeups-me.workers.dev/challenge?title=Minions%20in%2016k&ctf=sekai%20ctf%202026&category=game)
+  - rust编写的bevy是数据驱动的游戏引擎，可以通过修改游戏的asset控制游戏行为
 
 ## APK
 
