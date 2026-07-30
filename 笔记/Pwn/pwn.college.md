@@ -522,3 +522,9 @@ interpret_sys中删去了sys_write，导致open+read打开flag后无法输出。
 由于vm的本质是ssh连接，我便问ds该怎么用python与其交互。ds说`pexpect`模块，完美符合我的需求。写一个C程序负责执行参数给出的shellcode，然后用`expect`判断模块是否卡死即可（注意timeout要给大点，给太小会出现false positive和false negative）
 
 我严重怀疑这是非预期解，完全跟题目描述不搭边
+
+### Ghost in the YPU 1
+
+粗略看了一眼，发现内存的分配与上一题一致，可直接套上一题的脚本。这下确认那是非预期解了
+
+猜测预期解是利用`sys_exec`，在`state->code`上实施spectre v1攻击
