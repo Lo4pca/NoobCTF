@@ -528,3 +528,25 @@ interpret_sys中删去了sys_write，导致open+read打开flag后无法输出。
 粗略看了一眼，发现内存的分配与上一题一致，可直接套上一题的脚本。这下确认那是非预期解了
 
 猜测预期解是利用`sys_exec`，在`state->code`上实施spectre v1攻击
+
+### Ghost in the YPU 2
+
+vm将内存隔成了两个区域，代码可访问的`memory`和存储读取的文件内容的`shadow`。非常可惜上一题的预期解没法用了，只能看看怎么用spectre v2。目标应该是`sys_exec`，这是唯一一处程序主动访问code的地方。所以怎么访问shadow？
+
+我知道spectre v2，但事实证明一个星期过去后我已经把细节忘干净了。像只无头苍蝇一样阅读社区里提到这道题的每一段对话后，我的记忆终于恢复了，想出了如下策略：在`interpret_sys`中多次训练sysfunc为`sys_exec`，然后突然改为`sys_open`。关键是`sys_open`的arg1范围是0-0xff0ff，只要cpu用这个参数推测执行`sys_exec`，在ds不为0的情况下就能突破memory与shadow的边界
+
+有多人提到要把yan85代码分成多个部分从而提高命中概率，我不明白他们指的是什么。实测只用一个fd和一段shellcode也能较为稳定地触发cache，也许是因为我提前布置好了ds，保证训练完`sys_exec`后可立刻调用`sys_open`
+
+最后是我注意到的几点：
+- ioctl加载代码时，前4个字节固定为`YPU\x00`，第6个字节为起始的i值
+- 训练`sys_exec`时要在指定的memory区域放一个非零字节，不然会无限循环
+- 我的exp出现了很多false positive，都是48和16，不知道是什么原因
+
+### Molten Access
+
+之前看的教学视频里给的demo挺好用的，核心测量逻辑这么多道题就没变过。因此我决定省去自己瞎试的功夫，再次抄了meltdown demo的脚本。没想到速度快得惊人，3秒左右就出flag了
+
+不对我们还没学什么是meltdown呢？meltdown的核心成因是“CPU在乱序执行时，会将内核态数据先加载到Cache中，之后才进行权限检查”，所以理论上任何存在漏洞的cpu上都可用meltdown攻击；但实操上需要考虑以下几点：
+- 目标内核地址的数据必须已经被加载到CPU缓存中。这也是为什么题目提供了device_ioctl，允许模块将flag字符加载到缓存中
+- linux环境下必须关闭kpti。kpti直接隔离了用户态和内核态的页表，即使是CPU的推测执行也无法转换不存在当前页表中的地址
+- 尽量让segfault的操作复杂些。demo将speculative_exploit里的指令分成了两部分：触发segfault的指令集A和实际访问内核内存的指令集B。A包含复杂的浮点数操作，且依赖于rax，必须顺序执行；而B完全不依赖rax，满足cpu乱序执行的前提。此处也有一点race condition的意味：我们希望cpu在乱序执行时把B放在A前执行。至于为什么要用segfault，主要是因为我们可以捕捉SIGSEGV信号，利用longjmp+setjmp创建稳定的攻击窗口

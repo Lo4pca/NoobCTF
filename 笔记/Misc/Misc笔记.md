@@ -2585,7 +2585,7 @@ for i in "${!data[@]}"; do modbus host:port $((i+19))=${data[$i]}; done
 - windows的系统调用号每个版本都不一样，所以只能用标准库函数。获取库函数地址的细节参考 https://idafchev.github.io/exploit/2017/09/26/writing_windows_shellcode.html 。调试时只需注意GetProcAddress函数，该函数可用于在运行时获取任意函数地址。在这里下断点可以方便调试。或者用[speakeasy](https://github.com/mandiant/speakeasy),可以根据工具的报告分析出程序用了什么dll。如果模拟运行时出错，可以参考官方wp的做法，用hook自行支持部分API Handlers（hook函数内部可以读取内存）
 - [官方wp](https://github.com/hackthebox/uni-ctf-2023/tree/main/uni-ctf-2023/forensics/%5BHard%5D%20Shadow%20of%20the%20Undead)详细介绍了meterpreter_reverse_tcp所使用的TLV packet格式。该格式可用[REW-sploit](https://github.com/REW-sploit/REW-sploit)处理并解密。wp还提了一嘴shellcode injection：攻击者分配一个内存段，改权限为RWX，然后创建新进程并往里面注入shellcode最后运行
 220. [Compromised](https://github.com/rixinsc/ctf-writeups/blob/master/wgmy2023.md#compromised)
-- RDP Bitmap Cache forensic。RDP Bitmap Cache文件一般存储于`AppData --> local --> Microsoft --> Terminal Client Server --> Cache`，遵循命名规律`Cachexxxx.bin`，且文件头为`52 44 50 38 62 6d 70`(RDP8bmp)。参考文章 https://www.linkedin.com/pulse/blind-forensics-rdp-bitmap-cache-ronald-craft/ ，可以从该文件中恢复出桌面图片的碎片
+- RDP Bitmap Cache forensic。RDP Bitmap Cache文件一般存储于`AppData --> local --> Microsoft --> Terminal Client Server --> Cache`，遵循命名规律`Cachexxxx.bin`，且文件头为`52 44 50 38 62 6d 70`(RDP8bmp)。参考文章 https://www.linkedin.com/pulse/blind-forensics-rdp-bitmap-cache-ronald-craft ，可以从该文件中恢复出桌面图片的碎片
 - 工具/其他wp/参考链接： 
     - [Remote-Desktop-Caching-](https://github.com/Viralmaniar/Remote-Desktop-Caching-)
     - [BMC-Tools](https://github.com/ANSSI-FR/bmc-tools)

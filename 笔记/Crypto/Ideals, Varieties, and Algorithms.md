@@ -89,9 +89,9 @@ d. 利用本节讨论的直观维数概念(intuitive notion of dimension)，猜�
 
 将原方程组的系数矩阵化为行阶梯形：
 
-$$\begin{pmatrix}1 & 2 & -2 & 1 & | & -1 \\ 1 & 1 & 1 & -1 & | & 2\end{pmatrix}
+$$\begin{pmatrix}1 & 2 & -2 & 1 & | & -1 \cr 1 & 1 & 1 & -1 & | & 2\end{pmatrix}
 \rightarrow
-\begin{pmatrix}1 & 0 & 4 & -3 & | & 5 \\ 0 & 1 & -3 & 2 & | & -3\end{pmatrix}$$
+\begin{pmatrix}1 & 0 & 4 & -3 & | & 5 \cr 0 & 1 & -3 & 2 & | & -3\end{pmatrix}$$
 
 得到：
 - x + 4z - 3w = 5
@@ -228,9 +228,9 @@ $f(x,y)-f(x,x)=\sum c_{ij}x^iy^j-\sum c_{ij}x^{i+j}=\sum c_{ij}(x^iy^j-x^{i+j})$
 2. 考虑由域 k 中的元素 a₁, …, aₙ 所确定的 n × n 范德蒙德行列式:
 
 $$det\begin{pmatrix}
-1&a_1&a_1^2&...&a_1^{n-1} \\
-1&a_2&a_2^2&...&a_2^{n-1} \\
-\vdots&\vdots&\vdots&&\vdots \\
+1&a_1&a_1^2&...&a_1^{n-1} \cr
+1&a_2&a_2^2&...&a_2^{n-1} \cr
+\vdots&\vdots&\vdots&&\vdots \cr
 1&a_n&a_n^2&...&a_n^{n-1}
 \end{pmatrix}$$
 
@@ -238,7 +238,7 @@ $$det\begin{pmatrix}
 
 若行列式为0，则存在n个 $c_i$ ，使得：
 
-$$c_0 \begin{pmatrix} 1 \\ 1 \\ \vdots \\ 1 \end{pmatrix} + c_1 \begin{pmatrix} a_1 \\ a_2 \\ \vdots \\ a_n \end{pmatrix} + c_2 \begin{pmatrix} a_1^2 \\ a_2^2 \\ \vdots \\ a_n^2 \end{pmatrix} + \cdots + c_{n-1} \begin{pmatrix} a_1^{n-1} \\ a_2^{n-1} \\ \vdots \\ a_n^{n-1} \end{pmatrix} = \begin{pmatrix} 0 \\ 0 \\ \vdots \\ 0 \end{pmatrix}$$
+$$c_0 \begin{pmatrix} 1 \cr 1 \cr \vdots \cr 1 \end{pmatrix} + c_1 \begin{pmatrix} a_1 \cr a_2 \cr \vdots \cr a_n \end{pmatrix} + c_2 \begin{pmatrix} a_1^2 \cr a_2^2 \cr \vdots \cr a_n^2 \end{pmatrix} + \cdots + c_{n-1} \begin{pmatrix} a_1^{n-1} \cr a_2^{n-1} \cr \vdots \cr a_n^{n-1} \end{pmatrix} = \begin{pmatrix} 0 \cr 0 \cr \vdots \cr 0 \end{pmatrix}$$
 
 第i行对应的多项式是 $c_0+c_1a_i+...+c_{n-1}a_i^{n-1}=0$ ，对每个i=1..n都成立。但`Corollary 3`说明n-1次多项式最多只能有n-1个根，矛盾。因此行列式不可能是0
 
@@ -333,7 +333,7 @@ b. 你的基是否已尽可能小？或者能否从中删去某些 β，得到�
 
 a. 利用`Corollary 6`证明 $>_u$ 是单项式序（monomial ordering）。提示：你的论证在何处用到了 u₁, …, uₙ 的线性无关性？
 
-86页的`Corollary 6`给出的三条要求中，后两条均不证自明，剩下第一条： $>_u$ 在 $ℤⁿ_{≥0}$ 上是全序（total ordering）。设 $\alpha\neq\beta\in\mathbb{Z}^n_{\ge 0}$ ，则 $u\cdot\alpha$ 和 $u\cdot\beta$ 是实数。若 $u\cdot\alpha = u\cdot\beta$ ，则 $u\cdot(\alpha-\beta)=0$ 。由于 $u_i$ 在 $\mathbb{Q}$ 上线性无关，且 $\alpha-\beta$ 是有理数（整数）向量，只能有 $\alpha-\beta=0$ ，即 $\alpha=\beta$ ，矛盾。因此 $u\cdot\alpha \neq u\cdot\beta$ ，从而要么 $u\cdot\alpha > u\cdot\beta$ 要么 $u\cdot\beta > u\cdot\alpha$ ，全序性成立
+86页的`Corollary 6`给出的三条要求中，后两条均不证自明，剩下第一条： > $_u$ 在 $ℤⁿ_{≥0}$ 上是全序（total ordering）。设 $\alpha\neq\beta\in\mathbb{Z}^n_{\ge 0}$ ，则 $u\cdot\alpha$ 和 $u\cdot\beta$ 是实数。若 $u\cdot\alpha = u\cdot\beta$ ，则 $u\cdot(\alpha-\beta)=0$ 。由于 $u_i$ 在 $\mathbb{Q}$ 上线性无关，且 $\alpha-\beta$ 是有理数（整数）向量，只能有 $\alpha-\beta=0$ ，即 $\alpha=\beta$ ，矛盾。因此 $u\cdot\alpha \neq u\cdot\beta$ ，从而要么 $u\cdot\alpha > u\cdot\beta$ 要么 $u\cdot\beta > u\cdot\alpha$ ，全序性成立
 
 （看69页对全序的定义时，我以为一个关系是全序只需要满足“ $x^a$ < $x^b$ , $x^a=x^b$ , $x^a$ > $x^b$ 中有且只有一个说法为真”，但似乎还要保证 $x^a=x^b$ 时，在 $ℤⁿ_{≥0}$ 上a=b）
 
@@ -383,3 +383,48 @@ $x_l A − x_k B$ 一定无法被除 $g_i,g_j$ 之外的多项式整除，因为
 c. 解释为什么 $g_1, …, g_t$ 是既约 Gröbner 基
 
 因为 $g_i = x_k + A$ ，首项之间无法整除，A也无法被任何首项整除（106页定义5）
+
+### First Applications of Groebner Bases
+
+7. 设 ℝ³ 中的曲面 S 由连接直线 {x=t, y=0, z=1} 与 {x=0, y=1, z=t} 上具有相同参数 t 的点对所成的直线段之并构成。（这是一类称为直纹面(ruled surfaces)的曲面的特例）
+
+a. 证明曲面 S 可表示为如下参数形式：
+- x = ut
+- y = 1 − u
+- z = u + t − ut
+
+首先得澄清题目到底在说什么。 $L_1=$ {x=t, y=0, z=1} 和 $L_2=$ {x=0, y=1, z=t}分别是两个 ℝ³ 中的直线方程。对每个参数t，取 $P_1(t)=L_1(t)$ 和 $P_2(t)=L_2(t)$ ，连接两点即可得到一条直线段。所有这些直线段的并集就是曲面S
+
+回顾“Parametrizations of Affine Varieties”的第7题，参数化一条直线可以用 $L_t=P_0+u(P_1-P_0)$ ,那么整合起来就是 $S(u,t)=(t,0,1)+u(-t,1,t-1)=(t-ut,u,ut-u+1)$ 。这与期望的参数化不同，因为u的方向反了。 $u\in [0,1]$ ，把u替换为1-u，就能得到题目要求的参数形式
+
+b. 用例 4 和例 5 的方法，求包含曲面 S 的簇 V 的一个（隐式）方程
+
+```py
+R.<x,y,z,u,t> = PolynomialRing(QQ, order='lex')
+f1 = x-u*t
+f2 = y-1+u
+f3 = z-u-t+u*t
+I = ideal(f1, f2, f3)
+print(I.elimination_ideal([u, t]))
+```
+
+$xy + y^2 + yz - 2y - z + 1=0$
+
+c. 证明 V = S（即证 V 的每一点均可由 (a) 部分方程代入某些 t, u 的值得到）。提示：尝试将 V 的隐式方程关于一个变量解出，表示为另外两个变量的函数
+
+```py
+var('x y z u t')
+f = x*y + y^2 + y*z - 2*y - z + 1
+sols = solve(f == 0, y)
+for sol in sols:
+    expr = sol.rhs()
+    subs_dict = {
+        x: u*t,
+        y: 1 - u,
+        z: u + t - u*t
+    }
+    print(expr.subs(subs_dict).simplify_full())
+```
+x和z的结果均符合预期，只有y的结果不是很直观，为 `-1/2*t - 1/2*u - 1/2*sqrt(t^2 - 2*t*u + u^2) + 1`。放到wolfram alpha里可以看见在t和u均为实数的前提下，原函数等于如下的分段函数：
+- 1-t( $t\geq u$ )
+- 1-u (其他)
