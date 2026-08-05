@@ -819,6 +819,8 @@ $$
         - 将 $x_i = r^ix_0$ 代入 $\sum v_i x_i$ ，得 $\sum v_i * (r^i x_0) = x_0 (v_0 + v_1 r + v_2 r^2 + ... + v_k r^k) \approx 0 \mod p$
         - 向量 v 的系数 $(v_0, v_1, ..., v_k)$ 正好构成了一个整系数多项式 $P(t) = v_0 + v_1 t + ... + v_k t^k$ ，而 LCG 的乘数 r 是这个多项式在模 p 下的一个根
     - 这题要更复杂些，存在两个lcg。lcg A的ax+b中的b系数是另一个lcg B
+- [teRRibleRing](https://blog.sceleri.cc/posts/r3ctf-2026-writeup)
+    - decisional RLWE(Ring LWE)中模数p可能的后门结构。问题的难度取决于多项式p的度数和系数的大小。如果f可以被分解为g和h，则利用 $Z_p[x]/(f)$ 到 $Z_p[x]/(g)$ 的投影便可以在更小的维度上解决相同的问题。然而投影相当于计算a mod g，需要额外保证g的系数极小，否则噪声在模g的过程中被放大后也无法用LLL解出。因此可用的后门一般是f的某些因子的乘积构成的稀疏且度数不大的多项式
 
 ## Elliptic Curves(ECC,椭圆曲线)
 
@@ -963,6 +965,8 @@ $$
     - 用[Pollard's kangaroo algorithm](https://en.wikipedia.org/wiki/Pollard%27s_kangaroo_algorithm)（也叫pollard-lambda）计算ecdlp
         - 工具[Kangaroo](https://github.com/JeanLucPons/Kangaroo)，支持用gpu加速:[nvida cuda](https://developer.nvidia.com/cuda-toolkit)
     - 相关论文：[Breaking ECDSA with Two Affinely Related Nonces](https://eprint.iacr.org/2025/705.pdf)
+- [rECp1cG](https://blog.sceleri.cc/posts/r3ctf-2026-writeup)
+    - ECHNP
 
 ## AES/DES
 

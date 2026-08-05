@@ -550,3 +550,11 @@ vm将内存隔成了两个区域，代码可访问的`memory`和存储读取的�
 - 目标内核地址的数据必须已经被加载到CPU缓存中。这也是为什么题目提供了device_ioctl，允许模块将flag字符加载到缓存中
 - linux环境下必须关闭kpti。kpti直接隔离了用户态和内核态的页表，即使是CPU的推测执行也无法转换不存在当前页表中的地址
 - 尽量让segfault的操作复杂些。demo将speculative_exploit里的指令分成了两部分：触发segfault的指令集A和实际访问内核内存的指令集B。A包含复杂的浮点数操作，且依赖于rax，必须顺序执行；而B完全不依赖rax，满足cpu乱序执行的前提。此处也有一点race condition的意味：我们希望cpu在乱序执行时把B放在A前执行。至于为什么要用segfault，主要是因为我们可以捕捉SIGSEGV信号，利用longjmp+setjmp创建稳定的攻击窗口
+
+### Molten Walk
+
+ioctl cmd 31337可以获取某个pid对应的进程的task_struct指针（ghidra的伪代码乍一看还以为没有返回pid_task给出的指针，但是配合汇编可以看到返回值被拷贝到了`[ioctl_param+8]`的位置），cmd 1337则可以将指定kernel地址加载进缓存
+
+task_struct偏移0x3e0处有一个名为mm的字段（可以用`p &((struct task_struct *)0)->mm`查看偏移），类型是mm_struct。mm_struct偏移0x50的地方又有一个名为pgd的字段，为该进程的页表。接下来就可以根据 https://blog.zolutal.io/understanding-paging 手动进行page walk，找到目标进程虚拟地址0x00404060对应的内核地址了。注意页表里存储的都是物理地址，在kaslr没开的情况下，可以将物理地址加上0xffff888000000000得到对应的虚拟内核地址
+
+另外我的exp不知道为什么没法泄漏出0xff。幸好0xff基本只在地址高位，可以手动补全

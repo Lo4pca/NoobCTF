@@ -428,3 +428,17 @@ for sol in sols:
 x和z的结果均符合预期，只有y的结果不是很直观，为 `-1/2*t - 1/2*u - 1/2*sqrt(t^2 - 2*t*u + u^2) + 1`。放到wolfram alpha里可以看见在t和u均为实数的前提下，原函数等于如下的分段函数：
 - 1-t( $t\geq u$ )
 - 1-u (其他)
+
+### (Optional) Improvements on Buchberger’s Algorithm
+
+3. 设 M 为 k[x₁, …, xₙ] 上的 m × (m+1) 多项式矩阵。令 I 为由 M 的所有 m×m 子矩阵的行列式生成的理想（这类理想称为行列式理想）
+
+c. 给出生成行列式理想生成元间合冲关系（syzygy）的一般方法。提示：寻找构造包含 M 的 (m+1)×(m+1) 矩阵的方法，其行列式自动为零
+
+“行列式自动为零”指的是行向量线性相关或有两行相同导致行列式恒为0。所以我们可以随便拿M中的一个行向量加到M的底部，得到M'，然后沿新加的那一行做Laplace展开： $det(M')=\sum_{j=1}^{m+1}(-1)^{(m+1)+j}a_{(m+1)j}det(M'_{(m+1)j})$ ， $M'_{(m+1)j}$ 为M'去掉m+1行，j列所成的矩阵，正好就是原M的所有m×m 子矩阵。已知det(M')一定为0，所以 $(-1)^{(m+1)+j}a_{(m+1)j}$ 就是要求的syzygy
+
+7. 完成`Proposition 10`的证明(122页)，证明 $S_{ij}=\frac{x^{\gamma_{ij}}}{x^{\gamma_{ik}}}S_{ik}-\frac{x^{\gamma_{ij}}}{x^{\gamma_{jk}}}S_{jk}$
+
+$S_{ij}$ 表示只有i和j分量不为0，且 $S_{ij}G$ 会消掉G中 $f_i$ 和 $f_j$ 的首项。观察 $S_{ik}$ 和 $S_{jk}$ 的结构，显然需要以某种手段消掉k处的分量。假设 $h_k=(S_{ik})_k,h_k'=(S_{jk})_k$ ,则由于 $LT(h_k)=\frac{x^{\gamma_{ik}}}{LT(f_k)}$ , $LT(h_k)LT(f_k)=x^{\gamma_{ik}}$ ；类似地，有 $LT(h_k')LT(f_k)=x^{\gamma_{jk}}$ 。不难看出分别乘上 $\frac{x^{\gamma_{ij}}}{x^{\gamma_{ik}}}$ 和 $\frac{x^{\gamma_{ij}}}{x^{\gamma_{jk}}}$ 后，两者即可抵消
+
+接下来需要证明 $S_{ij}$ 确实可以取消掉 $f_i,f_j$ 的首项。这不难，因为任何syzygy乘以任意单项式后，仍然是针对对应首项的syzygy。所以 $(S_{ik})_i$ 和 $(S_{jk})_j$ 分别乘上 $f_i$ 和 $f_j$ 后结果的首项仍等于其k分量乘上 $f_k$ 的结果的首项，而后者已被证明相等
