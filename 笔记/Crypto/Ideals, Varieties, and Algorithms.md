@@ -442,3 +442,15 @@ c. 给出生成行列式理想生成元间合冲关系（syzygy）的一般方�
 $S_{ij}$ 表示只有i和j分量不为0，且 $S_{ij}G$ 会消掉G中 $f_i$ 和 $f_j$ 的首项。观察 $S_{ik}$ 和 $S_{jk}$ 的结构，显然需要以某种手段消掉k处的分量。假设 $h_k=(S_{ik})_k,h_k'=(S_{jk})_k$ ,则由于 $LT(h_k)=\frac{x^{\gamma_{ik}}}{LT(f_k)}$ , $LT(h_k)LT(f_k)=x^{\gamma_{ik}}$ ；类似地，有 $LT(h_k')LT(f_k)=x^{\gamma_{jk}}$ 。不难看出分别乘上 $\frac{x^{\gamma_{ij}}}{x^{\gamma_{ik}}}$ 和 $\frac{x^{\gamma_{ij}}}{x^{\gamma_{jk}}}$ 后，两者即可抵消
 
 接下来需要证明 $S_{ij}$ 确实可以取消掉 $f_i,f_j$ 的首项。这不难，因为任何syzygy乘以任意单项式后，仍然是针对对应首项的syzygy。所以 $(S_{ik})_i$ 和 $(S_{jk})_j$ 分别乘上 $f_i$ 和 $f_j$ 后结果的首项仍等于其k分量乘上 $f_k$ 的结果的首项，而后者已被证明相等
+
+## Elimination Theory
+
+### The Geometry of Elimination
+
+1. 用Extension Theorem(132)和Lemma 1(137)证明Geometric Extension Theorem(138)
+
+脑抽了，想了半天 $V(I_1)$ 是如何拆成 $\pi_1(V)$ 和 $V(g_1,..., g_s) ∩ V(I_1)$ 的，不断地钻 $V(g_1,..., g_s) ∩ V(I_1)$ 的牛角尖：“啊，为什么是这两者的交集呢”，事实上这题根本没有什么复杂的内容
+
+给定任意 $a=(a_2,...,a_n)\in V(I_1)$ ,若 $a\not\in V(g_1,...,g_s)$ ,则根据Extension Theorem，a可扩展。可扩展说明存在 $a_1$ 使得 $(a_1,a_2,...,a_n)\in V$ ，即 $a\in\pi_1(V)$
+
+若 $a\in V(g_1,...,g_s)$ ，我们无法得知a是否可扩展，它可能不在 $\pi_1(V)$ 中。那么到底有什么a在 $V(I_1)$ 中呢？答案是两者的交集，这就是 $V(g_1,..., g_s) ∩ V(I_1)$ 的由来……

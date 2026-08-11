@@ -105,7 +105,7 @@
 
 - [Restricted Jumper](https://yun.ng/c/ctf/2024-nitectf/rev/restricted-jumper)
   - [UnityExplorer](https://github.com/sinai-dev/UnityExplorer)：允许在游戏内进行调试，修改的mod。支持IL2CPP和Mono
-- [Russian Roulette](https://gist.github.com/C0nstellati0n/a066c450ed5d4c8ffbb0c1328283fe14#russian-roulette)
+- [Russian Roulette](https://gist.github.com/Lo4pca/a066c450ed5d4c8ffbb0c1328283fe14#russian-roulette)
     - IL2Cpp unity apk逆向： https://palant.info/2021/02/18/reverse-engineering-a-unity-based-android-game 。其实和IL2Cpp exe差不多，都需要用[Il2CppDumper(GUI)](https://github.com/AndnixSH/Il2CppDumper-GUI)。注意工具输出的`Assemble-CSharp.dll`只包含函数签名而没有实际的代码，还需要用ida pro/ghidra配合工具提供的script反编译`libil2cpp.so`
     - 如何用[frida-il2cpp-bridge](https://github.com/vfsfitvnm/frida-il2cpp-bridge)调用任意函数
 - [Yep another smake game](https://hackmd.io/VXBgjljNTKatGeOx1O8v7A)
@@ -119,6 +119,8 @@
     - 提取`.pak`后缀的游戏资源:[UE4-AES-Key-Extracting-Guide](https://github.com/Cracko298/UE4-AES-Key-Extracting-Guide),[UnrealPakViewer](https://github.com/jashking/UnrealPakViewer)
 - [Minions in 16k](https://mrfuzzypants.writeups-me.workers.dev/challenge?title=Minions%20in%2016k&ctf=sekai%20ctf%202026&category=game)
   - rust编写的bevy是数据驱动的游戏引擎，可以通过修改游戏的asset控制游戏行为
+- [FunnyGame](https://glory-jitterbug-745.notion.site/r3ctf-by-Flagsomnia-3952bfc3213c80f99670f3d45928f1af)
+  - godot v3 `.pck`文件格式、GDScript Code（`.gdc`）文件反编译和Native Functions (GDExtension Bindings)
 
 ## APK
 

@@ -558,3 +558,13 @@ ioctl cmd 31337可以获取某个pid对应的进程的task_struct指针（ghidra
 task_struct偏移0x3e0处有一个名为mm的字段（可以用`p &((struct task_struct *)0)->mm`查看偏移），类型是mm_struct。mm_struct偏移0x50的地方又有一个名为pgd的字段，为该进程的页表。接下来就可以根据 https://blog.zolutal.io/understanding-paging 手动进行page walk，找到目标进程虚拟地址0x00404060对应的内核地址了。注意页表里存储的都是物理地址，在kaslr没开的情况下，可以将物理地址加上0xffff888000000000得到对应的虚拟内核地址
 
 另外我的exp不知道为什么没法泄漏出0xff。幸好0xff基本只在地址高位，可以手动补全
+
+## [System Exploitation](https://pwn.college/system-security/system-exploitation)
+
+### level2.1
+
+yan85_seccomp_validate禁止了read相关的syscall。但检查存在条件竞争，攻击者可在通过检查后修改当前指令
+
+seccomp给了ioctl，mmap和fork。那么可以让父进程不断调用ioctl，并fork出一个子进程循环修改调用的syscall
+
+（结果我被一个和题目无关的逻辑卡了两天：我用python读取泄漏出来的flag时没用rb模式，导致检查flag的逻辑永远为假……我的exp早就成功了，然而我一直没有手动cat flag……）

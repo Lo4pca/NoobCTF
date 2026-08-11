@@ -3160,3 +3160,8 @@ $ cd a/b
 - 编写代码，使同一份代码可用多种语言执行
 414. [Food poisoning](https://www.pizzasteve.me/posts/gpn-ctf-26-misc-challenges-writeups)
 - [github actions cache poisoning](https://cloud.hacktricks.wiki/en/pentesting-ci-cd/github-security/abusing-github-actions/gh-actions-cache-poisoning.html)：GitHub Actions的缓存是按仓库和分支进行作用域限定的。从某个分支写入的缓存可被源自同一父分支的其他工作流读取。因此若攻击者在某个低权限工作流拿到了rce，便可以针对某个高权限的工作流使用的缓存键写入恶意内容，从而修改高权限工作流的行为
+415. [trustedhash](https://github.com/starcatmeow/trustedhash/blob/main/writeup-zh.md)
+- 可信平台模块（TPM）2.0+Linux Lockdown实现的类TEE（Trusted Execution Environment）。虽然题目绝大部分的设置我都没看懂，但wp提到的解法所包含的内容似乎可复用于其他题目：
+    - 安装并启动[UEFI-Shell](https://github.com/pbatard/UEFI-Shell),然后在shell内运行[Memory-Dump-UEFI](https://github.com/NoInitRD/Memory-Dump-UEFI) dump内存
+    - 即使在lockdown模式下（无法读取或修改内存），root仍可以安装eBPF fentry捕捉函数上下文
+    - TPM具有有限的session。耗尽session后再创建新session将会报错
