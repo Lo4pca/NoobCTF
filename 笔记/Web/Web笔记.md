@@ -4602,3 +4602,5 @@ if (await remote.hasPasswordFor(id)) {
 586. [Filtered Reality](https://vhxuu.xyz/blog/sekai26/filtered-reality)
 - apache `mod_php`与WordPress regex差异：请求`/wp-admin/index.php/anything%0A/wp-admin/x.php`可正常访问`index.php`，但`get_current_screen()->id`将得到`x`。成因在于`mod_php`将用户路由到`index.php`后仍传递了完整的url给wordpress，导致regex取最后一个匹配项时取到了`x.php`
 - 对于没有设置`navigate-to`的csp，可以利用Signed HTTP Exchanges (SXGs)的`fallbackUrl`字段将受害者重定向至指定url
+587. **mafuyuuuuu**
+- 利用`.NET` CoreCLR的`memfd:doublemapper`映射将任意文件写转换为rce

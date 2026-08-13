@@ -2218,3 +2218,9 @@ offset = the_mmap64_plus_23_itself
 255. [Tcademy](https://frederik353.github.io/writeups/ctfs/lactf-26/tcademy)
 - glibc 2.35 堆溢出->伪造unsorted bin chunk泄漏libc和堆地址->tcache poisoning->House of Apple 2 FSOP RCE/覆盖libc strlen GOT RCE
   - 都是见过的技巧，但是这篇wp把它们串联在一起的同时讲得还挺详细，例如“如何处理假unsorted bin堆块在free时位于top chunk中间“。`nextchunk == av->top`时`_int_free`会跳过大部分检查，不满足时就需要额外伪造两个堆块，用于满足`Next chunk’s PREV_INUSE bit is set`,`Next chunk’s size must be reasonable`和`Next-next chunk’s PREV_INUSE bit is set`三个条件
+256. [Escape CET](https://satwik67.xyz/blog/escape-cet)
+- Intel CET（Shadow Stack+Indirect Branch Tracking (IBT)）。Shadow Stack保留一份返回地址的副本，当主栈记录的返回地址与其不符时报错；IBT则是保证间接调用必须落在ENDBR指令上
+- 题目给出一块slab的地址和libc地址，允许攻击者往slab写一段payload、往libc任意地址写4字节一次、调用libc内的函数。但攻击者无法控制调用函数时的参数，也无法采用FSOP或exit handler这类常用的手段，且seccomp要求必须使用openat2+read+write
+- 解法：在slab里写入构造好的模块，然后往`libc.sym.nss_module_list`写入模块地址，最后调用nss_module_freeres。该函数最终会调用`_dl_call_fini`。从`_dl_call_fini`的函数调用可分支出两种做法：
+  - 利用lll_lock_priv+rand_r函数设置rsi和rdx。由于rdi总是指向slab，调用mprotect可将slab设为rwx，随后写入并调用orw shellcode
+  - 遵循 https://scholar.dsu.edu/cgi/viewcontent.cgi?params=/context/theses/article/1442/&path_info=Stratton__Logan_1.pdf 实现Function-Oriented Programming。可用https://github.com/LMS57/FOP_Mythoclast dump出可用的gadget

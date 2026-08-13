@@ -967,6 +967,7 @@ $$
     - 相关论文：[Breaking ECDSA with Two Affinely Related Nonces](https://eprint.iacr.org/2025/705.pdf)
 - [rECp1cG](https://blog.sceleri.cc/posts/r3ctf-2026-writeup)
     - ECHNP
+    - https://github.com/tl2cents/Implementation-of-Cryptographic-Attacks
 
 ## AES/DES
 
