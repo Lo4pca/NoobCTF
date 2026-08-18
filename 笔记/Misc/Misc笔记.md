@@ -550,9 +550,9 @@ print(base64.b64encode(temp.encode()))
         - 使用runas调用某个可疑程序
         - PEB is being meddled with unlinking the current process from the list using SeDebugPrivilege，用于隐藏某些恶意进程。wp里还有一些隐藏恶意进程的手段
         - VirtualAllocEx, WriteProcessMemory, GetModuleHandleA(“Kernel32”) are all very very common indicators of a DLL injection
-- [Batman Investigation II](https://blog.bi0s.in/2024/02/27/Forensics/BatmanInvestigationII-GothamUndergroundCorruption-bi0sCTF2024/)
+- [Batman Investigation II](https://blog.bi0s.in/2024/02/27/Forensics/BatmanInvestigationII-GothamUndergroundCorruption-bi0sCTF2024)
     - 若分析memory dump时在进程列表里看见`Thunderbird.exe`（电子邮箱软件），可以用volatility3的`windows.filescan.FileScan`和`windows.dumpfiles.DumpFiles`插件提取出Inbox file，进而获取全部的conversation data
-    - KeePass password manager密码获取。首先在memory dump中找后缀为`.kdbx`的文件，然后参考这篇[文章](https://www.forensicxlab.com/posts/keepass/)，或是利用这个[工具](https://github.com/vdohney/keepass-password-dumper) （另一个版本： https://github.com/matro7sh/keepass-dump-masterkey ）就可得到密码。另一道有关利用CVE漏洞恢复keepass密码的题：[H4Gr1n](https://teamshakti.in/CTF-Write-ups/ShaktiCTF24/forensics/H4Gr1n/)
+    - KeePass password manager密码获取。首先在memory dump中找后缀为`.kdbx`的文件，然后参考这篇[文章](https://www.forensicxlab.com/posts/keepass)，或是利用这个[工具](https://github.com/vdohney/keepass-password-dumper) （另一个版本： https://github.com/matro7sh/keepass-dump-masterkey ）就可得到密码。另一道有关利用CVE漏洞恢复keepass密码的题：[H4Gr1n](https://teamshakti.in/CTF-Write-ups/ShaktiCTF24/forensics/H4Gr1n)
     - Exodus（cryptocurrency wallet）相关
         - 获取该软件的安装时间（但我觉得也可以推广到其他软件）
             1. 可用volatility2的printKey功能打印Uninstall reg entry。一般来说这个注册项的Last updated时间就是安装时间
@@ -611,10 +611,10 @@ print(base64.b64encode(temp.encode()))
 - [tiny_usb](https://odintheprotector.github.io/2024/06/23/wanictf-forensic-writeup.html)
     - 使用[isodump](https://github.com/evild3ad/isodump)分析iso镜像文件
     - 这个[wp](https://warlocksmurf.github.io/posts/wanictf2024/)说用7zip可以直接看
-- [SAM I AM](https://p-pratik.github.io/posts/ductf'24/)
-    - 从SAM文件和SYSTEM文件中提取出密码hash。使用工具[samdump2](https://www.kali.org/tools/samdump2/)。出来的hash格式为Windows 2k/NT/XP password hash，常用的hash破解工具可以破解
+- [SAM I AM](https://p-pratik.github.io/posts/ductf'24)
+    - 从SAM文件和SYSTEM文件中提取出密码hash。使用工具[samdump2](https://www.kali.org/tools/samdump2)。出来的hash格式为Windows 2k/NT/XP password hash，常用的hash破解工具可以破解
     - 其他wp：
-        - https://sanlokii.eu/writeups/downunderctf/bad-policies/ ：使用impacket-secretsdump。话说这个[impacket](https://github.com/fortra/impacket)包有挺多工具的
+        - https://sanlokii.eu/writeups/downunderctf/bad-policies ：使用impacket-secretsdump。话说这个[impacket](https://github.com/fortra/impacket)包有挺多工具的
         - https://www.cnblogs.com/LAMENTXU/articles/18288730 ：mimikatz的lsadump也可以
 - [mkductfiso](https://ouuan.moe/post/2024/07/ductf-2024)
 	- 提取ISO文件时如果发现提取出来的内容少了`initramfs-linux.img`或`{amd,intel}-ucode.img`或什么其他文件，导致iso文件无法正常挂载，可以自行下载需要的文件，之后用xorriso命令打包成新的iso文件
@@ -718,6 +718,7 @@ print(base64.b64encode(temp.encode()))
     - 分析SQL XEL日志
 - [Zero Hour](https://github.com/t4mpr/ctf-writeups/tree/main/0xL4ughCTF%3D2026-Writeup)
     - Windows Push Notification Database `wpndatabase.db`可能包含部分discord/telegram的消息
+    - [NotifAnalyzer.py](https://github.com/labcif/YPA/blob/master/NotifAnalyzer.py)
 - [The Legendary Armory](https://0xasta.me/writeups/srdnlen26-thetrilogyofdeathvolumeii)
     - 分析[86Box](https://86box.net)产生的windows minidump文件。工具：[minidump](https://github.com/skelsec/minidump)
     - 这篇wp是AI写的，`Step 2`似乎出现了问题。正确的复现结果见 **The Legendary Armory**
@@ -729,6 +730,26 @@ print(base64.b64encode(temp.encode()))
             - 两个db均由SQLCipher加密，使用的key不同。user db的key从main db的key（main key）与kwk(Key Wrapping Key)推导而来
             - kwk存储在zoom的服务器上，在登录或已有的session刷新时下放。可用[apimonitor](http://www.rohitab.com/apimonitor)监听出kwk
         - `zoom.us.ini`包含被DPAPI加密后的main key。参考`Breadcrumbs`解密密钥；可用dpapimk2john爆破出登录密码
+- [Relizane is Down](https://medium.com/@0xgbreil/relizane-is-down-l3akctf-2026-forensics-challeng-d4b42441546a)
+    - windows文件系统DFIR大杂烩。这里尽量按原题提问的顺序逐条记录之前没见过的内容
+    - 获取用户在粘贴板中pin的内容
+        - 若启用了window系统设置中的“Clipboard History”项，则粘贴板会保存用户拷贝的任何内容。通常内容仅保存在RAM中，除非用户选择pin某个条目。这些条目保存在`C:\Users\[user]\AppData\Local\Microsoft\Windows\Clipboard\Pinned`
+        - 文件夹下的内容由DPAPI-NG保护。解密需要获取用户的登录密码，然后用[MadPassExt](https://www.nirsoft.net/utils/microsoft_account_dpapi_password.html)获取对应的DPAPI密码
+        - 实际的解密还需要经过AES Key Unwrap与AES-256-GCM，具体见wp
+    - 获取用户浏览的网站
+        - 除了各个浏览器的历史与缓存，还有chrome session，可用[Chrome-History-SNSS-Parser](https://github.com/IRB0T/Chrome-History-SNSS-Parser)提取
+    - 获取恶意软件的哈希值
+        - 如果在文件系统里找不到软件本体，可以注意Windows Defender的检测历史，里面会记录恶意软件的路径、哈希值等内容
+        - [Defender DetectionHistory Parser](https://github.com/jklepsercyber/defender-detectionhistory-parser)
+    - 浏览器下载项
+        - 除了浏览器自带的下载项，CryptnetUrlCache也有可能存储下载的内容。可用[CryptnetURLCacheParser](https://github.com/AbdulRhmanAlfaifi/CryptnetURLCacheParser)查看
+    - 网络活动
+        - 若没有提供pcap，SRUM Artifact是一个入手点。可用[SrumECmd](https://ericzimmerman.github.io)分析
+        - 输出内容还包括程序的运行时间
+    - 文件内容
+        - Windows Search Index Database (Windows.edb)包含系统中文件的索引信息，比如metaadata和一些文件内容。可用[Search Index DB Reporter](https://github.com/strozfriedberg/sidr)分析
+    - 图片
+        - 对于已不在原处的文件，MFT记录和`Windows.edb`可能包含信息；如果文件是图片，则ThumbCache可能包含额外的信息。可用[Thumbcache Viewer](https://thumbcacheviewer.github.io)查看
 
 ## Network Forensics
 
@@ -2940,8 +2961,8 @@ a=A()
 - 看了半天才明白wp说的"follow the ... pattern"是什么意思。这题的源码在这： https://github.com/DownUnderCTF/Challenges_2024_Public/blob/main/misc/the-other-minimal-php (也是官方wp)，payload传入htmlspecialchars后再取反，最后才eval。所以这里要求我们的payload取反后还是合法的UTF-8。根据wp所说和UTF-8的编码方式： https://en.wikipedia.org/wiki/UTF-8#Encoding ，四种编码方式里只有第二种里的做法拆开能用，因为只有`110xxxxx`和`10xxxxxx`取反后还在合法的UTF-8里。这也是为什么wp里的php payload那么奇怪
 - 其他做法： https://gist.github.com/C0nstellati0n/78f5887b5bee235583a026840354ae54#the-other-minimal-php
 349. [Bad Policies](https://p-pratik.github.io/posts/ductf'24/)
-- 破解[Group Policy Preferences File (GPP XML)](https://infinitelogins.com/2020/09/07/cracking-group-policy-preferences-file-gpp-xml/)。可用命令`gpp-decrypt`
-- 另一种做法： https://sanlokii.eu/writeups/downunderctf/bad-policies/ ，使用impacket-Get-GPPPassword
+- 破解[Group Policy Preferences File (GPP XML)](https://infinitelogins.com/2020/09/07/cracking-group-policy-preferences-file-gpp-xml)。可用命令`gpp-decrypt`
+- 另一种做法： https://sanlokii.eu/writeups/downunderctf/bad-policies ，使用impacket-Get-GPPPassword
 350. [Intercepted Transmissions](https://github.com/EnchLolz/DUCTF-24/blob/main/MISC/Intercepted%20Transmissions.md)
 - 手动解码[CCIR 476](https://en.wikipedia.org/wiki/CCIR_476) transmission
 351. [i-see](https://www.youtube.com/watch?v=bmLAca3wxGc)
