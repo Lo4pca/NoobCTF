@@ -537,3 +537,51 @@ b. 利用文中给出的提示证明定理2（144）
 第一段：设 $V=V(J)\subset k^{n+m+1}$ 。假设k=C，由(8)(147)，有 $F(C^m-W)=\pi_{m+1}(V)$ 。根据Closure Theorem（139）， $V(J_{m+1})$ 是 $k^n$ 中包含 $\pi_{m+1}(V)$ 的最小簇
 
 第三段：已知 $F(k^m-W)=\pi_{m+1}(V_k)\subset V_k(J_{m+1})$ 。设 $Z_k=V_k(g_1,...,g_s)\subset k^n$ 是 $k^n$ 中满足 $F(k^m-W)\subset Z_k$ 的任意簇，需证明 $V_k(J_{m+1})\subset Z_k$ 。首先各个 $g_i$ 在 $Z_k$ 上取值为0，所以 $g_i$ 在更小的集合 $F(k^m-W)$ 上取值也为0。这说明每个 $g_i\circ F$ 在 $k^m-W$ 上取值为0。这里就能用(a)的结论得到 $g_i\circ F$ 是零多项式，进而完成全部的证明了
+
+### Singular Points and Envelopes
+
+2. 在定义1(153)中，我们需要证明重数的概念与直线的参数化方式无关
+
+a. 证明两个参数化
+- x = a + ct，  x = a + c′t
+- y = b + dt，  y = b + d′t
+
+对应同一直线，当且仅当存在非零数 λ ∈ k，使得 (c, d) = λ(c′, d′)。提示：在直线 L 的参数化 x = a + ct, y = b + dt 中，L 与向量 (c, d) 平行
+
+L与向量(c,d)平行的原因是L=(a,b)+t(c,d)：从点(a,b)出发，沿着向量(c,d)的方向移动
+
+$\Rightarrow$ 方向显然。对于 $\Leftarrow$ 方向，若(c, d) = λ(c′, d′)，则两个向量代表同一方向，只是模长不同。既然两者都过点(a,b),两者对应同一条直线
+
+b. 设 (a) 部分的两个参数化对应同一直线 L，且 L 与 V(f) 交于 (a, b)。证明多项式 g(t) = f(a + ct, b + dt) 与 g′(t) = f(a + c′t, b + d′t) 在 t = 0 处有相同的重数。提示：利用 (a) 部分建立 g 与 g′ 的关系。这将证明 L 与 V(f) 在 (a, b) 处相交的重数是良定义的
+
+由(a)，得 $g'(t)=f(a + c't, b + d't)=f(a+\frac{c}{\lambda}t,b+\frac{d}{\lambda}t)=g(\frac{t}{\lambda})$
+
+假设t=0是g的具有重数k的根，则 $g=t^kh(t),h(0)\not=0$ 。那么 $g'(t)=g(\frac{t}{\lambda})=(\frac{t}{\lambda})^kh(\frac{t}{\lambda})=\frac{1}{\lambda^k}t^kh(\frac{t}{\lambda})$ 。其中 $\frac{t}{\lambda}=0$ 而 $h(0)\not=0$ ，因此g'在t=0处的重数也是k
+
+3. 考虑直线
+- x = t
+- y = b + t
+
+其斜率为 1，纵截距为 b。当 b 取何值时，该直线与圆 x² + y² = 2 相切？提示：考虑 g(t) = t² + (b + t)² − 2。该二次式的根确定直线与圆相交时 t 的值
+
+153页有这样一句话：“Thus, we can detect when the line is tangent to the parabola by looking for a multiple root”。所以我们希望找到一个b值，使得g(t)有重根。有重根对应判别式为0。g(t)的判别式为 $-4(b^2-4)$ ,解得 $b=\pm 2$
+
+4. 若 (a, b) ∈ V(f) 且 $∇f(a, b) \not= (0, 0)$ ，证明 V(f) 在 (a, b) 处的切线由方程 $\frac{\partial}{\partial x} f(a, b) · (x − a) + \frac{\partial}{\partial y} f(a, b) · (y − b) = 0$ 定义
+
+“L=(a+ct,b+dt)是点(a,b)的切线”等同于说“t=0是g(t) = f (a + ct, b + dt)重数大于等于2的根”。而t = 0 is a root of g of multiplicity ≥ 2 ⇔ g'(0) = 0。借用154页出现的方程， $\frac{\partial}{\partial x}f (a, b) · c +\frac{\partial}{\partial y} f(a, b) · d=0$ 。注意到（或者155页给出）∇ f (a, b) · (c, d)=0，说明∇ f (a, b)与向量(c, d)垂直。因为(c,d)与L平行，所以可以用点法式方程得出过点(a,b)，法向量为∇ f (a, b)的直线为 $\frac{\partial}{\partial x} f(a, b) · (x − a) + \frac{\partial}{\partial y} f(a, b) · (y − b) = 0$
+
+7. 本练习将研究切线与曲线的相交重数如何大于 2。设 C 为由 y = f(x) 定义的曲线，其中 f ∈ k[x]。因此 C 即 f 的图像
+
+a. 用代数方法证明 C 在 (a, f(a)) 处的切线可参数化为
+- x = a + t
+- y = f(a) + f′(a)t
+
+提示：考虑 g(t) = f(a) + f′(a)t − f(a + t)
+
+这里说的“代数方法证明”似乎指的是完全通过重数的定义与多项式的代数运算（求导、分解）证明，不涉及极限
+
+F(x,y)=y-f(x),g(t)=F(a+t,f(a) + f′(a)t)=f(a) + f′(a)t-f(a+t)。用求导判定g(t)是否有重根：
+- g(0)=f(a)-f(a)=0
+- $g'(t)=f'(a)-f'(a+t)$ , $g'(0)=0$
+
+所以g(t)在t=0处的重数至少为2，直线与曲线相切

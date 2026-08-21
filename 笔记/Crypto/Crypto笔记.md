@@ -982,7 +982,7 @@ AES是很能出题的。DES则是放在这凑数的
     - 跟上面那题目标一样，但是是CBC。更详细的解析： https://docs.google.com/presentation/d/1FfM7ZblrqmNklG5NX9T5UyTDdEb5h1BRZTtwNrm_-mQ
 - [admin](https://github.com/Thehackerscrew/CrewCTF-2024-Public/tree/main/challenges/crypto/admin)
 	- AES GCM,已知两条明文及其对应密文+可控制加密用的IV（IV重用，不过更多时候叫nonce），要求伪造指定明文的密文
-- [Lazy STEK](https://blog.soreatu.com/posts/writeup-for-lazy-stek-in-line-ctf-2022/)
+- [Lazy STEK](https://blog.soreatu.com/posts/writeup-for-lazy-stek-in-line-ctf-2022)
     - AES GCM forbidden attack（nonce reused攻击）
     - 还是在这个[脚本](https://rbtree.blog/posts/2022-03-27-sage-script-for-aes-gcm)里知道这题的。脚本内容为“在sagemath里如何将字节块转换为 $F_2^{128}$ 里的元素”
 - [Conversationalist](https://github.com/JorianWoltjer/challenges/blob/main/1337up-live-2024/conversationalist)

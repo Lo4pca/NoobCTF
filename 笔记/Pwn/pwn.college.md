@@ -584,3 +584,17 @@ seccomp给了ioctl，mmap和fork。那么可以让父进程不断调用ioctl，�
 之前在race condition里也有一道加了信号的题，但那题的信号只是缩短了窗口，并没有完全杜绝race。这题就不一样了，我和ds一致认为信号完全修复了race问题。所以就无解了？
 
 仔细看load_program，每段program只有0x300大小的buffer，但读取时却读了整整0x1000。再看信号结构体`sem_t`在data中的分布，正好就在最后一个program buffer的末尾。我们可以利用溢出修改结构体的内容，比如开头的`__count`字段。每次调用sem_wait时，函数将检查这个值是否为0:若为0，则阻塞等待；若不为0，则将该字段减去1。sem_post则是将这个字段加回1。所以这个字段表示同一时刻可并行的线程数量。用溢出将这个值改大，剩下的内容就和上一题一样了
+
+### level5.1
+
+基本上是之前见过的技巧的大杂烩
+
+程序仅支持顺序连接，而且load_program接收program的buffer位于栈上。不过此处的bof仍然存在，让我看看有没有canary——没有，并且NX也没开。本来想着用vsyscall+partial overwrite直接ret2shellcode，但seccomp堵死了这条路。盯着电脑发呆了许久，猛然想起ROP Roulette这题
+
+所以步骤如下：
+- partial overwrite返回地址，泄漏elf基址
+- 用elf内的gadget泄漏libc地址
+- 读`__environ`泄漏栈地址
+- ret2shellcode执行和`level2.1`类似的逻辑，但是把fork换成clone
+
+clone的文档见 https://manpages.debian.org/testing/manpages-dev/clone.2.en.html 。注意系统调用只有4个参数：clone_flags，newsp，parent_tid和child_tid，直接用`shellcraft.clone`得到的结果是错误的，需要用`shellcraft.syscall`手动调用。pwntools出现错误的原因见 https://github.com/Gallopsled/pwntools/issues/2283 ，pwndbg也有类似的问题
