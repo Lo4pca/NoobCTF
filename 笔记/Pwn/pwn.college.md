@@ -598,3 +598,7 @@ seccomp给了ioctl，mmap和fork。那么可以让父进程不断调用ioctl，�
 - ret2shellcode执行和`level2.1`类似的逻辑，但是把fork换成clone
 
 clone的文档见 https://manpages.debian.org/testing/manpages-dev/clone.2.en.html 。注意系统调用只有4个参数：clone_flags，newsp，parent_tid和child_tid，直接用`shellcraft.clone`得到的结果是错误的，需要用`shellcraft.syscall`手动调用。pwntools出现错误的原因见 https://github.com/Gallopsled/pwntools/issues/2283 ，pwndbg也有类似的问题
+
+### level7.1
+
+单纯用已有的race condition没法绕过sys_read中关于“读取的内容不能包含大括号”的限制。虽然sys_read的反编译代码不知为何难以阅读，但是从kernel_read的参数中可看出该函数最多允许读取0x100字节。因为interpret_sys没有限制内存的起始点，所以这里存在bof，我们可以破坏vm_state结构体。查看该结构体的定义，可以发现里面定义了系统调用的函数指针。这下目标就很清晰了：用bof将sys_open的函数指针改为run_cmd

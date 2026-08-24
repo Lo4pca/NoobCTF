@@ -2001,3 +2001,7 @@ ds的专家模式好像确实比快速模式聪明很多
 - 假设 $S=\sum r_i$ 。当NS大于p时，NS=tp+u,原式等于 $((tp+u)\mod p)\mod N=u\mod N=(NS-tp)\mod N=-tp\mod N$
 - 首次溢出时t=1（省略证明，但是通过观察噪声与p的大小可猜测出），因此错误解密给出的值其实是 $-p\mod N$
 - 选择多个质数N，收集足够多的余数后可crt恢复p
+
+### Authentification 2
+
+ds分析出gcm的实现错误在encrypt函数里。注意加密明文和构建tag时用的都是J，导致我们可以恢复ghash的输出S。而ghash函数其实是 $GF(2^{128})$ 下关于H的多项式，可以在sagemath中解出H，从而伪造tag
