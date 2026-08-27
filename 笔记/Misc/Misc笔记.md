@@ -750,6 +750,8 @@ print(base64.b64encode(temp.encode()))
         - Windows Search Index Database (Windows.edb)包含系统中文件的索引信息，比如metaadata和一些文件内容。可用[Search Index DB Reporter](https://github.com/strozfriedberg/sidr)分析
     - 图片
         - 对于已不在原处的文件，MFT记录和`Windows.edb`可能包含信息；如果文件是图片，则ThumbCache可能包含额外的信息。可用[Thumbcache Viewer](https://thumbcacheviewer.github.io)查看
+- [Transcendent Renovation](https://medium.com/@0xgbreil/transcendent-renovation-challenge-l3akctf-2026-3eec504385b2)
+    - windows Jump Lists
 
 ## Network Forensics
 

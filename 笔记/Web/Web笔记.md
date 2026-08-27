@@ -215,7 +215,7 @@
     - css injection。目标是绕过过滤的情况下一次注入泄漏出[shadow dom](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_shadow_DOM)之外的元素。“逃逸”shadow dom可以用`:host-context`或者`:host`。绕过过滤则是由于chromium的一个bug（现在修了），主要是在re-serialization某个style sheet（或者说取出某个css rule的cssText？）时，单引号被去掉了，导致css的含义改变，可以偷渡`@import`进去
     - 单注入点css injection泄漏内容。第一篇wp用了trigram的做法，个人感觉官方wp的做法更好,见 https://research.securitum.com/css-data-exfiltration-in-firefox-via-single-injection-point
 - [forms](https://github.com/ImaginaryCTF/ImaginaryCTF-2024-Challenges-Public/blob/main/Web/forms)
-	- Content-Type header没有设置charset导致的xss。见这篇文章： https://www.sonarsource.com/blog/encoding-differentials-why-charset-matters/ 。浏览器一般按照这样的顺序决定当前文档使用的字符集：
+	- Content-Type header没有设置charset导致的xss。见这篇文章： https://www.sonarsource.com/blog/encoding-differentials-why-charset-matters 。浏览器一般按照这样的顺序决定当前文档使用的字符集：
 	1. HTML文档开头的Byte-Order Mark（这玩意的xss见上面的secure-notes）
 	2. Content-Type header里的charset属性
 	3. HTML文档里的`<meta>`标签
@@ -3967,7 +3967,7 @@ window.recaptcha=true;
 - 绕过php对eval输入的过滤并执行系统命令/读文件
 - 8进制编码不仅可以用在函数名，也可以用在参数。不过有时候会报错，尝试手动关闭php tag:`?>`。参考 https://thef0rceawak5ns.github.io/shaktictf
 418. [Flaglang](https://github.com/uclaacm/lactf-archive/tree/main/2024/web/flaglang)
-- yaml中，NO可被看作是布尔值。yaml里还有很多奇怪的布尔值表示，参考 https://www.bram.us/2022/01/11/yaml-the-norway-problem/
+- yaml中，NO可被看作是布尔值。yaml里还有很多奇怪的布尔值表示，参考 https://www.bram.us/2022/01/11/yaml-the-norway-problem
 419. [empty execution](https://github.com/tahdjao/writeup/blob/main/braekerctf/empty_execution_en.md)
 - 不使用`/`和`..`的命令注入
 - 其他做法： **empty execution**
@@ -4591,6 +4591,7 @@ if (await remote.hasPasswordFor(id)) {
 - 当多个CSS规则匹配同一个HTML元素且设置同一个属性时，浏览器只会应用优先级最高的样式表。可以给每个样式都加一个自定义属性避免这种冲突
 583. [Fancy food notifications](https://kore.one/gpn-ctf-2026-fancy-food-notifications-challenge-writeup)
 - python requests和urllib库的url解析差异。对于`http://USER@127.0.0.1\\@x.com/a`，`urlparse(url).hostname`返回`x.com`，`pr = PreparedRequest(); pr.prepare_url(url, None);urlparse(pr.url).hostname)`返回`127.0.0.1`。后者是requests库发送请求前内部的解析操作
+    - 其他解析库的差异： https://www.sonarsource.com/blog/security-implications-of-url-parsing-differentials
 - 预期解是dns rebinding。参考 https://th3b0ywh0l1v3d.github.io/ctf/gpn-ctf-2026/web/simple-food-notifications :题目设置了`min-cache-ttl=2`，强制每个缓存持续至少两秒。但程序使用的`urllib3.request`遇见超时的ip会重试，导致解析用时超过2秒，cache失效
 584. [restaurant-builder](https://kore.one/gpn-ctf-2026-restaurant-builder-challenge-writeup)
 - Pydantic v2 `create_model`前向引用导致的rce。当调用`create_model("ModelName", field_name="some_string")`时，如果`"some_string"`不是一个`(类型, 默认值)`这样的二元元组,Pydantic就会直接将这个字符串值当作该字段的类型注解来处理。接下来，为了解析这个字符串类型（即前向引用），Pydantic 就会去调用 Python 的 eval()，控制`"some_string"`等于控制了执行的代码内容
@@ -4604,3 +4605,11 @@ if (await remote.hasPasswordFor(id)) {
 - 对于没有设置`navigate-to`的csp，可以利用Signed HTTP Exchanges (SXGs)的`fallbackUrl`字段将受害者重定向至指定url
 587. **mafuyuuuuu**
 - 利用`.NET` CoreCLR的`memfd:doublemapper`映射将任意文件写转换为rce
+588. [L3AK Platform Protection](https://blog.7chn.me/posts/20260804-l3ak-platform-protection)
+- React2Shell与waf绕过
+- 具体的细节与react使用的flight协议（用类json格式封装复杂的类型与对象）和js自动递归处理嵌套thenable对象有关，见 https://lachlan.nz/blog/the-react2shell-story
+589. [Squid](https://jorianwoltjer.com/blog/p/ctf/l3akctf-2026-squid)
+- Flask `send_file`文件大小条件竞争。`send_file`根据`os.stat`的输出决定`Content-Length`，而`/proc/self/environ`这类特殊文件的size为0，导致利用`send_file`的任意文件读无法直接获取这类文件内容。然而根据`send_file`的实现，无论`os.stat`返回的size是多少，代码都会正常open+read读取文件内容，且两个操作的执行时间不同。于是此处存在条件竞争：传入某个文件链接，保证链接指向的文件在stat时返回正数size，并在实际open+read时替换为目标特殊文件
+    - 上述技巧需要攻击者有写链接和替换链接指向的文件的能力。此处可利用open在打开文件时会创建`/proc/pid/fd/x`且fd是循环使用的特性：线程1不断打开普通A文件，线程2不断打开特殊B文件，理想情况下两个文件的fd都是x；然后线程3读取`/proc/pid/fd/x`
+590. [Zebda](https://denim-bosworth-b13.notion.site/Zebda-3afe6e3c12ea80eda405e0a9ddbdaea0)
+- js-yaml与PyYAML对merge key (`<<`)的解析差异
