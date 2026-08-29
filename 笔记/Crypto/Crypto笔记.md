@@ -1262,7 +1262,7 @@ print(flag)
 ```
 
 12. Many Time pad攻击（利用空格异或其他字符会转大小写的特性）。例题:[不止一次](../../CTF/moectf/2022/Crypto/不止一次.md)
-13. 希尔密码（hill）。例题:[[UTCTF2020]hill](https://github.com/C0nstellati0n/NoobCTF/blob/main/CTF/BUUCTF/Crypto/%5BUTCTF2020%5Dhill.md)
+13. 希尔密码（hill）。例题:[[UTCTF2020]hill](../../CTF/BUUCTF/Crypto/[UTCTF2020]hill.md)
 14. 秘密共享（Secret sharing）的Asmuth-Bloom方案。例题:[[AFCTF2018]花开藏宝地](../../CTF/BUUCTF/Crypto/[AFCTF2018]花开藏宝地.md)
 15. ecc（椭圆曲线加密算法）入门。[链接](https://www.pediy.com/kssd/pediy06/pediy6014.htm)。
 16. 伏羲六十四卦解密脚本。

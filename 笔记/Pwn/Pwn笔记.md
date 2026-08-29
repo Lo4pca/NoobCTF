@@ -2107,7 +2107,7 @@ fn get_ptr<'a, 'b, T: ?Sized>(x: &'a mut T) -> &'b mut T {
 - 通过覆盖栈上的计数变量从而获取printf的多次调用。比赛时差点没搞明白栈上的格式化字符串怎么修改栈上的变量（疑似学bss段格式化字符串过拟合了），最后搞出了个1/4096的概率exp，本地能通远程寄。原来正确做法只需要赌1/16的概率，关键在于输入payload时长度不能超过8，因为目标指针在input+8处。我调试时payload超过了8，所以怎么也找不到那个指针……
 228. [Recover Your Vision](https://buddurid.netlify.app/2024/12/27/0xl4ugh-ctf-2024)
 - 多线程的canary问题。主线程新开的线程的栈和tls区域其实是主线程中一个mmap chunk，rwx属性继承自主线程。tls里装着canary，而且和栈挨着。如果有足够大的溢出，则可以直接覆盖tls中存储的canary，绕过canary保护
-- https://gist.github.com/C0nstellati0n/c5657f0c8e6d2ef75c342369ee27a6b5#recover-your-vision
+- **Recover Your Vision**
 229. [book-editor](https://sky-lance.github.io/2025/01/13/UoftCTF25-book-editor)
 - 当malloc的size参数过大或是负数时，malloc会返回null
 - 利用exit handlers(也叫exit hook) getshell的详细解析

@@ -602,3 +602,13 @@ clone的文档见 https://manpages.debian.org/testing/manpages-dev/clone.2.en.ht
 ### level7.1
 
 单纯用已有的race condition没法绕过sys_read中关于“读取的内容不能包含大括号”的限制。虽然sys_read的反编译代码不知为何难以阅读，但是从kernel_read的参数中可看出该函数最多允许读取0x100字节。因为interpret_sys没有限制内存的起始点，所以这里存在bof，我们可以破坏vm_state结构体。查看该结构体的定义，可以发现里面定义了系统调用的函数指针。这下目标就很清晰了：用bof将sys_open的函数指针改为run_cmd
+
+### level8.1
+
+我有write？
+
+kaslr导致存储code的页面的地址和run_cmd的地址未知，因此需要找到泄漏地址的方式。我打算触发kernel oops后在dmesg给出的崩溃日志里找地址，结果模块里可能的崩溃点都不在内核自己的函数里，使得日志只能泄漏题目模块的地址（我忘了这个地址与kbase的偏移是否固定了）
+
+服务器里有人询问kaslr的作用是什么，因为他们`7.1`的解法与kaslr无关。原来我上一题是非预期解啊。继续翻看内核代码找别的bug，迷迷糊糊地意识到sys_write存在与sys_read同样的问题，所以一个write就能泄漏存储code的指针与打开的文件指针
+
+sys_write对内容的过滤只会停止yan85 vm，并不会释放对应的文件指针；且`kernel_read`已经更新了文件偏移量。利用之前的bof漏洞可以迫使vm不断使用同一个文件指针，过了大括号后就能正常读取文件了
