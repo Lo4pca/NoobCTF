@@ -612,3 +612,23 @@ kaslr导致存储code的页面的地址和run_cmd的地址未知，因此需要�
 服务器里有人询问kaslr的作用是什么，因为他们`7.1`的解法与kaslr无关。原来我上一题是非预期解啊。继续翻看内核代码找别的bug，迷迷糊糊地意识到sys_write存在与sys_read同样的问题，所以一个write就能泄漏存储code的指针与打开的文件指针
 
 sys_write对内容的过滤只会停止yan85 vm，并不会释放对应的文件指针；且`kernel_read`已经更新了文件偏移量。利用之前的bof漏洞可以迫使vm不断使用同一个文件指针，过了大括号后就能正常读取文件了
+
+# [Software Exploitation](https://pwn.college/software-exploitation)
+
+## [File Struct Exploits](https://pwn.college/software-exploitation/file-struct-exploits)
+
+没想到竟然有个fsop合集。是时候整理一下我见过（但可能不会用）的乱七八糟的技巧了
+
+以下的libc版本均为2.31
+
+### level1
+
+任意地址读：将flags修改为0x1800并让`_IO_write_ptr`大于`_IO_write_base`后，IO相关函数会往目标fd写入`_IO_write_base`和`_IO_write_ptr`之间的内容
+
+（`Flag Roulette`）
+
+### level2
+
+任意地址写：将flags修改为`0xfbad2488`，`_IO_buf_base`为写入的地址。需满足`_IO_buf_end-_IO_buf_base`大于fread指定的读取数量（如果是scanf的话，似乎任意大小都行）。`_fileno`指定读取的源fd（修改为0就可以从stdin读取）
+
+(`speedpwn`)

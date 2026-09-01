@@ -1889,10 +1889,10 @@ try {
 - 官方wp： https://enzo.run/posts/lactf2024/#flipma ,以及关于FSOP和Exit Handler Demangling更好的解析： https://www.youtube.com/watch?v=DQ9yLCdmt-s
 180. [Embryobot](https://github.com/D13David/ctf-writeups/tree/main/braekerctf24/rev/embryobot)
 - [tinyELF](https://nathanotterness.com/2021/10/tiny_elf_modernized.html)分析。这种binary连header里都可能有运行时的指令，一般的反编译器都没法分析，需要自行nop掉header中无法改变的区域，再使用objdump查看反编译指令
-181. [Tallocator](https://owl-a.github.io/ctf/2024/03/03/bi0sctf-tallocator/)
+181. [Tallocator](https://owl-a.github.io/ctf/2024/03/03/bi0sctf-tallocator)
 - 自定义堆内存分配器pwn。题目以apk的webview `@JavascriptInterface`作为载体，编写exp时需要使用js。具体做法是利用自定义堆内存分配器的漏洞分配任意地址，注入“读取flag并将flag发送至远程端口”的shellcode后执行
-- [官方wp](https://blog.bi0s.in/2024/02/26/Pwn/Tallocator-bi0sctf2024/)讲得更详细，还包括如何使用gdbserver，AVDManager和adb调试程序。android+pwn这类题之前也出现过： https://fineas.github.io/FeDEX/post/tridroid.html ，wp里还有更详细的调试步骤
-182. [Flag Roulette](https://chovid99.github.io/posts/gcc-ctf-2024/)
+- [官方wp](https://blog.bi0s.in/2024/02/26/Pwn/Tallocator-bi0sctf2024)讲得更详细，还包括如何使用gdbserver，AVDManager和adb调试程序。android+pwn这类题之前也出现过： https://fineas.github.io/FeDEX/post/tridroid.html ，wp里还有更详细的调试步骤
+182. [Flag Roulette](https://chovid99.github.io/posts/gcc-ctf-2024)
 - libc 2.37，可使用malloc申请大小在0x80到0x21000之间的chunk，且允许相对于这个chunk的非负oob write。使用FSOP泄漏libc地址，并用TLS DTOR实现栈迁移（绕过seccomp filter）
 - 若使用malloc分配的chunk的大小超过了`mp_.mmap_threshold`（默认0x20000，可能会有改动），就会使用mmap分配内存。这块内存与libc和tls的偏移是固定的
 - 当free一个用mmap分配的chunk时，会将`mp_.mmap_threshold`的大小改为那个被free的chunk的大小。如果把`mp_.no_dyn_threshold`改为1这个值就不会动了
@@ -2112,7 +2112,7 @@ fn get_ptr<'a, 'b, T: ?Sized>(x: &'a mut T) -> &'b mut T {
 - 当malloc的size参数过大或是负数时，malloc会返回null
 - 利用exit handlers(也叫exit hook) getshell的详细解析
 - 比赛时没注意到malloc可以返回null的点，倒是找到了一处堆溢出。队友提出用house of tangerine+scanf输入内容过大会调用malloc的性质操控内存。太复杂了根本搞不明白，没想到预期解这么简单……
-- fsop解法： https://vulnx.github.io/blog/posts/UofTCTF2025
+- fsop解法： https://vulnx.dev/posts/2025-01-13-uoftctf2025
   - pwntools可以直接用`FileStructure().write`生成可以泄漏任意地址的stdout结构体
   - 可以通过覆盖stdin来修改输入字节的存储地址（任意地址写）
 230. [pwny-heap](https://github.com/x3ctf/challenges-2025/tree/main/pwn/pwny-heap)

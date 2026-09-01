@@ -821,6 +821,9 @@ $$
     - 这题要更复杂些，存在两个lcg。lcg A的ax+b中的b系数是另一个lcg B
 - [teRRibleRing](https://blog.sceleri.cc/posts/r3ctf-2026-writeup)
     - decisional RLWE(Ring LWE)中模数p可能的后门结构。问题的难度取决于多项式p的度数和系数的大小。如果f可以被分解为g和h，则利用 $Z_p[x]/(f)$ 到 $Z_p[x]/(g)$ 的投影便可以在更小的维度上解决相同的问题。然而投影相当于计算a mod g，需要额外保证g的系数极小，否则噪声在模g的过程中被放大后也无法用LLL解出。因此可用的后门一般是f的某些因子的乘积构成的稀疏且度数不大的多项式
+- [A Fine Product](https://github.com/wjaaaaaaat/writeups/blob/main/L3ak)
+    - 给出多个模N下可逆的lcg $f_i(x)=a_ix+b_i$ ，目标是寻找如何合成`f(x)=2x+1`。合成方式为`composed_a, composed_b = (composed_a * a_i) % N, (composed_b * a_i + b_i) % N`
+    - composed_a的合成方式是经典的“离散对数线性化”，见`Bruce Schneier's Password: Part 2`。合成composed_b的思路也很巧妙：首先合成一个 $f_c(x)=x+b_c$ （ $a_c=0$ ），然后利用这些lcg构成非阿贝尔群的特点，排列组合已知的合成方式，得到不同的 $f_j(x)=x+b_j$ 。拿这些函数作为合成的源函数，由于 $a_j=0$ ，此时`composed_b=composed_b + b_i`，可以用格求解
 
 ## Elliptic Curves(ECC,椭圆曲线)
 

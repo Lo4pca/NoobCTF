@@ -4613,3 +4613,4 @@ if (await remote.hasPasswordFor(id)) {
     - 上述技巧需要攻击者有写链接和替换链接指向的文件的能力。此处可利用open在打开文件时会创建`/proc/pid/fd/x`且fd是循环使用的特性：线程1不断打开普通A文件，线程2不断打开特殊B文件，理想情况下两个文件的fd都是x；然后线程3读取`/proc/pid/fd/x`
 590. [Zebda](https://denim-bosworth-b13.notion.site/Zebda-3afe6e3c12ea80eda405e0a9ddbdaea0)
 - js-yaml与PyYAML对merge key (`<<`)的解析差异
+- **Zebda**
