@@ -474,7 +474,7 @@ print(base64.b64encode(temp.encode()))
     - 利用python module/library hijacking提权。其实就是在root运行某个python文件时将里面的某个库替换成其他代码，就能以root身份执行命令
 - [SecureSurfer](https://twc1rcle.com/ctf/team/ctf_writeups/nahamcon_2024/misc/SecureSurfer)
     - lynx命令注入+提权。这题的知识点我之前都见过但是都忘了……比如：`'$(id)'#https://`，`#`用来注释后面的内容，`$()`取出命令执行结果。我自己想的payload就粗暴很多：`https:///'||ls||'`
-    - 用户的`.ssh`文件夹下存储着ssh连接的私钥及公钥。有了私钥就能随便连ssh了。连ssh是比较稳重的做法。又看了一篇[wp](https://blog.ikuamike.io/posts/2024/nahamcon_ctf_2024_misc/)，执行bash并得到输出，不过使用的payload是`';bash;'`，而且放到`$()`里用就没有输出。另外这个wp里有lynx其他的提权方式，比如读取、覆盖文件
+    - 用户的`.ssh`文件夹下存储着ssh连接的私钥及公钥。有了私钥就能随便连ssh了。连ssh是比较稳重的做法。又看了一篇[wp](https://blog.ikuamike.io/posts/2024/nahamcon_ctf_2024_misc)，执行bash并得到输出，不过使用的payload是`';bash;'`，而且放到`$()`里用就没有输出。另外这个wp里有lynx其他的提权方式，比如读取、覆盖文件
     - 提权可看一下这个命令的输出:`sudo -l`。一般都是突破口
     - lynx有个`-editor`选项，可指定使用的编辑器。将其指定为vi后进入lynx并输入e就能进入vi界面。然后输入`:!/bin/bash`就能getshell了。如果lynx有root权限，这个出来的vi包括其打开的shell也有root权限
     - 发现了个[非预期解](https://github.com/ramenhost/ctf-writeups/tree/main/nahamcon-ctf-2024/misc/securesurfer)。root的密码也是userpass，但是在`/etc/passwd`里，其login shell被设置成了invalid。解决办法是用ssh登录进任意用户的shell后用`su -s /bin/bash root`覆盖当前shell为root
@@ -3191,3 +3191,5 @@ $ cd a/b
     - 安装并启动[UEFI-Shell](https://github.com/pbatard/UEFI-Shell),然后在shell内运行[Memory-Dump-UEFI](https://github.com/NoInitRD/Memory-Dump-UEFI) dump内存
     - 即使在lockdown模式下（无法读取或修改内存），root仍可以安装eBPF fentry捕捉函数上下文
     - TPM具有有限的session。耗尽session后再创建新session将会报错
+416. [The Three Ways - Flow](https://github.com/SasmitNarnaware/BrunnerCTF-2026-Writeups/blob/main/boot2root/the-three-ways-flow.md)
+- gitea diffpatch rce：当用户通过 diffpatch API 提交一个补丁时，Gitea会在bare仓库中执行`git apply`命令，并在git版本大于等于2.32时添加`-3`参数启用three-way merge。当攻击者连续两次提交相同的恶意补丁制造合并冲突后，`-3`参数会执行冲突解决流程，并将文件写出到工作区。然而bare仓库没有自己的工作区，所以文件将直接输出到`$GIT_DIR`。攻击者可以瞄准hooks目录写入git hook来执行命令

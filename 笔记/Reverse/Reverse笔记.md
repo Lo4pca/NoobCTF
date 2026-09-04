@@ -42,6 +42,8 @@
   - Java decompiler, assembler, and disassembler
 - https://stdrs.dev/nightly/x86_64-unknown-linux-gnu/std/index.html
   - rust逆向时可用的文档，记录了内部属性和结构体布局
+- https://mooofin.github.io/portfolio/blog/vmware.html
+  - [Miasm](https://github.com/cea-sec/miasm)：逆向分析框架。一个用法是在vm类型题中自定义vm架构并符号运行或是画流程图
 
 ## Z3
 
