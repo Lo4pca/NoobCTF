@@ -623,7 +623,7 @@ sys_write对内容的过滤只会停止yan85 vm，并不会释放对应的文件
 
 ### level1
 
-任意地址读：将flags修改为0x1800并让`_IO_write_ptr`大于`_IO_write_base`后，IO相关函数会往目标fd写入`_IO_write_base`和`_IO_write_ptr`之间的内容
+任意地址读：将flags修改为0x1800并让`_IO_write_ptr`大于`_IO_write_base`后，IO相关函数(似乎必须是写相关的，比如fwrite)会往目标fd(`_fileno`)写入`_IO_write_base`和`_IO_write_ptr`之间的内容
 
 （`Flag Roulette`）
 
@@ -632,3 +632,15 @@ sys_write对内容的过滤只会停止yan85 vm，并不会释放对应的文件
 任意地址写：将flags修改为`0xfbad2488`，`_IO_buf_base`为写入的地址。需满足`_IO_buf_end-_IO_buf_base`大于fread指定的读取数量（如果是scanf的话，似乎任意大小都行）。`_fileno`指定读取的源fd（修改为0就可以从stdin读取）
 
 (`speedpwn`)
+
+### level7
+
+调用某个函数：house of apple 2，伪造`_wide_data`与其vtable。需要知道libc基址和任意一块可控内存（大小至少为0xe8）的地址；payload直接写入结构体
+
+(`Tcademy`)
+
+### level8
+
+调用某个函数：需已知libc基址；payload直接写入结构体（大小为0xe8）。算是上一个的升级版，通过结构体的重叠剔除额外内存的要求
+
+(`pwny-heap`)

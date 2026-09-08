@@ -2770,7 +2770,7 @@ print(hex(random.getrandbits(256)))
 #0xf728b4fa42485e3a0a5d2f346baa9455e3e70682c2094cac629f6fbed82c07cd
 ```
 100. [are YOU smarter than Joseph-Louis Lagrange????](https://github.com/programmeruser2/ctf-solutions/tree/main/litctf/2023/lagrange)
-- 使用[wolfram](https://www.wolframalpha.com/)解方程+Lagrange Interpolation。当知道任意数量的点后，Lagrange Interpolation可用于给出满足所有输出点的一个函数方程
+- 使用[wolfram](https://www.wolframalpha.com)解方程+Lagrange Interpolation。当知道任意数量的点后，Lagrange Interpolation可用于给出满足所有输出点的一个函数方程
 101. [E(Z/C)LCG](https://meashiri.github.io/ctf-writeups/posts/202308-litctf/#cryptoezclcg)
 - 椭圆曲线（ecc）的参数恢复。Weierstrass形式的椭圆曲线方程为 $y^2=x^3+ax+b$ ，若已知曲线上任意两个点，就能恢复a和b。 https://github.com/jvdsn/crypto-attacks/blob/master/attacks/ecc/parameter_recovery.py
 - 注意当g=ax，其中x是椭圆曲线上的点，a是常数的话，已知g，a求x要用离散对数（还是要根据定义来，这里的乘法不是常规意义上的乘法，是椭圆曲线自己定义的）

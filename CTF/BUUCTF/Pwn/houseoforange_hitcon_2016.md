@@ -182,7 +182,7 @@ int upgrade()
 
 这里的对齐是以内存页为单位，通常是4kb。比如有一个top chunk 的 size 大小是 20fe1，起始位置是0x602020，通过计算即可得知 0x602020+0x20fe0=0x623000 是对于 0x1000（4kb）对齐的。因此我们伪造的 fake_size 可以是 0x0fe1、0x1fe1、0x2fe1、0x3fe1 等对齐4kb的 size。伪造完成后，我们申请一个比top chunk size大的chunk就能让原有的top chunk进入unsorted bin了。接着再申请一个堆块，这个堆块会从unsorted bin中已有的chunk里切割给我们，获得的chunk会带着宝贵的main_arena地址信息，此时就能泄露基址了。
 
-[ctf-wiki](https://ctf-wiki.org/en/pwn/linux/user-mode/io-file/fsop/)里有讲FSOP。[FSOP](https://phot0n.com/2022/09/06/%E9%AB%98%E7%89%88%E6%9C%AC%E7%9A%84%E5%A0%86%E5%88%A9%E7%94%A8%E4%B8%8EFSOP/)的核心思想就是劫持_IO_list_all 的值来伪造链表和其中的_IO_FILE 项，但是单纯的伪造只是构造了数据还需要某种方法进行触发。这个东西有很多种触发方式，这里就针对这道题的环境：64位+libc-2.23.so，利用`malloc_printerr->_libc_message->abort->_IO_flush_all_lockup->_IO_overflow`这条调用链。这条链的硬性要求为`fp->_mode <= 0 && fp->_IO_write_ptr > fp->_IO_write_base`。习惯把笔记做exp上，直接放exp。
+[ctf-wiki](https://ctf-wiki.org/en/pwn/linux/user-mode/io-file/fsop)里有讲FSOP。[FSOP](https://phot0n.com/2022/09/06/%E9%AB%98%E7%89%88%E6%9C%AC%E7%9A%84%E5%A0%86%E5%88%A9%E7%94%A8%E4%B8%8EFSOP)的核心思想就是劫持_IO_list_all 的值来伪造链表和其中的_IO_FILE 项，但是单纯的伪造只是构造了数据还需要某种方法进行触发。这个东西有很多种触发方式，这里就针对这道题的环境：64位+libc-2.23.so，利用`malloc_printerr->_libc_message->abort->_IO_flush_all_lockup->_IO_overflow`这条调用链。这条链的硬性要求为`fp->_mode <= 0 && fp->_IO_write_ptr > fp->_IO_write_base`。习惯把笔记做exp上，直接放exp。
 
 ```python
 from pwn  import *

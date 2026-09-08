@@ -279,15 +279,15 @@ print(base64.b64encode(temp.encode()))
   - 这题本身是python stockfish（国际象棋分析库）的使用，因为输入未被过滤，可以直接跳过当前输入，让stockfish自己和自己下棋
 - [LLM Sanitizer](https://1-day.medium.com/llm-sanitizer-real-world-ctf-2024-walkthrough-233dbdb0b90f)
   - 绕语言模型过滤。其他解法： **llm sanitizer**
-- [Diligent Auditor](https://ur4ndom.dev/posts/2024-02-11-dicectf-quals-diligent-auditor/)
+- [Diligent Auditor](https://ur4ndom.dev/posts/2024-02-11-dicectf-quals-diligent-auditor)
   - 在只能使用import导入一个名称不含下划线及`.`模块且大部分builtins被删除，添加audithook的情况下实现RCE/读文件
   - FileFinder内部的`_path_cache`缓存着文件夹下的所有文件名称，意味着即使不知道flag完整的文件名（只知道名称包含flag），也能通过`_path_cache`找到完整的文件名并读取
   - 使用readline类读取文件。open会被audit hook监视，但用readline读文件则不会触发audit hook
   - 一些利用ctypes绕过audit hook逃脱pyjail并获取RCE的技巧
   - 其他解法： **diligent auditor**
-- [IRS](https://maplebacon.org/2024/02/dicectf2024-irs/)
+- [IRS](https://maplebacon.org/2024/02/dicectf2024-irs)
   - 算是上面那道题的究极升级版（加了ast以及其他乱七八糟的过滤），甚至利用到了python内部的uaf。没有简略总结因为全篇都是知识点
-- [pyquinejailgolf](https://gerlachsnezka.github.io/writeups/amateursctf/2024/jail/pyquinejailgolf/)
+- [pyquinejailgolf](https://gerlachsnezka.github.io/writeups/amateursctf/2024/jail/pyquinejailgolf)
   - 使用python编写[quine](https://en.wikipedia.org/wiki/Quine_(computing)) 程序（输出自己源码的程序）。注意payload被包在题目文件里执行，所以部分payload会利用这点，导致其单独运行不是quine程序，只有在题目文件里才是
   - 其他做法： **pyquinejailgolf**
 - [Picklestar](https://github.com/cr3mov/cr3ctf-2024/tree/main/challenges/misc/picklestar)
