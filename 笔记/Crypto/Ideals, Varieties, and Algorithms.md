@@ -710,3 +710,31 @@ d. 若 W = V(g₁, …, gₛ) 是 kⁿ 中的任一簇，其中 k 非代数闭�
 对于 < f, g >里的元素，利用二项式定理可知任何4次方以上的元素都在⟨f², g³⟩里，所以 $⟨f, g⟩\in √I$ ;但反过来，如果有 $h\in √I$ 使得 $h^m\in I$ ，似乎没法推出 $h\in < f, g >$ 。这里便需要我们想个反例
 
 为了使h不在< f, g >中，需要让h的次数小于f和g的次数。方便起见，直接让h=x，则f可以是xy，g可以是 $x^2$ , $I=< x^2y^2,x^6 >$ 。 $h\in √I$ ，因为 $h^6=x^6\in I$ ；但 $h\not\in < f, g >$
+
+### Sums, Products, and Intersections of Ideals
+
+11. k[x₁, …, xₙ] 的两个理想 I 和 J 称为互余的(comaximal)，当且仅当 I + J = k[x₁, …, xₙ]
+
+a. 证明若 k = ℂ，则 I 与 J 互余当且仅当 V(I) ∩ V(J) = ∅。举一个反例说明一般情形下此结论不成立
+
+198页`Theorem 4`说明V(I+J)=V(I) ∩ V(J)，所以 $\Rightarrow$ 方向下有V(I) ∩ V(J)=V(k[x₁, …, xₙ])=∅
+
+$\Leftarrow$ 方向见184页的`Weak Nullstellensatz`：代数闭域k下若理想 $I\in k[x_1,...,x_n]$ 满足V(I)=∅,则 $I=k[x_1,...,x_n]$ 。 $V(I) ∩ V(J)= ∅\Rightarrow V(I+J)=∅\Rightarrow I+J=k[x₁, …, xₙ]$
+
+反例可从非代数闭域上找，比如 $I=< x^2+1 >,J=< 0 >\in R[x]$
+
+b. 证明若 I 与 J 互余，则 IJ = I ∩ J
+
+从理想的吸收性可以直接推出 $IJ\subseteq I ∩ J$ 。对于另一个方向，因为I和J互余，所以存在 $a\in I,b\in J$ 使得a+b=1。对任意 $x\in I ∩ J$ ,有(a+b)x=x=ax+bx。 $ax\in IJ,bx\in JI=IJ$ ，因此 $I ∩ J\in IJ$
+
+c. (b) 的逆命题成立吗？即，若 IJ = I ∩ J，是否必有 I 与 J 互余？证明或举反例
+
+不成立。I=< xy >,J=< z >（k[x,y,z]）
+
+d. 若 I 与 J 互余，证明对所有正整数 r 和 s，Iʳ 与 Jˢ 均互余
+
+存在 $a\in I,b\in J$ 使得a+b=1。取n=r+s， $(a+b)^n=1$ ，同时二项式展开的每一项都在Iʳ或Jˢ中，因此 $1\in Iʳ+Jˢ$ ,Iʳ与Jˢ互余
+
+e. 设 $I₁, …, I_r$ 为 k[x₁, …, xₙ] 中的理想，并假设对每个 i, $I_i$ 与 $J_i = ∩_{j ≠ i} I_j$ 均互余。证明对所有正整数 m， $I₁ᵐ ∩ … ∩ I_rᵐ = (I₁ ⋯ I_r)ᵐ = (I₁ ∩ … ∩ I_r)ᵐ$
+
+用(d)和(b)的结论可得 $I₁ᵐ ∩ … ∩ I_rᵐ=I₁ᵐ...I_rᵐ$ ，再利用理想乘积的特点可得 $I₁ᵐ...I_rᵐ=(I₁ ⋯ I_r)ᵐ$ 。这里再用一次(b)的结论即可得到 $(I₁ ∩ … ∩ I_r)ᵐ$

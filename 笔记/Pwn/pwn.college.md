@@ -623,7 +623,7 @@ sys_write对内容的过滤只会停止yan85 vm，并不会释放对应的文件
 
 ### level1
 
-任意地址读：将flags修改为0x1800并让`_IO_write_ptr`大于`_IO_write_base`后，IO相关函数(似乎必须是写相关的，比如fwrite)会往目标fd(`_fileno`)写入`_IO_write_base`和`_IO_write_ptr`之间的内容
+任意地址读：将flags修改为0x1800并让`_IO_write_ptr`大于`_IO_write_base`后，IO相关函数(似乎必须是写相关的，比如fwrite。fclose也行，但这会关闭对应的fd，所以泄漏时不要往stdout写，可以往stderr写)会往目标fd(`_fileno`)写入`_IO_write_base`和`_IO_write_ptr`之间的内容
 
 （`Flag Roulette`）
 

