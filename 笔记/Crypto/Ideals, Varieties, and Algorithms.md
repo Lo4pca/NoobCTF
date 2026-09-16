@@ -738,3 +738,25 @@ d. 若 I 与 J 互余，证明对所有正整数 r 和 s，Iʳ 与 Jˢ 均互余
 e. 设 $I₁, …, I_r$ 为 k[x₁, …, xₙ] 中的理想，并假设对每个 i, $I_i$ 与 $J_i = ∩_{j ≠ i} I_j$ 均互余。证明对所有正整数 m， $I₁ᵐ ∩ … ∩ I_rᵐ = (I₁ ⋯ I_r)ᵐ = (I₁ ∩ … ∩ I_r)ᵐ$
 
 用(d)和(b)的结论可得 $I₁ᵐ ∩ … ∩ I_rᵐ=I₁ᵐ...I_rᵐ$ ，再利用理想乘积的特点可得 $I₁ᵐ...I_rᵐ=(I₁ ⋯ I_r)ᵐ$ 。这里再用一次(b)的结论即可得到 $(I₁ ∩ … ∩ I_r)ᵐ$
+
+### Zariski Closure and Quotients of Ideals
+
+3. 设 I 和 J 为理想。证明：若 I 是根理想，则 I : J 是根理想，且 I : J = I : √J
+
+设任意 $f^m\in I:J$ ，则 $f^mg\in I,\forall g\in J$ 。将 $f^mg$ 乘上 $g^{m-1}$ ,结果 $f^mg^m=(fg)^m$ 仍在I中。由于I是根理想， $fg\in I\Rightarrow f\in I:J\Rightarrow$ I:J是根理想
+
+$J\subseteq √J$ ，所以 $I : √J\subseteq I : J$ 。另一方向的思路类似上文：对任意 $f\in I:J$ ，有 $fg\in I,\forall g\in J$ 。从√J里取h，使得 $h^m=g$ 。则 $fh^m\in I\Rightarrow f^mh^m\in I\Rightarrow (fh)^m\in I\Rightarrow fh\in I\Rightarrow f\in I : √J$ ，因此 $I : J\subseteq I : √J$
+
+4. 举例说明：定理7(209)的结论成立需要 I 是根理想这一假设。提示：检查证明中用到了该假设的地方
+
+这个假设出现在证明论证hg所在的理想处：“...Thus, by the Nullstellensatz, hg ∈ √I. By assumption, I = √I, and hence, hg ∈ I for all g ∈ J”。所以要找不满足这个条件的h和g
+
+假设有代数闭域k，在k[x]上设 $I=< x^3 >,J=< x^2 >$ 。I:J=< x >,V(I:J)={0}。由于I和J的簇一样，V(I) − V(J)=∅，进而I(V(I) − V(J))=k[x]，V(k[x])=∅。 $V(I:J)\not\subset V(I(V(I) − V(J)))$ ,结论不成立
+
+9. 设 I = ⟨f₁, …, fₛ⟩ ⊂ k[x₁, …, xₙ]，并固定 f ∈ k[x₁, …, xₙ]。若 y 为新变量，令Ĩ = ⟨f₁, …, fₛ, 1 − fy⟩ ⊂ k[x₁, …, xₙ, y]
+
+a. 证明 $I : f^∞ = Ĩ ∩ k[x₁, …, xₙ]$ 。提示：参见 §2 命题8(192)的证明
+
+假设 $g\in I : f^∞$ ，则 $gf^m\in I\in Ĩ$ 。接下来利用命题8的证明中的技巧构造出 $1 − y^m f^m=(1 − yf ) · (1 + yf +···+ y^{m−1} f^{m−1})$ ，然后尝试消去 $f^m$ : $gf^my^m+g(1 − y^m f^m)=g$ 。因此 $g\in Ĩ$
+
+反过来，假设 $g\in Ĩ ∩ k[x₁, …, xₙ]$ ，则g可以写成 $\sum a_i(x,y)f_i+b(x,y)(1-fy)$ 的形式。取y=1/f，得 $g=\sum a_i(x,1/f)f_i$ 。由于这个式子在分式域上，令m足够大，使得 $f^mg=\sum f^ma_i(x,1/f)f_i$ 为多项式。此时 $f^mg\in I,g\in I : f^∞$

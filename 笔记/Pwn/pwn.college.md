@@ -623,7 +623,7 @@ sys_write对内容的过滤只会停止yan85 vm，并不会释放对应的文件
 
 ### level1
 
-任意地址读：将flags修改为0x1800并让`_IO_write_ptr`大于`_IO_write_base`后，IO相关函数(似乎必须是写相关的，比如fwrite。fclose也行，但这会关闭对应的fd，所以泄漏时不要往stdout写，可以往stderr写)会往目标fd(`_fileno`)写入`_IO_write_base`和`_IO_write_ptr`之间的内容
+任意地址读：将flags修改为0x1800并让`_IO_write_ptr`大于`_IO_write_base`后，fread、fwrite(fclose也行，但这会关闭对应的fd，所以泄漏时不要往stdout写，可以往stderr写。如果修改的文件结构体是内置结构体，比如stdout，则任意IO相关函数都会触发，比如puts)会往目标fd(`_fileno`)写入`_IO_write_base`和`_IO_write_ptr`之间的内容
 
 （`Flag Roulette`）
 
@@ -644,3 +644,7 @@ sys_write对内容的过滤只会停止yan85 vm，并不会释放对应的文件
 调用某个函数：需已知libc基址；payload直接写入结构体（大小为0xe8）。算是上一个的升级版，通过结构体的重叠剔除额外内存的要求
 
 (`pwny-heap`)
+
+### level17
+
+从fd读取/写入内容：flags设为`0xfbad2480`，`_fileno`为目标fd；位于这两个字段中间的字段全为null。与任意地址读/写技巧的区别是，被读取内容将存于fread指定的参数；fwrite触发fsop后，还需要执行fclose（或者退出程序让exit清理）才能真正往目标fd写入内容

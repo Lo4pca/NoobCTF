@@ -26,7 +26,7 @@
 
 `vars(vars()[[*vars()][-9]])[[*vars(vars()[[*vars()][-9]])][12]]()`
 
-同样是在其他CTF里见到的，参考 https://xhacka.github.io/posts/writeup/2023/07/19/Censorship/#censorship-lite 。不过偏移有些不一样，需要自己找
+同样是在其他CTF里见到的，参考 https://xhacka.github.io/ctf/2023/amateursctf/censorship 。不过偏移有些不一样，需要自己找
 
 ## PyRunner!
 
