@@ -1132,7 +1132,7 @@ def get_file_list(dir_path):
         else:
             file_list.append(new_dir_path)
     return file_list
-file_list = get_file_list(r'/Users/constellation/Desktop/source_code')
+file_list = get_file_list(r'source_code')
 for file_str in file_list:
     f = open(file_str, 'r', encoding='utf-8')
     try:

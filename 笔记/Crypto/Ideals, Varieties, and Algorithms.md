@@ -760,3 +760,13 @@ a. 证明 $I : f^∞ = Ĩ ∩ k[x₁, …, xₙ]$ 。提示：参见 §2 命题8
 假设 $g\in I : f^∞$ ，则 $gf^m\in I\in Ĩ$ 。接下来利用命题8的证明中的技巧构造出 $1 − y^m f^m=(1 − yf ) · (1 + yf +···+ y^{m−1} f^{m−1})$ ，然后尝试消去 $f^m$ : $gf^my^m+g(1 − y^m f^m)=g$ 。因此 $g\in Ĩ$
 
 反过来，假设 $g\in Ĩ ∩ k[x₁, …, xₙ]$ ，则g可以写成 $\sum a_i(x,y)f_i+b(x,y)(1-fy)$ 的形式。取y=1/f，得 $g=\sum a_i(x,1/f)f_i$ 。由于这个式子在分式域上，令m足够大，使得 $f^mg=\sum f^ma_i(x,1/f)f_i$ 为多项式。此时 $f^mg\in I,g\in I : f^∞$
+
+### Decomposition of a Variety into Irreducibles
+
+2. 证明：至少两个素理想的非冗余交（irredundant intersection）永远不是素理想
+
+假设 $I=I_1\cap...\cap I_n$ 为n个素理想的非冗余交。取 $a_i\in I_i-\cup_{j=1,j\not=i}^n I_j$ （这样的 $a_i$ 必定存在，因为如果不存在的话，说明 $I_i\subseteq \cup_{j=1,j\not=i}^n I_j$ 。根据素理想的避让定理，有 $I_i\subseteq I_j$ ，对某个j，而这与非冗余交的前提矛盾）。 $a_1...a_n\in I$ ，但各个 $a_i$ 只落于其对应的 $I_i$ 中，因此I不是素理想
+
+8. 设 V、W 为 kⁿ 中的簇，且 V ⊂ W。证明组成V的每个不可约簇都包含于组成W的某个不可约簇中
+
+假设 $V=V_1\cup...\cup V_m,W=W_1\cup...\cup W_n$ 。如果 $V\subset W$ ,则 $V_i\subset W\Rightarrow V_i=(V_i\cap W_i)\cup...\cup(V_i\cap W_n)$ ，每个 $V_i\cap W_j$ 都是 $V_i$ 的真闭子集。但 $V_i$ 是不可约簇，不能写成有限个真闭子集的并，因此必然存在一个 $V_i\cap W_j=V_i$ ，即 $V_i\subseteq W_j$
