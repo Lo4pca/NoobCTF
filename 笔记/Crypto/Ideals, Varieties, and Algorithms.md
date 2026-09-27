@@ -770,3 +770,27 @@ a. 证明 $I : f^∞ = Ĩ ∩ k[x₁, …, xₙ]$ 。提示：参见 §2 命题8
 8. 设 V、W 为 kⁿ 中的簇，且 V ⊂ W。证明组成V的每个不可约簇都包含于组成W的某个不可约簇中
 
 假设 $V=V_1\cup...\cup V_m,W=W_1\cup...\cup W_n$ 。如果 $V\subset W$ ,则 $V_i\subset W\Rightarrow V_i=(V_i\cap W_i)\cup...\cup(V_i\cap W_n)$ ，每个 $V_i\cap W_j$ 都是 $V_i$ 的真闭子集。但 $V_i$ 是不可约簇，不能写成有限个真闭子集的并，因此必然存在一个 $V_i\cap W_j=V_i$ ，即 $V_i\subseteq W_j$
+
+### (Optional) Primary Decomposition of Ideals
+
+1. 考虑理想 I = ⟨x, y²⟩ ⊂ ℂ[x, y]
+
+b. 证明 I 是准素理想(primary)
+
+设 $m=\sqrt{I}=<x,y>$ ，则需要证明 $\forall f,g\in I:fg\in I\Rightarrow f\in I$ 或 $g\in m$ 。假设 $f\not\in I$ 且 $g\not\in m$ ，用反证法证明这将导出矛盾。考虑商环 $C[x,y]/I\cong C[y]/<y^2>$ （因为C[x,y]/I相当于把x和 $y^2$ 置0；x置0后就只剩下单变量多项式环C[y]了），该商环中的元素形如a+by。 $g\not\in m$ 意味着g为非零常数项，其逆可由几何级数公式得到： $\frac{1}{a}-\frac{b}{a^2}y$ 。既然g存在逆， $fg\in I\Rightarrow fg=0$ 说明f=0， $f\in I$ ，但这与之前的假设矛盾。因此必有 $f\in I$ 或 $g\in m$
+
+3. 设 I ⊂ k[x₁, …, xₙ] 为理想
+
+c. 假设 fg ∈ I。若进一步有 $I : g^N = I : g^{N+1}$ ，证明 $(I + ⟨g^N⟩) ∩ (I + ⟨f⟩) = I$ 。提示： $(I + ⟨g^N⟩) ∩ (I + ⟨f⟩)$ 中的元素可写为 $a + bg^N = c + df$ ，其中 a, c ∈ I，b, d ∈ k[x₁, …, xₙ]。现在两边乘以 g
+
+根据提示，将两边乘上g，得 $ag + bg^{N+1} = cg + dfg$ 。因为fg ∈ I，所以 $ag + bg^{N+1}\in I\Rightarrow bg^{N+1}\in I\Rightarrow b\in I : g^{N+1}$ 。又因为 $I : g^N = I : g^{N+1}$ ，所以 $b\in I : g^N\Rightarrow bg^N\in I$ ，得出 $(I + ⟨g^N⟩) ∩ (I + ⟨f⟩)\subseteq I$
+
+另一个方向显而易见，令b为0即可
+
+10. 证明定理9（226）。提示：改编定理6（221）的证明。额外的要素是你需要取根理想。§3 中的命题16（205）会很有用。你还需要使用练习9和引理8（226）
+
+模仿定理6的证明，先看{ $\sqrt{I : f} : f ∈ k[x_1,..., x_n]$ }中的理想是什么结构。 $\sqrt{I:f}=\sqrt{(\cap_{i=1}^rQ_i):f}=\sqrt{\cap_{i=1}^r(Q_i:f)}$ 。根据引理8，要么 $f\in Q_i$ ，这种情况下 $Q_i:f=< 1 >$ ；要么 $f\not\in Q_i$ ，这种情况下 $Q_i:f$ 一定是 $P_i(=\sqrt{Q_i})$ 准素的
+
+现在用命题16， $\sqrt{\cap_{i=1}^r(Q_i:f)}=\cap_{i=1}^r\sqrt{Q_i:f}$ 。利用练习9的结论，属于真理想I的素理想也都是真理想，于是可进一步使用`5.4`(217)的结论， $\sqrt{I:f}$ 等于某个 $\sqrt{Q_i:f}$ 。考虑到 $\sqrt{Q_i:f}$ 要么是< 1 >要么是 $P_i$ ， $\sqrt{I:f}$ 只能是 $P_i$
+
+至于每个 $P_i$ 如何出现在集合中，固定一个i并选择 $f\in(\cap_{j\not=i}^rQ_j)-Q_i$ ，则 $\sqrt{Q_i:f}=P_i$ 且对 $j\not=i,\sqrt{Q_j:f}=< 1 >$ 。结合上文，不难看出 $\sqrt{I:f}=P_i$
