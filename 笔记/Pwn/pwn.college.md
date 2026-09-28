@@ -648,3 +648,39 @@ sys_write对内容的过滤只会停止yan85 vm，并不会释放对应的文件
 ### level17
 
 从fd读取/写入内容：flags设为`0xfbad2480`，`_fileno`为目标fd；位于这两个字段中间的字段全为null。与任意地址读/写技巧的区别是，被读取内容将存于fread指定的参数；fwrite触发fsop后，还需要执行fclose（或者退出程序让exit清理）才能真正往目标fd写入内容
+
+### level21
+
+rop链：house of apple2+setcontext。这题写入的结构体是stderr，触发方式只有退出程序时libc调用的exit。不知道是不是stderr与stdout处理的方式不同，之前给stdout的payload放在这里甚至无法触发fsop。于是我查询了两个资料：
+- https://www.cnblogs.com/sumi007/p/19808792
+- https://jazho76.github.io/house_of_apple_2
+
+根据第一个资料，走`exit(0)`的house of apple 2需要注意以下几点：
+- `_flags` 的 0x2 ，0x8 和 0x800 这三位上不能为 1。getshell的话可以设为`  sh;\x00\x00\x00`
+- `_wide_data->_IO_buf_base`为 0
+- `_wide_data->_IO_write_base`为 0
+- `_vtables`为`_IO_wfile_jumps`
+- `_wide_data`为伪造的`_wide_data`地址
+- `_wide_data->_wide_vtable->doallocate`为要调用的gadget
+- 为了让`exit(0)`触发fsop，还需要满足`fp->_mode <= 0 && fp->_IO_write_ptr > fp->_IO_write_base`
+
+第二个资料则是有关如何重叠`_wide_data`与`_wide_vtable`的。原理不复杂，但是结构体的定义和偏移看着有点头晕。可以把`_wide_data`设为任意一个地址A，只要满足：
+- A+0x18=0(`_wide_data->_IO_write_base`)
+- A+0x30=0(`_wide_data->_IO_buf_base`)
+- A+0xe0=B(`_wide_data->_wide_vtable`)
+- B+0x68=gadget(`_wide_vtable->doallocate`)
+
+不知道是不是巧合，我调试时发现stderr后紧跟着stdout，任何输入进stdout的内容都会被IO操作弄坏（有可能因为stdout是`_IONBF`而stderr不是），所以重叠时不要超出stderr的范围（即vtable后不要写东西。链接二给出的重叠方式是超过的）
+
+这样就能控制rip了，且rdi始终是fp。但这题光调用system还不够，还得用setuid提权。此时参考 https://blog.kylebot.net/2022/10/22/angry-FSROP/#PC2ROP ，用`getkeyserv_handle`里的一段gadget将rdi转移到rdx，接着用setcontext布置rop链（旧版libc中setcontext设置寄存器时用的是rdi，但新版用的是rdx）
+
+考虑到`getkeyserv_handle`里的gadget会将`rdi+0x8`指向的内容转移到rdx，可以将`fp->_IO_read_ptr`设为地址C，并使C满足：
+- C+0x20指向setcontext设置寄存器的部分
+- C+0xa0为rsp，rsp-8指向接下来的rop链
+- C+0xa8为rcx。由于gadget会`push rcx`，等效于接下来调用的gadget
+- C+0x70为rsi
+- C+0x68为rdi
+- C+0x88为rdx
+- （setcontext这段gadget除了rax都能设置，此处省略）
+
+想调试这个链的话可以在`_IO_wdoallocbuf`，`setcontext+61`处下断点。`p *(struct _IO_FILE_plus *)`可以检查文件结构
