@@ -44,6 +44,8 @@
   - rust逆向时可用的文档，记录了内部属性和结构体布局
 - https://mooofin.github.io/portfolio/blog/vmware.html
   - [Miasm](https://github.com/cea-sec/miasm)：逆向分析框架。一个用法是在vm类型题中自定义vm架构并符号运行或是画流程图
+- https://github.com/ev3dev/lms-hacker-tools
+  - 逆向LEGO MINDSTORMS
 
 ## Z3
 
@@ -1306,7 +1308,7 @@ finish()
 164. [pickledbg](https://github.com/Legoclones/pickledbg)
 - python pickle文件调试器
 165. [warmup](https://github.com/cr3mov/cr3ctf-2024/tree/main/challenges/rev/warmup)
-- binja/ghidra/ida的一些bug，可用于混淆代码。参考 https://blog.es3n1n.eu/posts/obfuscator-pt-1/ 。对于不同反编译器，这些指令会使其无法反编译：
+- binja/ghidra/ida的一些bug，可用于混淆代码。参考 https://blog.es3n1n.eu/posts/obfuscator-pt-1 。对于不同反编译器，这些指令会使其无法反编译：
 ```
 ida: ENTER 0xFFFF, 0xFF
 binja: adc

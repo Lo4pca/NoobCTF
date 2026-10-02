@@ -2224,3 +2224,8 @@ offset = the_mmap64_plus_23_itself
 - 解法：在slab里写入构造好的模块，然后往`libc.sym.nss_module_list`写入模块地址，最后调用nss_module_freeres。该函数最终会调用`_dl_call_fini`。从`_dl_call_fini`的函数调用可分支出两种做法：
   - 利用lll_lock_priv+rand_r函数设置rsi和rdx。由于rdi总是指向slab，调用mprotect可将slab设为rwx，随后写入并调用orw shellcode
   - 遵循 https://scholar.dsu.edu/cgi/viewcontent.cgi?params=/context/theses/article/1442/&path_info=Stratton__Logan_1.pdf 实现Function-Oriented Programming。可用https://github.com/LMS57/FOP_Mythoclast dump出可用的gadget
+257. [Mindbreaker](https://ctf.adamino.dk/brunner/pwn/2026/mindbreaker)
+- 在LEGO MINDSTORMS lms2012固件上编写文件读取与写屏代码
+- 其他解法： **Mindbreaker**
+258. [Pure Notes](https://ctf.adamino.dk/brunner/pwn/2026/pure-notes)
+- Haskell下的libc 2.41 uaf+tcache poisoning。其实和C底层原理一样

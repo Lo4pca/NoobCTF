@@ -684,3 +684,17 @@ rop链：house of apple2+setcontext。这题写入的结构体是stderr，触发
 - （setcontext这段gadget除了rax都能设置，此处省略）
 
 想调试这个链的话可以在`_IO_wdoallocbuf`，`setcontext+61`处下断点。`p *(struct _IO_FILE_plus *)`可以检查文件结构
+
+## [Exploitation Primitives](https://pwn.college/software-exploitation/memory-mastery)
+
+### level1.0
+
+意识到这题又涉及条件竞争的那一刻我有些崩溃。做的那么多条件竞争并没有转化为熟练度，反而加重了我的厌恶。回去翻了笔记，之前非常顺利的脚本放到这次却没用了。更崩溃了。直接从教学视频（Exploit Primitives这集）抄吧
+
+`Heap Address Disclosure via Race Conditions`提到了一个很巧妙的竞争点：printf打印内容前需要获取字符串的长度，而字符串所在的内存没有加锁。所以我们可以让其获取A的长度但实际打印B的内容。这样便能解决子线程堆地址包含大量null字符的问题
+
+我本来想用thread创建三组线程分别负责不同的内容，一组free，一组malloc+scanf，一组printf，结果触发了SIGABRT。猜测原因是free组有两个线程连续调用free导致了double free。于是跟着视频使用`os.fork`创造单个子线程，效果竟然出奇的好
+
+注意视频里的controlled_allocation函数的os.wait后跟着一句`time.sleep(0.1)`。这行很重要，sleep的时间过短会导致奇怪的行为，表现在while循环可以顺利break但程序仍然无法分配到指定地址
+
+最后别忘了safe linking
