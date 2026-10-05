@@ -419,6 +419,9 @@ print(base64.b64encode(temp.encode()))
 - **ReLuess Your Inihbitions**
     - 通过访问神经网络的黑盒实现，提取其所有参数：[Polynomial Time Cryptanalytic Extraction of Neural Network Models](https://eprint.iacr.org/2023/1526)
     - https://github.com/google-research/cryptanalytic-model-extraction
+- [Vecnet](http://hackchester.net/writeups?id=2026%2FSunshineCTF%202026%2Fvecnet)
+    - ChromaDB api使用
+    - 可从向量数据库的嵌入（Embedding）反推出文本。工具： https://github.com/vec2text/vec2text
 
 ## Hardware
 

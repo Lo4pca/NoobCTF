@@ -794,3 +794,18 @@ c. 假设 fg ∈ I。若进一步有 $I : g^N = I : g^{N+1}$ ，证明 $(I + ⟨
 现在用命题16， $\sqrt{\cap_{i=1}^r(Q_i:f)}=\cap_{i=1}^r\sqrt{Q_i:f}$ 。利用练习9的结论，属于真理想I的素理想也都是真理想，于是可进一步使用`5.4`(217)的结论， $\sqrt{I:f}$ 等于某个 $\sqrt{Q_i:f}$ 。考虑到 $\sqrt{Q_i:f}$ 要么是< 1 >要么是 $P_i$ ， $\sqrt{I:f}$ 只能是 $P_i$
 
 至于每个 $P_i$ 如何出现在集合中，固定一个i并选择 $f\in(\cap_{j\not=i}^rQ_j)-Q_i$ ，则 $\sqrt{Q_i:f}=P_i$ 且对 $j\not=i,\sqrt{Q_j:f}=< 1 >$ 。结合上文，不难看出 $\sqrt{I:f}=P_i$
+
+## Polynomial and Rational Functions on a Variety
+
+### Quotients of Polynomial Rings
+
+10. 本题说明幂零元在环中的一种重要应用。设 R = k[x]，I = (x²)
+
+c. 给定 b + aε ∈ R/I，我们可以通过将每个元素 f(x) ∈ R 中的 x 替换为 b + aε，定义一个映射 R → R/I。例如，取 b + aε = 2 + ε 和 f(x) = x²，得到 (2 + ε)² = 4 + 4ε + ε² = 4 + 4ε。证明
+- f(b + aε) = f(b) + a · f′(b) ε
+
+其中 f′ 是多项式 f 的形式导数（因此，多项式的导数可以纯代数地构造出来）
+
+只需证明上述等式对多项式内的各项成立。因为假如 $f=f_1+...+f_n$ (意为 $f(x)=f_1(x)+...+f_n(x)$ )，其中各个 $f_i$ 为f中的单项式；若有 $f_i(b + aε)=f_i(b)+af_i'(b)ε$ ,则 $f(b + aε)=f_1(b + aε)+...+f_n(b + aε)=f_1(b)+af_1'(b)ε+...+f_n(b)+af_n'(b)ε=f(b)+af'(b)ε$
+
+利用二项式定理，得n次单项式 $k(b + aε)^n=k\sum_{k=0}^n\binom{n}{k}b^{n-k}a^kε^k$ 。由于R/I中 $x^2=0$ ，唯一保留下来的项是 $kb^n+knb^{n-1}aε$ 。 $kb^n$ 等于将b代入原本的单项式，即f(b)； $knb^{n-1}aε$ 则等于 $af'(b)ε$ 。组合起来就得到了f(b + aε) = f(b) + a · f′(b) ε

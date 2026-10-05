@@ -698,3 +698,7 @@ rop链：house of apple2+setcontext。这题写入的结构体是stderr，触发
 注意视频里的controlled_allocation函数的os.wait后跟着一句`time.sleep(0.1)`。这行很重要，sleep的时间过短会导致奇怪的行为，表现在while循环可以顺利break但程序仍然无法分配到指定地址
 
 最后别忘了safe linking
+
+### level3.0
+
+子线程的堆中存储着指向main_arena的指针，利用arb_read可以获取libc基址。与主线程不同，子线程的栈地址与libc基址的偏移固定
