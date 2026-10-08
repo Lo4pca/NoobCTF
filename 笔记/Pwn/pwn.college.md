@@ -702,3 +702,29 @@ rop链：house of apple2+setcontext。这题写入的结构体是stderr，触发
 ### level3.0
 
 子线程的堆中存储着指向main_arena的指针，利用arb_read可以获取libc基址。与主线程不同，子线程的栈地址与libc基址的偏移固定
+
+### level7.0
+
+scanf没法接收null字符，但会在输入内容的末尾追加一个null。利用这点便可以调用多次scanf一点一点拼出完整的rop链
+
+rop调用setuid+system后还没完。execve之后的程序（比如system启动的shell）使用的是全局的stdin/stdout，不是socket自己的fd，即使调用了也没法输入命令和获取输出。需要调用dup2将当前socket的fd复制到stdin/stdout
+
+练习模式下发现socket fd是6，但去到非练习模式后脚本失败了。猜fd猜了半天，最后发现还是6。难道要多次运行后fd才会是6？
+
+不知道是不是bug，pwntools内运行和终止server太多次后接下来的连接会堵塞。已经遇到这种情况两次了，每次都需要重启环境
+
+条件竞争时，如果很久没赢race可以终止脚本再重新运行。实测发现要么赢得很快，要么很久都不会赢
+
+### level8.0
+
+pthread_exit ban了上题用的rop。左看右看，似乎只剩下fsop了。这次的触发路径是fclose。查询源码，fclose是[_IO_new_fclose](https://elixir.bootlin.com/glibc/glibc-2.35/source/libio/iofclose.c#L33)的宏定义。`_IO_new_fclose`会调用`_IO_FINISH`。这是一个vtable操作，vtable检查通过后会调用`vtable+0x10`处的函数。错开[_IO_wfile_jumps](https://elixir.bootlin.com/glibc/glibc-2.35/source/libio/wfileops.c#L1021)使得`fake_vtable+0x10`对应`_IO_wfile_overflow`即可触发house of apple2
+
+由于控制的内存多了不少，构造假文件结构不再需要特别精密的结构体重叠。fclose路径额外需要注意的地方有：
+- `_flags & _IO_IS_FILEBUF==0`来避免进入`_IO_file_close_it`（源码显示`_IO_IS_FILEBUF=0x2000`，但调试时似乎是`0x8000`?总之以调试器为准）
+- `_lock`指向任意大小为0x10且内容为null的地址(根据之前的第二篇资料，似乎`_IO_acquire_lock`和`_IO_release_lock`会用到这个字段)
+
+libc 2.35似乎移除了`getkeyserv_handle`，还好调用函数时rdx离文件结构不远。直接调用setcontext就好
+
+子线程存储文件结构指针的fsbase与libc基址的偏移是固定的
+
+scanf不接收任意形式的空白字符（比如空格和tab），所以需要碰运气，只有在假文件结构不包含任何空白字符时才能成功

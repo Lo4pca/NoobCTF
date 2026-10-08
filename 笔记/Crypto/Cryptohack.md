@@ -4,7 +4,7 @@
 
 理论上应该从最简单的开始，但一位愿意指导我的大佬仅在这个月有空，所以只能赶鸭子上架，从难的开始(･_･;
 
-根据[FAQ](https://cryptohack.org/faq/#solutions)，仅能公开分享Starter和小于等于25分的题的解法。因此这里会记录一些做题的思考和提示（非完整解题思路和脚本）
+根据[FAQ](https://cryptohack.org/faq/#solutions)，目前可以公开完整解法。所有解题脚本见 https://gist.github.com/Lo4pca/af65d95683be932f3a7eb79457d7d1f9
 
 ## [Elliptic Curves](https://cryptohack.org/courses/elliptic/course_details)
 
@@ -1681,6 +1681,10 @@ https://hackmd.io/@vishiswoz/r10P7knwj
 题目作者写过一篇介绍上述方法的文章： http://web.archive.org/web/20240907071414/https://www.nccgroup.com/us/research-blog/exploiting-noisy-oracles-with-bayesian-inference 。这种策略叫Probability-guided Strategy
 
 `sceleri`用UCB算法（常用于求解multi-armed bandit问题）使每次猜测有86%的概率正确。那么一共32个字符就是 $0.86^32≈0.008$
+
+### Rhetorical Oracle
+
+最开始以为是aes cbc bitflip，但是明文未知且长度不止16字节。这其实是padding oracle解密的变种，见 **Enchanted Oracle**
 
 ## [Crypto on the Web](https://cryptohack.org/challenges/web)
 
