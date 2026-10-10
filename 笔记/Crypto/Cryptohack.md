@@ -1323,6 +1323,14 @@ print(long_to_bytes(int(flag,2)))
 
 priv_key包含32个不同的项，但可以从已知消息的data_hash_bytes算出每个字节对应的hash_iters，进而确认每个sig_item是`priv_key[i]` hash多少次后得到的。有了这些数据就能精确算出当前sig_item距离目标sig_item的迭代次数
 
+### Seventy-Two
+
+bcrypt只会处理输入的前72字节。选择最长的用户名后只需爆破一位密码
+
+### Long Story Short
+
+当输入长于指定的哈希算法的block size时，PBKDF2会使用输入的哈希值作为原始输入
+
 ## [RSA](https://cryptohack.org/challenges/rsa)
 
 ### Fast Primes
@@ -1565,6 +1573,10 @@ $ciphertext=16^{64}\times\Sigma c_i\sqrt{p_i}\approx\Sigma c_i\sqrt{p_i}16^{64}$
 
 还可以用测信道和二次剩余解这道题
 
+### Common Ground
+
+$gcd(N^a-1,N^b-1)=N^{gcd(a,b)}-1$
+
 ## [Symmetric Ciphers](https://cryptohack.org/challenges/aes)
 
 ### Lazy CBC
@@ -1685,6 +1697,12 @@ https://hackmd.io/@vishiswoz/r10P7knwj
 ### Rhetorical Oracle
 
 最开始以为是aes cbc bitflip，但是明文未知且长度不止16字节。这其实是padding oracle解密的变种，见 **Enchanted Oracle**
+
+### Rhetorical Oracle 2
+
+和上一题原理一致，但这次不能控制iv，意味着我们无法控制一块密文的解密结果，但我们可以决定这块密文的位置。只要保证解密结果包裹在双引号之间，json就会将其视为某个键的值。`unicode_escape`和`strict=False`让json不会对值过于挑剔（不过仍有可能失败）
+
+可以用batch提速脚本，即一次输入多行json query。不过题目限制单条消息最大为4096，所以一次最多batch 12个query
 
 ## [Crypto on the Web](https://cryptohack.org/challenges/web)
 
@@ -1843,6 +1861,10 @@ deepseek说可以将群结构分解成 $(-1)^{\epsilon}5^t\mod 2^{63},\epsilon\i
 - `user202729`的解法“注意力惊人”
 - `DanW`用的是fast correlation attack
 - `2x2y2`利用non-linear filter的linear approximation
+
+### Bad Temper
+
+经典的mt19937。唯一要注意的是如何将`randbytes(32)`转换成多个`getrandbits(32)`的输出
 
 ## [CTF Archive](https://cryptohack.org/challenges/ctf-archive)
 

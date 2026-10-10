@@ -809,3 +809,13 @@ c. 给定 b + aε ∈ R/I，我们可以通过将每个元素 f(x) ∈ R 中的 
 只需证明上述等式对多项式内的各项成立。因为假如 $f=f_1+...+f_n$ (意为 $f(x)=f_1(x)+...+f_n(x)$ )，其中各个 $f_i$ 为f中的单项式；若有 $f_i(b + aε)=f_i(b)+af_i'(b)ε$ ,则 $f(b + aε)=f_1(b + aε)+...+f_n(b + aε)=f_1(b)+af_1'(b)ε+...+f_n(b)+af_n'(b)ε=f(b)+af'(b)ε$
 
 利用二项式定理，得n次单项式 $k(b + aε)^n=k\sum_{k=0}^n\binom{n}{k}b^{n-k}a^kε^k$ 。由于R/I中 $x^2=0$ ，唯一保留下来的项是 $kb^n+knb^{n-1}aε$ 。 $kb^n$ 等于将b代入原本的单项式，即f(b)； $knb^{n-1}aε$ 则等于 $af'(b)ε$ 。组合起来就得到了f(b + aε) = f(b) + a · f′(b) ε
+
+### Algorithmic Computations in $k[x_1,..., x_n]/I$
+
+9. 假设 I ⊂ k[x₁, …, xₙ] 是一个理想，使得对每个 i，都有 $x_i^{m_i} ∈ ⟨LT(I)⟩$ 。陈述并证明一个判别准则，用于确定 V(I) 在 ℂⁿ 中恰好包含 m₁ · m₂ ⋯ mₙ 个点。你的准则是否以某种方式考虑了根的重数？
+
+"对每个 i，都有 $x_i^{m_i} ∈ ⟨LT(I)⟩$ "等同于说V(I)是一个有限集,因此点数不超过 $dim(C[x_1,..., x_n]/I)=dim( Span(x^α : x^α \not∈< LT(I) >))$ ,后者最大等于 $m_1 · m_2 ··· m_n$ 。Proposition 8(249)又说“If I is a radical ideal, then equality holds, i.e., the number of points in V(I) is exactly $dim(C[x_1,..., x_n]/I)$ ”，所以第一个条件是“I是根式理想”
+
+若G为I的Gröbner基，则< LT(I) > = < LT(G) >。所以第二个条件是 $dim( Span(x^α : x^α \not∈< LT(G) >))=m_1 · m_2 ··· m_n$
+
+根据ds，根的重数的考虑隐藏在根式理想的条件里。重数根会导致幂零元，进而导致 $dim(C[x_1,..., x_n]/I)$ 增加但|V(I)|不增加（假设 $x^n\in I=0$ ，任何 $x^i$ ,i < n都必须是基，因为向量空间只支持标量乘法。但它们在几何上仍然是同一个点）

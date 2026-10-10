@@ -1295,7 +1295,7 @@ for i in range(0,len(ss),8):
 print(res)
 ```
 
-17.  [梅森旋转算法](https://liam.page/2018/01/12/Mersenne-twister/)（Mersenne Twister Algorithm，简称 MT）相关[考点](https://badmonkey.site/archives/mt19937.html)。
+17.  [梅森旋转算法](https://liam.page/2018/01/12/Mersenne-twister/)（Mersenne Twister Algorithm，简称 MT）相关[考点](https://badmonkey.site/archives/mt19937.html)
 18.  python的随机数（如random.getrandbits()）基于梅森旋转算法MT。MT19937能做到生成 1≤k≤623 个32位均匀分布的随机数，如果我们获取了624个，解下来的随机数就能用[randCrack](https://github.com/tna0y/Python-random-module-cracker)预测了。例题:[[GKCTF 2021]Random](https://blog.csdn.net/m0_57291352/article/details/119655082)
 19.  Many time pad攻击（利用[汉明距离](https://baike.baidu.com/item/%E6%B1%89%E6%98%8E%E8%B7%9D%E7%A6%BB/475174)。
 
@@ -2757,7 +2757,7 @@ Print[ByteArrayToString[ByteArray[IntegerDigits[Flag, 2^8]]]]
 ```
 - 某些情况下可以用z3： https://nolliv22.com/writeups/lit%20ctf%202023/polypoint
 99. [The Door to the Xord](https://demo.hedgedoc.org/s/aCKUEfByW)
-- 获取MT19937连续的624个32-bit输出后，即可预测接下来的随机数。参考 https://www.schutzwerk.com/en/blog/attacking-a-rng/ ，工具： https://github.com/anneouyang/MT19937 。因为其state有19968 bit，624个32 bit就是624×32=19968
+- 获取MT19937连续的624个32-bit输出后，即可预测接下来的随机数。参考 https://www.schutzwerk.com/en/blog/attacking-a-rng ，工具： https://github.com/anneouyang/MT19937 。因为其state有19968 bit，624个32 bit就是624×32=19968
 - mt19937是线性的，就算只能获取32-bit输出与一个固定未知值的异或结果，仍然也是线性的。只需要在z3里实现mt19937即可
 - 如果不能获取32 bit输出而是其n倍bit，可以将n倍bit转为32 bit。因为其输出是倒着拼接的
 ```py
