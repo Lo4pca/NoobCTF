@@ -1866,6 +1866,10 @@ deepseek说可以将群结构分解成 $(-1)^{\epsilon}5^t\mod 2^{63},\epsilon\i
 
 经典的mt19937。唯一要注意的是如何将`randbytes(32)`转换成多个`getrandbits(32)`的输出
 
+### Bad Temper 2
+
+根据 https://stackered.com/blog/python-random-prediction/#pythons-seeding-procedure ，bytes类型的seed会拼接上其sha512 digest然后用`int.from_bytes`转成数字。用文中给出的`seedArrayFromState`从最开始的mt19937 state恢复seed array后，secret位于索引16-23处
+
 ## [CTF Archive](https://cryptohack.org/challenges/ctf-archive)
 
 这里应该就能给完整代码了，因为这些题都是过去的CTF里的，本来就有wp

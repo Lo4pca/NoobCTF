@@ -736,3 +736,23 @@ scanf不接收任意形式的空白字符（比如空格和tab），所以需要
 结果我发现泄漏出来的堆地址仍然是固定的，未来会分配出的堆地址也位于leak的固定偏移。我不理解为什么会发生这样的事，但这表示我们可以套原来的脚本
 
 注意先前造出的利用scanf的arb_write无法正确发送以`\x00`开头的字符串
+
+### level10.0
+
+本题修复了堆地址不随机的bug
+
+虽然我们无法预测tcache 0x400堆块地址之间的偏移，但只要malloc了n个0x400堆块，free这n个堆块后再分配n个得到的仍然是同样的堆块。这是因为随机的surprise堆块同样落入tcache 0x400的概率较小。我们可以malloc 4个堆块，free后再将它们malloc出来。由于malloc不清空堆块，这样便可以轻松获取这些堆块里存储的fd值（是的，根本不需要race condition……无脑跟视频的代价）
+
+实测发现demangle fd得到的堆地址不完全等于真正的堆地址。但这不重要，因为误差只在低位，而mangle忽略低12位。利用泄漏的堆地址还可以获取进程的heap base，进而算出存储flag的地址（不是flag_buf，是打开的文件结构。文件结构的分配早于任何surprise，所以它与heap base的偏移固定）
+
+最后用任意地址读的fsop输出flag即可。可以把fileno设置成2，输出到server的stderr
+
+## [Dynamic Allocator Exploitation](https://pwn.college/software-exploitation/dynamic-allocator-exploitation)
+
+### level2.0
+
+读取flag时分配的chunk大小是0x46f。加上8字节的metadata（虽然prev_size+size总共是16字节，但当前块被分配时不会使用prev_size，可以并入当前块的可用空间）并按16字节对齐后，实际分配的块大小是0x480。目标是让分配的第二块堆块正好等于我们之前malloc出来的地址
+
+为了让堆块与top chunk合并，被释放的块需大于0x410；否则任何小于等于0x410的堆块需填满tcache后才能触发合并
+
+可能有很多种解法。我的解法是分配7个0x40堆块，然后分配0x420，0x40，0x420。最后按顺序把它们都free掉。这样前7个0x40堆块会填满对应的tcache，剩下三个堆块均与top chunk合并。read_flag第一次分配时将得到前两个堆块的空间（实际分配大小(0x420+0x10)+(0x40+0x10)=0x480），于是第二次分配得到的是第二个0x420堆块的地址

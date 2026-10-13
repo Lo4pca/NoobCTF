@@ -777,6 +777,9 @@ for i in range(300,1000):
     - 其他wp： https://github.com/S450R1/qnqsec-ctf-writeups/tree/main/web/airspeed
 - [No Quotes 3](https://lance-kenji.gitbook.io/uoftctf-2026-writeups/web/uoftctf-2026-no-quotes-3)
     - flask无引号、句点(`.`)的payload
+- [Farewell, #include](https://mindcrafters.xyz/writeups/no-hack-no-ctf-2026-web)
+    - percollate命令参数注入
+    - Nunjucks(js) SSTI
 - [更多模板注入payload](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Server%20Side%20Template%20Injection/Python.md)
     - `{% for x in ().__class__.__base__.__subclasses__() %}{% if "warning" in x.__name__ %}{{x()._module.__builtins__['__import__']('os').popen("cmd").read()}}{%endif%}{% endfor %}`
     - https://sanlokii.eu/writeups/downunderctf/parrot-the-emu
@@ -1814,9 +1817,9 @@ $('#ajax-load').load('/ajax/articles?cat=news');
 mxss cheatsheet: https://sonarsource.github.io/mxss-cheatsheet
 
 162. [Proxy It](https://github.com/Dhanush-T/PCTF23-writeups/blob/main/web/ProxyIt/writeup.md)。利用[request smuggling](https://portswigger.net/web-security/request-smuggling)（请求走私）访问被禁止的路径。
-163. [Pages of Turmoil](https://github.com/Dhanush-T/PCTF23-writeups/blob/main/web/PagesOfTurmoil/writeup.md)。
-- 利用Chrome的[Text Fragments](https://developer.mozilla.org/en-US/docs/Web/Text_fragments)控制页面高亮、翻页到特定位置。
-- MongoDB [ObjectId](https://www.mongodb.com/docs/manual/reference/method/ObjectId/)格式。
+163. [Pages of Turmoil](https://github.com/Dhanush-T/PCTF23-writeups/blob/main/web/PagesOfTurmoil/writeup.md)
+- 利用Chrome的[Text Fragments](https://developer.mozilla.org/en-US/docs/Web/Text_fragments)控制页面高亮、翻页到特定位置
+- MongoDB [ObjectId](https://www.mongodb.com/docs/manual/reference/method/ObjectId)格式
 164. [Lerdof's Records](https://github.com/Dhanush-T/PCTF23-writeups/blob/main/web/Lerdof's%20Records/writeup.md)
 - php的strcmp()只会对比null字节之前的字符，但strlen函数计算字符串长度是包含null字节
 
@@ -2920,8 +2923,8 @@ results = db.flags.find(
     %yesorno;
     ]>
     ```
-238. [mongodb](https://xhacka.github.io/posts/mogodb/)
-- mongodb/[no sql injection](https://nullsweep.com/a-nosql-injection-primer-with-mongo/)的绕过登录payload。例：
+238. [mongodb](https://xhacka.github.io/posts/mogodb)
+- mongodb/[no sql injection](https://nullsweep.com/a-nosql-injection-primer-with-mongo)的绕过登录payload。例：
     ```py
     #https://security.stackexchange.com/questions/83231/mongodb-nosql-injection-in-python-code/83234
     user = db.users.find_one(
@@ -2933,7 +2936,7 @@ results = db.flags.find(
     ```
     - 用户名：`' == '`，密码为空
     - 用户名与密码均为：`' || 'a'=='a`
-239. [Very Secure](https://xhacka.github.io/posts/Very-Secure/)
+239. [Very Secure](https://xhacka.github.io/posts/Very-Secure)
 - flask session secret key爆破：flask-unsign+字典。`flask-unsign --wordlist ./keys --cookie '' --unsign --no-literal-eval`。字典格式：每个key之间用`\n`分隔
 - 如果不想用字典，也可以直接在程序里爆破key
 ```py
@@ -3544,7 +3547,8 @@ wp里还有将要泄露的内容转换为符合域名规范的16进制的进阶p
 - [strapi-plugin-email-designer](https://github.com/alexzaganelli/strapi-plugin-email-designer) ssti
 306. [0day blog](https://github.com/DownUnderCTF/Challenges_2023_Public/tree/main/web/0day-blog)
 - Drupal core `JSON:API` module cache poisoning。可通过构造恶意url，使admin访问这个url后session cookie会被cache进这个url，以后任意一个普通用户访问这个url就能获取admin的session cookie
-307. Mongo ObjectId是可预测的，利用工具： https://github.com/andresriancho/mongo-objectid-predict
+307. [Mango](https://medium.com/@DieLoop/nhnc-ctf-mangodb-write-up-first-blood-257482564718)
+- MongoDB ObjectId是可预测的，利用工具： https://github.com/andresriancho/mongo-objectid-predict
 308. [Smug-Dino](https://github.com/osirislab/CSAW-CTF-2023-Quals/tree/main/web/smug-dino),[wp](https://github.com/D13David/ctf-writeups/tree/main/csaw23/web/smug_dino)
 - nginx 1.17.6请求走私
 309. [rainbow-notes](https://github.com/osirislab/CSAW-CTF-2023-Quals/tree/main/web/rainbow-notes)
@@ -4614,3 +4618,5 @@ if (await remote.hasPasswordFor(id)) {
 590. [Zebda](https://denim-bosworth-b13.notion.site/Zebda-3afe6e3c12ea80eda405e0a9ddbdaea0)
 - js-yaml与PyYAML对merge key (`<<`)的解析差异
 - **Zebda**
+591. [Cucumber Farm](https://1kuzus.github.io/26c/wp-no-hack-no-ctf-2026)
+- pickle反序列化黑盒测试。可以通过大小不同的无害pickle数据的加载时间在不触发waf的情况下测试服务器是否会反序列化

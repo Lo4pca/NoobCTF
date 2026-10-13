@@ -1901,7 +1901,7 @@ try {
   - 使用pwntools的[unstrip_libc](https://docs.pwntools.com/en/stable/libcdb.html#pwnlib.libcdb.unstrip_libc)恢复被去除符号列表的libc中的符号
   - 在控制rdx的情况下可以用setcontext实现栈迁移。作者借此找到了puts里的一段gadget，在利用`__run_exit_handlers`调用这段gadget时，rbx和r14都指向libc里的可写段，能控制r14就能调用接下来调用的gadget
   - [官方wp](https://github.com/GCC-ENSIBS/GCC-CTF-2024/tree/main/Pwn/flag_roulette)。官方wp的做法稍微有些繁琐，因为作者忽略了FSOP可用，所以就用了[House of blindness](https://hackmd.io/jmE0VvcTQaaJm6SEWiqUJA)的变种技巧+栈迁移。这种技巧针对程序退出时的(_dl_fini，可能和82条有点关系？)的link_maps，需要将DT_FINI_ARRAY设为NULL，然后修改l_addr。在PIE的情况下需要爆破4bit的ASLR。而且这个技巧只能用一次，想再用的话得清理initial结构体。另外还有一个知识点，libc与其他binary的偏移固定的前提条件是运行时使用同样的环境变量
-183. [babybof](https://www.numb3rs.re/writeup/gccctf_babybof/)
+183. [babybof](https://www.numb3rs.re/writeup/gccctf_babybof)
 - Safestack保护机制下的buffer overflow。safestack机制创建了一块被隔离的内存unsafe_stack，将不安全的data放置于此。因此没法覆盖返回地址执行rop。但是在足够的溢出下还是可以覆盖canary（unsafe_stack也被canary保护），也有几率控制一些寄存器
 - [官方wp](https://github.com/GCC-ENSIBS/GCC-CTF-2024/tree/main/Pwn/baby_bof)解释得比较详细些。储存不安全数据的unsafe_stack位于tls区域的上方，且与其偏移固定。可以用TLS DTOR技巧getshell
 184. [Game, CET, Match](https://github.com/S4muii/ctf_writeups/tree/main/wolvctf24/game_cet)

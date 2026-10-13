@@ -819,3 +819,13 @@ c. 给定 b + aε ∈ R/I，我们可以通过将每个元素 f(x) ∈ R 中的 
 若G为I的Gröbner基，则< LT(I) > = < LT(G) >。所以第二个条件是 $dim( Span(x^α : x^α \not∈< LT(G) >))=m_1 · m_2 ··· m_n$
 
 根据ds，根的重数的考虑隐藏在根式理想的条件里。重数根会导致幂零元，进而导致 $dim(C[x_1,..., x_n]/I)$ 增加但|V(I)|不增加（假设 $x^n\in I=0$ ，任何 $x^i$ ,i < n都必须是基，因为向量空间只支持标量乘法。但它们在几何上仍然是同一个点）
+
+### The Coordinate Ring of an Affine Variety
+
+2. 设 V ⊂ ℂⁿ 为非空仿射簇
+
+a. 设 φ ∈ ℂ[V]。证明 $V_V(\phi) = ∅$ 当且仅当 φ 在 ℂ[V] 中可逆（即存在某个 ψ ∈ ℂ[V]，使得在 ℂ[V] 中 φψ = [1]）
+
+$\Leftarrow:$ 假设φψ=[1]，则对任何 $P\in V,\phi(P)\psi(P)=1\Rightarrow \phi(P)\not =0\Rightarrow V_V(\phi) = ∅$
+
+$\Rightarrow:$ 假设 $\phi\in C[V]$ 不可逆，则 $< \phi >$ 是真理想（若不是， $< \phi >=C[V]\Rightarrow [1]\in < \phi >\Rightarrow$ 存在 $\psi$ 使得 $\phi\psi=[1]$ ,矛盾）。 $< \phi >\in C[V]$ 对应 $< \phi >+I(V)\in C[x_1,...,x_n]$ ，从 $< \phi >$ 是真理想可得出 $< \phi >+I(V)$ 也是真理想。那么根据184页的`Weak Nullstellensatz`, $V(\phi+I(V))\not =\emptyset$ 。 $V(\phi+I(V))=V(\phi)\cap V(I(V))=V(\phi)\cap V=V_V(\phi)=\emptyset$ ，与前提矛盾。因此 $\phi\in C[V]$ 可逆
