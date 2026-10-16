@@ -1504,3 +1504,5 @@ mov     r8, qword [r13]
 229. [Piano](https://scuffed.online/b01lers-2026)
 - nanomite反调试技巧：程序中存在两个进程，父进程和子进程。父进程用诸如ptrace的调试api跟进子进程，并让程序流在两个进程之间跳转：子进程可以用SIGTRAP等信号通知父进程，父进程收到信号后可以修改子进程的寄存器等信息。由于单个进程只能有一个tracer，要么调试父进程但不知道子进程如何运行，要么调试子进程但失去子进程与父进程之间的交互，难以获知父进程给子进程发送的指令
 - 用qemu虚拟机调试整个系统可以查看父进程和子进程之间的交互
+230. [akari](https://hackmd.io/@aplet123/ryJVqvVAWx)
+- 分析由布尔电路转成的akari puzzle棋盘

@@ -380,6 +380,9 @@ print(base64.b64encode(temp.encode()))
     - **pyjail**
         - 一些golf可用的特殊语法
         - 调用help弹出repl后可以用`IPython.__main__`调出python repl，或者利用`modules`中的模块。比如sagemath模块可以帮助调用`breakpoint`
+- [exponential](https://gist.github.com/Lydxn/b14fcc16a206a555f1870b4d971f98ad)
+    - 覆盖特殊方法实现无括号调用函数
+    - ascii与str类似，可以帮助获取字符串
 - pyjail cheatsheet
     - https://shirajuki.js.org/blog/pyjail-cheatsheet
     - https://book.hacktricks.wiki/en/generic-methodologies-and-resources/python/bypass-python-sandboxes/index.html
@@ -3199,3 +3202,6 @@ $ cd a/b
     - TPM具有有限的session。耗尽session后再创建新session将会报错
 416. [The Three Ways - Flow](https://github.com/SasmitNarnaware/BrunnerCTF-2026-Writeups/blob/main/boot2root/the-three-ways-flow.md)
 - gitea diffpatch rce：当用户通过 diffpatch API 提交一个补丁时，Gitea会在bare仓库中执行`git apply`命令，并在git版本大于等于2.32时添加`-3`参数启用three-way merge。当攻击者连续两次提交相同的恶意补丁制造合并冲突后，`-3`参数会执行冲突解决流程，并将文件写出到工作区。然而bare仓库没有自己的工作区，所以文件将直接输出到`$GIT_DIR`。攻击者可以瞄准hooks目录写入git hook来执行命令
+417. [Camel Rider](https://github.com/MacallanTheRoot/ctf-writeups/blob/main/ctfs/nohacknoctf2026-writeups/camel_rider)
+- perl的`<>`会读取`@ARGV`里的文件名并打开文件。如果`@ARGV`为空则从stdin读取
+- 可用`q{...}`表示single-quoted string(可简单理解成字符串。double-quoted string支持插入变量)

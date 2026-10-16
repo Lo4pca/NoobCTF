@@ -25,7 +25,7 @@ public:
     }
 };
 ```
-上面这个是 $O(n^2)$ 的dp做法。拖慢这个算法的罪魁祸首是中间那两个for语句，作用是“寻找相对于mid点左边小于它的点的数量和右边大于它的点的数量”，复杂度是O(n)。能不能让它快一点？答案是[binary indexed tree](https://cs.stackexchange.com/questions/10538/bit-what-is-the-intuition-behind-a-binary-indexed-tree-and-how-was-it-thought-a)。不过虽然它叫“tree”，它其实不是树，只是一个有特别规则的数组。用来算prefix sum（或者说数组里某一段的和）有奇效
+上面这个是 $O(n^2)$ 的dp做法。拖慢这个算法的罪魁祸首是中间那两个for语句，作用是“寻找相对于mid点左边小于它的点的数量和右边大于它的点的数量”，复杂度是O(n)。能不能让它快一点？答案是[binary indexed tree](https://cs.stackexchange.com/questions/10538/bit-what-is-the-intuition-behind-a-binary-indexed-tree-and-how-was-it-thought-a)。不过虽然它叫“tree”，它其实不是树(未来的我勘误一下：确实是树，压缩成数组表示了)，只是一个有特别规则的数组。用来算prefix sum（或者说数组里某一段的和）有奇效
 ```c++
 //https://leetcode.com/problems/count-number-of-teams/editorial
 class Solution {

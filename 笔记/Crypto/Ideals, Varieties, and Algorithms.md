@@ -829,3 +829,15 @@ a. 设 φ ∈ ℂ[V]。证明 $V_V(\phi) = ∅$ 当且仅当 φ 在 ℂ[V] 中�
 $\Leftarrow:$ 假设φψ=[1]，则对任何 $P\in V,\phi(P)\psi(P)=1\Rightarrow \phi(P)\not =0\Rightarrow V_V(\phi) = ∅$
 
 $\Rightarrow:$ 假设 $\phi\in C[V]$ 不可逆，则 $< \phi >$ 是真理想（若不是， $< \phi >=C[V]\Rightarrow [1]\in < \phi >\Rightarrow$ 存在 $\psi$ 使得 $\phi\psi=[1]$ ,矛盾）。 $< \phi >\in C[V]$ 对应 $< \phi >+I(V)\in C[x_1,...,x_n]$ ，从 $< \phi >$ 是真理想可得出 $< \phi >+I(V)$ 也是真理想。那么根据184页的`Weak Nullstellensatz`, $V(\phi+I(V))\not =\emptyset$ 。 $V(\phi+I(V))=V(\phi)\cap V(I(V))=V(\phi)\cap V=V_V(\phi)=\emptyset$ ，与前提矛盾。因此 $\phi\in C[V]$ 可逆
+
+9. 设 α : V → W 和 β : W → V 是两个同构簇 V 与 W 之间的互逆多项式映射。令 $U = V_V(I)$ ，其中 I ⊂ k[V] 为某个理想。证明 α(U) 是 W 的子簇，并说明如何找到理想 J ⊂ k[W]，使得 $α(U) = V_W(J)$
+
+参考257页给出的pullback mapping，定义 $\beta^{\*}:k[V]\rightarrow k[W],\beta^{\*}(f)=f\circ\beta$
+
+首先证明 $\beta^{\*}(I)$ (称为J)是k[W]中的理想：
+- $0=0\circ\beta,0\in I\Rightarrow 0\in J$
+- 若 $g_1=f_1\circ\beta,g_2=f_2\circ\beta$ ，则 $g_1+g_2=(f_1+f_2)\circ\beta$ 。因 $f_1,f_2\in I,f_1+f_2\in I\Rightarrow g_1+g_2\in J$
+- $g_1\in J,-g_1\in J$ 的论证类似
+- 对任意 $g=f\circ\beta\in J,f\in I,h\in k[W]$ 。利用互逆的α可得 $h(f\circ\beta)=(h\circ\alpha\circ\beta)\*f\circ\beta=(h\circ\alpha\*f)\circ\beta$ 。 $h\circ\alpha\in k[V]$ ,因此 $h\circ\alpha\*f\in I$ 。由此得到 $g\in J$
+
+然后看它是否是W的子簇。 $P\in α(U)\Leftrightarrow\beta(P)\in U=V_V(I)\Leftrightarrow f(\beta(P))=0,\forall f\in I$ 。而 $f(\beta(P))=\beta^{\*}(f)(P)$ ,所以 $α(U)=V_W(J)$

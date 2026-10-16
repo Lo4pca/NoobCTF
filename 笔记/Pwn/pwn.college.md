@@ -751,8 +751,20 @@ scanf不接收任意形式的空白字符（比如空格和tab），所以需要
 
 ### level2.0
 
-读取flag时分配的chunk大小是0x46f。加上8字节的metadata（虽然prev_size+size总共是16字节，但当前块被分配时不会使用prev_size，可以并入当前块的可用空间）并按16字节对齐后，实际分配的块大小是0x480。目标是让分配的第二块堆块正好等于我们之前malloc出来的地址
+读取flag时分配的chunk大小是0x46f。加上8字节的metadata（虽然prev_size+size总共是16字节，但当前块被分配时不会使用prev_size，可以并入当前块相邻的前一个块的可用空间）并按16字节对齐后，实际分配的块大小是0x480。目标是让分配的第二块堆块正好等于我们之前malloc出来的地址
 
 为了让堆块与top chunk合并，被释放的块需大于0x410；否则任何小于等于0x410的堆块需填满tcache后才能触发合并
 
 可能有很多种解法。我的解法是分配7个0x40堆块，然后分配0x420，0x40，0x420。最后按顺序把它们都free掉。这样前7个0x40堆块会填满对应的tcache，剩下三个堆块均与top chunk合并。read_flag第一次分配时将得到前两个堆块的空间（实际分配大小(0x420+0x10)+(0x40+0x10)=0x480），于是第二次分配得到的是第二个0x420堆块的地址
+
+### level4.0
+
+large bin attack，参考how2heap的poc。由于我们无法直接写入`p1[3]`，需要用puts泄漏fd和bk以便覆盖时不破坏原值。`fd_nextsize`可以随便填
+
+### level5.0
+
+unsafe_unlink
+
+### level6.0
+
+fastbin_dup_into_stack。poc开头的几个malloc是为了填满tcache并防止与top chunk合并，可以用calloc代替
