@@ -841,3 +841,15 @@ $\Rightarrow:$ 假设 $\phi\in C[V]$ 不可逆，则 $< \phi >$ 是真理想（�
 - 对任意 $g=f\circ\beta\in J,f\in I,h\in k[W]$ 。利用互逆的α可得 $h(f\circ\beta)=(h\circ\alpha\circ\beta)\*f\circ\beta=(h\circ\alpha\*f)\circ\beta$ 。 $h\circ\alpha\in k[V]$ ,因此 $h\circ\alpha\*f\in I$ 。由此得到 $g\in J$
 
 然后看它是否是W的子簇。 $P\in α(U)\Leftrightarrow\beta(P)\in U=V_V(I)\Leftrightarrow f(\beta(P))=0,\forall f\in I$ 。而 $f(\beta(P))=\beta^{\*}(f)(P)$ ,所以 $α(U)=V_W(J)$
+
+11. 本练习将研究定义2(253)之后的例子，其中 V = V(z − x² − y²) ⊂ ℝ³
+
+b. W ={(1, 1, 2)}⊂ V。证明 $⟨[x − 1], [y − 1]⟩ = I_V(W)$ 。提示：证明 V 同构于 ℝ²，并利用练习9
+
+((a)部分已经说明 $W=V_V([x-1],[y-1])，⟨[x − 1], [y − 1]⟩ \subset I_V(W)$ )
+
+“V 同构于 ℝ²”的结论可从练习6得到，此处不再赘述。以练习9的视角看当前情况的话，V=V， $W=R^2$ ，U=W。互逆多项式映射为：
+- $\alpha:V\rightarrow W,\alpha(x,y,z)=(x,y)$
+- $\beta: W\rightarrow V,\beta(x,y)=(x,y,x^2+y^2)$
+
+则存在 $J\subset k[W]$ 使得 $\alpha(U)=V_W(J)$ 。利用 $\beta^{\*}$ 可得J=⟨[x − 1], [y − 1]⟩，注意J在W中是极大理想。由于V和W同构，它们的pullback mapping同样同构，因此保持极大关系。所以 $⟨[x − 1], [y − 1]⟩\in k[V]$ 也是极大理想。根据(a)，该极大理想包含于 $I_V(W)$ ，要么 $I_V(W)=k[V]$ ，要么 $⟨[x − 1], [y − 1]⟩ = I_V(W)$ 。前者显然不正确，那么只能是后者
