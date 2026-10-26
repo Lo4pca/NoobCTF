@@ -768,3 +768,7 @@ unsafe_unlink
 ### level6.0
 
 fastbin_dup_into_stack。poc开头的几个malloc是为了填满tcache并防止与top chunk合并，可以用calloc代替
+
+### level7.0
+
+和上题一样，只是这次需要利用程序记录的size伪造chunk metadata

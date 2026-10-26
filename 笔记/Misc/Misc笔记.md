@@ -3205,3 +3205,5 @@ $ cd a/b
 417. [Camel Rider](https://github.com/MacallanTheRoot/ctf-writeups/blob/main/ctfs/nohacknoctf2026-writeups/camel_rider)
 - perl的`<>`会读取`@ARGV`里的文件名并打开文件。如果`@ARGV`为空则从stdin读取
 - 可用`q{...}`表示single-quoted string(可简单理解成字符串。double-quoted string支持插入变量)
+418. [quant](https://github.com/n4ctbyte/ctf-writeups/blob/main/umdctf-2026/quant.md)
+- 量子电路上的Grover's algorithm：使爆破黑盒函数的唯一正确输入的复杂度降为 $\sqrt{N}$

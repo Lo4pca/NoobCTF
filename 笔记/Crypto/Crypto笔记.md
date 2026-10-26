@@ -2921,8 +2921,7 @@ c2=encrypt(k2,c1)
 150. [IDEA](https://mystiz.hk/posts/2024/2024-06-24-google-ctf-3)
 - [IDEA](https://www.geeksforgeeks.org/simplified-international-data-encryption-algorithm-idea/)密码相关密钥攻击。能够flip密钥的指定bit并加密内容，在可接受的操作数量里恢复完整的key。相关论文： https://www.schneier.com/wp-content/uploads/2016/02/paper-key-schedule.pdf
 151. [mceliece](https://github.com/google/google-ctf/tree/main/2024/quals/crypto-mceliece)
-- [McEliece cryptosystem](https://en.wikipedia.org/wiki/McEliece_cryptosystem)。此题预期解是实现论文里提到的算法：[Distinguisher-Based Attacks on Public-Key
-Cryptosystems Using Reed-Solomon Codes](https://arxiv.org/pdf/1307.6458)
+- [McEliece cryptosystem](https://en.wikipedia.org/wiki/McEliece_cryptosystem)。此题预期解是实现论文里提到的算法：[Distinguisher-Based Attacks on Public-Key Cryptosystems Using Reed-Solomon Codes](https://arxiv.org/pdf/1307.6458)
 152. [groups](https://github.com/Warriii/CTF-Writeups/blob/main/uiu24/crypto_groups.md)
 - 生成一个大于512 bit的carmichael数k，并计算k上的离散对数。生成做法没啥技巧，参考[定理](https://en.wikipedia.org/wiki/Carmichael_number)爆破即可。计算离散对数时因为已经知道了其分解，可以参考wp实现一个自己的pohlig hellman
 - 这还有个库：[Carmichael](http://github.com/drazioti/Carmichael)
