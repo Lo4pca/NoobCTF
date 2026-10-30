@@ -360,6 +360,7 @@ print(base64.b64encode(temp.encode()))
 - [Pyjail 4-6](https://github.com/XDSEC/MoeCTF_2025/blob/main/official_writeups/Misc/Writeup.md)
     - 利用栈帧（Stack Frame）逃逸： https://www.cnblogs.com/gaorenyusi/p/18242719
     - 利用match-case绕过`ast.Attribute`获取属性： https://pid-blog.com/article/noval-pyjail-tricks
+        - match-case同样可以绕过`ast.Subscript`获取字典的值： https://github.com/XDSEC/MoeCTF_2026/blob/main/official_writeups/sandbox/Writeup.md
     - 利用try-except和match-case在无内置object类的情况下绕过`ast.Attribute`获取属性
 - [exception-handler](https://github.com/infobahnctf/CTF-2025/blob/main/misc/exception-handler-baby-steps)
     - python 3.11异常处理表（co_exceptiontable）劫持

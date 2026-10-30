@@ -772,3 +772,16 @@ fastbin_dup_into_stack。poc开头的几个malloc是为了填满tcache并防止�
 ### level7.0
 
 和上题一样，只是这次需要利用程序记录的size伪造chunk metadata
+
+### level8.0
+
+poison_null_byte。poc里有几点需要注意：
+- allocate padding这步不是必需的，这是为了后续布置中覆盖末尾2字节时无需爆破。这题有puts获取heap leak
+- step4布置fake chunk时有一行`*(long *)(prev + 0x500) = 0x500`，超出了请求的0x500大小。这是因为0x500堆块的malloc_usable_size为0x508。编写这题的exp时请求0x508即可
+- 因为off by null发生在read_copy，所以在布置fake chunk时victim的size字段的PREV_INUSE位已经被清除了（对应poc `VULNERABILITY`部分），可跳过step6
+- step5里把a取出又free，再free victim最后取出a的操作纯粹是为了能在设置`a->bck`时只需覆盖末尾2字节。这题有heap leak，可以直接算出fake chunk的地址写入`a->bck`（更关键的是，因为已覆盖victim的size，此时free victim会报错）
+- poc里把fake chunk放在prev的可用空间+0x10的地方。其实可以让fake chunk完全与prev重合，设置好fake_chunk->fd == a 和 fake_chunk->bk == b并让prev_size(next_chunk)等于prev的size即可。poc这么做是为了利用prev内残留的fd_nextsize和bk_nextsize，这也是为什么poc里没有设置fd和bk
+
+### level9
+
+house_of_botcake

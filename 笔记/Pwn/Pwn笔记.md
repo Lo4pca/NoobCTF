@@ -2229,3 +2229,5 @@ offset = the_mmap64_plus_23_itself
 - 其他解法： **Mindbreaker**
 258. [Pure Notes](https://ctf.adamino.dk/brunner/pwn/2026/pure-notes)
 - Haskell下的libc 2.41 uaf+tcache poisoning。其实和C底层原理一样
+259. [vkexchange](https://mycatpets.me/writeups/vkexchange)
+- vulkan api下的oob

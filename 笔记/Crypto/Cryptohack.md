@@ -2035,3 +2035,7 @@ ds的专家模式好像确实比快速模式聪明很多
 ### Authentification 2
 
 ds分析出gcm的实现错误在encrypt函数里。注意加密明文和构建tag时用的都是J，导致我们可以恢复ghash的输出S。而ghash函数其实是 $GF(2^{128})$ 下关于H的多项式，可以在sagemath中解出H，从而伪造tag
+
+### Do you have good eyes?
+
+ds指出`parameters.sage`里使用的 $R_q=Z_q[x]/(X^{256}-1)$ 错了，原本应该模 $X^{256}+1$ 的。由于 $X^{256}-1$ 存在因子X-1，存在良定义环同态 $R_q\rightarrow F_q: [f(X)]\rightarrow f(1)$ 。利用这个同态将题目给出的A和t映射到 $F_q$ 后就能用lattice求s和e了
