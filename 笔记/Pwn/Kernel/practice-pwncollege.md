@@ -1616,3 +1616,17 @@ def write_kbfs_image(filename="kbfs.img"):
 write_kbfs_image()
 ```
 运行脚本后命令行运行`/challenge/mount_kbfs ./kbfs.img ./mnt`就能得到flag了
+
+(level1的附件里其实有源码……)
+
+### level2
+
+社区有人推荐用[bindiff](https://github.com/google/bindiff)比较各题文件之间的差异来找漏洞。此处记录烦人的环境配置环节
+
+个人是macos m1，直接在releases页下载dmg文件即可。然后下载[binexport](https://github.com/google/binexport)，这个工具帮助从binary生成BinExport文件，后者是bindiff接收的文件类型
+
+借这个机会升级了使用的ghidra。去 https://github.com/NationalSecurityAgency/ghidra/releases 下载了Ghidra 12.1.2（我只有jdk 21，而12.2需要jdk 25。又因为 https://github.com/NationalSecurityAgency/ghidra/discussions/9536 ，12.1.3和12.1.4都没有Native Components，故能用的最新版本是12.1.2）
+
+然而BinExport官方只支持到Ghidra 11.0.3，实测12环境下插件确实会报错。解决办法是下载 https://github.com/abd3lraouf-studios/binexport-ghidra-12
+
+(bindiff存在误报，还是以ghidra为准)

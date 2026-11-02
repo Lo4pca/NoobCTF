@@ -2545,8 +2545,7 @@ print(req.get("http://xxx.com/{{config.e(config.k).read()}}").text)
 212. [Referrrrer](https://mxcezl.github.io/posts/write-up/ctf/heroctf-v5/web/referrrrer/)
 - express 4.x中，`req.header("Referer")`表示取请求中的Referer字段的值，不过请求传`Referrer`同样可以取到值，两者在源码层面是一样的。而nginx.conf里就不能混用（nginx.conf里看的是`$http_referer`)。
 - 根据文档：`CaseSensitive: Disabled by default`,express 4.x里的路径名大小写不敏感。访问`/a`和`/A`是一样的。而nginx里location的配置是大小写敏感的
-213. DEX相关概念（[uniswap](https://docs.uniswap.org/contracts/v2/concepts/core-concepts/pools)，[liquidity pool](https://www.youtube.com/watch?v=dVJzcFDo498&list=PLHx4UicbtUoYvCvRouZ4XbaDpE7cbCCqo)）以及题目：
-- [blockchain2-4](https://github.com/Kaiziron/heroctf-v5/tree/main).另外这个系列有统一的非预期解：https://github.com/J4X-98/Writeups/blob/main/CTFs/HeroCTF/Chal2_3_4/writeup.md
+213. *
 214. [Blogodogo](https://mxcezl.github.io/posts/write-up/ctf/heroctf-v5/web/blogodogo-2/)
 - 对于可以提交任意url的地方，可以使用`javascript:code`来执行任意js代码，不一定要带有payload的http url。如果代码太长，就将代码写为一行，然后base64编码执行。`javascript:eval(atob(base64))`
 - python flask里的`SESSION_COOKIE_HTTPONLY = True`配置项表示cookie无法被js代码获取。
@@ -4620,3 +4619,6 @@ if (await remote.hasPasswordFor(id)) {
 - **Zebda**
 591. [Cucumber Farm](https://1kuzus.github.io/26c/wp-no-hack-no-ctf-2026)
 - pickle反序列化黑盒测试。可以通过大小不同的无害pickle数据的加载时间在不触发waf的情况下测试服务器是否会反序列化
+592. [Thank You Javascript](https://cnf409.me/posts/plfanzen2026-thank-you-javascript)
+- 对于node-sqlite3包，bind参数时如果第一个参数是数组，则展开该数组的所有元素作为参数，其余参数丢弃。比如`await db.runAsync("INSERT INTO users (A, B, C) VALUES (?, ?, ?)", a,b,c)`，如果a是一个具有两个元素的数组，则a[0]、a[1]分别对应A和B，C没有对应的值，默认为NULL
+- liquidJS 10.25.3前可以绕过ownPropertyOnly读取继承链上属性的值

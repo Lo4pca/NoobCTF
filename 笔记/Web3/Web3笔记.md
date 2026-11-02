@@ -198,6 +198,8 @@
     - (完全看不懂)solidity blockchain frontrunning。唯一明白的点是提高gas price让服务器先执行我们要的函数再执行其他函数。作者还提到了一个bomb的概念，用bomb将一个block内所有的gas消耗完毕，剩下的调用会推迟到下一个block执行
 - [Staker](/CTF/Codegate%20Junior/Staker.md)
     - web3 blockchain solidity题目实践
+- DEX相关概念（[uniswap](https://docs.uniswap.org/contracts/v2/concepts/core-concepts/pools)，[liquidity pool](https://www.youtube.com/watch?v=dVJzcFDo498&list=PLHx4UicbtUoYvCvRouZ4XbaDpE7cbCCqo)）以及题目：
+    - [blockchain2-4](https://github.com/Kaiziron/heroctf-v5/tree/main).另外这个系列有统一的非预期解：https://github.com/J4X-98/Writeups/blob/main/CTFs/HeroCTF/Chal2_3_4/writeup.md
 
 1. [First Drop](https://github.com/GCC-ENSIBS/GCC-CTF-2024/tree/main/Web3/first_drop)
 - 检查一个地址是否是contract不能采用“是否有bytecode”的判断方式。因为合约在构造时（构造函数内）是没有bytecode的
