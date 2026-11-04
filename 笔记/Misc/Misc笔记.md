@@ -3210,3 +3210,4 @@ $ cd a/b
 - 量子电路上的Grover's algorithm：使爆破黑盒函数的唯一正确输入的复杂度降为 $\sqrt{N}$
 419. [Supply Chain Fun #1](https://blog.gk.wtf/posts/plfanzen)
 - workflow checkout时默认基于base repo，所以ref填写`github.head_ref`通常会失败，因base repo一般没有和PR分支名相同的分支。如果仍想在这个配置下顺利执行checkout，可用base repo中的修改后的commit hash做PR的分支名（比如修改一些字母为大写，因github拒绝直接将commit hash作分支名）
+    - 现在github已经修复这个问题了

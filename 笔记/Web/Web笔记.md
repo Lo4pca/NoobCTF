@@ -638,6 +638,15 @@
         - SW再次拦截第二个请求，但这次将请求转发到目标，并保存response
         - SW拦截对任意资源的普通需求，并返回上一步保存的response
         - 若上述普通需求正常返回，说明目标返回了206（命中flag）；否则目标返回了416（返回内容过短导致`Range: bytes=<N>-`无效）
+- [Sourceless](https://gist.github.com/terjanq/4cb40653760c1ba8c33ee06be098d508)
+    - chrome和firefox均可以通过覆盖`Error.prototype`劫持console errors并读取具体的`error.message`。可以用script标签包含任意`file://` 文件，然后从报错信息中获取文件内容
+    - 上述方法在`https?://`协议下因为安全原因无法使用，但在`file://` 协议下可以。有两种方法可以将payload下载至本地磁盘：
+        - 直接触发文件下载，随后在`file:///home/users/user/Downloads`下找文件（自动下载关闭或目标目录只读时不可用）
+        - 使用indexedDB，文件将保存至用户目录
+    - `file://` 协议加载的文件只能包含其他文件，不能读取内容。不过firefox上的Puppeteer若`security.fileuri.strict_origin_policy`为false，则`file://A` 和 `file://B`视为同源，可以互相读取
+- [The X Sanitizer](https://kitctf.de/writeups/googlectf/x-sanitizer)
+    - 可以用`<link rel="import">`标签导入js
+    - script标签存在charset参数，可以指定脚本使用的编码
 
 ## SSTI
 
