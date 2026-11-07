@@ -384,6 +384,8 @@ print(base64.b64encode(temp.encode()))
 - [exponential](https://gist.github.com/Lydxn/b14fcc16a206a555f1870b4d971f98ad)
     - 覆盖特殊方法实现无括号调用函数
     - ascii与str类似，可以帮助获取字符串
+- **abstossend**
+    - open可以接收文件fd作为参数,0就可以直接从stdin读取
 - pyjail cheatsheet
     - https://shirajuki.js.org/blog/pyjail-cheatsheet
     - https://book.hacktricks.wiki/en/generic-methodologies-and-resources/python/bypass-python-sandboxes/index.html

@@ -4,7 +4,7 @@
 
 这个教程也是从hxp CTF的kernel rop开始的，所以我会省去题目分析部分和与那篇笔记重复的内容（或者简单提一嘴）。
 
-## [01 From Zero to One](https://blog.wohin.me/posts/linux-kernel-pwn-01/)
+## [01 From Zero to One](https://blog.wohin.me/posts/linux-kernel-pwn-01)
 
 找kernel文件里的rop gadgets时可以用[ropr](https://github.com/Ben-Lichtman/ropr)，比ROPgadget快。
 
@@ -58,7 +58,7 @@ mov     cr3, rdi
 - [Kernel pwn CTF 入门 - 1](https://www.anquanke.com/post/id/255882)
 - [内核下载与编译](https://ctf-wiki.org/pwn/linux/kernel-mode/environment/build-kernel/)
 
-## [0401 Pawnyable之基础](https://blog.wohin.me/posts/pawnyable-01/)
+## [0401 Pawnyable之基础](https://blog.wohin.me/posts/pawnyable-01)
 
 内核态的资源和堆由内核和所有模块共享，用户态进程则拥有自己的资源和堆栈空间。内核态的共享特性对于攻击者来说有利有弊，好处在于拥有相当多的可利用对象，坏处在于堆状态会受到所有程序影响，更难于控制和预测。
 
@@ -79,7 +79,7 @@ pwndbg> b module_close
 ```
 注意符号文件要在当前工作目录下。或者自己指定路径。
 
-## [040201 Pawnyable之栈溢出](https://blog.wohin.me/posts/pawnyable-0201/)
+## [040201 Pawnyable之栈溢出](https://blog.wohin.me/posts/pawnyable-0201)
 
 /etc/init.d/下可能用漏洞模块的相关信息。
 ```sh
@@ -102,7 +102,7 @@ mknod -m 666 /dev/holstein c `grep holstein /proc/devices | awk '{print $1;}'` 0
 
 _copy_from_user和_copy_to_user与copy_from_user和copy_to_user的区别在于前者不会对复制的长度进行检查，易导致溢出
 
-## [040202 Pawnyable之堆溢出](https://blog.wohin.me/posts/pawnyable-0202/)
+## [040202 Pawnyable之堆溢出](https://blog.wohin.me/posts/pawnyable-0202)
 
 因为我是一边看一边写的笔记，导致写完才发现这篇全是干货，这笔记精简基本精简了个寂寞。建议看原文，我这里只标了一点自己不理解的地方
 
@@ -276,7 +276,7 @@ cred结构体指针在[task_struct结构体](https://elixir.bootlin.com/linux/v5
 
 如果只是为了提升权限，那么简单利用AAW去修改usermode helpers、cred结构体等已经足够；如果目的是容器逃逸，那么修改这些数据结构是不够的。
 
-## [040203 Pawnyable之UAF](https://blog.wohin.me/posts/pawnyable-0203/)
+## [040203 Pawnyable之UAF](https://blog.wohin.me/posts/pawnyable-0203)
 
 ```c
 #define DEVICE_NAME "holstein"
@@ -326,7 +326,7 @@ MAP_POPULATE的作用是确保内核中能够看到我们做的内存映射，�
 
 基于AAR/AAW的UAF漏洞利用与堆溢出版本基本差不多，也可以搞modprobe_path和cred结构体。只是后者用溢出控制tty_struct，uaf用uaf（有点废话）。注意篡改当前进程的cred结构体时aaw和aar的gadget第一次uaf就全写好，第二次uaf再写就不行了（全局变量，所以第二次uaf后全部指向的都是另一个空间了）
 
-## [040204 Pawnyable之竞态条件](https://blog.wohin.me/posts/pawnyable-0204/)
+## [040204 Pawnyable之竞态条件](https://blog.wohin.me/posts/pawnyable-0204)
 
 竞态条件个人喜欢叫“条件竞争”。该漏洞利用在多核环境下的成功率更高。如果题目的qemu命令有一句`-smp 2`将虚拟机设置为2核，可以推测目标环境可能存在条件竞争漏洞。
 
@@ -334,9 +334,9 @@ MAP_POPULATE的作用是确保内核中能够看到我们做的内存映射，�
 
 条件竞争的exp通常不是很稳定，多试几次即可
 
-## [040302 Pawnyable之双取](https://blog.wohin.me/posts/pawnyable-0302/)
+## [040302 Pawnyable之双取](https://blog.wohin.me/posts/pawnyable-0302)
 
-0301本来应该是“空指针解引用”，但是SMAP和mmap_min_addr给空指针解引用漏洞利用带来了很大限制。另外，[02期](https://blog.wohin.me/posts/linux-kernel-pwn-02/)已经讲过如何利用了（没做笔记，因为真的过时太久了）
+0301本来应该是“空指针解引用”，但是SMAP和mmap_min_addr给空指针解引用漏洞利用带来了很大限制。另外，[02期](https://blog.wohin.me/posts/linux-kernel-pwn-02)已经讲过如何利用了（没做笔记，因为真的过时太久了）
 
 双取是double fetch的翻译。这个漏洞是条件竞争的一种：TOCTOU。简而言之，程序的检查逻辑和动作执行逻辑之间存在间隙，攻击者可以先提供一个合法对象以绕过检查，然后立即将其替换为恶意对象。第一次fetch用户数据用于检查，第二次fetch用户数据用于操作。两次fetch之间的时间就是攻击者将正常用户数据替换为恶意用户数据的时机。
 
@@ -414,7 +414,7 @@ pt_regs结构体的末尾恰好提供了用户态寄存器上下文信息，因�
 
 另外需要注意的是，针对用于绕过KPTI的swapgs_restore_regs_and_return_to_usermode（kpti trampoline），以往我们都是选择跳转到它偏移22处的指令，从那里开始执行，因为该函数开头部分有大量的对ROP不必要的pop指令。但是这里不行。pt_regs结构体中用到的最后一个成员“寄存器r8”与“用于返回用户态的寄存器上下文信息的第一个成员ip”之间隔了6个无关成员，而以往从偏移22处开始执行swapgs_restore_regs_and_return_to_usermode需要处理后面的2个额外pop指令，因此最终我们需要将偏移减4，也就是多包含swapgs_restore_regs_and_return_to_usermode中的4个pop指令，一共有6个pop，刚好把pt_regs中的无关成员跳过。（这块对照着[pt_regs结构体](https://elixir.bootlin.com/linux/v5.17.1/source/arch/x86/include/asm/ptrace.h#L59)的定义就清楚了，我们只能控制到r8，下面还有6个没有的寄存器，用几个pop跳过后才到iretq的ip）
 
-## [040303 Pawnyable之userfaultfd](https://blog.wohin.me/posts/pawnyable-0303/)
+## [040303 Pawnyable之userfaultfd](https://blog.wohin.me/posts/pawnyable-0303)
 
 这篇还是条件竞争，不过竞争要做的步骤更复杂了，导致达到竞争的理想状态非常困难。加上不理想的竞争状态可能会导致内核崩溃，所以需要Linux userfaultfd机制提高内核竞态条件漏洞利用的成功率
 
@@ -441,7 +441,7 @@ userfaultfd机制允许多线程程序中的某个线程为其他线程提供用
 
 userfaultfd提高条件竞争成功率的关键在于它能让指令走到一半停掉。普通条件竞争的难点在于各命令之间不等人，很难卡到成功的点。而userfaultfd利用缺页异常暂停当前线程并去到另一个线程，这另一个线程就能随意uaf了，做完再返回，不用担心卡不上点
 
-## [040304 Pawnyable之FUSE](https://blog.wohin.me/posts/pawnyable-0304/)
+## [040304 Pawnyable之FUSE](https://blog.wohin.me/posts/pawnyable-0304)
 
 还是条件竞争，与上篇同样的漏洞模块。
 
@@ -466,7 +466,7 @@ FUSE编程的核心在于实现对应的文件操作方法（有点像编写kern
 
 这里不太理解的地方是，漏洞模块读取空白内存页引发缺页后，为啥调用的是`read_callback`？根据我的理解，`read_callback`应该是当读取注册的fuse时才会被调用。虽然漏洞模块的确读取了，但是会引发缺页异常，缺页异常又去哪了？难道缺页异常一起在`read_callback`里被处理了？
 
-## [05 ret2dir](https://blog.wohin.me/posts/linux-kernel-pwn-05/)
+## [05 ret2dir](https://blog.wohin.me/posts/linux-kernel-pwn-05)
 
 ret2dir (return-to-direct-mapped memory)利用一块直接映射到某一部分或者全部系统物理内存的内核区域来绕过现有的ret2usr防护。让攻击者在kernel地址空间里直接“镜像”一块user space数据
 
@@ -486,6 +486,6 @@ ret2dir (return-to-direct-mapped memory)利用一块直接映射到某一部分�
 
 参考这篇[文章](https://www.anquanke.com/post/id/185408),可以放一些特殊的字符串在mmap的page里。这样方便用gdb调试时找到地址。
 
-## [06 DirtyCred](https://blog.wohin.me/posts/linux-kernel-pwn-06/)
+## [06 DirtyCred](https://blog.wohin.me/posts/linux-kernel-pwn-06)
 
-这篇干货很多，和堆溢出那篇一样。堆溢出那篇我基本上全部都是抄的，没啥意思。所以不想无用功地抄了，而且这篇没有例题，暂时不做具体研究（等我实战中碰见然后看了wp再说）。另外，英文看得头疼，[这篇](https://kiprey.github.io/2022/10/dirty-cred/)是中文的
+这篇干货很多，和堆溢出那篇一样。堆溢出那篇我基本上全部都是抄的，没啥意思。所以不想无用功地抄了，而且这篇没有例题，暂时不做具体研究（等我实战中碰见然后看了wp再说）。另外，英文看得头疼，[这篇](https://kiprey.github.io/2022/10/dirty-cred)是中文的
