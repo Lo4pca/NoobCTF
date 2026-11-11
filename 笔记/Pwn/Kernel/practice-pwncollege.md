@@ -1634,3 +1634,41 @@ write_kbfs_image()
 神奇的bindiff找到了这题与上题相比唯一改动的函数：kbfs_iget。将level1的源码和本题的反编译代码拿去给ds比较后，ds顺利找到了漏洞。源码的kbfs_iget在i_uid_write时使用的是`info->uid`，在`kbfs_fill_super`中可以看见是挂载者的uid；而反编译代码的make_kuid使用的却是磁盘镜像记录的文件dnode指定的uid。这意味着我们可以创建root所有的文件，那么创建一个带有setuid位的恶意binary即可提权
 
 由于kbfs块大小限制在0x1000（且根据ds，kbfs_file_mmap存在bug导致binary必须只有一个PT_LOAD），ds选择写orw汇编并生成单段静态ELF
+
+### level3
+
+mount_kbfs失去了suid位，但`/dev/loop*`权限为0666且`kbfs_fs_type.fs_flags`为9（FS_REQUIRES_DEV | FS_USERNS_MOUNT），可以用unshare创建挂载用的命名空间然后自行mount
+
+漏洞在kbfs_iget和kbfs_put_link中。当获取symlink的stat时，kbfs会调用kmalloc分配一个object存储link指向的路径（指针存储在`kbfs_inode->link`中）。但kbfs_put_link free `ki->link`时并没有清除指针。这是一个uaf，我们可以通过多次调用`readlink`来重复free `ki->link`指向的object
+
+kbfs_inode分配自自定义`kbfs_inode_cache`，但`ki->link`分配自通用的`kmalloc-cg-*` cache（因为存在GFP_KERNEL_ACCOUNT位）。我们可以控制link的内容，意味着我们能够攻击任意大小的`kmalloc-cg-*` cache
+
+ds找到了位于kmalloc-cg-32的seq_operations，可以泄漏kernel base。具体操作如下：
+- `lstat`一个link长度同样在`kmalloc-cg-32`的symlink
+- `readlink`解析link，free `ki->link`
+- spray seq_operations
+- 再次readlink。运气好的情况下同一个object会被`seq_operations`占用，从而读出里面的kernel指针
+
+然后我在这里卡了很久。我很想走modprobe提权，但这意味着我需要任意地址写。先前记录的pipe_buffer任意地址写存在局限性（见`Reading and writing to the kernel image`部分），似乎只在写入堆时好使。那么`tty_struct`呢？不知道为什么，我用和喷射`seq_operations`类似的步骤试了多次，每次都在最后一步readlink时panic，可能是`tty_struct`没能重新占有`ki->link`。而且`tty_struct`拿任意地址写需要伪造`tty_operations`并将伪造的结构体指针写入`tty_struct->ops`。首先我们没有堆地址，其次就算有了堆地址也不好算假结构体的位置（与glibc不同，无法精确控制kernel堆），最后我们没法过magic这道坎（唯一的写入机会是kbfs_iget分配object后的`strcpy`。magic包含null字符，这样就碰不到ops字段了）
+
+当然我没有漏了明显的`seq_operations`，直接修改里面的指针就能劫持rip。但我的脑子最近是浆糊中的浆糊，既忘了自己记过相关的内容，也没有想着去搜一下，停在“是的我可以劫持rip但是我的modprobe怎么办？”就不动了
+
+我去社区逛了逛，看见有人提到了[RetSpill](https://adamdoupe.com/publications/retspill-ccs2023.pdf)。这篇文章其实在`Kernel Exploitation`的`Recommend Reading`里提过，但我整个模块都在为了我心爱的modprobe硬抗hardened freelist，根本看都没看它一眼。我也在 https://arttnba3.cn/2021/03/03/PWN-0X00-LINUX-KERNEL-PWN-PART-I 里看见了类似的技巧，但文章中标注`may obsolete`，“稳定性大幅下降”，所以我又没上心
+
+我真的不想再处理freelist了。在又一阵失败的搜索后，我又去看了RetSpill一眼。文章的第11页提到"25.44% is achieved when the attacker only relies on Preserved Registers or Uninitialized Memory for data spillage"，这里的Preserved Registers即为`pt_regs`。其实成功率也没那么低？让我调试一下
+
+结果我发现题目环境根本没开`RANDKSTACK`，于是利用`seq_operations`劫持rip后rsp的值与`pt_regs`的偏移固定为0x1e8。光明就在前方，赶紧用ropper找`add rsp, X` gadget……没有。ropper的表现非常奇怪，总是在第一步`LOAD GADGETS`时卡在81%的位置。输入ctrl+c后倒是可以继续运行，但我怀疑这样就漏了gadget，总之没有任何有用的结果
+
+那ROPgadget呢？这倒是快了不少，只是同样没有任何`add rsp`相关gadget。奇妙的是，我在第二篇文章的评论区发现有人问了这个问题，说“ROPgadget经常找不全，ropper又太慢了”，这使我想到了之前逛社区时看到的工具：[kropr](https://github.com/zolutal/kropr)。但是搭建这个工具需要rust环境，服务器上又没有。没关系，我自己有啊，压缩一下vmlinux然后下载下来自己跑不就得了吗？
+
+scp显示需要50分钟才能下载下来。我不确定kropr真的就能找到前两个工具找不到的gadget，于是花50分钟下载一个vmlinux看起来像是绝望中的愚蠢行为。但在经历这样的起起伏伏后，我雾蒙蒙的脑子早已被排除在智能之列，想来我确实是既绝望又愚蠢——所以我真的等了50分钟
+
+从今往后，如果有人告诉我“工具不重要，都差不多”，我一定不会信；因为kropr吐出了一堆包含`add rsp,X`的gadget，甚至有一个就是`add rsp, 0x1e8; ret`。没什么好说的了，我甚至感觉我已经解出来了
+
+我写得有点累了。总之由于我不会C，更不懂`__asm__`的写法，只能一点一点让ds调；以及vm真的很慢，调试花了不少功夫；我仍在这里卡了许久。至少我们有一个好结局，顺利得到了root shell。步骤接上文：
+- 最后的readlink又free了`ki->link`，于是在kbfs里创建很多symlink，spray `lstat`尝试再次取回这个object
+- symlink指向的路径为`add rsp, 0x1e8; ret` gadget，覆盖`seq_operations`中的指针
+- 汇编布置好krop chain，触发seq_operations中的gadget
+- 注意题目没开KPTI，不需要KPTI trampoline
+
+（我其实在`Linux Kernel PWN`中记录过`pt_regs`技巧。没想到三年了，我是一点都不记得了）
