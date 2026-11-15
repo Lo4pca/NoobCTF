@@ -719,9 +719,9 @@ sympy也放这了
 - [any% ssg](https://hackmd.io/@lamchcl/SJIdwQb3a#cryptoany-ssg)
     - 利用LLL爆破类似minecraft的生成地图seed。参考官方[wp](https://github.com/AVDestroyer/CTF-Writeups/tree/main/lactf2024/any-percent-ssg)和wp里提到的视频[系列](https://www.youtube.com/playlist?list=PLke4P_1UHlmB8sB1oGdcea4SeBH0yZy5B) （另外这也是个不错的格入门视频），这题的知识点更准确地说，应该是“找到LCG的初始seed，使接下来的12个连续输出满足 $min\leq seed_i\leq max$ 的不等式“
     - 其他脚本： https://gist.github.com/TheBlupper/0b3cb0b7402c46e3d374a7244bd9e5cd
-- [Too Many Leaks](https://berliangabriel.github.io/post/gcc-ctf-2024/)
+- [Too Many Leaks](https://berliangabriel.github.io/post/gcc-ctf-2024)
     - Diffie-Hellman共享秘密的高位泄漏：Hidden number problem,见[论文](https://eprint.iacr.org/2020/1506.pdf)的6.2节,Most significant bits of finite field Diffie-Hellman shared secret
-- [ReallyComplexProblem](https://maplebacon.org/2024/05/sdctf-reallycomplexproblem/)
+- [ReallyComplexProblem](https://maplebacon.org/2024/05/sdctf-reallycomplexproblem)
     - 复数（complex numbers）上的部分p（这个p是高斯素数，gaussian primes）泄漏RSA题。也是个coppersmith，本来要放在rsa分类里的，不过这题的重难点都在格上，就放这了。不过这篇wp也是篇很好的coppersmith介绍文。涉及内容：
         - Howgrave-Graham Theorem，有关如何将mod p上的多项式的根转换成普通整数上多项式的根（说转换可能不太准确，应该说“存在”）
         - 如何缩减大型多项式。上面那个定理有一条要求多项式的系数向量较小，如果已有的多项式过大的话，就要找点方法将其缩小（缩的是系数而不是根）。长话短说，几个mod p下根一样的多项式的线性组合结果不会改变根。针对coppersmith这个 $f(x)=a+r\mod p$ （实际情况下还要乘个上限R）多项式找同根的多项式也不难，n是一个（常数也算），f(x)的所有次幂也是。给f(x)乘x的不同次幂也行，只是这样就没有常数项了。还有两种构造方式见wp
@@ -2918,7 +2918,7 @@ c2=encrypt(k2,c1)
 - 如何求解形如 $x^2+ky^2\equiv m\mod n$ 的方程。见论文： https://dl.acm.org/doi/10.1109/TIT.1987.1057350
 - 此题的求解脚本：**ZKPOK**
 149. [Ilovecrackmes](https://github.com/perfectblue/ctf-writeups/tree/master/2024/googlectf-2024/rev-ilovecrackmes)
-- [paillier cryptosystem](https://blog.openmined.org/the-paillier-cryptosystem/)。这个系统有同态的性质。所以在服务器给出一条密文和公钥后，能伪造出含有特定内容的另一条密文
+- [paillier cryptosystem](https://blog.openmined.org/the-paillier-cryptosystem)。这个系统有同态的性质。所以在服务器给出一条密文和公钥后，能伪造出含有特定内容的另一条密文
 150. [IDEA](https://mystiz.hk/posts/2024/2024-06-24-google-ctf-3)
 - [IDEA](https://www.geeksforgeeks.org/simplified-international-data-encryption-algorithm-idea/)密码相关密钥攻击。能够flip密钥的指定bit并加密内容，在可接受的操作数量里恢复完整的key。相关论文： https://www.schneier.com/wp-content/uploads/2016/02/paper-key-schedule.pdf
 151. [mceliece](https://github.com/google/google-ctf/tree/main/2024/quals/crypto-mceliece)

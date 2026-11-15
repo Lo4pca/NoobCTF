@@ -84,6 +84,7 @@
 - [Sum of All Subset XOR Totals](./Easy/Sum%20of%20All%20Subset%20XOR%20Totals.md). 生成subset/bitmask/backtrack
 - [Defuse the Bomb](./Easy/Defuse%20the%20Bomb.md). sliding window+circular array
 - [Final Array State After K Multiplication Operations I](./Easy/Final%20Array%20State%20After%20K%20Multiplication%20Operations%20I.md). c++ make_heap相关函数
+- [Minimum Positive Sum Subarray](./Easy/Minimum%20Positive%20Sum%20Subarray.md). sliding window
 
 ## Medium
 - [Sum Root to Leaf Numbers](Medium/Sum%20Root%20to%20Leaf%20Numbers.md).Each root-to-leaf path in the tree represents a number. For example, the root-to-leaf path 1 -> 2 -> 3 represents the number 123. Return the total sum of all root-to-leaf numbers. Test cases are generated so that the answer will fit in a 32-bit integer. 返回全部根节点到子节点路径数字的和。

@@ -386,6 +386,13 @@ print(base64.b64encode(temp.encode()))
     - ascii与str类似，可以帮助获取字符串
 - **abstossend**
     - open可以接收文件fd作为参数,0就可以直接从stdin读取
+- [collatz](https://jia.je/ctf-writeups/2026-07-25-jailctf-2026/collatz.html)
+    - 一些控制payload长度的技巧
+    - 这类题通常要求payload内各段字符之间（的长度）满足某种关系
+- [format](https://jia.je/ctf-writeups/2026-07-25-jailctf-2026/format.html)
+    - (推荐看官方wp，更好懂一些。以下内容都是针对官方wp的)
+    - python里单个字符对象所处的地址相对于cpython库是固定的，所以无论aslr怎么变，末尾3个nibble（地址末尾的3个hex digit）都不会变。如果能泄漏出字符的地址就能反推出对应的字符
+    - `{0[idx].__add__}`得到str object的地址，`{0[54+i]}`取出地址末尾的第i个nibble，随后的一连串`{0.__class__.__basicsize__:.xxx}`利用float format支持的精度推断数字字符：指定的精度不能超过INT_MAX，否则会报错`precision too big`。每个payload对应返回的字符都是剩下的字符中唯一不会触发报错的字符。至于a-f，可用额外一组不同的format区分
 - pyjail cheatsheet
     - https://shirajuki.js.org/blog/pyjail-cheatsheet
     - https://book.hacktricks.wiki/en/generic-methodologies-and-resources/python/bypass-python-sandboxes/index.html

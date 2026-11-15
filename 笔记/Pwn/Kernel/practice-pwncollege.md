@@ -1629,7 +1629,7 @@ write_kbfs_image()
 
 然而BinExport官方只支持到Ghidra 11.0.3，实测12环境下插件确实会报错。解决办法是下载 https://github.com/abd3lraouf-studios/binexport-ghidra-12
 
-(bindiff可能存在误报，还是以ghidra为准)
+(bindiff可能存在误报，还是以ghidra为准。不知道是binexport的bug还是预期行为，若导出时没有在ghidra里保存要导出的文件，可能得到不全的BinExport文件)
 
 神奇的bindiff找到了这题与上题相比唯一改动的函数：kbfs_iget。将level1的源码和本题的反编译代码拿去给ds比较后，ds顺利找到了漏洞。源码的kbfs_iget在i_uid_write时使用的是`info->uid`，在`kbfs_fill_super`中可以看见是挂载者的uid；而反编译代码的make_kuid使用的却是磁盘镜像记录的文件dnode指定的uid。这意味着我们可以创建root所有的文件，那么创建一个带有setuid位的恶意binary即可提权
 
@@ -1672,3 +1672,5 @@ scp显示需要50分钟才能下载下来。我不确定kropr真的就能找到�
 - 注意题目没开KPTI，不需要KPTI trampoline
 
 （我其实在`Linux Kernel PWN`中记录过`pt_regs`技巧。没想到三年了，我是一点都不记得了）
+
+如果已经在gdb里，可以运行`target remote localhost:1234`调试vm
