@@ -2057,3 +2057,13 @@ ds指出`parameters.sage`里使用的 $R_q=Z_q[x]/(X^{256}-1)$ 错了，原本�
 https://blog.cryptohack.org/tetctf-2021
 
 一些有关gaussian integers与相关乘法群结构、Z[i]/nZ[i]下离散对数的知识。sagemath内置的pari似乎能处理log或discrete_log处理不了的离散对数问题
+
+### Tenet: The Plagarism
+
+描述中提到这是hkcert 2020一题的翻版，而那题是mitm。描述还说“reuse the solve script”，我就在想难道这题也是mitm？可是16个AES的话，就算mitm也有 $256^8$ 的复杂度，除非有什么我和ai都不知道的神秘技巧
+
+偶然间注意到这题本质上是要我们找出256个可能的keystream里哪16个的异或结果是已知的目标。不知为何我想到了格，但很快又否决了这一可能。异或是 $F_2$ 下的线性操作，哪有什么大数小数之说？
+
+题目描述还给了出题人的博客，于是顺着博客我就摸到了wp： https://mystiz.hk/posts/2021/2021-11-18-hkcert-ctf-2 。草草浏览一番，看到文章中熟悉的线性方程组构造我立刻就关掉了网页。格“ptsd”使我看到什么线性关系就会想到格，但也仅此而已了。有没有可能还有线性方程组这一玩意？
+
+用256个keystream构成矩阵，256个变量 $x_i $表示“是否包含当前keystream”，target为已知的prefix和密文异或得到的keystream。然而prefix只有208 bit，变量太多而方程太少，可能解过多。如何增加方程的数量？答案是末尾的`}`，这是额外的8个方程；以及flag格式为`w{35}`，说明每个字节的msb都是0，又有了35个方程；一定有偶数个 $x_i$ 为1，所以所有 $x_i$ 的和为0，这又是1个。共252个方程，求出特解后只需爆破 $2^4$ 种可能

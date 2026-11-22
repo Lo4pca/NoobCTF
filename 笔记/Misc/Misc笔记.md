@@ -393,6 +393,11 @@ print(base64.b64encode(temp.encode()))
     - (推荐看官方wp，更好懂一些。以下内容都是针对官方wp的)
     - python里单个字符对象所处的地址相对于cpython库是固定的，所以无论aslr怎么变，末尾3个nibble（地址末尾的3个hex digit）都不会变。如果能泄漏出字符的地址就能反推出对应的字符
     - `{0[idx].__add__}`得到str object的地址，`{0[54+i]}`取出地址末尾的第i个nibble，随后的一连串`{0.__class__.__basicsize__:.xxx}`利用float format支持的精度推断数字字符：指定的精度不能超过INT_MAX，否则会报错`precision too big`。每个payload对应返回的字符都是剩下的字符中唯一不会触发报错的字符。至于a-f，可用额外一组不同的format区分
+- [what-numbers-v2](https://github.com/jailctf/challenges-2026/tree/master/what-numbers-v2)
+    - 在eval（`{"__builtins__":{}}`）环境下构造返回指定数字元组的尽量短的代码
+    - wp给出的代码在非eval环境会报错，因为代码利用了“eval环境里`__builtins__`是字典”，通过列表生成式覆盖`__builtins__`中的键，从而注册多个后续可以直接引用的变量
+    - [pysearch](https://github.com/lynn/pysearch): 爆破python中的短表达式
+    - **what-numbers-v2**
 - pyjail cheatsheet
     - https://shirajuki.js.org/blog/pyjail-cheatsheet
     - https://book.hacktricks.wiki/en/generic-methodologies-and-resources/python/bypass-python-sandboxes/index.html
@@ -3220,3 +3225,5 @@ $ cd a/b
 419. [Supply Chain Fun #1](https://blog.gk.wtf/posts/plfanzen)
 - workflow checkout时默认基于base repo，所以ref填写`github.head_ref`通常会失败，因base repo一般没有和PR分支名相同的分支。如果仍想在这个配置下顺利执行checkout，可用base repo中的修改后的commit hash做PR的分支名（比如修改一些字母为大写，因github拒绝直接将commit hash作分支名）
     - 现在github已经修复这个问题了
+420. [just-another-injection-challenge](https://github.com/jailctf/challenges-2026/blob/master/just-another-injection-challenge)
+- 串联jq中的纯字母函数(过滤器)泄漏env
