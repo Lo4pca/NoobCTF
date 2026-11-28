@@ -398,6 +398,9 @@ print(base64.b64encode(temp.encode()))
     - wp给出的代码在非eval环境会报错，因为代码利用了“eval环境里`__builtins__`是字典”，通过列表生成式覆盖`__builtins__`中的键，从而注册多个后续可以直接引用的变量
     - [pysearch](https://github.com/lynn/pysearch): 爆破python中的短表达式
     - **what-numbers-v2**
+- [one pickle](https://github.com/jailctf/challenges-2026/blob/master/one-pickle)
+    - cpickle和pickletools对FRAME的解析差异可用于绕过检查
+        - cpickle处理FRAME时没有实现边界检查，导致FRAME可能截断opcode的参数
 - pyjail cheatsheet
     - https://shirajuki.js.org/blog/pyjail-cheatsheet
     - https://book.hacktricks.wiki/en/generic-methodologies-and-resources/python/bypass-python-sandboxes/index.html
